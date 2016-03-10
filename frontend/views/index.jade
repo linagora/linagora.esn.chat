@@ -1,6 +1,88 @@
-.chat.col-xs-12
-  fab(ng-click='')
-
-  .chat-body.p-t-15
-    .row
-      p Let's chat
+.container
+  .block-header
+    h2 Messages
+  #messages-main.card.m-b-0
+    .ms-menu(data-ng-class="{ 'toggled': mactrl.lvMenuStat }")
+      .ms-block
+        a.btn.btn-primary.btn-block(href='', dropdown-toggle='')
+          | Messages
+      .listview.lv-user.m-t-20
+        .lv-item.media.active
+          .lv-avatar.pull-left
+            img(src='/api/user/profile/avatar', alt='')
+          .media-body
+            .lv-title Davil Parnell
+            .lv-small Fierent fastidii recteque ad pro
+        .lv-item.media
+          .lv-avatar.bgm-red.pull-left a
+          .media-body
+            .lv-title Ann Watkinson
+            .lv-small Cum sociis natoque penatibus
+        .lv-item.media
+          .lv-avatar.bgm-orange.pull-left m
+          .media-body
+            .lv-title Marse Walter
+            .lv-small Suspendisse sapien ligula
+        .lv-item.media
+          .lv-avatar.pull-left
+            img(src='/api/user/profile/avatar', alt='')
+          .media-body
+            .lv-title Jeremy Robbins
+            .lv-small Phasellus porttitor tellus nec
+        .lv-item.media
+          .lv-avatar.pull-left
+            img(src='/api/user/profile/avatar', alt='')
+          .media-body
+            .lv-title Reginald Horace
+            .lv-small Quisque consequat arcu eget
+        .lv-item.media
+          .lv-avatar.bgm-cyan.pull-left sa
+          .media-body
+            .lv-title Shark Henry
+            .lv-small Nam lobortis odio et leo maximu
+        .lv-item.media
+          .lv-avatar.bgm-purple.pull-left p
+          .media-body
+            .lv-title Paul Van Dack
+            .lv-small Nam posuere purus sed velit auctor sodales
+        .lv-item.media
+          .lv-avatar.pull-left
+            img(src='/api/user/profile/avatar', alt='')
+          .media-body
+            .lv-title James Anderson
+            .lv-small Vivamus imperdiet sagittis quam
+        .lv-item.media
+          .lv-avatar.pull-left
+            img(src='/api/user/profile/avatar', alt='')
+          .media-body
+            .lv-title Kane Williams
+            .lv-small Suspendisse justo nulla luctus nec
+    .ms-body
+      .listview.lv-message
+        .lv-header-alt.clearfix
+          #ms-menu-trigger(data-ng-class="{ 'open': mactrl.lvMenuStat }", data-ng-click='mactrl.lvMenuStat = (mactrl.lvMenuStat===true ? false : true )')
+            .line-wrap
+              .line.top
+              .line.center
+              .line.bottom
+          .lvh-label.hidden-xs
+            .lv-avatar.pull-left
+              img(src='/api/user/profile/avatar', alt='')
+            span.c-black XXX
+          ul.lv-actions.actions
+            li
+              a(href='')
+                i.mdi.mdi-delete
+            li
+              a(href='')
+                i.mdi.mdi-check
+            li
+              a(href='')
+                i.mdi.mdi-clock
+            li
+              a(href='')
+                i.mdi.mdi-dots-vertical
+        .lv-body
+          chat-message(ng-repeat="message in messages", message="message")
+        .clearfix
+        chat-message-compose(channel-id="")

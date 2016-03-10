@@ -1,0 +1,9 @@
+.lv-item.media
+    .lv-avatar.pull-left
+        img(ng-src='/api/users/{{::message.user._id}}/profile/avatar', alt='')
+    .media-body
+        .ms-item
+            | {{::message.text}}
+        small.ms-date
+            i.zmdi.zmdi-time
+            |  {{::message.date}}
