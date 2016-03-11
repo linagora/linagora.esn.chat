@@ -17,7 +17,7 @@ angular.module('linagora.esn.chat')
           last_message: {
             user: {displayName: 'Davil Parnell'},
             text: 'Hello, how are you?!',
-            date: '20/02/2015 at 09:0'
+            date: Date.now()
           }
         },
         {
@@ -25,7 +25,7 @@ angular.module('linagora.esn.chat')
           last_message: {
             user: {displayName: 'Ann Watkinson'},
             text: 'This is fun, thx again',
-            date: '20/02/2015 at 09:0'
+            date: Date.now()
           }
         },
         {
@@ -33,7 +33,7 @@ angular.module('linagora.esn.chat')
           last_message: {
             user: {displayName: 'Jeremy Robbins'},
             text: 'See you on monday guys, have a nice weekend',
-            date: '20/02/2015 at 09:0'
+            date: Date.now()
           }
         },
         {
@@ -41,44 +41,44 @@ angular.module('linagora.esn.chat')
           last_message: {
             user: {displayName: 'Jeremy Robbins'},
             text: 'YOLO!',
-            date: '20/02/2015 at 09:0'
+            date: Date.now()
           }
         }
       ];
-      history.forEach(function(element, index) {
-        element.last_message.date = element.last_message.date + index;
-      });
 
       return $q.when(history);
     }
 
     function fetchMessages(options) {
+      
+      var user = session.user;
+      user.displayName = '@chamerling';
 
       var messages = [
         {
-          user: session.user,
+          user: user,
           text: 'Hello, how are you?!',
-          date: '20/02/2015 at 09:0'
+          date: Date.now()
         },
         {
-          user: session.user,
+          user: user,
           text: 'Mauris volutpat magna nibh, et condimentum est rutrum a. Nunc sed turpis mi. In eu massa a sem pulvinar lobortis.',
-          date: '20/02/2015 at 09:0'
+          date: Date.now()
         },
         {
-          user: session.user,
+          user: user,
           text: 'Etiam ex arcumentum',
-          date: '20/02/2015 at 09:0'
+          date: Date.now()
         },
         {
-          user: session.user,
+          user: user,
           text: 'Etiam nec facilisis lacus. Nulla imperdiet augue ullamcorper dui ullamcorper, eu laoreet sem consectetur. Aenean et ligula risus. Praesent sed posuere sem. Cum sociis natoque penatibus et magnis dis parturient montes',
-          date: '20/02/2015 at 09:0'
+          date: Date.now()
         },
         {
-          user: session.user,
+          user: user,
           text: 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Etiam ac tortor ut elit sodales varius. Mauris id ipsum id mauris malesuada tincidunt. Vestibulum elit massa, pulvinar at sapien sed, luctus vestibulum eros. Etiam finibus tristique ante, vitae rhoncus sapien volutpat eget',
-          date: '20/02/2015 at 09:0'
+          date: Date.now()
         }
       ];
 

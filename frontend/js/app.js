@@ -9,7 +9,8 @@ angular.module('linagora.esn.chat', [
   'esn.header',
   'esn.sidebar',
   'op.dynamicDirective',
-  'esn.url'
+  'esn.url',
+  'angularMoment'
 ])
   .config(function($stateProvider, routeResolver) {
     $stateProvider.state('/chat', {

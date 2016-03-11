@@ -4,5 +4,5 @@
     .media-body
       .chat-message-title
         span.displayname {{::message.user.displayName}}
-        small.date {{::message.date}}
+        small.date {{::message.date | amDateFormat:'h:mm A'}}
       .chat-message-text {{::message.text}}
