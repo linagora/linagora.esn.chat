@@ -1,0 +1,6 @@
+.lv-item.media
+  .lv-avatar.pull-left
+    img(src='/api/users/profile/avatar', alt='')
+  .media-body
+    .lv-title {{::item.channel_name}}
+    .lv-small {{::item.last_message.text}}

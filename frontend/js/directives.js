@@ -9,6 +9,16 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('chatConversationItem', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        item: '='
+      },
+      templateUrl: '/chat/views/partials/conversation-item.html'
+    };
+  })
+
   .directive('chatMessage', function() {
     return {
       restrict: 'E',
@@ -46,8 +56,7 @@ angular.module('linagora.esn.chat')
           }, function(err) {
             $log.error('Error while sending message', err);
           });
-        }
+        };
       }
     };
-  })
-;
+  });

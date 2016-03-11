@@ -1,11 +1,55 @@
 'use strict';
 
 angular.module('linagora.esn.chat')
-  .factory('ChatService', function($q, $log, session) {
 
-    function sendMessage(message) {
-      $log.debug('Send message', message);
-      return $q.when(message);
+  .factory('ChatConversationService', function($q, session) {
+
+    /**
+     * Fetch conversation history for the current user
+     *
+     * @param options
+     * @returns {Promise}
+     */
+    function fetchHistory(options) {
+      var history = [
+        {
+          channel_name: '#openpaas',
+          last_message: {
+            user: {displayName: 'Davil Parnell'},
+            text: 'Hello, how are you?!',
+            date: '20/02/2015 at 09:0'
+          }
+        },
+        {
+          channel_name: '@christophe',
+          last_message: {
+            user: {displayName: 'Ann Watkinson'},
+            text: 'This is fun, thx again',
+            date: '20/02/2015 at 09:0'
+          }
+        },
+        {
+          channel_name: '#barcamp',
+          last_message: {
+            user: {displayName: 'Jeremy Robbins'},
+            text: 'See you on monday guys, have a nice weekend',
+            date: '20/02/2015 at 09:0'
+          }
+        },
+        {
+          channel_name: '#todo',
+          last_message: {
+            user: {displayName: 'Jeremy Robbins'},
+            text: 'YOLO!',
+            date: '20/02/2015 at 09:0'
+          }
+        }
+      ];
+      history.forEach(function(element, index) {
+        element.last_message.date = element.last_message.date + index;
+      });
+
+      return $q.when(history);
     }
 
     function fetchMessages(options) {
@@ -39,14 +83,25 @@ angular.module('linagora.esn.chat')
       ];
 
       messages.forEach(function(message, index) {
-        console.log(index);
         message.date = message.date + index;
       });
       return $q.when(messages);
     }
 
     return {
-      fetchMessages: fetchMessages,
+      fetchHistory: fetchHistory,
+      fetchMessages: fetchMessages
+    };
+  })
+
+  .factory('ChatService', function($q, $log) {
+
+    function sendMessage(message) {
+      $log.debug('Send message', message);
+      return $q.when(message);
+    }
+
+    return {
       sendMessage: sendMessage
     };
 
