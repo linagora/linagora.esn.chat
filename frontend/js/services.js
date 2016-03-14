@@ -2,6 +2,25 @@
 
 angular.module('linagora.esn.chat')
 
+  .factory('ChatMessageAdapter', function($q, userAPI) {
+
+    function fromAPI(message) {
+      // TODO: Cache the user profile
+      if (message.user) {
+        return userAPI.user(message.user).then(function(response) {
+          message.user = response.data;
+          return message;
+        });
+      }
+
+      return $q.when(message);
+    }
+
+    return {
+      fromAPI: fromAPI
+    };
+  })
+
   .factory('ChatConversationService', function($q, session) {
 
     /**
@@ -94,15 +113,70 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('ChatService', function($q, $log) {
+  .service('ChatService', function($q, $log, $rootScope) {
 
-    function sendMessage(message) {
-      $log.debug('Send message', message);
-      return $q.when(message);
+    function ChatService(options) {
+      this.options = options;
+      this.transport = options.transport;
     }
 
-    return {
-      sendMessage: sendMessage
+    ChatService.prototype.connect = function() {
+      this.transport.connect(this.receiveMessage.bind(this));
     };
 
+    ChatService.prototype.sendMessage = function(message) {
+      $log.debug('Send message', message);
+      return this.transport.sendMessage(message);
+    };
+
+    ChatService.prototype.receiveMessage = function(message) {
+      $log.debug('Got a message on chat service', message);
+
+      if (!message.type) {
+        $log.debug('Message does not have type, skipping')
+        return;
+      }
+
+      if (message.user && message.user === this.options.user) {
+        $log.debug('My message, skipping');
+        return;
+      }
+
+      $rootScope.$broadcast('chat:message:' + message.type, message);
+    };
+
+    return ChatService;
+
+  })
+
+  .service('ChatWSTransport', function($rootScope, $log, $q, livenotification) {
+
+    function ChatWSTransport(options) {
+      this.options = options;
+    }
+
+    ChatWSTransport.prototype.sendMessage = function(message) {
+      $log.info('Send message to peers', message);
+      this.sio.send('message', message);
+      // TODO: ACK
+      return $q.when(message);
+    };
+
+    ChatWSTransport.prototype.connect = function(onMessage) {
+      var self = this;
+      if (!this.sio) {
+        this.sio = livenotification(self.options.ns, self.options.room);
+
+        this.sio.on('message', function(message) {
+          $log.debug('Got a message on transport', message);
+          onMessage.call(this, message);
+        });
+
+        this.sio.on('connected', function() {
+          $log.info('Connected');
+        });
+      }
+    };
+
+    return ChatWSTransport;
   });

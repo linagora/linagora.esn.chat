@@ -9,6 +9,28 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('chatManager', function(ChatWSTransport, ChatService, session) {
+    return {
+      restrict: 'A',
+      link: function(scope) {
+        var transport = new ChatWSTransport({
+          ns: '/chat',
+          room: '123',
+          user: session.user._id
+        });
+
+        var chat = new ChatService({
+          user: session.user._id,
+          transport: transport
+        });
+
+        chat.connect();
+
+        scope.chatService = chat;
+      }
+    };
+  })
+
   .directive('chatConversationItem', function() {
     return {
       restrict: 'E',
@@ -29,7 +51,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, ChatService) {
+  .directive('chatMessageCompose', function($log) {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/partials/message-compose.html',
@@ -42,16 +64,17 @@ angular.module('linagora.esn.chat')
 
           var message = {
             id: 1, // TODO: Unique ID
+            type: 'text',
             text: scope.text,
-            user: scope.user,
+            user: scope.user._id,
             channel: scope.channel,
             date: Date.now()
           };
 
-          scope.messages.push(message);
+          scope.newMessage(message);
           scope.text = '';
 
-          ChatService.sendMessage(message).then(function(result) {
+          scope.chatService.sendMessage(message).then(function(result) {
             $log.debug('Message ACK', result);
           }, function(err) {
             $log.error('Error while sending message', err);
