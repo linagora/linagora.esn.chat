@@ -33,7 +33,7 @@ function init(dependencies) {
     var userId = helper.getUserId(socket);
     logger.info('New connection on %s by user %s', NAMESPACE, userId);
 
-    socket.on('subscribe', function (channel) {
+    socket.on('subscribe', function(channel) {
       logger.info('Joining chat channel', channel);
       socket.join(channel);
 
@@ -49,9 +49,11 @@ function init(dependencies) {
       });
 
       socket.on('message', function(data) {
-        var message = {user: userId, type: data.type, date: Date.now(), text: data.text};
-        localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: room, message: message});
-        sendMessage(room, message);
+        data.date = Date.now();
+        data.room = room;
+        //var message = {user: userId, type: data.type, date: Date.now(), text: data.text};
+        //localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: room, message: message});
+        sendMessage(room, data);
       });
     });
 

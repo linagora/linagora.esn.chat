@@ -1,4 +1,4 @@
 .lv-footer.ms-reply
-  textarea(placeholder="What's on your mind...", ng-model='text')
+  textarea(placeholder="What's on your mind...", ng-model='text', ng-change='onTextChanged()')
   button(ng-click='sendMessage()')
     i.mdi.mdi-send
