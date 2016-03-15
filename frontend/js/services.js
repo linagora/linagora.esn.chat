@@ -2,6 +2,13 @@
 
 angular.module('linagora.esn.chat')
 
+  .factory('ChatRestangular', function(Restangular) {
+    return Restangular.withConfig(function(RestangularConfigurer) {
+      RestangularConfigurer.setBaseUrl('/chat/api/chat');
+      RestangularConfigurer.setFullResponse(true);
+    });
+  })
+
   .factory('ChatMessageAdapter', function($q, userAPI) {
 
     function fromAPI(message) {
@@ -21,7 +28,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('ChatConversationService', function($q, session) {
+  .factory('ChatConversationService', function($q, session, ChatRestangular) {
 
     /**
      * Fetch conversation history for the current user
@@ -116,9 +123,14 @@ angular.module('linagora.esn.chat')
       return $q.when(messages);
     }
 
+    function getChannels(options) {
+      return ChatRestangular.all('channels').getList(options);
+    }
+
     return {
       fetchHistory: fetchHistory,
-      fetchMessages: fetchMessages
+      fetchMessages: fetchMessages,
+      getChannels: getChannels
     };
   })
 

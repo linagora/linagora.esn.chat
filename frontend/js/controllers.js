@@ -5,6 +5,10 @@ angular.module('linagora.esn.chat')
 
     $scope.user = session.user;
 
+    ChatConversationService.getChannels().then(function(result) {
+      $scope.channel = result.data[0];
+    });
+
     ChatConversationService.fetchMessages({
       size: CHAT.DEFAULT_FETCH_SIZE
     }).then(function(result) {

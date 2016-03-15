@@ -27,32 +27,23 @@ function init(dependencies) {
 
   chatNamespace = io.of(NAMESPACE);
 
-  var room = '123';
-
   chatNamespace.on('connection', function(socket) {
     var userId = helper.getUserId(socket);
     logger.info('New connection on %s by user %s', NAMESPACE, userId);
 
-    socket.on('subscribe', function(channel) {
-      logger.info('Joining chat channel', channel);
-      socket.join(channel);
+    socket.on('subscribe', function(room) {
+      logger.info('Joining chat channel', room);
+      socket.join(room);
 
-      sendMessage(room, {
-        type: 'hello',
-        channel: channel,
-        user: userId
-      });
-
-      socket.on('unsubscribe', function (channel) {
-        logger.info('Leaving chat channel', channel);
-        socket.leave(channel);
+      socket.on('unsubscribe', function(room) {
+        logger.info('Leaving chat channel', room);
+        socket.leave(room);
       });
 
       socket.on('message', function(data) {
         data.date = Date.now();
         data.room = room;
-        //var message = {user: userId, type: data.type, date: Date.now(), text: data.text};
-        //localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: room, message: message});
+        localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: room, message: data});
         sendMessage(room, data);
       });
     });

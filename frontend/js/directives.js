@@ -38,7 +38,7 @@ angular.module('linagora.esn.chat')
       link: function(scope) {
         var transport = new ChatWSTransport({
           ns: '/chat',
-          room: '123',
+          room: session.domain._id,
           user: session.user._id
         });
 
@@ -99,7 +99,7 @@ angular.module('linagora.esn.chat')
             type: 'user_typing',
             state: state,
             user: scope.user._id,
-            channel: scope.channel,
+            channel: scope.channel._id,
             date: Date.now()
           };
 
@@ -133,7 +133,7 @@ angular.module('linagora.esn.chat')
             type: 'text',
             text: scope.text,
             user: scope.user._id,
-            channel: scope.channel,
+            channel: scope.channel._id,
             date: Date.now()
           };
 
