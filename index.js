@@ -22,7 +22,7 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
   states: {
     lib: function(dependencies, callback) {
       var libModule = require('./backend/lib')(dependencies);
-      var chat = require('./backend/webserver/api')(dependencies);
+      var chat = require('./backend/webserver/api')(dependencies, libModule);
 
       var lib = {
         api: {

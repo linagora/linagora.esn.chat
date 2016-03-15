@@ -6,8 +6,12 @@ module.exports = function(dependencies) {
     callback();
   }
 
+  var model = require('./db/channel');
+
   return {
     start: start,
-    constants: require('./constants')
+    constants: require('./constants'),
+    channel: require('./channel'),
+    model: model
   };
 };
