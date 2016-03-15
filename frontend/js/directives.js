@@ -62,6 +62,14 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('chatFooter', function() {
+    return {
+      restrict: 'E',
+      templateUrl: '/chat/views/partials/conversation-footer.html'
+
+    };
+  })
+
   .directive('chatConversationItem', function() {
     return {
       restrict: 'E',
@@ -82,11 +90,11 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log) {
+  .directive('chatMessageCompose', function($log, screenSize, chatScrollDown) {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/partials/message-compose.html',
-      link: function(scope) {
+      link: function(scope, element) {
 
         var timer = null;
 
@@ -109,6 +117,17 @@ angular.module('linagora.esn.chat')
             $log.error('Error while sending message', err);
           });
         }
+        element.on('keydown', function(event) {
+          if (!screenSize.is('xs, sm') && event.keyCode === 13) {
+            if (!event.shiftKey) {
+              event.preventDefault();
+              scope.sendMessage();
+              // hack to reset autoSize
+              $('textarea')[0].style.height = '56px';
+            }
+            chatScrollDown();
+          }
+        });
 
         scope.onTextChanged = function() {
           if (!scope.typing) {

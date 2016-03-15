@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('linagora.esn.chat')
-  .controller('chatController', function($scope, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT) {
+  .controller('chatController', function($scope, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown) {
 
     $scope.user = session.user;
 
@@ -24,6 +24,7 @@ angular.module('linagora.esn.chat')
     $scope.newMessage = function(message) {
       ChatMessageAdapter.fromAPI(message).then(function(message) {
         $scope.messages.push(message);
+        chatScrollDown();
       });
     };
 

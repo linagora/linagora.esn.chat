@@ -1,10 +1,7 @@
 @import '../../../../frontend/components/material-admin/less/inc/chat';
 @import '../../../../frontend/components/material-admin/less/inc/messages';
 @import './partial/aside.less';
-
-#messages-main {
-  margin-bottom: 0;
-}
+@import './partial/footer.less';
 
 .lv-message .lv-item {
   padding-top: 10px;
@@ -29,19 +26,13 @@
   }
 
   .chat-message-text {
-
+    white-space: pre-wrap;
   }
-}
-
-.chat-message-status {
-  height: 20px;
-  margin-top: 10px;
-  margin-bottom: 10px;
 }
 
 
 @media (min-width: @screen-sm-min) {
   #messages-main .ms-body {
-    padding-left: 0px;
+    padding-left: 0;
   }
 }
