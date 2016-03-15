@@ -1,7 +1,7 @@
-.lv-item.clickable(title="{{::item.channel_name}}", ui-sref-active="selected")
+.lv-item.clickable(title="{{::item.name}}", ui-sref-active="selected")
   .badge-container
-    i.item-icon.mdi(ng-class="item.channel.type === 'channel' ? 'mdi-pound' : 'mdi-checkbox-blank-circle'")
+    i.item-icon.mdi(ng-class="item.type === 'channel' ? 'mdi-pound' : 'mdi-checkbox-blank-circle'")
   .item-name
     span.item-name-inner
-      bdi {{::item.channel_name}}
+      bdi {{::item.name}}
     span.item-name-after
