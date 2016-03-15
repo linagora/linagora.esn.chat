@@ -172,9 +172,7 @@ angular.module('linagora.esn.chat')
 
   .factory('chatScrollDown', function($timeout, elementScrollService) {
     return function() {
-      $timeout(function() {
-        elementScrollService.scrollDownToElement($('.chat-message-typing'));
-      }, 50);
+      elementScrollService.autoScrollDown($('.ms-body .lv-body'));
     };
   })
 

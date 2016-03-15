@@ -5,7 +5,10 @@
   color: @secondaryTextColor;
 
   .ms-reply {
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    box-shadow: none;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    background: @lightenBgColor;
   }
 
   .lv-footer {
@@ -21,9 +24,11 @@
       line-height: 20px;
       max-height: 130px;
       overflow: auto;
+      background: transparent;
     }
     .send-button {
       .visible-xs;
+
       background: transparent;
     }
   }

@@ -10,8 +10,7 @@ angular.module('linagora.esn.chat', [
   'esn.sidebar',
   'op.dynamicDirective',
   'esn.url',
-  'angularMoment',
-  'matchMedia'
+  'angularMoment'
 ])
   .config(function($stateProvider, routeResolver) {
     $stateProvider.state('/chat', {
