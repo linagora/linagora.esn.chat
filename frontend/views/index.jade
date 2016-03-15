@@ -43,4 +43,5 @@
           chat-message(ng-repeat="message in messages", message="message")
         .clearfix
         chat-message-compose(channel-id="")
-        chat-user-typing
+        div.chat-message-status
+          chat-user-typing

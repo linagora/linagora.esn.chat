@@ -9,18 +9,24 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatUserTyping', function() {
+  .directive('chatUserTyping', function(_) {
     return {
       restrict: 'E',
       scope: true,
       templateUrl: '/chat/views/partials/user-typing.html',
       link: function(scope) {
 
-        scope.typing = false;
-
+        scope.typing = {};
         scope.$on('chat:message:user_typing', function(evt, message) {
-          scope.user = message.user;
-          scope.typing = message.state;
+          scope.typing[message.user] = message.state;
+          scope.usersTyping = _.map(scope.typing, function(value, key) {
+            if (value) {
+              return key;
+            }
+          }).filter(function(element) {
+            return element !== undefined;
+          });
+          console.log(scope.usersTyping)
         });
       }
     }
