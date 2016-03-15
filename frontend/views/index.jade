@@ -1,47 +1,39 @@
-.container(chat-manager)
-  .block-header
-    h2 Messages
-  #messages-main.card.m-b-0
-    .ms-menu(data-ng-class="{ 'toggled': mactrl.lvMenuStat }")
-      .ms-block
-        a.btn.btn-primary.btn-block(href='', dropdown-toggle='')
-          | Messages
-      .listview.lv-user.m-t-20
-        .lv-item.media.active
-          .lv-avatar.pull-left
-            img(src='/api/user/profile/avatar', alt='')
-          .media-body
-            .lv-title Davil Parnell
-            .lv-small Fierent fastidii recteque ad pro
-        chat-conversation-item(ng-repeat="item in conversations" item="item")
-    .ms-body
-      .listview.lv-message
-        .lv-header-alt.clearfix
-          #ms-menu-trigger(data-ng-class="{ 'open': mactrl.lvMenuStat }", data-ng-click='mactrl.lvMenuStat = (mactrl.lvMenuStat===true ? false : true )')
-            .line-wrap
-              .line.top
-              .line.center
-              .line.bottom
-          .lvh-label.hidden-xs
-            .lv-avatar.pull-left
-              img(src='/api/user/profile/avatar', alt='')
-            span.c-black XXX
-          ul.lv-actions.actions
-            li
-              a(href='')
-                i.mdi.mdi-delete
-            li
-              a(href='')
-                i.mdi.mdi-check
-            li
-              a(href='')
-                i.mdi.mdi-clock
-            li
-              a(href='')
-                i.mdi.mdi-dots-vertical
-        .lv-body
-          chat-message(ng-repeat="message in messages", message="message")
-        .clearfix
-        chat-message-compose(channel-id="")
-        div.chat-message-status
-          chat-user-typing
+.ui-view.col-xs-12.nopadding(name="root")
+  .subheader-aware.inbox-main
+    .col-md-3.hidden-xs.hidden-sm
+      chat-sidebar
+    .col-xs-12.col-md-8.no-padding-xs(chat-manager)
+      .block-header
+        h2 Messages
+      #messages-main.card
+        .ms-body
+          .listview.lv-message
+            .lv-header-alt.clearfix
+              #ms-menu-trigger(data-ng-class="{ 'open': mactrl.lvMenuStat }", data-ng-click='mactrl.lvMenuStat = (mactrl.lvMenuStat===true ? false : true )')
+                .line-wrap
+                  .line.top
+                  .line.center
+                  .line.bottom
+              .lvh-label.hidden-xs
+                .lv-avatar.pull-left
+                  img(src='/api/user/profile/avatar', alt='')
+                span.c-black XXX
+              ul.lv-actions.actions
+                li
+                  a(href='')
+                    i.mdi.mdi-delete
+                li
+                  a(href='')
+                    i.mdi.mdi-check
+                li
+                  a(href='')
+                    i.mdi.mdi-clock
+                li
+                  a(href='')
+                    i.mdi.mdi-dots-vertical
+            .lv-body
+              chat-message(ng-repeat="message in messages", message="message")
+            .clearfix
+            chat-message-compose(channel-id="")
+            div.chat-message-status
+              chat-user-typing

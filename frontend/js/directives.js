@@ -26,10 +26,10 @@ angular.module('linagora.esn.chat')
           }).filter(function(element) {
             return element !== undefined;
           });
-          console.log(scope.usersTyping)
+          console.log(scope.usersTyping);
         });
       }
-    }
+    };
   })
 
   .directive('chatManager', function(ChatWSTransport, ChatService, session) {
@@ -51,6 +51,14 @@ angular.module('linagora.esn.chat')
 
         scope.chatService = chat;
       }
+    };
+  })
+
+  .directive('chatSidebar', function() {
+    return {
+      restrict: 'E',
+      templateUrl: '/chat/views/partials/conversation-sidebar.html'
+
     };
   })
 
@@ -111,8 +119,8 @@ angular.module('linagora.esn.chat')
           timer = setTimeout(function() {
             scope.typing = false;
             sendUserTyping(false);
-            console.log('Stop typing')
-          }, 2000)
+            console.log('Stop typing');
+          }, 2000);
         };
 
         scope.sendMessage = function() {

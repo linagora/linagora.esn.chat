@@ -32,7 +32,10 @@ angular.module('linagora.esn.chat')
     function fetchHistory(options) {
       var history = [
         {
-          channel_name: '#openpaas',
+          channel_name: 'openpaas',
+          channel: {
+            type: 'channel'
+          },
           last_message: {
             user: {displayName: 'Davil Parnell'},
             text: 'Hello, how are you?!',
@@ -40,7 +43,7 @@ angular.module('linagora.esn.chat')
           }
         },
         {
-          channel_name: '@christophe',
+          channel_name: 'christophe',
           last_message: {
             user: {displayName: 'Ann Watkinson'},
             text: 'This is fun, thx again',
@@ -48,7 +51,10 @@ angular.module('linagora.esn.chat')
           }
         },
         {
-          channel_name: '#barcamp',
+          channel_name: 'barcamp',
+          channel: {
+            type: 'channel'
+          },
           last_message: {
             user: {displayName: 'Jeremy Robbins'},
             text: 'See you on monday guys, have a nice weekend',
@@ -56,7 +62,10 @@ angular.module('linagora.esn.chat')
           }
         },
         {
-          channel_name: '#todo',
+          channel_name: 'todo',
+          channel: {
+            type: 'channel'
+          },
           last_message: {
             user: {displayName: 'Jeremy Robbins'},
             text: 'YOLO!',
@@ -69,7 +78,7 @@ angular.module('linagora.esn.chat')
     }
 
     function fetchMessages(options) {
-      
+
       var user = session.user;
       user.displayName = '@chamerling';
 
@@ -133,7 +142,7 @@ angular.module('linagora.esn.chat')
       $log.debug('Got a message on chat service', message);
 
       if (!message.type) {
-        $log.debug('Message does not have type, skipping')
+        $log.debug('Message does not have type, skipping');
         return;
       }
 

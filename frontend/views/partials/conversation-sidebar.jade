@@ -1,0 +1,12 @@
+.esn-aside.esn-aside-desktop-menu(data-ng-class="{ 'toggled': mactrl.lvMenuStat }")
+  ul.nav.nav-pills.nav-stacked
+    .listview.p-t-5
+      .lv-body
+        .lv-item.clickable.menu-heading
+          .title
+            i.menu-icon.mdi.mdi-facebook-messenger
+            .text #{__('FU slack')}
+          .add-folder
+            i.menu-icon.mdi.mdi-plus
+
+        chat-conversation-item(ng-repeat="item in conversations" item="item")
