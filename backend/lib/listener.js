@@ -13,6 +13,9 @@ module.exports = function(dependencies) {
     var channel = require('./channel');
 
     localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
+      if(data.message.type === 'user_typing') {
+        return;
+      }
       channel.getChannel(data.message.channel, function(err, response) {
         if (err) {
           logger.error('Cannot find channel: %s', data.message.channel, err);
@@ -36,7 +39,7 @@ module.exports = function(dependencies) {
           if (err) {
             logger.error('Error while saving whatsup', err);
           }
-          logger.error('Response: ', response);
+          logger.debug('Response: ', response);
         });
       });
     });
