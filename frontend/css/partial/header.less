@@ -1,0 +1,36 @@
+.conversation-subheader {
+
+  .button {
+    position: absolute;
+    top: 10px;
+    opacity: 1;
+    padding: 0 5px;
+
+    &.submit {
+      right: 0;
+    }
+  }
+
+  .title {
+    text-align: center;
+    font-size: 1.4em;
+    margin-left: 35px;
+    margin-right: 35px;
+    color: @textPrimaryColor;
+  }
+
+  &.composer {
+    .mdi {
+      font-size: 1.6em; // icons seem to be bigger than others, so we reduce its size
+    }
+
+    .attach {
+      padding: 0 5px 0 0;
+    }
+  }
+}
+
+#sub-header .mdi.item-icon {
+  font-size: 20px;
+  vertical-align: bottom;
+}

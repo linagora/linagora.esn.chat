@@ -7,7 +7,7 @@ angular.module('linagora.esn.chat')
       $scope.conversations = result.data;
     });
   })
-  .controller('chatController', function($scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _) {
+  .controller('chatController', function($scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _, headerService) {
 
     $scope.user = session.user;
 
@@ -29,9 +29,11 @@ angular.module('linagora.esn.chat')
     $scope.$on('chat:message:text', function(evt, message) {
       $scope.newMessage(message);
     });
+
+    headerService.subHeader.setInjection('conversation-subheader', $scope);
   })
 
-  .controller('addChannelController', function($scope, $state, ChatConversationService) {
+  .controller('addChannelController', function($scope, $state, ChatConversationService, headerService) {
     $scope.addChannel = function() {
       var channel = {
         name: $scope.channel.name,
@@ -40,8 +42,10 @@ angular.module('linagora.esn.chat')
       };
 
       ChatConversationService.postChannels(channel).then(function(response) {
-        $state.go('chat');
+        $state.go('chat.channels-views', {id: response.data._id});
         $scope.conversations.push(response.data);
       });
     };
+
+    headerService.subHeader.setInjection('conversation-subheader', $scope);
   });

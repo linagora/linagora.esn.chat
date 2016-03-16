@@ -89,6 +89,13 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('conversationSubheader', function() {
+    return {
+      restrict: 'E',
+      templateUrl: '/chat/views/partials/subheader.html'
+    };
+  })
+
   .directive('chatMessageCompose', function($log, deviceDetector, chatScrollDown) {
     return {
       restrict: 'E',
