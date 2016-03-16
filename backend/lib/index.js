@@ -2,6 +2,10 @@
 
 module.exports = function(dependencies) {
 
+  var models = {
+    channel: require('./db/channel'),
+    message: require('./db/message')
+  };
   var listener = require('./listener')(dependencies);
 
   function start(callback) {
@@ -9,12 +13,10 @@ module.exports = function(dependencies) {
     callback();
   }
 
-  var model = require('./db/channel');
-
   return {
     start: start,
     constants: require('./constants'),
     channel: require('./channel'),
-    model: model
+    models: models
   };
 };

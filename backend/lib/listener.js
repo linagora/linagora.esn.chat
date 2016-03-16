@@ -3,6 +3,7 @@
 var CONSTANTS = require('./constants');
 var mongoose = require('mongoose');
 var Whatsup = mongoose.model('Whatsup');
+var ChatMessage = mongoose.model('ChatMessage');
 
 module.exports = function(dependencies) {
 
@@ -14,11 +15,7 @@ module.exports = function(dependencies) {
   function start() {
     var channel = require('./channel');
 
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
-      if (data.message.type === 'user_typing') {
-        return;
-      }
-
+    function saveInActivityStream(data) {
       var userId = data.message.user;
 
       userModule.get(userId, function(err, user) {
@@ -56,6 +53,35 @@ module.exports = function(dependencies) {
           });
         });
       });
+    }
+
+    function saveAsChatMessage(data) {
+      var chatMessage = new ChatMessage({
+        type: data.message.type,
+        text: data.message.text,
+        creator: data.message.user,
+        channel: data.message.channel
+      });
+      chatMessage.save(function(err, result) {
+        if (err) {
+          logger.error('Can not save ChatMessage', err);
+        }
+        logger.debug('Chat Message saved', result);
+      })
+    }
+
+    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
+      if (data.message.type === 'user_typing') {
+        return;
+      }
+      saveInActivityStream(data);
+    });
+
+    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
+      if (data.message.type === 'user_typing') {
+        return;
+      }
+      saveAsChatMessage(data);
     });
   }
 

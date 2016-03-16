@@ -5,7 +5,19 @@ module.exports = function(dependencies, lib) {
   var logger = dependencies('logger');
 
   function getMessages(req, res) {
-    return res.status(200).json([]);
+    lib.channel.getMessages(req.params.channel, {}, function(err, results) {
+      if (err) {
+        logger.error('Error while getting messages', err);
+        return res.status(500).json({error: {status: 500}});
+      }
+
+      results = results.map(function(message) {
+        delete message.password;
+        return message;
+      });
+
+      return res.status(200).json(results);
+    });
   }
 
   function getChannels(req, res) {
