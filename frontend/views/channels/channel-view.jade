@@ -1,28 +1,38 @@
-#messages-main.card
-  .ms-body
-    .listview.lv-message
-      .lv-header-alt.clearfix
-        #ms-menu-trigger(data-ng-class="{ 'open': mactrl.lvMenuStat }", data-ng-click='mactrl.lvMenuStat = (mactrl.lvMenuStat===true ? false : true )')
-          .line-wrap
-            .line.top
-            .line.center
-            .line.bottom
-        .lvh-label.hidden-xs
-          span.c-black \#{{::channel.name}}
-        ul.lv-actions.actions
-          li
-            a(href='')
-              i.mdi.mdi-delete
-          li
-            a(href='')
-              i.mdi.mdi-check
-          li
-            a(href='')
-              i.mdi.mdi-clock
-          li
-            a(href='')
-              i.mdi.mdi-dots-vertical
-      .lv-body
-        chat-message(ng-repeat="message in messages", message="message")
-      .clearfix
-      chat-footer
+#messages-main
+  .block-header
+    h2 \#{{::channel.name}}
+    ul.actions
+      li
+        a(href='')
+          i.mdi.mdi-account-multiple-plus
+      li
+        a(href='')
+          i.mdi.mdi-message-outline
+      li
+        a(href='')
+          i.mdi.mdi-dots-vertical
+  .card
+    .ms-body
+      .listview.lv-message
+        .lv-header.message-header
+          .lvh-label
+            a(href='') 5 members
+            span.divider |
+            span(ng-if="!channel.topic.value")
+              | Your topic here!
+              a(href='')
+                | Add
+                i.mdi.mdi-plus
+            span(ng-if="channel.topic.value")
+              | {{::channel.topic.value}}
+              a(href='')
+                | Edit
+                i.mdi.mdi-pencil
+          ul.lv-actions.actions
+            li
+              a(href='')
+                i.mdi.mdi-information-outline
+        .lv-body
+          chat-message(ng-repeat="message in messages", message="message")
+        //.clearfix
+        chat-footer

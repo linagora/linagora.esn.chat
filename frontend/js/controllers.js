@@ -15,6 +15,7 @@ angular.module('linagora.esn.chat')
       $scope.channel =  _.find(result.data, {_id: $stateParams.id}) || result.data[0];
       ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
         $scope.messages = result;
+        chatScrollDown();
       });
     });
 

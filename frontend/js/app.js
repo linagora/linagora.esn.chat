@@ -30,7 +30,7 @@ angular.module('linagora.esn.chat', [
         }
       })
       .state('chat.channels-views', {
-        url: '/channels/:id',
+        url: '/channels/view/:id',
         views: {
           'main@chat': {
             templateUrl: '/chat/views/channels/channel-view.html',
