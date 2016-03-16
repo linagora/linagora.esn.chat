@@ -35,7 +35,15 @@ module.exports = function(dependencies, lib) {
     var channel = {
       name: req.body.name,
       type: 'channel',
-      creator: req.user
+      creator: req.user,
+      topic: {
+        value: req.body.topic,
+        creator: req.user
+      },
+      purpose: {
+        value: req.body.purpose,
+        creator: req.user
+      }
     };
 
     lib.channel.createChannel(channel, function(err, result) {

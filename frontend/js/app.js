@@ -13,15 +13,40 @@ angular.module('linagora.esn.chat', [
   'angularMoment'
 ])
   .config(function($stateProvider, routeResolver) {
-    $stateProvider.state('/chat', {
-      url: '/chat',
-      templateUrl: '/chat/views/index',
-      controller: 'chatController',
-      resolve: {
-        domain: routeResolver.session('domain'),
-        user: routeResolver.session('user')
-      }
-    });
+    $stateProvider
+      .state('chat', {
+        url: '/chat',
+        templateUrl: '/chat/views/index',
+        controller: 'rootController',
+        resolve: {
+          domain: routeResolver.session('domain'),
+          user: routeResolver.session('user')
+        },
+        deepStateRedirect: {
+          default: 'chat.channels-views',
+          fn: function() {
+            return { state: 'chat.channels-views' };
+          }
+        }
+      })
+      .state('chat.channels-views', {
+        url: '/channels/view',
+        views: {
+          'main@chat': {
+            templateUrl: '/chat/views/channels/channel-view.html',
+            controller: 'chatController'
+          }
+        }
+      })
+      .state('chat.channels-add', {
+        url: '/channels/add',
+        views: {
+          'main@chat': {
+            templateUrl: '/chat/views/channels/channel-add.html',
+            controller: 'addChannelController'
+          }
+        }
+      });
   })
   .config(function(dynamicDirectiveServiceProvider) {
 

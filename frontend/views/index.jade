@@ -1,33 +1,5 @@
-.ui-view.col-xs-12.nopadding(name="root")
+.col-xs-12.nopadding
   .subheader-aware.inbox-main
     .col-md-3.hidden-xs.hidden-sm
       chat-sidebar
-    .col-xs-12.col-md-8.no-padding-xs(chat-manager)
-      #messages-main.card
-        .ms-body
-          .listview.lv-message
-            .lv-header-alt.clearfix
-              #ms-menu-trigger(data-ng-class="{ 'open': mactrl.lvMenuStat }", data-ng-click='mactrl.lvMenuStat = (mactrl.lvMenuStat===true ? false : true )')
-                .line-wrap
-                  .line.top
-                  .line.center
-                  .line.bottom
-              .lvh-label.hidden-xs
-                span.c-black \#{{::channel.name}}
-              ul.lv-actions.actions
-                li
-                  a(href='')
-                    i.mdi.mdi-delete
-                li
-                  a(href='')
-                    i.mdi.mdi-check
-                li
-                  a(href='')
-                    i.mdi.mdi-clock
-                li
-                  a(href='')
-                    i.mdi.mdi-dots-vertical
-            .lv-body
-              chat-message(ng-repeat="message in messages", message="message")
-            .clearfix
-            chat-footer
+    .col-xs-12.col-md-8.no-padding-xs.ui-view(chat-manager, name="main")

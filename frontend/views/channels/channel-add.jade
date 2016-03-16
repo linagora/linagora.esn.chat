@@ -1,0 +1,16 @@
+.block-header
+  h2 #{__('Create a new channel')}
+.inbox-main-content.configuration.card
+  form(name='addChannelForm', ng-submit="addChannel()")
+    .form-group.fg-line
+      .field-name #{__('Name')}
+      input.form-control(ng-model="channel.name", placeholder="#{__('Enter the channel name')}", auto-focus, required)
+    .form-group.fg-line
+      .field-name #{__('Topic')}
+      input.form-control(ng-model="channel.topic", placeholder="#{__('Add topic')}")
+    .form-group.fg-line
+      .field-name #{__('Purpose')}
+      input.form-control(ng-model="channel.purpose", placeholder="#{__('Add purpose')}")
+    .button-bar.actions.hidden-xs.flex-end
+      input.btn.btn-default(type="button", value="#{__('Cancel')}", ui-sref="chat.channels-views")
+      input.btn.btn-primary(type="submit", value="#{__('Create')}", ng-disabled="addChannelForm.$invalid")

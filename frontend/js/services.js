@@ -127,10 +127,15 @@ angular.module('linagora.esn.chat')
       return ChatRestangular.all('channels').getList(options);
     }
 
+    function postChannels(channel) {
+      return ChatRestangular.one('channels').customPOST(channel);
+    }
+
     return {
       fetchHistory: fetchHistory,
       fetchMessages: fetchMessages,
-      getChannels: getChannels
+      getChannels: getChannels,
+      postChannels: postChannels
     };
   })
 

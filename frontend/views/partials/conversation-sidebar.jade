@@ -3,10 +3,10 @@
     .listview.p-t-5
       .lv-body
         .lv-item.clickable.menu-heading
-          .title
+          .title(ui-sref='chat.channels-views')
             i.menu-icon.mdi.mdi-facebook-messenger
             .text #{__('FU slack')}
-          .add-folder
+          .add-folder(ui-sref='chat.channels-add')
             i.menu-icon.mdi.mdi-plus
 
         chat-conversation-item(ng-repeat="item in conversations" item="item")
