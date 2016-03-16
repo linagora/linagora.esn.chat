@@ -26,7 +26,6 @@ angular.module('linagora.esn.chat')
           }).filter(function(element) {
             return element !== undefined;
           });
-          console.log(scope.usersTyping);
         });
       }
     };
@@ -135,7 +134,6 @@ angular.module('linagora.esn.chat')
           timer = setTimeout(function() {
             scope.typing = false;
             sendUserTyping(false);
-            console.log('Stop typing');
           }, 2000);
         };
 

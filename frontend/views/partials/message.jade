@@ -3,6 +3,6 @@
         img(ng-src='/api/users/{{::message.user._id}}/profile/avatar', alt='')
     .media-body
       .chat-message-title
-        span.displayname {{::message.user.displayName}}
+        user-profile-link.displayname(user="message.user")
         small.date {{::message.date | amDateFormat:'h:mm A'}}
       .chat-message-text {{::message.text}}
