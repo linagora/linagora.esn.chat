@@ -7,12 +7,12 @@ angular.module('linagora.esn.chat')
       $scope.conversations = result.data;
     });
   })
-  .controller('chatController', function($scope, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown) {
+  .controller('chatController', function($scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _) {
 
     $scope.user = session.user;
 
     ChatConversationService.getChannels().then(function(result) {
-      $scope.channel = result.data[0];
+      $scope.channel =  _.find(result.data, {_id: $stateParams.id}) || result.data[0];
       ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
         $scope.messages = result;
       });
