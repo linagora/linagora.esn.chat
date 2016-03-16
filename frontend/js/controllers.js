@@ -13,12 +13,9 @@ angular.module('linagora.esn.chat')
 
     ChatConversationService.getChannels().then(function(result) {
       $scope.channel = result.data[0];
-    });
-
-    ChatConversationService.fetchMessages({
-      size: CHAT.DEFAULT_FETCH_SIZE
-    }).then(function(result) {
-      $scope.messages = result;
+      ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
+        $scope.messages = result;
+      });
     });
 
     $scope.newMessage = function(message) {
