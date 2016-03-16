@@ -20,7 +20,7 @@ angular.module('linagora.esn.chat')
         scope.$on('chat:message:user_typing', function(evt, message) {
           scope.typing[message.user] = message.state;
           scope.usersTyping = _.map(scope.typing, function(value, key) {
-            if (value) {
+            if (value && scope.channel._id === message.channel) {
               return key;
             }
           }).filter(function(element) {
