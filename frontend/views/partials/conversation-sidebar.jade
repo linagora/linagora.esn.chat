@@ -6,6 +6,8 @@
           .title(ui-sref='chat.channels-views')
             i.menu-icon.mdi.mdi-facebook-messenger
             .text #{__('Let\'s chat')}
+          .add-folder(ng-click='toggleNotification()')
+            i.menu-icon.mdi(ng-class="isNotificationEnabled? 'mdi-bell-outline': 'mdi-bell-off'")
           .add-folder(ui-sref='chat.channels-add')
             i.menu-icon.mdi.mdi-plus
 

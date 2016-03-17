@@ -69,8 +69,12 @@ angular.module('linagora.esn.chat')
   .directive('chatSidebar', function() {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/partials/conversation-sidebar.html'
-
+      templateUrl: '/chat/views/partials/conversation-sidebar.html',
+      link: function(scope, element) {
+        scope.toggleNotification = function() {
+          scope.isNotificationEnabled = !scope.isNotificationEnabled;
+        }
+      }
     };
   })
 
