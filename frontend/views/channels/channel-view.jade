@@ -33,6 +33,5 @@
               a(href='')
                 i.mdi.mdi-information-outline
         .lv-body
-          chat-message(ng-repeat="message in messages", message="message")
-        //.clearfix
+          chat-message(ng-repeat="message in messages track by $index", message="message")
         chat-footer
