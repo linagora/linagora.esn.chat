@@ -22,8 +22,8 @@ angular.module('linagora.esn.chat')
     });
 
     $scope.newMessage = function(message) {
-      if (!$window.document.hasFocus() && message.user !== $scope.user._id) {
-        var conversation = _.find($scope.conversations, {_id: message.channel});
+      var conversation = _.find($scope.conversations, {_id: message.channel});
+      if (!$window.document.hasFocus() && !conversation.isNotRead  && message.user !== $scope.user._id) {
         var channelName = conversation.name || 'OpenPaas Chat';
         webNotification.showNotification('New message in ' + channelName, {
           body: message.text,

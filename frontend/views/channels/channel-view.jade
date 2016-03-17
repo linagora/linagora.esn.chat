@@ -19,9 +19,8 @@
             a(href='') 5 members
             span.divider |
             span(ng-if="!channel.topic.value")
-              | Your topic here!
               a(href='')
-                | Add
+                | Add a topic
                 i.mdi.mdi-plus
             span(ng-if="channel.topic.value")
               | {{::channel.topic.value}}
