@@ -9,7 +9,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatUserTyping', function(_) {
+  .directive('chatUserTyping', function(_, $q, ChatMessageAdapter) {
     return {
       restrict: 'E',
       scope: true,
@@ -19,13 +19,26 @@ angular.module('linagora.esn.chat')
         scope.typing = {};
         scope.$on('chat:message:user_typing', function(evt, message) {
           scope.typing[message.user] = message.state;
-          scope.usersTyping = _.map(scope.typing, function(value, key) {
+          var areTyping = _.map(scope.typing, function(value, key) {
             if (value && scope.channel._id === message.channel) {
               return key;
             }
           }).filter(function(element) {
             return element !== undefined;
           });
+
+          $q.all(areTyping.map(function(element) {
+            return ChatMessageAdapter.getUser(element);
+          })).then(function(results) {
+            scope.usersTyping = results.map(function(result) {
+              if (result.firstname || result.lastname) {
+                return (result.firstname || '') + ' ' + (result.lastname || '');
+              } else {
+                return result.emails[0];
+              }
+            });
+          });
+
         });
       }
     };
@@ -109,7 +122,7 @@ angular.module('linagora.esn.chat')
 
         function sendUserTyping(state) {
           var message = {
-            id: 1, // TODO: Unique ID
+            //id: 1,
             type: 'user_typing',
             state: state,
             user: scope.user._id,
@@ -150,7 +163,7 @@ angular.module('linagora.esn.chat')
           }
 
           var message = {
-            id: 1, // TODO: Unique ID
+            //id: 1,
             type: 'text',
             text: scope.text,
             user: scope.user._id,

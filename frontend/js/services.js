@@ -11,10 +11,23 @@ angular.module('linagora.esn.chat')
 
   .factory('ChatMessageAdapter', function($q, userAPI) {
 
+    var cache = {};
+
+    function getUser(id) {
+      if (cache[id]) {
+        return $q.when(cache[id]);
+      }
+
+      return userAPI.user(id).then(function(response) {
+        cache[id] = response.data;
+        return response.data;
+      });
+    }
+
     function fromAPI(message) {
       if (message.user) {
-        return userAPI.user(message.user).then(function(response) {
-          message.user = response.data;
+        return getUser(message.user).then(function(user) {
+          message.user = user;
           return message;
         });
       }
@@ -23,7 +36,8 @@ angular.module('linagora.esn.chat')
     }
 
     return {
-      fromAPI: fromAPI
+      fromAPI: fromAPI,
+      getUser: getUser
     };
   })
 
