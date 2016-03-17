@@ -5,6 +5,6 @@
       .chat-message-title
         user-profile-link.displayname(user="message.user")
         small.date {{::message.date | amDateFormat:'h:mm A'}}
-      .chat-message-text {{::message.text}}
+      .chat-message-text(ng-bind-html="message.text | linky:'_blank'")
       .oembeds
         oembeds(message="message.text")
