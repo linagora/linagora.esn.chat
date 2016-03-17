@@ -10,7 +10,8 @@ angular.module('linagora.esn.chat', [
   'esn.sidebar',
   'op.dynamicDirective',
   'esn.url',
-  'angularMoment'
+  'angularMoment',
+  'esn.lodash-wrapper'
 ])
   .config(function($stateProvider, routeResolver) {
     $stateProvider
