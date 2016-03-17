@@ -33,5 +33,5 @@
               a(href='')
                 i.mdi.mdi-information-outline
         .lv-body
-          chat-message(ng-repeat="message in messages track by $index", message="message")
+          chat-message(ng-repeat="message in messages | filter:{ channel: channel._id } | orderBy: ['timestamps.creation'] track by $index", message="message")
         chat-footer

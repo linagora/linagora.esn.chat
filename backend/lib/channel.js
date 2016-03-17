@@ -33,7 +33,7 @@ function getMessages(channel, query, callback) {
   mq.populate('creator');
   mq.limit(query.limit || 20);
   mq.skip(query.offset || 0);
-  mq.sort('timestamps.creation');
+  mq.sort('-timestamps.creation');
   mq.exec(callback);
 }
 module.exports.getMessages = getMessages;

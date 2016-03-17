@@ -35,7 +35,7 @@ angular.module('linagora.esn.chat', [
         url: '/channels/view/:id',
         views: {
           'main@chat': {
-            templateUrl: '/chat/views/channels/channel-view.html',
+            template: '<channel-view>',
             controller: 'chatController'
           }
         }
