@@ -8,6 +8,7 @@ var ChannelSchema = new mongoose.Schema({
   name: {type: String},
   type: {type: String, required: true},
   creator: {type: ObjectId, ref: 'User'},
+  isNotRead: {type: Boolean},
   topic: {
     value: {type: String},
     creator: {type: ObjectId, ref: 'User'},

@@ -13,6 +13,8 @@ angular.module('linagora.esn.chat')
 
     ChatConversationService.getChannels().then(function(result) {
       $scope.channel =  _.find(result.data, {_id: $stateParams.id}) || result.data[0];
+      var conversation = _.find($scope.conversations, {_id: $scope.channel._id});
+      conversation && (conversation.isNotRead = false);
       ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
         $scope.messages = result;
         chatScrollDown();
@@ -20,6 +22,9 @@ angular.module('linagora.esn.chat')
     });
 
     $scope.newMessage = function(message) {
+      if(message.channel !== $scope.channel._id) {
+        _.find($scope.conversations, {_id: message.channel}).isNotRead = true;
+      }
       ChatMessageAdapter.fromAPI(message).then(function(message) {
         $scope.messages.push(message);
         chatScrollDown();
@@ -38,7 +43,8 @@ angular.module('linagora.esn.chat')
       var channel = {
         name: $scope.channel.name,
         topic: $scope.channel.topic || '',
-        purpose: $scope.channel.purpose || ''
+        purpose: $scope.channel.purpose || '',
+        isNotRead: false
       };
 
       ChatConversationService.postChannels(channel).then(function(response) {
