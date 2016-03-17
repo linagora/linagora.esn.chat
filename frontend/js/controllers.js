@@ -23,7 +23,9 @@ angular.module('linagora.esn.chat')
 
     $scope.newMessage = function(message) {
       if (!$window.document.hasFocus() && message.user !== $scope.user._id) {
-        webNotification.showNotification('New message in ' + $scope.channel.name, {
+        var conversation = _.find($scope.conversations, {_id: message.channel});
+        var channelName = conversation.name || 'OpenPaas Chat';
+        webNotification.showNotification('New message in ' + channelName, {
           body: message.text,
           icon: '/images/facebook-messenger.png',
           autoClose: 4000
