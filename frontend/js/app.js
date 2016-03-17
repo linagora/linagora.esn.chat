@@ -13,7 +13,8 @@ angular.module('linagora.esn.chat', [
   'angularMoment',
   'esn.lodash-wrapper',
   'esn.oembed',
-  'angular-web-notification'
+  'angular-web-notification',
+  'esn.localstorage'
 ])
   .config(function($stateProvider, routeResolver) {
     $stateProvider

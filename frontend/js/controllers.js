@@ -2,10 +2,19 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('rootChatController', function($scope, ChatConversationService) {
+  .controller('rootChatController', function($scope, ChatConversationService, localStorageService) {
     ChatConversationService.getChannels().then(function(result) {
       $scope.conversations = result.data;
-      $scope.isNotificationEnabled = true;
+      var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
+      localForage.getItem('isNotificationEnabled').then(function(value) {
+        if (value) {
+          $scope.isNotificationEnabled = value === 'true'? true : false;
+        } else {
+          localForage.setItem('isNotificationEnabled', 'true').then(function() {
+            $scope.isNotificationEnabled = true;
+          });
+        };
+      });
     });
   })
   .controller('chatController', function($window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _, headerService, webNotification) {
@@ -25,7 +34,7 @@ angular.module('linagora.esn.chat')
     $scope.newMessage = function(message) {
       var conversation = _.find($scope.conversations, {_id: message.channel});
       function canSendNotification() {
-        return !$window.document.hasFocus() && !conversation.isNotRead && $scope.isNotificationEnabled  && message.user !== $scope.user._id;
+        return !$window.document.hasFocus() && !conversation.isNotRead && $scope.isNotificationEnabled && message.user !== $scope.user._id;
       }
 
       if (canSendNotification()) {
