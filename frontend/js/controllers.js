@@ -2,12 +2,12 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('rootController', function($scope, $state, ChatConversationService) {
+  .controller('rootChatController', function($scope, ChatConversationService) {
     ChatConversationService.getChannels().then(function(result) {
       $scope.conversations = result.data;
     });
   })
-  .controller('chatController', function($scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _, headerService) {
+  .controller('chatController', function($window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _, headerService, webNotification) {
 
     $scope.user = session.user;
 
@@ -22,6 +22,18 @@ angular.module('linagora.esn.chat')
     });
 
     $scope.newMessage = function(message) {
+      if (!$window.document.hasFocus() && message.user !== $scope.user._id) {
+        webNotification.showNotification('New message in ' + $scope.channel.name, {
+          body: message.text,
+          icon: '/images/facebook-messenger.png',
+          autoClose: 4000
+        }, function onShow(error, hide) {
+          if (error) {
+            console.log('Unable to show notification: ' + error.message);
+          }
+        });
+      }
+
       if(message.channel !== $scope.channel._id) {
         _.find($scope.conversations, {_id: message.channel}).isNotRead = true;
       }

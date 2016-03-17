@@ -12,14 +12,15 @@ angular.module('linagora.esn.chat', [
   'esn.url',
   'angularMoment',
   'esn.lodash-wrapper',
-  'esn.oembed'
+  'esn.oembed',
+  'angular-web-notification'
 ])
   .config(function($stateProvider, routeResolver) {
     $stateProvider
       .state('chat', {
         url: '/chat',
         templateUrl: '/chat/views/index',
-        controller: 'rootController',
+        controller: 'rootChatController',
         resolve: {
           domain: routeResolver.session('domain'),
           user: routeResolver.session('user')
