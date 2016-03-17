@@ -6,3 +6,5 @@
         user-profile-link.displayname(user="message.user")
         small.date {{::message.date | amDateFormat:'h:mm A'}}
       .chat-message-text {{::message.text}}
+      .oembeds
+        oembeds(message="message.text")
