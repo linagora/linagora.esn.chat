@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('linagora.esn.chat')
-  .directive('applicationMenuChat', function(applicationMenuTemplateBuilder) {
+  .directive('chatApplicationMenu', function(applicationMenuTemplateBuilder) {
     return {
       restrict: 'E',
       replace: true,
@@ -69,7 +69,7 @@ angular.module('linagora.esn.chat')
   .directive('chatSidebar', function(localStorageService) {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/partials/conversation-sidebar.html',
+      templateUrl: '/chat/views/aside/sidebar.html',
       link: function(scope) {
         scope.toggleNotification = function() {
           var newState = !scope.isNotificationEnabled;
@@ -84,18 +84,17 @@ angular.module('linagora.esn.chat')
   .directive('chatFooter', function() {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/partials/conversation-footer.html'
-
+      templateUrl: '/chat/views/channels/channel-footer.html'
     };
   })
 
-  .directive('chatConversationItem', function() {
+  .directive('chatChannelItem', function() {
     return {
       restrict: 'E',
       scope: {
         item: '='
       },
-      templateUrl: '/chat/views/partials/conversation-item.html'
+      templateUrl: '/chat/views/aside/channel-item.html'
     };
   })
 
@@ -105,28 +104,28 @@ angular.module('linagora.esn.chat')
       scope: {
         message: '='
       },
-      templateUrl: '/chat/views/partials/message.html'
+      templateUrl: '/chat/views/messages/message.html'
     };
   })
 
-  .directive('conversationSubheader', function() {
+  .directive('chatChannelSubheader', function() {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/partials/subheader.html'
+      templateUrl: '/chat/views/subheaders/channel.html'
     };
   })
 
-  .directive('channelView', function() {
+  .directive('chatChannelView', function() {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/channels/channel-view.html'
     };
   })
 
-  .directive('chatMessageCompose', function($log, deviceDetector, chatScrollDown, ChatMessageSender) {
+  .directive('chatMessageCompose', function($log, deviceDetector, ChatScrollDown, ChatMessageSender) {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/partials/message-compose.html',
+      templateUrl: '/chat/views/messages/message-compose.html',
       link: function(scope, element) {
 
         var sender = ChatMessageSender.get(scope.chatService);
@@ -194,7 +193,7 @@ angular.module('linagora.esn.chat')
 
           // hack to reset autoSize
           $('textarea')[0].style.height = '56px';
-          chatScrollDown();
+          ChatScrollDown();
 
           sender.sendMessage(message).then(function(result) {
             $log.debug('Message ACK', result);

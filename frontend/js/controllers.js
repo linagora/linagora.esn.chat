@@ -2,37 +2,38 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('rootChatController', function($scope, ChatConversationService, localStorageService) {
+  .controller('chatRootController', function($scope, ChatConversationService, localStorageService) {
     ChatConversationService.getChannels().then(function(result) {
-      $scope.conversations = result.data;
+      $scope.channels = result.data;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
       localForage.getItem('isNotificationEnabled').then(function(value) {
         if (value) {
-          $scope.isNotificationEnabled = value === 'true'? true : false;
+          $scope.isNotificationEnabled = value === 'true';
         } else {
           localForage.setItem('isNotificationEnabled', 'true').then(function() {
             $scope.isNotificationEnabled = true;
           });
-        };
+        }
       });
     });
   })
-  .controller('chatController', function($window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, chatScrollDown, _, headerService, webNotification) {
+
+  .controller('chatController', function($log, $window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, ChatScrollDown, _, headerService, webNotification) {
 
     $scope.user = session.user;
 
     ChatConversationService.getChannels().then(function(result) {
       $scope.channel =  _.find(result.data, {_id: $stateParams.id}) || result.data[0];
-      var conversation = _.find($scope.conversations, {_id: $scope.channel._id});
+      var conversation = _.find($scope.channels, {_id: $scope.channel._id});
       conversation && (conversation.isNotRead = false);
       ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
         $scope.messages = result;
-        chatScrollDown();
+        ChatScrollDown();
       });
     });
 
     $scope.newMessage = function(message) {
-      var conversation = _.find($scope.conversations, {_id: message.channel});
+      var conversation = _.find($scope.channels, {_id: message.channel});
       function canSendNotification() {
         return !$window.document.hasFocus() && !conversation.isNotRead && $scope.isNotificationEnabled && message.user !== $scope.user._id;
       }
@@ -43,19 +44,20 @@ angular.module('linagora.esn.chat')
           body: message.text,
           icon: '/images/facebook-messenger.png',
           autoClose: 4000
-        }, function onShow(error, hide) {
-          if (error) {
-            console.log('Unable to show notification: ' + error.message);
+        }, function onShow(err) {
+          if (err) {
+            $log.error('Unable to show notification: ' + err);
           }
         });
       }
 
       if(message.channel !== $scope.channel._id) {
-        _.find($scope.conversations, {_id: message.channel}).isNotRead = true;
+        _.find($scope.channels, {_id: message.channel}).isNotRead = true;
       }
+
       ChatMessageAdapter.fromAPI(message).then(function(message) {
         $scope.messages.push(message);
-        chatScrollDown();
+        ChatScrollDown();
       });
     };
 
@@ -63,10 +65,10 @@ angular.module('linagora.esn.chat')
       $scope.newMessage(message);
     });
 
-    headerService.subHeader.setInjection('conversation-subheader', $scope);
+    headerService.subHeader.setInjection('chat-channel-subheader', $scope);
   })
 
-  .controller('addChannelController', function($scope, $state, ChatConversationService, headerService) {
+  .controller('chatAddChannelController', function($scope, $state, ChatConversationService, headerService) {
     $scope.addChannel = function() {
       var channel = {
         name: $scope.channel.name,
@@ -77,9 +79,9 @@ angular.module('linagora.esn.chat')
 
       ChatConversationService.postChannels(channel).then(function(response) {
         $state.go('chat.channels-views', {id: response.data._id});
-        $scope.conversations.push(response.data);
+        $scope.channels.push(response.data);
       });
     };
 
-    headerService.subHeader.setInjection('conversation-subheader', $scope);
+    headerService.subHeader.setInjection('chat-channel-subheader', $scope);
   });

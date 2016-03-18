@@ -181,7 +181,7 @@ angular.module('linagora.esn.chat')
 
   })
 
-  .factory('chatScrollDown', function($timeout, elementScrollService) {
+  .factory('ChatScrollDown', function($timeout, elementScrollService) {
     return function() {
       elementScrollService.autoScrollDown($('.ms-body .lv-body'));
     };

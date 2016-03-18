@@ -2,5 +2,5 @@
   .title(ng-if= "channel")
     i.item-icon.mdi(ng-class="channel.type === 'channel' ? 'mdi-pound' : 'mdi-checkbox-blank-circle'")
     span.ellipsis {{ ::channel.name }}
-  a.close.button(contextual-sidebar, data-content-template="/chat/views/partials/conversation-sidebar.html")
+  a.close.button(contextual-sidebar, data-content-template="/chat/views/aside/sidebar.html")
     i.mdi.mdi-menu
