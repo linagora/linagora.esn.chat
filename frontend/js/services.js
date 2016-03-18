@@ -9,6 +9,83 @@ angular.module('linagora.esn.chat')
     });
   })
 
+  .factory('ChatMessageSender', function($log, $q, fileUploadService, backgroundProcessorService, DEFAULT_FILE_TYPE) {
+
+    return {
+      get: function(chatService) {
+
+        function buildMessage(message, attachments) {
+          if (attachments) {
+            var attachmentsModel = attachments.map(function (attachment) {
+              var type = attachment.file.type;
+              if (!type || type.length === 0) {
+                type = DEFAULT_FILE_TYPE;
+              }
+
+              return {
+                _id: attachment.response.data._id,
+                name: attachment.file.name,
+                contentType: type,
+                length: attachment.file.size
+              };
+            });
+            message.attachments = attachmentsModel;
+          }
+          return message;
+        }
+
+        function sendUserTyping(message) {
+          message.type = 'user_typing';
+          return sendMessage(message);
+        }
+
+        function sendMessage(message) {
+          return chatService.sendMessage(message);
+        }
+
+        function sendMessageWithAttachments(message, files) {
+
+          var uploadService = fileUploadService.get();
+          var attachments = [];
+
+          for (var i = 0; i < files.length; i++) {
+            attachments.push(uploadService.addFile(files[i], true));
+          }
+
+          if (uploadService.isComplete()) {
+            return sendMessage(buildMessage(message, attachments)).then(function(response) {
+              $log.info('Message has been sent');
+              return response;
+            }, function (err) {
+              $log.error('Message has not been sent', err);
+            });
+          } else {
+            var defer = $q.defer();
+            $log.debug('Publishing message...');
+            var done = function(attachments) {
+              $log.debug('Upload complete');
+              return sendMessage(buildMessage(message, attachments)).then(function(response) {
+                $log.debug('Message has been sent');
+                defer.resolve(response);
+              }, function(err) {
+                defer.reject(err);
+                $log.error('Error while sending message', err);
+              });
+            };
+            backgroundProcessorService.add(uploadService.await(done));
+            return defer.promise;
+          }
+        }
+
+        return {
+          sendMessageWithAttachments: sendMessageWithAttachments,
+          sendMessage: sendMessage,
+          sendUserTyping: sendUserTyping
+        };
+      }
+    };
+  })
+
   .factory('ChatMessageAdapter', function($q, userAPI) {
 
     var cache = {};

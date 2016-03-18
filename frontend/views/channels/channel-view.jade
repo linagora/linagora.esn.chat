@@ -31,6 +31,6 @@
             li
               a(href='')
                 i.mdi.mdi-information-outline
-        .lv-body
+        .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true")
           chat-message(ng-repeat="message in messages | filter:{ channel: channel._id } | orderBy: ['timestamps.creation'] track by $index", message="message")
         chat-footer

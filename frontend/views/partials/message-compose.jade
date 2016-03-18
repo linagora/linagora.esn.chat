@@ -1,4 +1,6 @@
 .lv-footer.ms-reply
-  textarea(auto-size, placeholder="What's in your mind...", ng-model='text', ng-change='onTextChanged()')
+  button.send-button-left(type='file', ng-file-select='onFileSelect($files)', data-multiple='true')
+    i.mdi.mdi-plus
+  textarea(auto-size, ng-model='text', ng-change='onTextChanged()')
   button.send-button(ng-click='sendMessage()')
     i.mdi.mdi-send

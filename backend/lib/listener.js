@@ -62,12 +62,16 @@ module.exports = function(dependencies) {
         creator: data.message.user,
         channel: data.message.channel
       });
+
+      if (data.message.attachments) {
+        chatMessage.attachments = data.message.attachments;
+      }
       chatMessage.save(function(err, result) {
         if (err) {
           logger.error('Can not save ChatMessage', err);
         }
         logger.debug('Chat Message saved', result);
-      })
+      });
     }
 
     localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {

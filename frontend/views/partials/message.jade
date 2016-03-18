@@ -8,3 +8,5 @@
       .chat-message-text(ng-bind-html="message.text | linky:'_blank'")
       .oembeds
         oembeds(message="message.text")
+      .lv-footer.attachments(ng-if="message.attachments.length > 0")
+        message-attachment(ng-repeat="attachment in message.attachments", attachment="::attachment")

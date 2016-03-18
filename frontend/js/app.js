@@ -14,7 +14,9 @@ angular.module('linagora.esn.chat', [
   'esn.lodash-wrapper',
   'esn.oembed',
   'angular-web-notification',
-  'esn.localstorage'
+  'esn.localstorage',
+  'esn.file',
+  'angularFileUpload'
 ])
   .config(function($stateProvider, routeResolver) {
     $stateProvider

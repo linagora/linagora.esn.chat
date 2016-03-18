@@ -123,12 +123,13 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, deviceDetector, chatScrollDown) {
+  .directive('chatMessageCompose', function($log, deviceDetector, chatScrollDown, ChatMessageSender) {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/partials/message-compose.html',
       link: function(scope, element) {
 
+        var sender = ChatMessageSender.get(scope.chatService);
         var timer = null;
 
         scope.typing = false;
@@ -136,7 +137,6 @@ angular.module('linagora.esn.chat')
 
         function sendUserTyping(state) {
           var message = {
-            //id: 1,
             type: 'user_typing',
             state: state,
             user: scope.user._id,
@@ -144,12 +144,13 @@ angular.module('linagora.esn.chat')
             date: Date.now()
           };
 
-          scope.chatService.sendMessage(message).then(function(result) {
+          sender.sendMessage(message).then(function(result) {
             $log.debug('Message ACK', result);
           }, function(err) {
             $log.error('Error while sending message', err);
           });
         }
+
         element.on('keydown', function(event) {
           if (!deviceDetector.isMobile() && event.keyCode === 13) {
             if (!event.shiftKey) {
@@ -171,20 +172,23 @@ angular.module('linagora.esn.chat')
           }, 2000);
         };
 
-        scope.sendMessage = function() {
-          if (!scope.text) {
-            return;
-          }
-
-          var message = {
-            //id: 1,
+        function buildCurrentMessage() {
+          return {
             type: 'text',
             text: scope.text,
             user: scope.user._id,
             channel: scope.channel._id,
             date: Date.now()
           };
+        }
 
+        scope.sendMessage = function() {
+          if (!scope.text) {
+            $log.debug('Can not send message');
+            return;
+          }
+
+          var message = buildCurrentMessage();
           scope.newMessage(message);
           scope.text = '';
 
@@ -192,10 +196,20 @@ angular.module('linagora.esn.chat')
           $('textarea')[0].style.height = '56px';
           chatScrollDown();
 
-          scope.chatService.sendMessage(message).then(function(result) {
+          sender.sendMessage(message).then(function(result) {
             $log.debug('Message ACK', result);
           }, function(err) {
             $log.error('Error while sending message', err);
+          });
+        };
+
+        scope.onFileSelect = function(files) {
+          $log.debug('Sending message with attachments', files);
+          sender.sendMessageWithAttachments(buildCurrentMessage(), files).then(function(response) {
+            scope.newMessage(response);
+            scope.text = '';
+          }, function(err) {
+            $log.error('Error while uploading message', err);
           });
         };
       }
