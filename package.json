@@ -24,7 +24,8 @@
     "karma-spec-reporter": "0.0.22",
     "mocha": "2.3.3",
     "mockery": "1.4.0",
-    "phantomjs": "1.9.18"
+    "phantomjs": "1.9.18",
+    "sinon": "^1.17.3"
   },
   "scripts": {
     "test": "grunt test",
@@ -41,6 +42,7 @@
     "bower": "1.7.0",
     "express": "4.13.3",
     "i18n": "~0.4.1",
+    "mongoose": "3.8.23",
     "q": "1.4.1",
     "request": "2.69.0"
   }
