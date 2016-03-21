@@ -4,7 +4,7 @@ var mockery = require('mockery');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 
-describe.only('The linagora.esn.chat channel lib', function() {
+describe('The linagora.esn.chat channel lib', function() {
 
   describe('The getChannels function', function() {
 
@@ -84,7 +84,6 @@ describe.only('The linagora.esn.chat channel lib', function() {
     });
   });
 
-
   describe('The getMessages function', function() {
 
     it('should call ChatMessage.find', function(done) {
@@ -116,7 +115,7 @@ describe.only('The linagora.esn.chat channel lib', function() {
                   expect(sortMock).to.have.been.calledWith('-timestamps.creation');
                   callback();
                 }
-              }
+              };
             }
           };
         }

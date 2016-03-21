@@ -2,7 +2,6 @@
 
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.ObjectId;
-var uuid = require('node-uuid');
 
 var AttachmentSchema = new mongoose.Schema({
   _id: {type: ObjectId, required: true},

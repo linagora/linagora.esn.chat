@@ -59,7 +59,7 @@ describe('The linagora.esn.chat webserver controller', function() {
   });
 
   describe('The getChannels function', function() {
-    it('should send back HTTP 500 with error when error is sent back from lib', function (done) {
+    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       var err = new Error('failed');
       var lib = {
         channel: {
@@ -117,7 +117,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       var purpose = 'MyPurpose';
       var lib = {
         channel: {
-          createChannel: function(options, callback) {
+          createChannel: function(options) {
             expect(options).to.deep.equal({
               name: name,
               type: 'channel',
@@ -146,7 +146,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
 
-    it('should send back HTTP 500 with error when channel can not be created', function (done) {
+    it('should send back HTTP 500 with error when channel can not be created', function(done) {
       var err = new Error('failed');
       var lib = {
         channel: {
@@ -155,7 +155,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           }
         }
       };
-      var req = {body: {}}
+      var req = {body: {}};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.createChannel(req, {
         status: function(code) {
@@ -179,7 +179,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           }
         }
       };
-      var req = {body: {}}
+      var req = {body: {}};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.createChannel(req, {
         status: function(code) {
@@ -194,5 +194,4 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
   });
-
-  });
+});

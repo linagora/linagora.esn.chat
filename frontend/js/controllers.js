@@ -18,7 +18,7 @@ angular.module('linagora.esn.chat')
     });
   })
 
-  .controller('chatController', function($log, $window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, ChatScrollDown, _, headerService, webNotification) {
+  .controller('chatController', function($log, $window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, ChatScroll, _, headerService, webNotification) {
 
     $scope.user = session.user;
 
@@ -28,7 +28,7 @@ angular.module('linagora.esn.chat')
       conversation && (conversation.isNotRead = false);
       ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
         $scope.messages = result;
-        ChatScrollDown();
+        ChatScroll.scrollDown();
       });
     });
 
@@ -51,13 +51,13 @@ angular.module('linagora.esn.chat')
         });
       }
 
-      if(message.channel !== $scope.channel._id) {
+      if (message.channel !== $scope.channel._id) {
         _.find($scope.channels, {_id: message.channel}).isNotRead = true;
       }
 
       ChatMessageAdapter.fromAPI(message).then(function(message) {
         $scope.messages.push(message);
-        ChatScrollDown();
+        ChatScroll.scrollDown();
       });
     };
 

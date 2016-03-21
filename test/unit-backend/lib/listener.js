@@ -43,7 +43,7 @@ describe('The linagora.esn.chat lib listener module', function() {
               subscribe: function(cb) {
                 listener = cb;
               }
-            }
+            };
           }
         }
       };
@@ -92,7 +92,7 @@ describe('The linagora.esn.chat lib listener module', function() {
               subscribe: function(cb) {
                 listener = cb;
               }
-            }
+            };
           }
         }
       };

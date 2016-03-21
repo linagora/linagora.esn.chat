@@ -76,7 +76,7 @@ angular.module('linagora.esn.chat')
           localStorageService.getOrCreateInstance('linagora.esn.chat').setItem('isNotificationEnabled', newState.toString()).then(function() {
             scope.isNotificationEnabled = newState;
           });
-        }
+        };
       }
     };
   })
@@ -122,7 +122,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, deviceDetector, ChatScrollDown, ChatMessageSender) {
+  .directive('chatMessageCompose', function($log, deviceDetector, ChatScroll, ChatMessageSender) {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/messages/message-compose.html',
@@ -193,7 +193,7 @@ angular.module('linagora.esn.chat')
 
           // hack to reset autoSize
           $('textarea')[0].style.height = '56px';
-          ChatScrollDown();
+          ChatScroll.scrollDown();
 
           sender.sendMessage(message).then(function(result) {
             $log.debug('Message ACK', result);

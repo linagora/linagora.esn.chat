@@ -16,7 +16,7 @@ angular.module('linagora.esn.chat')
 
         function buildMessage(message, attachments) {
           if (attachments) {
-            var attachmentsModel = attachments.map(function (attachment) {
+            var attachmentsModel = attachments.map(function(attachment) {
               var type = attachment.file.type;
               if (!type || type.length === 0) {
                 type = DEFAULT_FILE_TYPE;
@@ -56,7 +56,7 @@ angular.module('linagora.esn.chat')
             return sendMessage(buildMessage(message, attachments)).then(function(response) {
               $log.info('Message has been sent');
               return response;
-            }, function (err) {
+            }, function(err) {
               $log.error('Message has not been sent', err);
             });
           } else {
@@ -181,9 +181,14 @@ angular.module('linagora.esn.chat')
 
   })
 
-  .factory('ChatScrollDown', function($timeout, elementScrollService) {
-    return function() {
+  .factory('ChatScroll', function($timeout, elementScrollService) {
+
+    function scrollDown() {
       elementScrollService.autoScrollDown($('.ms-body .lv-body'));
+    }
+
+    return {
+      scrollDown: scrollDown
     };
   })
 
