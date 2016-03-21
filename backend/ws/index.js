@@ -7,7 +7,6 @@ var chatNamespace;
 
 function init(dependencies) {
   var logger = dependencies('logger');
-  var globalPubsub = dependencies('pubsub').global;
   var localPubsub = dependencies('pubsub').local;
   var io = dependencies('wsserver').io;
   var helper = dependencies('wsserver').ioHelper;
@@ -20,10 +19,6 @@ function init(dependencies) {
     logger.warn('The chat notification service is already initialized');
     return;
   }
-
-  globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
-    sendMessage(data.room, data.message);
-  });
 
   chatNamespace = io.of(NAMESPACE);
 

@@ -20,11 +20,12 @@ function createChannel(options, callback) {
 }
 module.exports.createChannel = createChannel;
 
-function addMessage(channel, message, callback) {
-  return callback();
-}
-module.exports.addMessage = addMessage;
+function createMessage(message, callback) {
+  var chatMessage = new ChatMessage(message);
+  return chatMessage.save(callback);
 
+}
+module.exports.createMessage = createMessage;
 function getMessages(channel, query, callback) {
   query = query || {};
   var channelId = channel._id || channel;
