@@ -8,12 +8,12 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The getChannels function', function() {
 
-    it('should call Channel.find', function(done) {
+    it('should call ChatChannel.find', function(done) {
       mockery.registerMock('mongoose', {
         model: function(type) {
           return {
             find: function(cb) {
-              expect(type).to.equal('Channel');
+              expect(type).to.equal('ChatChannel');
               cb();
             }
           };
@@ -25,13 +25,13 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The getChannel function', function() {
 
-    it('should call Channel.findById', function(done) {
+    it('should call ChatChannel.findById', function(done) {
       var channel = 1;
       mockery.registerMock('mongoose', {
         model: function(type) {
           return {
             findById: function(channel, cb) {
-              expect(type).to.equal('Channel');
+              expect(type).to.equal('ChatChannel');
               expect(channel).to.equal(channel);
               cb();
             }
@@ -44,18 +44,18 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The createChannel function', function() {
 
-    it('should call Channel.save', function(done) {
+    it('should call ChatChannel.save', function(done) {
       var options = {id: 1};
-      function Channel(opts) {
+      function ChatChannel(opts) {
         expect(opts).to.deep.equal(options);
       }
-      Channel.prototype.save = function(cb) {
+      ChatChannel.prototype.save = function(cb) {
         cb();
       };
 
       mockery.registerMock('mongoose', {
         model: function() {
-          return Channel;
+          return ChatChannel;
         }
       });
       require('../../../backend/lib/channel').createChannel(options, done);

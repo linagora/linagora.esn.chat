@@ -31,4 +31,4 @@ var ChannelSchema = new mongoose.Schema({
   schemaVersion: {type: Number, default: 1}
 });
 
-module.exports = mongoose.model('Channel', ChannelSchema);
+module.exports = mongoose.model('ChatChannel', ChannelSchema);

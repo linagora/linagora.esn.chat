@@ -1,7 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var Channel = mongoose.model('Channel');
+var Channel = mongoose.model('ChatChannel');
 var ChatMessage = mongoose.model('ChatMessage');
 
 function getChannels(options, callback) {
