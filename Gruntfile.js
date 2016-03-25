@@ -75,6 +75,7 @@ module.exports = function(grunt) {
   grunt.registerTask('linters', 'Check code for lint', ['jshint:all', 'jscs:all', 'lint_pattern']);
   grunt.registerTask('test-unit-backend', 'Test backend code', ['mochacli:backend']);
   grunt.registerTask('test-unit-frontend', 'Test frontend code', ['karma:unit']);
-  grunt.registerTask('test', ['linters', 'test-unit-frontend', 'test-unit-backend']);
+  grunt.registerTask('test', ['linters', 'test-unit-backend']);
+  grunt.registerTask('test-all', ['linters', 'test-unit-frontend', 'test-unit-backend']);
   grunt.registerTask('default', ['test']);
 };

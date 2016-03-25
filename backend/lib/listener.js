@@ -7,8 +7,7 @@ module.exports = function(dependencies) {
   var localPubsub = dependencies('pubsub').local;
   var logger = dependencies('logger');
 
-  function start() {
-    var channel = require('./channel');
+  function start(channel) {
 
     function saveAsChatMessage(data) {
       var chatMessage = {

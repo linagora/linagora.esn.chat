@@ -1,7 +1,6 @@
 'use strict';
 
 var expect = require('chai').expect;
-var mockery = require('mockery');
 
 describe('The linagora.esn.chat lib listener module', function() {
 
@@ -30,11 +29,11 @@ describe('The linagora.esn.chat lib listener module', function() {
         }
       };
 
-      mockery.registerMock('./channel', {
+      var channel = {
         createMessage: function() {
           return done(new Error());
         }
-      });
+      };
 
       deps.pubsub = {
         local: {
@@ -49,7 +48,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       };
 
       var module = require('../../../backend/lib/listener')(dependencies);
-      module.start();
+      module.start(channel);
 
       listener(data);
       done();
@@ -72,7 +71,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         }
       };
 
-      mockery.registerMock('./channel', {
+      var channelMock = {
         createMessage: function(msg) {
           expect(msg).to.deep.equals({
             type: type,
@@ -83,7 +82,7 @@ describe('The linagora.esn.chat lib listener module', function() {
           });
           done();
         }
-      });
+      };
 
       deps.pubsub = {
         local: {
@@ -98,7 +97,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       };
 
       var module = require('../../../backend/lib/listener')(dependencies);
-      module.start();
+      module.start(channelMock);
 
       listener(data);
     });
