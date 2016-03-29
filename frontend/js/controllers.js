@@ -32,14 +32,15 @@ angular.module('linagora.esn.chat')
       });
     });
 
-    $scope.newMessage = function(message) {
-      var conversation = _.find($scope.channels, {_id: message.channel});
+    $scope.notifyNewMessage = function(message) {
+      var channel = _.find($scope.channels, {_id: message.channel});
+
       function canSendNotification() {
-        return !$window.document.hasFocus() && !conversation.isNotRead && $scope.isNotificationEnabled && message.user !== $scope.user._id;
+        return !$window.document.hasFocus() && !channel.isNotRead && $scope.isNotificationEnabled && message.user !== $scope.user._id;
       }
 
       if (canSendNotification()) {
-        var channelName = conversation.name || 'OpenPaas Chat';
+        var channelName = channel.name || 'OpenPaas Chat';
         webNotification.showNotification('New message in ' + channelName, {
           body: message.text,
           icon: '/images/facebook-messenger.png',
@@ -50,6 +51,10 @@ angular.module('linagora.esn.chat')
           }
         });
       }
+    };
+
+    $scope.newMessage = function(message) {
+      $scope.notifyNewMessage(message);
 
       if (message.channel !== $scope.channel._id) {
         _.find($scope.channels, {_id: message.channel}).isNotRead = true;

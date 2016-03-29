@@ -18,8 +18,12 @@ module.exports = function(config) {
       'frontend/components/sinon-1.15.4/index.js',
       'frontend/components/moment/moment.js',
       'frontend/components/angular-moment/angular-moment.js',
+      'frontend/components/angular-web-notification/angular-web-notification.js',
+      'frontend/components/HTML5-Desktop-Notifications2/desktop-notify.js',
+      'frontend/components/angular-file-upload/dist/angular-file-upload-all.js',
+      'test/unit-frontend/module.js',
       'frontend/js/**/*.js',
-      'test/unit-frontend/**/*.js',
+      'test/unit-frontend/js/*.js',
       'frontend/views/**/*.jade'
     ],
     frameworks: ['mocha'],
@@ -47,7 +51,7 @@ module.exports = function(config) {
 
     ngJade2ModulePreprocessor: {
       stripPrefix: 'frontend',
-      prependPrefix: '/linagora.esn.gsafe',
+      prependPrefix: '/linagora.esn.chat',
       // setting this option will create only a single module that contains templates
       // from all the files, so you can load them all with module('templates')
       jadeRenderConfig: {
