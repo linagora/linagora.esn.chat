@@ -1,0 +1,53 @@
+.conversation-footer {
+
+  border-radius: 4px;
+  margin: 20px 20px 0 20px;
+  color: @secondaryTextColor;
+
+  .ms-reply {
+    box-shadow: none;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    background: @lightenBgColor;
+  }
+
+  .lv-footer {
+    .flex-start;
+
+    padding: 0;
+
+    textarea {
+      .flex-grow;
+
+      margin-left: 60px;
+      margin-right: 60px;
+
+      padding: 8px;
+      color: @text-color;
+      line-height: 20px;
+      max-height: 130px;
+      overflow: auto;
+      background: transparent;
+    }
+    .send-button {
+      .visible-xs;
+      background: transparent;
+    }
+
+    .send-button-left {
+      left: 0;
+      background: transparent;
+      border-right: 2px solid rgba(0, 0, 0, 0.1);
+    }
+  }
+
+
+  .chat-message-typing {
+    height: 20px;
+    margin: 4px 0 0 8px;
+    color:  lighten(@secondaryTextColor, 20%);
+  }
+
+}
+
+

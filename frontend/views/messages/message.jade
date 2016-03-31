@@ -1,0 +1,12 @@
+.lv-item.media.chat-message
+    .lv-avatar.pull-left
+      img(ng-src='/api/users/{{::message.user._id}}/profile/avatar', alt='')
+    .media-body
+      .chat-message-title
+        user-profile-link.displayname(user="message.user")
+        small.date {{::message.date | amDateFormat:'h:mm A'}}
+      .chat-message-text(ng-bind-html="message.text | linky:'_blank'")
+      .oembeds
+        oembeds(message="message.text")
+      .lv-footer.attachments(ng-if="message.attachments.length > 0")
+        message-attachment(ng-repeat="attachment in message.attachments", attachment="::attachment")

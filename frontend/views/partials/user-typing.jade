@@ -1,0 +1,4 @@
+div.chat-message-typing
+  span(ng-if="usersTyping.length === 1") {{usersTyping[0]}} is typing
+  span(ng-if="usersTyping.length === 2") {{usersTyping[0]}} and {{usersTyping[1]}} are typing
+  span(ng-if="usersTyping.length > 2") several users are typing

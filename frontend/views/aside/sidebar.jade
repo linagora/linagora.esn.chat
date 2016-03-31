@@ -1,0 +1,14 @@
+.esn-aside.esn-aside-desktop-menu(data-ng-class="{ 'toggled': mactrl.lvMenuStat }")
+  ul.nav.nav-pills.nav-stacked
+    .listview.p-t-5
+      .lv-body
+        .lv-item.clickable.menu-heading
+          .title(ui-sref='chat.channels-views')
+            i.menu-icon.mdi.mdi-facebook-messenger
+            .text #{__('Let\'s chat')}
+          .add-folder(ng-click='toggleNotification()')
+            i.menu-icon.mdi(ng-class="isNotificationEnabled? 'mdi-bell-outline': 'mdi-bell-off'")
+          .add-folder(ui-sref='chat.channels-add')
+            i.menu-icon.mdi.mdi-plus
+
+        chat-channel-item(ng-repeat="item in channels" item="item")

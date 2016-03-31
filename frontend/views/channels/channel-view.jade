@@ -1,0 +1,36 @@
+#messages-main
+  .block-header.visible-md
+    h2 \#{{::channel.name}}
+    ul.actions
+      li
+        a(href='')
+          i.mdi.mdi-account-multiple-plus
+      li
+        a(href='')
+          i.mdi.mdi-message-outline
+      li
+        a(href='')
+          i.mdi.mdi-dots-vertical
+  .card
+    .ms-body
+      .listview.lv-message
+        .lv-header.message-header
+          .lvh-label
+            a(href='') 5 members
+            span.divider |
+            span(ng-if="!channel.topic.value")
+              a(href='')
+                | Add a topic
+                i.mdi.mdi-plus
+            span(ng-if="channel.topic.value")
+              | {{::channel.topic.value}}
+              a(href='')
+                | Edit
+                i.mdi.mdi-pencil
+          ul.lv-actions.actions
+            li
+              a(href='')
+                i.mdi.mdi-information-outline
+        .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true")
+          chat-message(ng-repeat="message in messages | filter:{ channel: channel._id } | orderBy: ['timestamps.creation'] track by $index", message="message")
+        chat-footer

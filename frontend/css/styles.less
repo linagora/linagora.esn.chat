@@ -1,0 +1,46 @@
+@import '@{components}/material-admin/less/inc/chat';
+@import '@{components}/material-admin/less/inc/messages';
+@import './partial/aside.less';
+@import './partial/footer.less';
+@import './partial/channel-add.less';
+@import './partial/channel-view.less';
+@import './partial/header.less';
+
+.lv-message .lv-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.chat-message {
+  .lv-avatar > img {
+    border-radius: 2px;
+  }
+
+  .chat-message-title {
+
+    a {
+      color: @text-color;
+    }
+
+    .displayname {
+      font-weight: 600;
+    }
+
+    .date {
+      color: #B3B3B3;
+      padding-left: 10px;
+      display: inline;
+    }
+  }
+
+  .chat-message-text {
+    white-space: pre-wrap;
+  }
+}
+
+
+@media (min-width: @screen-sm-min) {
+  #messages-main .ms-body {
+    padding-left: 0;
+  }
+}

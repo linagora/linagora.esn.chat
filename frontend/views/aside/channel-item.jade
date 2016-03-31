@@ -1,0 +1,7 @@
+.lv-item.clickable(title="{{::item.name}}", ui-sref='chat.channels-views({id: item._id})', ui-sref-active="selected", ng-class="{notread: item.isNotRead}")
+  .badge-container
+    i.item-icon.mdi(ng-class="item.type === 'channel' ? 'mdi-pound' : 'mdi-checkbox-blank-circle'")
+  .item-name
+    span.item-name-inner
+      bdi {{::item.name}}
+    span.item-name-after
