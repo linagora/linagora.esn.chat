@@ -17,9 +17,17 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.getChannels);
 
+  router.get('/channels/:id',
+    authorizationMW.requiresAPILogin,
+    controller.getChannel);
+
   router.post('/channels',
     authorizationMW.requiresAPILogin,
     controller.createChannel);
+
+  router.delete('/channels/:id',
+    authorizationMW.requiresAPILogin,
+    controller.deleteChannel);
 
   return router;
 };

@@ -14,6 +14,10 @@ module.exports = function(dependencies) {
     Channel.findById(channel, callback);
   }
 
+  function deleteChannel(channel, callback) {
+    Channel.findByIdAndRemove(channel, callback);
+  }
+
   function createChannel(options, callback) {
     var channel = new Channel(options);
     channel.save(callback);
@@ -41,7 +45,8 @@ module.exports = function(dependencies) {
     createMessage: createMessage,
     createChannel: createChannel,
     getChannel: getChannel,
-    getChannels: getChannels
+    getChannels: getChannels,
+    deleteChannel: deleteChannel
   };
 
 };
