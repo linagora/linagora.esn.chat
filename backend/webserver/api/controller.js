@@ -30,6 +30,26 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function getChannel(req, res) {
+    lib.channel.getChannel(req.params.id, function(err, result) {
+      if (err) {
+        logger.error('Error while getting the channel', err);
+        return res.status(500).json({error: {status: 500}});
+      }
+      res.status(200).json(result);
+    });
+  }
+
+  function deleteChannel(req, res) {
+    lib.channel.deleteChannel(req.params.id, function(err, result) {
+      if (err) {
+        logger.error('Error while deleting the channel', err);
+        return res.status(500).json({error: {status: 500}});
+      }
+      res.status(200).json(result);
+    });
+  }
+
   function createChannel(req, res) {
 
     var channel = {
@@ -58,6 +78,8 @@ module.exports = function(dependencies, lib) {
   return {
     getMessages: getMessages,
     getChannels: getChannels,
+    getChannel: getChannel,
+    deleteChannel: deleteChannel,
     createChannel: createChannel
   };
 
