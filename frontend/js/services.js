@@ -145,7 +145,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .service('ChatService', function($q, $log, $rootScope) {
+  .factory('ChatService', function($q, $log, $rootScope) {
 
     function ChatService(options) {
       this.options = options;
@@ -192,7 +192,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .service('ChatWSTransport', function($rootScope, $log, $q, livenotification) {
+  .factory('ChatWSTransport', function($rootScope, $log, $q, livenotification) {
 
     function ChatWSTransport(options) {
       this.options = options;
