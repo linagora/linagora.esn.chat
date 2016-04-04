@@ -1,12 +1,10 @@
 'use strict';
 
-/* global chai: false */
-/* global sinon: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
 describe('The linagora.esn.chat module controllers', function() {
-
   var $state,
     $q,
     windowMock,
@@ -16,7 +14,16 @@ describe('The linagora.esn.chat module controllers', function() {
     $rootScope,
     $controller,
     ChatConversationService = {},
-    localStorageService = {};
+    localStorageService = {
+      getOrCreateInstance: sinon.stub().returns({
+        getItem: sinon.spy(function(key) {
+          return $q.when(({
+            isNotificationEnabled: true
+          })[key]);
+        })
+      })
+    },
+    routeResolver;
 
   beforeEach(function() {
     $state = {
@@ -27,6 +34,10 @@ describe('The linagora.esn.chat module controllers', function() {
     };
     $stateParams = {
       emailId: '4'
+    };
+
+    routeResolver = {
+      session: angular.noop
     };
 
     module('linagora.esn.chat', function($provide) {
@@ -63,12 +74,15 @@ describe('The linagora.esn.chat module controllers', function() {
     }
 
     it('should retrieve user channels', function() {
-      var channels = [1, 2, 3];
+      var channels = {
+        data: [1, 2, 3]
+      };
       ChatConversationService.getChannels = function() {
-        return $q(channels);
+        return $q.when(channels);
       };
       initCtrl();
-      expect(scope.channels).to.deep.equal(channels);
+      $rootScope.$digest();
+      expect(scope.channels).to.deep.equal(channels.data);
     });
 
     it('should set the isNotificationEnabled value from user preferences', function() {

@@ -1,6 +1,7 @@
 'use strict';
 
 angular.module('linagora.esn.chat', [
+  'esn.core',
   'esn.router',
   'restangular',
   'esn.search',
@@ -16,6 +17,7 @@ angular.module('linagora.esn.chat', [
   'angular-web-notification',
   'esn.localstorage',
   'esn.file',
+  'ui.router',
   'angularFileUpload'
 ])
   .config(function($stateProvider, routeResolver) {
