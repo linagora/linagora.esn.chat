@@ -11,3 +11,18 @@ angular.module('esn.oembed', []);
 angular.module('esn.localstorage', []);
 angular.module('esn.file', []);
 angular.module('esn.lodash-wrapper', []);
+angular.module('esn.core', [])
+.constant('routeResolver', {
+  session: function(key) {
+    return ['$q', function($q) {
+      var session = {
+        user: {
+          _id: 'id'
+        },
+        domain: 'domain'
+      };
+
+      return $q.when(session[key]);
+    }];
+  }
+});
