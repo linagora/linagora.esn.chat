@@ -1,14 +1,19 @@
 'use strict';
 
-module.exports = function(dependencies, lib) {
+var _ = require('lodash');
 
-  var logger = dependencies('logger');
+module.exports = function(dependencies, lib) {
 
   function getMessages(req, res) {
     lib.channel.getMessages(req.params.channel, {}, function(err, results) {
       if (err) {
-        logger.error('Error while getting messages', err);
-        return res.status(500).json({error: {status: 500}});
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting messages'
+          }
+        });
       }
 
       results = results.map(function(message) {
@@ -23,8 +28,13 @@ module.exports = function(dependencies, lib) {
   function getChannels(req, res) {
     lib.channel.getChannels({}, function(err, result) {
       if (err) {
-        logger.error('Error while getting channels', err);
-        return res.status(500).json({error: {status: 500}});
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting channels'
+          }
+        });
       }
       res.status(200).json(result);
     });
@@ -33,8 +43,13 @@ module.exports = function(dependencies, lib) {
   function getChannel(req, res) {
     lib.channel.getChannel(req.params.id, function(err, result) {
       if (err) {
-        logger.error('Error while getting the channel', err);
-        return res.status(500).json({error: {status: 500}});
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting channel'
+          }
+        });
       }
       res.status(200).json(result);
     });
@@ -43,23 +58,36 @@ module.exports = function(dependencies, lib) {
   function deleteChannel(req, res) {
     lib.channel.deleteChannel(req.params.id, function(err, result) {
       if (err) {
-        logger.error('Error while deleting the channel', err);
-        return res.status(500).json({error: {status: 500}});
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while deleting channel'
+          }
+        });
       }
       res.status(200).json(result);
     });
   }
 
   function createChannel(req, res) {
+    var members;
+
+    members = req.body.members || [];
+
+    if (members.indexOf(String(req.user._id)) === -1) {
+      members.push(String(req.user._id));
+    }
 
     var channel = {
       name: req.body.name,
-      type: 'channel',
+      type: req.body.type,
       creator: req.user,
       topic: {
         value: req.body.topic,
         creator: req.user
       },
+      members: members,
       purpose: {
         value: req.body.purpose,
         creator: req.user
@@ -68,10 +96,91 @@ module.exports = function(dependencies, lib) {
 
     lib.channel.createChannel(channel, function(err, result) {
       if (err) {
-        logger.error('Error while creating channel', err);
-        return res.status(500).json({error: {status: 500}});
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while creating channel'
+          }
+        });
       }
       res.status(201).json(result);
+    });
+  }
+
+  function joinChannel(req, res) {
+    lib.channel.addMemberToChannel(req.params.id, req.user._id, function(err) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while joining channel'
+          }
+        });
+      }
+      res.status(204).end();
+    });
+  }
+
+  function leaveChannel(req, res) {
+    lib.channel.removeMemberFromChannel(req.params.id, req.user._id, function(err) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while leaving channel'
+          }
+        });
+      }
+      res.status(204).end();
+    });
+  }
+
+  function findGroupByMembers(req, res) {
+    if (!req.query.members) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'members attribute is required'
+        }
+      });
+    }
+
+    var members = _.isArray(req.query.members) ? req.query.members : [req.query.members];
+
+    if (members.indexOf(String(req.user._id)) === -1) {
+      members.push(String(req.user._id));
+    }
+
+    lib.channel.findGroupByMembers(true, members, function(err, userGroups) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while finding groups with users' + members.join(', ')
+          }
+        });
+      }
+      res.status(200).json(userGroups);
+    });
+  }
+
+  function findMyUsersGroups(req, res) {
+    lib.channel.findGroupByMembers(false, [String(req.user._id)], function(err, usersGroups) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while finding groups of user ' + req.user._id
+          }
+        });
+      }
+      res.status(200).json(usersGroups);
     });
   }
 
@@ -79,8 +188,11 @@ module.exports = function(dependencies, lib) {
     getMessages: getMessages,
     getChannels: getChannels,
     getChannel: getChannel,
+    findGroupByMembers: findGroupByMembers,
+    findMyUsersGroups: findMyUsersGroups,
+    joinChannel: joinChannel,
+    leaveChannel: leaveChannel,
     deleteChannel: deleteChannel,
     createChannel: createChannel
   };
-
 };

@@ -9,9 +9,10 @@ module.exports = function(dependencies) {
 
   var ChannelSchema = new mongoose.Schema({
     name: {type: String},
-    type: {type: String, required: true},
+    type: {type: String, enum: ['channel', 'group'], required: true},
     creator: {type: ObjectId, ref: 'User'},
     isNotRead: {type: Boolean},
+    members: [{type: ObjectId, ref: 'User'}],
     topic: {
       value: {type: String},
       creator: {type: ObjectId, ref: 'User'},

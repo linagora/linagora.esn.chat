@@ -3,6 +3,7 @@
 module.exports = function(dependencies) {
 
   var mongoose = dependencies('db').mongo.mongoose;
+  var ObjectId = mongoose.Types.ObjectId;
   var Channel = mongoose.model('ChatChannel');
   var ChatMessage = mongoose.model('ChatMessage');
 
@@ -18,6 +19,23 @@ module.exports = function(dependencies) {
     Channel.findByIdAndRemove(channel, callback);
   }
 
+  function findGroupByMembers(exactMatch, members, callback) {
+    var request = {
+      type:  'group',
+      members: {
+        $all: members.map(function(participant) {
+          return new ObjectId(participant);
+        })
+      }
+    };
+
+    if (exactMatch) {
+      request.members.$size = members.length;
+    }
+
+    Channel.findOne(request, callback);
+  }
+
   function createChannel(options, callback) {
     var channel = new Channel(options);
     channel.save(callback);
@@ -26,6 +44,18 @@ module.exports = function(dependencies) {
   function createMessage(message, callback) {
     var chatMessage = new ChatMessage(message);
     return chatMessage.save(callback);
+  }
+
+  function addMemberToChannel(channelId, userId, callback) {
+    Channel.update({_id: channelId}, {
+      $addToSet: {members: new ObjectId(userId)}
+    }, callback);
+  }
+
+  function removeMemberFromChannel(channelId, userId, callback) {
+    Channel.update({_id: channelId}, {
+      $pull: {members: new ObjectId(userId)}
+    }, callback);
   }
 
   function getMessages(channel, query, callback) {
@@ -42,11 +72,13 @@ module.exports = function(dependencies) {
 
   return {
     getMessages: getMessages,
+    addMemberToChannel: addMemberToChannel,
+    removeMemberFromChannel: removeMemberFromChannel,
+    findGroupByMembers: findGroupByMembers,
     createMessage: createMessage,
     createChannel: createChannel,
     getChannel: getChannel,
     getChannels: getChannels,
     deleteChannel: deleteChannel
   };
-
 };
