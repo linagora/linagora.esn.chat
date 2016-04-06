@@ -89,12 +89,12 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The findGroupByMembers function', function() {
 
-    it('should call Channel.findOne with correct parameters when exactMatch', function(done) {
+    it('should call Channel.findwith correct parameters when exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      modelsMock.ChatChannel.findOne = function(options, cb) {
+      modelsMock.ChatChannel.find = function(options, cb) {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
@@ -113,12 +113,12 @@ describe('The linagora.esn.chat channel lib', function() {
       require('../../../backend/lib/channel')(dependencies).findGroupByMembers(true, members, done);
     });
 
-    it('should call Channel.findOne with correct parameters when not exactMatch', function(done) {
+    it('should call Channel.find with correct parameters when not exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      modelsMock.ChatChannel.findOne = function(options, cb) {
+      modelsMock.ChatChannel.find = function(options, cb) {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
