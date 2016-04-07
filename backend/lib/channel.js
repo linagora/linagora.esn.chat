@@ -33,7 +33,7 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Channel.findOne(request, callback);
+    Channel.find(request, callback);
   }
 
   function createChannel(options, callback) {
