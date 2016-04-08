@@ -5,10 +5,12 @@ var chai = require('chai');
 var expect = chai.expect;
 var _ = require('lodash');
 var Q = require('q');
+var redis = require('redis');
+var async = require('async');
 
 describe('The chat API', function() {
 
-  var deps, mongoose, userId, app;
+  var deps, mongoose, userId, app, redisClient;
 
   function dependencies(name) {
     return deps[name];
@@ -20,11 +22,18 @@ describe('The chat API', function() {
     mongoose = require('mongoose');
     mongoose.connect(this.testEnv.mongoUrl);
     userId = mongoose.Types.ObjectId();
+    redisClient = redis.createClient(this.testEnv.redisPort);
+
     deps = {
       logger: require('../fixtures/logger'),
       db: {
         mongo: {
           mongoose: mongoose
+        },
+        redis: {
+          getClient: function() {
+            return Q.when(redisClient);
+          }
         },
       },
       authorizationMW: {
@@ -48,7 +57,7 @@ describe('The chat API', function() {
   });
 
   afterEach(function(done) {
-    this.helpers.mongo.dropDatabase(done);
+    async.parallel([this.helpers.mongo.dropDatabase, this.helpers.resetRedis], done);
   });
 
   describe('GET /api/channels', function() {
@@ -331,7 +340,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('DELETE /api/channels', function(done) {
+  describe('DELETE /api/channels', function() {
     it('should delete a channel', function(done) {
       var channelId;
 
@@ -353,4 +362,5 @@ describe('The chat API', function() {
       }).catch(done);
     });
   });
+
 });

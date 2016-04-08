@@ -2,7 +2,6 @@
 
 var conf_path = './test/config/';
 var servers = require(conf_path + 'servers-conf');
-//var config = require('./config/default.json');
 var GruntfileUtils = require('./tasks/utils/Gruntfile-utils');
 
 module.exports = function(grunt) {
@@ -81,6 +80,7 @@ module.exports = function(grunt) {
     },
     shell: {
       mongo: shell.newShell(command.mongo(false), new RegExp('connections on port ' + servers.mongodb.port), 'MongoDB server is started.'),
+      redis: shell.newShell(command.redis, /on port/, 'Redis server is started')
     },
     run_grunt: {
       midway_backend: runGrunt.newProcess(['test-midway-backend']),
@@ -115,12 +115,12 @@ module.exports = function(grunt) {
 
   grunt.registerTask('linters', 'Check code for lint', ['jshint:all', 'jscs:all', 'lint_pattern:all']);
   grunt.registerTask('linters-dev', 'Check changed files for lint', ['prepare-quick-lint', 'jshint:quick', 'jscs:quick', 'lint_pattern:quick']);
-  grunt.registerTask('spawn-servers', 'spawn servers', ['shell:mongo']);
-  grunt.registerTask('kill-servers', 'kill servers', ['shell:mongo:kill']);
+  grunt.registerTask('spawn-servers', 'spawn servers', ['shell:mongo', 'shell:redis']);
+  grunt.registerTask('kill-servers', 'kill servers', ['shell:mongo:kill', 'shell:redis:kill']);
   grunt.registerTask('setup-environment', 'create temp folders and files for tests', gruntfileUtils.setupEnvironment());
   grunt.registerTask('clean-environment', 'remove temp folder for tests', gruntfileUtils.cleanEnvironment());
-  grunt.registerTask('setup-mongo', ['spawn-servers', 'continue:on']);
-  grunt.registerTask('test-midway-backend', ['setup-environment', 'setup-mongo', 'run_grunt:midway_backend', 'kill-servers', 'clean-environment']);
+  grunt.registerTask('setup-servers', ['spawn-servers', 'continue:on']);
+  grunt.registerTask('test-midway-backend', ['setup-environment', 'setup-servers', 'run_grunt:midway_backend', 'kill-servers', 'clean-environment']);
   grunt.registerTask('test-unit-backend', 'Test backend code', ['mochacli:backend']);
   grunt.registerTask('test-unit-frontend', 'Test frontend code', ['karma:unit']);
   grunt.registerTask('test', ['linters', 'test-unit-backend', 'test-midway-backend']);

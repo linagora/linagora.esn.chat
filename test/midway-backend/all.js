@@ -7,6 +7,7 @@ var fs = require('fs-extra');
 var testConfig = require('../config/servers-conf');
 var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient;
+var redis = require('redis');
 
 before(function() {
   chai.use(require('chai-shallow-deep-equal'));
@@ -15,12 +16,13 @@ before(function() {
   var basePath = path.resolve(__dirname + '/../..');
   var tmpPath = path.resolve(basePath, testConfig.tmp);
   var host = testConfig.host;
-  this.testEnv = {
+  var testEnv = this.testEnv = {
     serversConfig: testConfig,
     basePath: basePath,
     tmp: tmpPath,
     fixtures: path.resolve(__dirname + '/fixtures'),
     mongoUrl: 'mongodb://' + host + ':' + testConfig.mongodb.port + '/' + testConfig.mongodb.dbname,
+    redisPort: testConfig.redis.port,
     writeDBConfigFile: function() {
       fs.writeFileSync(tmpPath + '/db.json', JSON.stringify({connectionString: 'mongodb://' + host + ':' + testConfig.mongodb.port + '/' + testConfig.mongodb.dbname, connectionOptions: {auto_reconnect: false}}));
     },
@@ -50,6 +52,11 @@ before(function() {
       lib: lib,
       api: api
     };
+  };
+
+  this.helpers.resetRedis = function(callback) {
+    var redisClient = redis.createClient(testEnv.redisPort);
+    return redisClient.flushall(callback);
   };
 
   this.helpers.mongo = {
