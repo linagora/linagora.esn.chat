@@ -184,12 +184,54 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function getUserState(req, res) {
+    lib.userState.get(req.params.id).then(function(state) {
+      return res.status(200).json({
+        state: state
+      });
+    }).catch(function(err) {
+      res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: err.message || 'Error while fetching user state for user' + req.params.id
+        }
+      });
+    });
+  }
+
+  function setMyState(req, res) {
+    if (!req.body.state) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'You should provide the user state'
+        }
+      });
+    }
+
+    lib.userState.set(req.user._id, req.body.state).then(function() {
+      res.status(204).end();
+    }).catch(function(err) {
+      res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: err.message || 'Error while setting user state for user' + req.params.id
+        }
+      });
+    });
+  }
+
   return {
     getMessages: getMessages,
     getChannels: getChannels,
     getChannel: getChannel,
     findGroupByMembers: findGroupByMembers,
     findMyUsersGroups: findMyUsersGroups,
+    getUserState: getUserState,
+    setMyState: setMyState,
     joinChannel: joinChannel,
     leaveChannel: leaveChannel,
     deleteChannel: deleteChannel,

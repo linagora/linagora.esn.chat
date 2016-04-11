@@ -31,8 +31,8 @@ describe('The chat API', function() {
           mongoose: mongoose
         },
         redis: {
-          getClient: function() {
-            return Q.when(redisClient);
+          getClient: function(callback) {
+            callback(null, redisClient);
           }
         },
       },
@@ -152,7 +152,6 @@ describe('The chat API', function() {
         .expect(201)
         .end(function(err, res) {
           if (err) {
-            console.log(err);
             return done(err);
           }
 
@@ -360,6 +359,36 @@ describe('The chat API', function() {
         expect(channel).to.be.null;
         done();
       }).catch(done);
+    });
+  });
+
+  describe('GET /api/state', function() {
+    it('should return disconnect for user which state is unknow', function(done) {
+      request(app.express)
+        .get('/api/state/unknowId')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.deep.equals({state: 'disconnected'});
+          done();
+        });
+    });
+
+    it('should return state of requested user state wich is known', function(done) {
+      app.lib.userState.set('user', 'state').then(function() {
+        request(app.express)
+          .get('/api/state/user')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equals({state: 'state'});
+            done();
+          });
+      });
     });
   });
 
