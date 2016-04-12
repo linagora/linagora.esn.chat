@@ -7,6 +7,7 @@ var _ = require('lodash');
 var Q = require('q');
 var redis = require('redis');
 var async = require('async');
+var pubsub = require('linagora-rse/backend/core/pubsub');
 
 describe('The chat API', function() {
 
@@ -26,6 +27,7 @@ describe('The chat API', function() {
 
     deps = {
       logger: require('../fixtures/logger'),
+      pubsub: pubsub,
       db: {
         mongo: {
           mongoose: mongoose
@@ -44,13 +46,6 @@ describe('The chat API', function() {
           next();
         }
       },
-      pubsub: {
-        local: {
-          topic: _.constant({
-            subscribe: _.noop
-          })
-        }
-      }
     };
 
     app = this.helpers.loadApplication(dependencies);
@@ -165,8 +160,7 @@ describe('The chat API', function() {
             },
             members: [userId.toString()],
             purpose: {
-              value: 'purpose',
-              creator: userId.toString()
+              value: 'purpose', creator: userId.toString()
             }
           });
           done();
