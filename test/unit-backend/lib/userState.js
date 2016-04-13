@@ -4,10 +4,15 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var Q = require('q');
 var _ = require('lodash');
+var CONSTANTS = require('../../../backend/lib/constants');
 
 describe('The linagora.esn.chat userState lib', function() {
 
   var deps, clock, redisGet, redisSet, redisGetResult, connectionTopic, disconnectionTopic, userStateTopic;
+
+  var DISCONNECTED = CONSTANTS.STATUS.DISCONNECTED;
+
+  var DISCONNECTION_DELAY = CONSTANTS.STATUS.DISCONNECTION_DELAY;
 
   var dependencies = function(name) {
     return deps[name];
@@ -83,7 +88,7 @@ describe('The linagora.esn.chat userState lib', function() {
     it('should return disconnected if no state found in redis', function(done) {
       getUserState().get('key').then(function(data) {
         expect(redisGet).to.have.been.calledWith('userState:key');
-        expect(data).to.equal('disconnected');
+        expect(data).to.equal(DISCONNECTED);
         done();
       }).catch(done);
     });
@@ -104,7 +109,7 @@ describe('The linagora.esn.chat userState lib', function() {
 
     it('should return previous state if delay is not passed', function(done) {
       redisGetResult = {
-        delay: 10000,
+        delay: DISCONNECTION_DELAY,
         since: Date.now(),
         state: 'state',
         previousState: 'previousState'
@@ -208,7 +213,7 @@ describe('The linagora.esn.chat userState lib', function() {
         expect(redisGet).to.have.been.called;
         expect(redisSet).to.have.been.calledWith('userState:key', sinon.match({
           previousState: 'state',
-          state: 'disconnected'
+          state: DISCONNECTED
         }));
         done();
       }).catch(done);
@@ -216,7 +221,7 @@ describe('The linagora.esn.chat userState lib', function() {
 
     it('should not erase previous state when set disconnected to a already disconnected user', function(done) {
       redisGetResult = {
-        state: 'disconnected',
+        state: DISCONNECTED,
         previousState: 'previousState'
       };
 
@@ -224,7 +229,7 @@ describe('The linagora.esn.chat userState lib', function() {
         expect(redisGet).to.have.been.called;
         expect(redisSet).to.have.been.calledWith('userState:key', sinon.match({
           previousState: 'previousState',
-          state: 'disconnected'
+          state: DISCONNECTED
         }));
         done();
       }).catch(done);
@@ -250,7 +255,7 @@ describe('The linagora.esn.chat userState lib', function() {
       expect(disconnectionTopic.subscribe).to.have.been.calledWith(sinon.match(function(handler) {
         if (_.isFunction(handler)) {
           handler('key').then(function() {
-            expect(redisSet).to.have.been.calledWith('userState:key', sinon.match.has('delay', 10000));
+            expect(redisSet).to.have.been.calledWith('userState:key', sinon.match.has('delay', DISCONNECTION_DELAY));
             done();
           }).catch(done);
           return true;
@@ -351,7 +356,7 @@ describe('The linagora.esn.chat userState lib', function() {
     });
 
     testActionThatDisconnect(function(userId) {
-      return getUserState().set(userId, 'disconnected');
+      return getUserState().set(userId, DISCONNECTED);
     });
 
   });

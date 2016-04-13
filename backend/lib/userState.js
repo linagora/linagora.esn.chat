@@ -2,6 +2,7 @@
 
 var Q = require('q');
 var _ = require('lodash');
+var CONSTANTS = require('../lib/constants');
 
 module.exports = function(dependencies) {
 
@@ -16,10 +17,9 @@ module.exports = function(dependencies) {
   var userConnectionTopic = pubsubLocal.topic('user:connection');
   var userDisconnectionTopic = pubsubLocal.topic('user:disconnection');
 
-  var DISCONNECTED = 'disconnected';
+  var DISCONNECTED = CONSTANTS.STATUS.DISCONNECTED;
 
-  //in minisecond
-  var DISCONNECTION_DELAY = 10000;
+  var DISCONNECTION_DELAY = CONSTANTS.STATUS.DISCONNECTION_DELAY;
 
   var delayedStateChanges = {};
 
