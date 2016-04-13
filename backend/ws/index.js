@@ -7,7 +7,9 @@ var chatNamespace;
 
 function init(dependencies) {
   var logger = dependencies('logger');
-  var localPubsub = dependencies('pubsub').local;
+  var pubsub = dependencies('pubsub');
+  var localPubsub = pubsub.local;
+  var globalPubsub = pubsub.global;
   var io = dependencies('wsserver').io;
   var helper = dependencies('wsserver').ioHelper;
 
@@ -44,6 +46,10 @@ function init(dependencies) {
     });
 
     initialized = true;
+  });
+
+  globalPubsub.topic('user:state').subscribe(function(data) {
+    chatNamespace.emit('user:state', data);
   });
 }
 

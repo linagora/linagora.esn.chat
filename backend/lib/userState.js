@@ -98,10 +98,6 @@ module.exports = function(dependencies) {
 
   userDisconnectionTopic.subscribe(_.partialRight(set, 'disconnected', DISCONNECTION_DELAY));
 
-  userStateTopic.subscribe(function(data) {
-    console.log('___________________ Todo socket io this data', data);
-  });
-
   return {
     set: set,
     get: get,
