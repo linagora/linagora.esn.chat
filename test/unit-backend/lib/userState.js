@@ -12,6 +12,8 @@ describe('The linagora.esn.chat userState lib', function() {
 
   var DISCONNECTED = CONSTANTS.STATUS.DISCONNECTED;
 
+  var DEFAULT_CONNECTED_STATE = CONSTANTS.STATUS.DEFAULT_CONNECTED_STATE;
+
   var DISCONNECTION_DELAY = CONSTANTS.STATUS.DISCONNECTION_DELAY;
 
   var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
@@ -146,10 +148,12 @@ describe('The linagora.esn.chat userState lib', function() {
   });
 
   function testActionThatShouldRestorePreviousState(action) {
-    it('should not set anything if nothing store in redis', function(done) {
+    it('should set DEFAULT_CONNECTED_STATE if nothing store in redis', function(done) {
       action('key').then(function() {
         expect(redisGet).to.have.been.calledWith('userState:key');
-        expect(redisSet).to.have.not.been.calledWith('userState:key');
+        expect(redisSet).to.have.been.calledWith('userState:key', sinon.match({
+          state: DEFAULT_CONNECTED_STATE
+        }));
         done();
       }).catch(done);
     });
@@ -163,7 +167,9 @@ describe('The linagora.esn.chat userState lib', function() {
 
       action('key').then(function() {
         expect(redisGet).to.have.been.calledWith('userState:key');
-        expect(redisSet).to.have.not.been.calledWith('userState:key');
+        expect(redisSet).to.have.been.calledWith('userState:key', sinon.match({
+          state: DEFAULT_CONNECTED_STATE
+        }));
         done();
       }).catch(done);
     });

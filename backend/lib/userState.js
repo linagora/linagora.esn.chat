@@ -21,6 +21,7 @@ module.exports = function(dependencies) {
   var userDisconnectionTopic = pubsubLocal.topic(USER_DISCONNECTION);
 
   var DISCONNECTED = CONSTANTS.STATUS.DISCONNECTED;
+  var DEFAULT_CONNECTED_STATE = CONSTANTS.STATUS.DEFAULT_CONNECTED_STATE;
 
   var DISCONNECTION_DELAY = CONSTANTS.STATUS.DISCONNECTION_DELAY;
 
@@ -67,11 +68,7 @@ module.exports = function(dependencies) {
   function restorePreviousState(userId) {
     return redisPromise.then(function(redis) {
       return Q.ninvoke(redis, 'hgetall', USER_STATE_KEY_PREFIX + userId).then(function(data) {
-        if (!(data && data.previousState)) {
-          return;
-        }
-
-        return set(userId, data.previousState);
+        return set(userId, data && data.previousState || DEFAULT_CONNECTED_STATE);
       });
     });
   }
