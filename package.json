@@ -45,6 +45,8 @@
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "superagent": "^1.8.3",
+    "redis": "~0.10.2",
+    "linagora-rse": "git+https://ci.open-paas.org/stash/scm/or/rse.git#master",
     "supertest": "^1.2.0"
   },
   "scripts": {

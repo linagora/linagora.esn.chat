@@ -4,10 +4,13 @@ var CONSTANTS = require('../lib/constants');
 var initialized = false;
 var NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
 var chatNamespace;
+var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 
 function init(dependencies) {
   var logger = dependencies('logger');
-  var localPubsub = dependencies('pubsub').local;
+  var pubsub = dependencies('pubsub');
+  var localPubsub = pubsub.local;
+  var globalPubsub = pubsub.global;
   var io = dependencies('wsserver').io;
   var helper = dependencies('wsserver').ioHelper;
 
@@ -44,6 +47,10 @@ function init(dependencies) {
     });
 
     initialized = true;
+  });
+
+  globalPubsub.topic(USER_STATE).subscribe(function(data) {
+    chatNamespace.emit(USER_STATE, data);
   });
 }
 

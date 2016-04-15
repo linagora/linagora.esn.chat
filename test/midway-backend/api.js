@@ -5,10 +5,13 @@ var chai = require('chai');
 var expect = chai.expect;
 var _ = require('lodash');
 var Q = require('q');
+var redis = require('redis');
+var async = require('async');
+var pubsub = require('linagora-rse/backend/core/pubsub');
 
 describe('The chat API', function() {
 
-  var deps, mongoose, userId, app;
+  var deps, mongoose, userId, app, redisClient;
 
   function dependencies(name) {
     return deps[name];
@@ -20,11 +23,19 @@ describe('The chat API', function() {
     mongoose = require('mongoose');
     mongoose.connect(this.testEnv.mongoUrl);
     userId = mongoose.Types.ObjectId();
+    redisClient = redis.createClient(this.testEnv.redisPort);
+
     deps = {
       logger: require('../fixtures/logger'),
+      pubsub: pubsub,
       db: {
         mongo: {
           mongoose: mongoose
+        },
+        redis: {
+          getClient: function(callback) {
+            callback(null, redisClient);
+          }
         },
       },
       authorizationMW: {
@@ -35,20 +46,13 @@ describe('The chat API', function() {
           next();
         }
       },
-      pubsub: {
-        local: {
-          topic: _.constant({
-            subscribe: _.noop
-          })
-        }
-      }
     };
 
     app = this.helpers.loadApplication(dependencies);
   });
 
   afterEach(function(done) {
-    this.helpers.mongo.dropDatabase(done);
+    async.parallel([this.helpers.mongo.dropDatabase, this.helpers.resetRedis], done);
   });
 
   describe('GET /api/channels', function() {
@@ -143,7 +147,6 @@ describe('The chat API', function() {
         .expect(201)
         .end(function(err, res) {
           if (err) {
-            console.log(err);
             return done(err);
           }
 
@@ -157,8 +160,7 @@ describe('The chat API', function() {
             },
             members: [userId.toString()],
             purpose: {
-              value: 'purpose',
-              creator: userId.toString()
+              value: 'purpose', creator: userId.toString()
             }
           });
           done();
@@ -331,7 +333,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('DELETE /api/channels', function(done) {
+  describe('DELETE /api/channels', function() {
     it('should delete a channel', function(done) {
       var channelId;
 
@@ -353,4 +355,35 @@ describe('The chat API', function() {
       }).catch(done);
     });
   });
+
+  describe('GET /api/state', function() {
+    it('should return disconnect for user which state is unknow', function(done) {
+      request(app.express)
+        .get('/api/state/unknowId')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.deep.equals({state: 'disconnected'});
+          done();
+        });
+    });
+
+    it('should return state of requested user state wich is known', function(done) {
+      app.lib.userState.set('user', 'state').then(function() {
+        request(app.express)
+          .get('/api/state/user')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equals({state: 'state'});
+            done();
+          });
+      });
+    });
+  });
+
 });

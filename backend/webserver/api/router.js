@@ -37,6 +37,15 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.findMyUsersGroups);
 
+  router.get('/state/:id',
+    authorizationMW.requiresAPILogin,
+    authorizationMW.requiresAPILogin,
+    controller.getUserState);
+
+  router.put('/me/state',
+    authorizationMW.requiresAPILogin,
+    controller.setMyState);
+
   router.delete('/channels/:id/members',
     authorizationMW.requiresAPILogin,
     controller.leaveChannel);
