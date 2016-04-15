@@ -3,6 +3,9 @@
 var Q = require('q');
 var _ = require('lodash');
 var CONSTANTS = require('../lib/constants');
+var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
+var USER_CONNECTION = CONSTANTS.NOTIFICATIONS.USER_CONNECTION;
+var USER_DISCONNECTION = CONSTANTS.NOTIFICATIONS.USER_DISCONNECTION;
 
 module.exports = function(dependencies) {
 
@@ -13,9 +16,9 @@ module.exports = function(dependencies) {
   var pubsubLocal = dependencies('pubsub').local;
   var pubsubGlobal = dependencies('pubsub').global;
 
-  var userStateTopic = pubsubGlobal.topic('user:state');
-  var userConnectionTopic = pubsubLocal.topic('user:connection');
-  var userDisconnectionTopic = pubsubLocal.topic('user:disconnection');
+  var userStateTopic = pubsubGlobal.topic(USER_STATE);
+  var userConnectionTopic = pubsubLocal.topic(USER_CONNECTION);
+  var userDisconnectionTopic = pubsubLocal.topic(USER_DISCONNECTION);
 
   var DISCONNECTED = CONSTANTS.STATUS.DISCONNECTED;
 
@@ -96,7 +99,7 @@ module.exports = function(dependencies) {
 
   userConnectionTopic.subscribe(restorePreviousState);
 
-  userDisconnectionTopic.subscribe(_.partialRight(set, 'disconnected', DISCONNECTION_DELAY));
+  userDisconnectionTopic.subscribe(_.partialRight(set, DISCONNECTED, DISCONNECTION_DELAY));
 
   return {
     set: set,

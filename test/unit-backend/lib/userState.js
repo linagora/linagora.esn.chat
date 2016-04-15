@@ -14,6 +14,10 @@ describe('The linagora.esn.chat userState lib', function() {
 
   var DISCONNECTION_DELAY = CONSTANTS.STATUS.DISCONNECTION_DELAY;
 
+  var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
+  var USER_CONNECTION = CONSTANTS.NOTIFICATIONS.USER_CONNECTION;
+  var USER_DISCONNECTION = CONSTANTS.NOTIFICATIONS.USER_DISCONNECTION;
+
   var dependencies = function(name) {
     return deps[name];
   };
@@ -62,16 +66,16 @@ describe('The linagora.esn.chat userState lib', function() {
       pubsub: {
         local: {
           topic: function(name) {
-            if (name === 'user:connection') {
+            if (name === USER_CONNECTION) {
               return connectionTopic;
-            } else if (name === 'user:disconnection') {
+            } else if (name === USER_DISCONNECTION) {
               return disconnectionTopic;
             }
           }
         },
         global: {
           topic: function(name) {
-            if (name === 'user:state') {
+            if (name === USER_STATE) {
               return userStateTopic;
             }
           }

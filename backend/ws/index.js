@@ -4,6 +4,7 @@ var CONSTANTS = require('../lib/constants');
 var initialized = false;
 var NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
 var chatNamespace;
+var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 
 function init(dependencies) {
   var logger = dependencies('logger');
@@ -48,8 +49,8 @@ function init(dependencies) {
     initialized = true;
   });
 
-  globalPubsub.topic('user:state').subscribe(function(data) {
-    chatNamespace.emit('user:state', data);
+  globalPubsub.topic(USER_STATE).subscribe(function(data) {
+    chatNamespace.emit(USER_STATE, data);
   });
 }
 
