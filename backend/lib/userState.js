@@ -97,13 +97,15 @@ module.exports = function(dependencies) {
     return Q.all(userIds.map(get));
   }
 
-  userConnectionTopic.subscribe(restorePreviousState);
-
-  userDisconnectionTopic.subscribe(_.partialRight(set, DISCONNECTED, DISCONNECTION_DELAY));
+  function init() {
+    userConnectionTopic.subscribe(restorePreviousState);
+    userDisconnectionTopic.subscribe(_.partialRight(set, DISCONNECTED, DISCONNECTION_DELAY));
+  }
 
   return {
     set: set,
     get: get,
+    init: init,
     restorePreviousState: restorePreviousState,
     getAll: getAll
   };

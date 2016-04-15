@@ -12,6 +12,7 @@ module.exports = function(dependencies) {
 
   function start(callback) {
     listener.start(channel);
+    userState.init();
     callback();
   }
 

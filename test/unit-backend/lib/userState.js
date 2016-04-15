@@ -23,7 +23,9 @@ describe('The linagora.esn.chat userState lib', function() {
   };
 
   function getUserState() {
-    return require('../../../backend/lib/userState')(dependencies);
+    var lib = require('../../../backend/lib/userState')(dependencies);
+    lib.init();
+    return lib;
   }
 
   beforeEach(function() {
