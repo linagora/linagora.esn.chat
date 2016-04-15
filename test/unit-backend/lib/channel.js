@@ -2,25 +2,29 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var CONSTANTS = require('../../../backend/lib/constants');
+var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 
 describe('The linagora.esn.chat channel lib', function() {
 
-  var deps;
-  var logger = {
-    error: console.log,
-    info: console.log,
-    debug: console.log
-  };
+  var deps, logger, channelCreationTopic, modelsMock, ObjectIdMock;
 
-  var dependencies = function(name) {
+  function dependencies(name) {
     return deps[name];
-  };
-
-  var modelsMock;
-
-  var ObjectIdMock;
+  }
 
   beforeEach(function() {
+
+    channelCreationTopic = {
+      publish: sinon.spy()
+    };
+
+    logger = {
+      error: console.log,
+      info: console.log,
+      debug: console.log
+    };
+
     modelsMock = {
       ChatChannel: {
         find: function(cb) {
@@ -43,6 +47,15 @@ describe('The linagora.esn.chat channel lib', function() {
               ObjectId: function() {
                 return ObjectIdMock.apply(this, arguments);
               }
+            }
+          }
+        }
+      },
+      pubsub: {
+        global: {
+          topic: function(name) {
+            if (name === CHANNEL_CREATION) {
+              return channelCreationTopic;
             }
           }
         }
@@ -84,6 +97,25 @@ describe('The linagora.esn.chat channel lib', function() {
       modelsMock.ChatChannel = ChatChannel;
 
       require('../../../backend/lib/channel')(dependencies).createChannel(options, done);
+    });
+
+    it('should publish on the global CHANNEL_CREATION topic', function(done) {
+      var options = {id: 1};
+
+      function ChatChannel(opts) {
+        this.isAChannel = true;
+      }
+
+      ChatChannel.prototype.save = function(cb) {
+        cb();
+      };
+
+      modelsMock.ChatChannel = ChatChannel;
+
+      require('../../../backend/lib/channel')(dependencies).createChannel(options, function() {
+        expect(channelCreationTopic.publish).to.have.been.calledWith({isAChannel: true});
+        done();
+      });
     });
   });
 

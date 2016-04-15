@@ -1,11 +1,18 @@
 'use strict';
 
+var CONSTANTS = require('../lib/constants');
+var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+
 module.exports = function(dependencies) {
 
   var mongoose = dependencies('db').mongo.mongoose;
   var ObjectId = mongoose.Types.ObjectId;
   var Channel = mongoose.model('ChatChannel');
   var ChatMessage = mongoose.model('ChatMessage');
+
+  var pubsubGlobal = dependencies('pubsub').global;
+
+  var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
 
   function getChannels(options, callback) {
     Channel.find(callback);
@@ -38,6 +45,7 @@ module.exports = function(dependencies) {
 
   function createChannel(options, callback) {
     var channel = new Channel(options);
+    channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
     channel.save(callback);
   }
 
