@@ -2,6 +2,7 @@
 
 var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var async = require('async');
 
 module.exports = function(dependencies) {
 
@@ -15,11 +16,15 @@ module.exports = function(dependencies) {
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
 
   function getChannels(options, callback) {
-    Channel.find(callback);
+    var mq = Channel.find({type: 'channel'});
+    mq.populate('members');
+    mq.exec(callback);
   }
 
   function getChannel(channel, callback) {
-    Channel.findById(channel, callback);
+    var mq = Channel.findById(channel);
+    mq.populate('members');
+    mq.exec(callback);
   }
 
   function deleteChannel(channel, callback) {
@@ -40,13 +45,25 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Channel.find(request, callback);
+    var mq = Channel.find(request);
+    mq.populate('members');
+    mq.exec(callback);
   }
 
   function createChannel(options, callback) {
-    var channel = new Channel(options);
-    channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
-    channel.save(callback);
+    async.waterfall([
+        function(callback) {
+          var channel = new Channel(options);
+          channel.save(callback);
+        },
+        function(channel, _num, callback) {
+          Channel.populate(channel, 'members', callback);
+        },
+        function(channel, callback) {
+          channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
+          callback(null, channel);
+        }
+    ], callback);
   }
 
   function createMessage(message, callback) {
