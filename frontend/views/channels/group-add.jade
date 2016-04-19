@@ -1,0 +1,10 @@
+.block-header.visible-md
+  h2 #{__('Create a new direct conversation')}
+.channel-add-form.configuration.card
+  form(name='addGroupForm', ng-submit="addGroup()")
+    .form-group.fg-line
+      .row
+        attendees-autocomplete-input(original-attendees='members', mutable-attendees='members')
+    .button-bar.actions.hidden-xs.flex-end
+      input.btn.btn-default(type="button", value="#{__('Cancel')}", ui-sref="chat.channels-views")
+      input.btn.btn-primary(type="submit", value="#{__('Create')}", ng-disabled="addGroupForm.$invalid")

@@ -26,7 +26,9 @@ describe('The linagora.esn.chat channel lib', function() {
     };
 
     mq = {
-      populate: sinon.spy(),
+      populate: sinon.spy(function() {
+        return mq;
+      }),
       exec: sinon.spy(function(cb) {
         cb();
       })

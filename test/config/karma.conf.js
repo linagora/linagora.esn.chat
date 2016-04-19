@@ -17,6 +17,7 @@ module.exports = function(config) {
       'frontend/components/sinon-chai/lib/sinon-chai.js',
       'frontend/components/sinon-1.15.4/index.js',
       'frontend/components/moment/moment.js',
+      'frontend/components/lodash/dist/lodash.js',
       'frontend/components/angular-moment/angular-moment.js',
       'frontend/components/angular-web-notification/angular-web-notification.js',
       'frontend/components/HTML5-Desktop-Notifications2/desktop-notify.js',
@@ -51,6 +52,11 @@ module.exports = function(config) {
 
     ngJade2ModulePreprocessor: {
       stripPrefix: 'frontend',
+      cacheIdFromPath: function(filepath) {
+        var cacheId = filepath.replace(/jade$/, 'html').replace(/^frontend/, '/chat');
+        console.log(cacheId);
+        return cacheId;
+      },
       prependPrefix: '/linagora.esn.chat',
       // setting this option will create only a single module that contains templates
       // from all the files, so you can load them all with module('templates')

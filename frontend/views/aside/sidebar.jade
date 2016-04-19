@@ -5,10 +5,17 @@
         .lv-item.clickable.menu-heading
           .title(ui-sref='chat.channels-views')
             i.menu-icon.mdi.mdi-facebook-messenger
-            .text #{__('Let\'s chat')}
+            .text #{__('Channels')}
           .add-folder(ng-click='toggleNotification()')
             i.menu-icon.mdi(ng-class="isNotificationEnabled? 'mdi-bell-outline': 'mdi-bell-off'")
           .add-folder(ui-sref='chat.channels-add')
             i.menu-icon.mdi.mdi-plus
 
         chat-channel-item(ng-repeat="item in channels" item="item")
+        .lv-item.clickable.menu-heading
+          .title(ui-sref='chat.channels-views')
+            i.menu-icon.mdi.mdi-facebook-messenger
+            .text #{__('Direct Message')}
+          .add-folder(ui-sref='chat.groups-add')
+            i.menu-icon.mdi.mdi-plus
+        chat-channel-item(ng-repeat="item in groups" item="item")

@@ -16,7 +16,7 @@
       .listview.lv-message
         .lv-header.message-header
           .lvh-label
-            a(href='') 5 members
+            a(href='') {{(channel.members || []).length}} members
             span.divider |
             span(ng-if="!channel.topic.value")
               a(href='')

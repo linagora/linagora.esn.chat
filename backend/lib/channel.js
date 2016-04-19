@@ -16,15 +16,11 @@ module.exports = function(dependencies) {
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
 
   function getChannels(options, callback) {
-    var mq = Channel.find({type: 'channel'});
-    mq.populate('members');
-    mq.exec(callback);
+    Channel.find({type: 'channel'}).populate('members').exec(callback);
   }
 
   function getChannel(channel, callback) {
-    var mq = Channel.findById(channel);
-    mq.populate('members');
-    mq.exec(callback);
+    Channel.findById(channel).populate('members').exec(callback);
   }
 
   function deleteChannel(channel, callback) {
@@ -45,9 +41,7 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    var mq = Channel.find(request);
-    mq.populate('members');
-    mq.exec(callback);
+    Channel.find(request).populate('members').exec(callback);
   }
 
   function createChannel(options, callback) {
