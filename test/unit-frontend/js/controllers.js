@@ -21,7 +21,6 @@ describe('The linagora.esn.chat module controllers', function() {
     setItem,
     localStorageService,
     routeResolver,
-    headerService,
     sessionMock,
     user,
     livenotificationMock,
@@ -32,12 +31,6 @@ describe('The linagora.esn.chat module controllers', function() {
   beforeEach(function() {
     $state = {
       go: sinon.spy()
-    };
-
-    headerService = {
-      subHeader: {
-        setInjection: sinon.spy()
-      }
     };
 
     getItemResult = 'true';
@@ -99,7 +92,6 @@ describe('The linagora.esn.chat module controllers', function() {
       $provide.value('session', sessionMock);
       $provide.value('$state', $state);
       $provide.value('livenotification', livenotificationMock);
-      $provide.value('headerService', headerService);
       $provide.value('ChatMessageAdapter', ChatMessageAdapter);
       $provide.value('ChatScroll', ChatScroll);
       $provide.value('_', _);
@@ -253,6 +245,26 @@ describe('The linagora.esn.chat module controllers', function() {
       it('should add channel in scope when created', function() {
 
       });
+    });
+  });
+
+  describe('chatChannelSubheaderController', function() {
+    function initCtrl() {
+      return initController('chatChannelSubheaderController');
+    }
+
+    beforeEach(function() {
+      $rootScope.$on = sinon.spy();
+      initCtrl();
+    });
+
+    it('should listen CHAT_EVENTS.SWITCH_CURRENT_CHANNEL and put new channel on the scope', function() {
+      expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, sinon.match.func.and(sinon.match(function(callback) {
+        var channel = {};
+        callback(null, channel);
+        expect(scope.channel).to.equal(channel);
+        return true;
+      })));
     });
   });
 });

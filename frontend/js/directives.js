@@ -136,10 +136,12 @@ angular.module('linagora.esn.chat.core')
     };
   })
 
-  .directive('chatChannelSubheader', function() {
+  .directive('chatChannelSubheader', function($rootScope) {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/subheaders/channel.html'
+      scope: true,
+      templateUrl: '/chat/views/subheaders/channel.html',
+      controller: 'chatChannelSubheaderController'
     };
   })
 
