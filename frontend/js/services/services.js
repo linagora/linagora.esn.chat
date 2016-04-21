@@ -130,25 +130,8 @@ angular.module('linagora.esn.chat')
       initListener: function() {
         session.ready.then(function(session) {
           var sio = livenotification(CHAT_NAMESPACE);
-          [{
-            event: CHAT_EVENTS.USER_CHANGE_STATE,
-            transformer: angular.identity
-          }, {
-            event: CHAT_EVENTS.NEW_CHANNEL,
-            transformer: function(channel) {
-              if (channel.type === 'group') {
-                if (_.filter(channel.members, {_id: session.user._id}).length === 0) {
-                  return null;
-                }
-                channel.name = ChatConversationService.computeGroupName(session.user._id, channel);
-              }
-              return channel;
-            }
-          }].forEach(function(o) {
-            sio.on(o.event, function(data) {
-              var transformedData = o.transformer(data);
-              transformedData && $rootScope.$broadcast(o.event, transformedData);
-            });
+          sio.on(CHAT_EVENTS.USER_CHANGE_STATE, function(data) {
+            $rootScope.$broadcast(CHAT_EVENTS.USER_CHANGE_STATE, data);
           });
         });
       }
@@ -178,16 +161,6 @@ angular.module('linagora.esn.chat')
   })
 
   .factory('ChatConversationService', function($q, session, ChatRestangular, _) {
-    function computeGroupName(myId, group) {
-      return _.chain(group.members)
-        .reject({_id: myId})
-        .map(function(u) {
-          return u.firstname + ' ' + u.lastname;
-        })
-        .value()
-        .join(', ');
-    }
-
     function fetchMessages(channel, options) {
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
         return response.data.map(function(message) {
@@ -198,49 +171,8 @@ angular.module('linagora.esn.chat')
       });
     }
 
-    function getGroups(options) {
-      return $q.all({
-        session: session.ready,
-        groups: ChatRestangular.one('me').all('groups').getList(options)
-      }).then(function(resolved) {
-        return resolved.groups.data.map(function(group) {
-          group.name = computeGroupName(resolved.session.user._id, group);
-          return group;
-        });
-      });
-    }
-
-    function getChannels(options) {
-      return ChatRestangular.all('channels').getList(options).then(function(response) {
-        return response.data;
-      });
-    }
-
-    function getChannel(channelId) {
-      return ChatRestangular.one('channels', channelId).get().then(function(response) {
-        var channel =  response.data;
-        if (!channel || channel.type !== 'group') {
-          return channel;
-        }
-
-        return session.ready.then(function(session) {
-          channel.name = computeGroupName(session.user._id, channel);
-          return channel;
-        });
-      });
-    }
-
-    function postChannels(channel) {
-      return ChatRestangular.one('channels').customPOST(channel);
-    }
-
     return {
-      fetchMessages: fetchMessages,
-      computeGroupName: computeGroupName,
-      getChannels: getChannels,
-      getChannel: getChannel,
-      getGroups: getGroups,
-      postChannels: postChannels
+      fetchMessages: fetchMessages
     };
   })
 

@@ -24,7 +24,7 @@ module.exports = function(config) {
       'frontend/components/angular-file-upload/dist/angular-file-upload-all.js',
       'test/unit-frontend/module.js',
       'frontend/js/**/*.js',
-      'test/unit-frontend/js/*.js',
+      'test/unit-frontend/js/**/*.js',
       'frontend/views/**/*.jade'
     ],
     frameworks: ['mocha'],

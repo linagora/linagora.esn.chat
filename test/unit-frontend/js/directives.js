@@ -5,7 +5,16 @@
 var expect = chai.expect;
 
 describe('The linagora.esn.chat module directive', function() {
-  var userState, $q, $rootScope, userStateResult, $compile, session, user, CHAT_EVENTS, listenChatWebsocketMock;
+  var userState,
+  $q,
+  $rootScope,
+  userStateResult,
+  $compile,
+  session,
+  chatNamespace,
+  user,
+  CHAT_EVENTS,
+  listenChatWebsocketMock;
 
   beforeEach(function() {
     userState = {
@@ -14,7 +23,10 @@ describe('The linagora.esn.chat module directive', function() {
       })
     };
 
+    chatNamespace = {on: sinon.spy()};
+
     listenChatWebsocketMock = {initListener: angular.noop};
+
     session = {};
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {

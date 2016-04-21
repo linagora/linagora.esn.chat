@@ -13,7 +13,7 @@ describe('The linagora.esn.chat module controllers', function() {
     scope,
     $rootScope,
     $controller,
-    ChatConversationService,
+    channelsService,
     groups,
     channels,
     getItemResult,
@@ -49,7 +49,7 @@ describe('The linagora.esn.chat module controllers', function() {
       })
     };
 
-    ChatConversationService = {
+    channelsService = {
       getChannels: sinon.spy(function() {
         return $q.when(channels);
       }),
@@ -87,7 +87,7 @@ describe('The linagora.esn.chat module controllers', function() {
       });
       $provide.value('$stateParams', $stateParams);
       $provide.value('$stateProvider', $stateProvider);
-      $provide.value('ChatConversationService', ChatConversationService);
+      $provide.value('channelsService', channelsService);
       $provide.value('localStorageService', localStorageService);
       $provide.value('session', sessionMock);
       $provide.value('$state', $state);
@@ -147,37 +147,6 @@ describe('The linagora.esn.chat module controllers', function() {
       initCtrl();
       expect(scope.isNotificationEnabled).to.be.true;
       expect(setItem).to.have.been.calledWith('isNotificationEnabled', 'true');
-    });
-
-    describe('The rootScope CHAT_EVENTS.NEW_CHANNEL handler', function() {
-      var callback;
-
-      beforeEach(function() {
-        $rootScope.$on = sinon.spy();
-        initCtrl();
-        expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.NEW_CHANNEL, sinon.match.func.and(sinon.match(function(_callback_) {
-          callback = _callback_;
-          return true;
-        })));
-      });
-
-      it('should add new group in scope.groups', function() {
-        var group = {
-          type: 'group'
-        };
-        callback(null, group);
-        expect(scope.groups[0]).to.equal(group);
-        expect(scope.channels).to.deep.equal([]);
-      });
-
-      it('should add new channel in scope.channels', function() {
-        var channel = {
-          type: 'channel'
-        };
-        callback(null, channel);
-        expect(scope.channels[0]).to.equal(channel);
-        expect(scope.groups).to.deep.equal([]);
-      });
     });
   });
 
