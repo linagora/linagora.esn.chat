@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('linagora.esn.chat.core')
+angular.module('linagora.esn.chat')
   .constant('CHAT', {
     DEFAULT_FETCH_SIZE: 20
   })

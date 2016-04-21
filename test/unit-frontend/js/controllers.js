@@ -81,7 +81,7 @@ describe('The linagora.esn.chat module controllers', function() {
     livenotificationMock = {
     };
 
-    module('linagora.esn.chat.core', function($provide) {
+    module('linagora.esn.chat', function($provide) {
       $provide.decorator('$window', function($delegate) {
         return angular.extend($delegate, windowMock);
       });

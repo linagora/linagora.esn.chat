@@ -34,17 +34,21 @@ describe('The linagora.esn.chat services', function() {
       }
     };
 
-    livenotificationMock = function(name) {
-      if (name === CHAT_NAMESPACE) {
-        return chatNamespace;
-      } else {
-        throw new Error(name + 'namespace has not been mocked');
-      }
-    };
+    function livenotificationFactory(CHAT_NAMESPACE) {
+      livenotificationMock = function(name) {
+        if (name === CHAT_NAMESPACE) {
+          return chatNamespace;
+        } else {
+          throw new Error(name + 'namespace has not been mocked');
+        }
+      };
 
-    module('linagora.esn.chat.core', function($provide) {
+      return livenotificationMock;
+    }
+
+    module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
-      $provide.value('livenotification', livenotificationMock);
+      $provide.factory('livenotification', livenotificationFactory);
       $provide.value('_', _);
     });
   });

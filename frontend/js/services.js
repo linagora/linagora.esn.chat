@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('linagora.esn.chat.core')
+angular.module('linagora.esn.chat')
 
   .factory('ChatRestangular', function(Restangular) {
     return Restangular.withConfig(function(RestangularConfigurer) {

@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The linagora.esn.chat module directive', function() {
-  var userState, $q, $rootScope, userStateResult, $compile, session, user, CHAT_EVENTS;
+  var userState, $q, $rootScope, userStateResult, $compile, session, user, CHAT_EVENTS, listenChatWebsocketMock;
 
   beforeEach(function() {
     userState = {
@@ -14,12 +14,14 @@ describe('The linagora.esn.chat module directive', function() {
       })
     };
 
+    listenChatWebsocketMock = {initListener: angular.noop};
     session = {};
     angular.mock.module('jadeTemplates');
-    angular.mock.module('linagora.esn.chat.core', function($provide) {
+    angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('userState', userState);
       $provide.value('_', _);
       $provide.value('session', session);
+      $provide.value('listenChatWebsocket', listenChatWebsocketMock);
     });
 
     user = {

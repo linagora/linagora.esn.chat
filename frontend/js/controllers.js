@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('linagora.esn.chat.core')
+angular.module('linagora.esn.chat')
 
   .controller('chatRootController', function($scope, $rootScope, ChatConversationService, CHAT_EVENTS, localStorageService) {
     var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');

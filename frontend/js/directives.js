@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('linagora.esn.chat.core')
+angular.module('linagora.esn.chat')
   .directive('chatApplicationMenu', function(applicationMenuTemplateBuilder) {
     return {
       restrict: 'E',
@@ -136,7 +136,7 @@ angular.module('linagora.esn.chat.core')
     };
   })
 
-  .directive('chatChannelSubheader', function($rootScope) {
+  .directive('chatChannelSubheader', function() {
     return {
       restrict: 'E',
       scope: true,
