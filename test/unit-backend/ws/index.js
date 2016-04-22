@@ -3,11 +3,13 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var CONSTANTS = require('../../../backend/lib/constants');
+var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var messageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self;
+  var messageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies);
@@ -17,9 +19,16 @@ describe('The Chat WS server', function() {
     self = this;
     getUserIdResult = null;
     messageReceivedTopic = {
-      subscribe: sinon.spy(), publish: sinon.spy() };
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
 
     userStateTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelCreationTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -46,8 +55,11 @@ describe('The Chat WS server', function() {
         },
         global: {
           topic: function(name) {
-            if (name === 'user:state') {
+            if (name === USER_STATE) {
               return userStateTopic;
+            }
+            if (name === CHANNEL_CREATION) {
+              return channelCreationTopic;
             }
           }
         }
@@ -68,7 +80,7 @@ describe('The Chat WS server', function() {
     });
   });
 
-  it('should listen user:state pubsub and emit it on ws', function() {
+  it('should listen USER_STATE pubsub and emit it on ws', function() {
     initWs();
     var callbackOnUserStatePubsub;
     expect(userStateTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -79,7 +91,21 @@ describe('The Chat WS server', function() {
     var data = {};
     callbackOnUserStatePubsub(data);
 
-    expect(chatNamespace.emit).to.have.been.calledWith('user:state', data);
+    expect(chatNamespace.emit).to.have.been.calledWith(USER_STATE, data);
+  });
+
+  it('should listen CREATION_CHANNEL pubsub and emit it on ws', function() {
+    initWs();
+    var callbackOnCreationChannelPubsub;
+    expect(channelCreationTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+      callbackOnCreationChannelPubsub = callback;
+      return _.isFunction(callback);
+    }));
+
+    var data = {};
+    callbackOnCreationChannelPubsub(data);
+
+    expect(chatNamespace.emit).to.have.been.calledWith(CHANNEL_CREATION, data);
   });
 
   describe('The connexion handler', function() {

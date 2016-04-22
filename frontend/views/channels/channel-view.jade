@@ -1,3 +1,5 @@
+sub-header
+  chat-channel-subheader
 #messages-main
   .block-header.visible-md
     h2 \#{{::channel.name}}
@@ -16,7 +18,7 @@
       .listview.lv-message
         .lv-header.message-header
           .lvh-label
-            a(href='') 5 members
+            a(href='') {{(channel.members || []).length}} #{__('members')}
             span.divider |
             span(ng-if="!channel.topic.value")
               a(href='')

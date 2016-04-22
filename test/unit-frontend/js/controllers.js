@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon: false */
+/* global chai, sinon, _: false */
 
 var expect = chai.expect;
 
@@ -13,22 +13,54 @@ describe('The linagora.esn.chat module controllers', function() {
     scope,
     $rootScope,
     $controller,
-    ChatConversationService = {},
-    localStorageService = {
-      getOrCreateInstance: sinon.stub().returns({
-        getItem: sinon.spy(function(key) {
-          return $q.when(({
-            isNotificationEnabled: true
-          })[key]);
-        })
-      })
-    },
-    routeResolver;
+    ChatConversationService,
+    groups,
+    channels,
+    getItemResult,
+    getItem,
+    setItem,
+    localStorageService,
+    routeResolver,
+    sessionMock,
+    user,
+    livenotificationMock,
+    ChatMessageAdapter,
+    ChatScroll,
+    CHAT_EVENTS;
 
   beforeEach(function() {
     $state = {
       go: sinon.spy()
     };
+
+    getItemResult = 'true';
+    getItem = sinon.spy(function(key) {
+      return $q.when(({
+        isNotificationEnabled: getItemResult
+      })[key]);
+    });
+    setItem = sinon.spy(function() {
+      return $q.when({});
+    });
+    localStorageService = {
+      getOrCreateInstance: sinon.stub().returns({
+        getItem: getItem,
+        setItem:  setItem
+      })
+    };
+
+    ChatConversationService = {
+      getChannels: sinon.spy(function() {
+        return $q.when(channels);
+      }),
+      getGroups: sinon.spy(function() {
+        return $q.when(groups);
+      })
+    };
+
+    groups = [];
+    channels = [];
+
     windowMock = {
       open: sinon.spy()
     };
@@ -40,6 +72,15 @@ describe('The linagora.esn.chat module controllers', function() {
       session: angular.noop
     };
 
+    user = {_id: 'userId'};
+
+    sessionMock = {
+      ready: { then: _.constant(user)}
+    };
+
+    livenotificationMock = {
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.decorator('$window', function($delegate) {
         return angular.extend($delegate, windowMock);
@@ -48,15 +89,21 @@ describe('The linagora.esn.chat module controllers', function() {
       $provide.value('$stateProvider', $stateProvider);
       $provide.value('ChatConversationService', ChatConversationService);
       $provide.value('localStorageService', localStorageService);
+      $provide.value('session', sessionMock);
       $provide.value('$state', $state);
+      $provide.value('livenotification', livenotificationMock);
+      $provide.value('ChatMessageAdapter', ChatMessageAdapter);
+      $provide.value('ChatScroll', ChatScroll);
+      $provide.value('_', _);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _$q_) {
+  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
+    CHAT_EVENTS = _CHAT_EVENTS_;
   }));
 
   function initController(ctrl) {
@@ -74,30 +121,68 @@ describe('The linagora.esn.chat module controllers', function() {
     }
 
     it('should retrieve user channels', function() {
-      var channels = {
-        data: [1, 2, 3]
-      };
-      ChatConversationService.getChannels = function() {
-        return $q.when(channels);
-      };
       initCtrl();
       $rootScope.$digest();
-      expect(scope.channels).to.deep.equal(channels.data);
+      expect(scope.channels).to.equal(channels);
+    });
+
+    it('should retrieve user groups', function() {
+      initCtrl();
+      $rootScope.$digest();
+      expect(scope.groups).to.equal(groups);
     });
 
     it('should set the isNotificationEnabled value from user preferences', function() {
-
+      initCtrl();
+      expect(localStorageService.getOrCreateInstance).to.have.been.calledWith('linagora.esn.chat');
+      expect(getItem).to.have.been.calledWith('isNotificationEnabled');
+      expect(scope.isNotificationEnabled).to.be.true;
+      getItemResult = 'false';
+      initCtrl();
+      expect(scope.isNotificationEnabled).to.be.false;
     });
 
     it('should initialize isNotificationEnabled in user preferences if not set', function() {
+      getItemResult = undefined;
+      initCtrl();
+      expect(scope.isNotificationEnabled).to.be.true;
+      expect(setItem).to.have.been.calledWith('isNotificationEnabled', 'true');
+    });
 
+    describe('The rootScope CHAT_EVENTS.NEW_CHANNEL handler', function() {
+      var callback;
+
+      beforeEach(function() {
+        $rootScope.$on = sinon.spy();
+        initCtrl();
+        expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.NEW_CHANNEL, sinon.match.func.and(sinon.match(function(_callback_) {
+          callback = _callback_;
+          return true;
+        })));
+      });
+
+      it('should add new group in scope.groups', function() {
+        var group = {
+          type: 'group'
+        };
+        callback(null, group);
+        expect(scope.groups[0]).to.equal(group);
+        expect(scope.channels).to.deep.equal([]);
+      });
+
+      it('should add new channel in scope.channels', function() {
+        var channel = {
+          type: 'channel'
+        };
+        callback(null, channel);
+        expect(scope.channels[0]).to.equal(channel);
+        expect(scope.groups).to.deep.equal([]);
+      });
     });
   });
 
   describe('The chatController controller', function() {
-
     it('should inject the subheader', function() {
-
     });
 
     it('should fetch channel messages from server', function() {
@@ -160,6 +245,26 @@ describe('The linagora.esn.chat module controllers', function() {
       it('should add channel in scope when created', function() {
 
       });
+    });
+  });
+
+  describe('chatChannelSubheaderController', function() {
+    function initCtrl() {
+      return initController('chatChannelSubheaderController');
+    }
+
+    beforeEach(function() {
+      $rootScope.$on = sinon.spy();
+      initCtrl();
+    });
+
+    it('should listen CHAT_EVENTS.SWITCH_CURRENT_CHANNEL and put new channel on the scope', function() {
+      expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, sinon.match.func.and(sinon.match(function(callback) {
+        var channel = {};
+        callback(null, channel);
+        expect(scope.channel).to.equal(channel);
+        return true;
+      })));
     });
   });
 });

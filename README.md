@@ -28,4 +28,3 @@ In your OpenPaaS ESN directory
 
     ln -s node_modules/linagora.esn.chat modules/linagora.esn.chat
 
-    

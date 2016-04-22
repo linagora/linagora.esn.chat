@@ -2,28 +2,64 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('chatRootController', function($scope, ChatConversationService, localStorageService) {
-    ChatConversationService.getChannels().then(function(result) {
-      $scope.channels = result.data;
-      var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
-      localForage.getItem('isNotificationEnabled').then(function(value) {
-        if (value) {
-          $scope.isNotificationEnabled = value === 'true';
-        } else {
-          localForage.setItem('isNotificationEnabled', 'true').then(function() {
-            $scope.isNotificationEnabled = true;
-          });
-        }
-      });
+  .controller('chatRootController', function($scope, $rootScope, ChatConversationService, CHAT_EVENTS, localStorageService) {
+    var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
+    localForage.getItem('isNotificationEnabled').then(function(value) {
+      if (value) {
+        $scope.isNotificationEnabled = value === 'true';
+      } else {
+        localForage.setItem('isNotificationEnabled', 'true').then(function() {
+          $scope.isNotificationEnabled = true;
+        });
+      }
     });
+
+    ChatConversationService.getChannels().then(function(channels) {
+      $scope.channels = channels;
+    });
+
+    ChatConversationService.getGroups().then(function(groups) {
+      $scope.groups = groups;
+    });
+
+    var unbind = $rootScope.$on(CHAT_EVENTS.NEW_CHANNEL, function(event, channel) {
+      (channel.type === 'group' ? $scope.groups : $scope.channels).push(channel);
+    });
+
+    $scope.$on('$destroy', unbind);
   })
 
-  .controller('chatController', function($log, $window, $scope, $stateParams, session, ChatService, ChatConversationService, ChatMessageAdapter, CHAT, ChatScroll, _, headerService, webNotification) {
+  .controller('chatController', function(
+        $scope,
+        $window,
+        $log,
+        $stateParams,
+        $rootScope,
+        session,
+        ChatService,
+        ChatConversationService,
+        ChatMessageAdapter,
+        CHAT,
+        CHAT_EVENTS,
+        ChatScroll,
+        _,
+        webNotification) {
 
     $scope.user = session.user;
 
-    ChatConversationService.getChannels().then(function(result) {
-      $scope.channel =  _.find(result.data, {_id: $stateParams.id}) || result.data[0];
+    function getChannel() {
+      if ($stateParams.id) {
+        return ChatConversationService.getChannel($stateParams.id);
+      } else {
+        return ChatConversationService.getChannels().then(function(channels) {
+          return channels[0];
+        });
+      }
+    }
+
+    getChannel().then(function(channel) {
+      $scope.channel = channel;
+      $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channel);
       var conversation = _.find($scope.channels, {_id: $scope.channel._id});
       conversation && (conversation.isNotRead = false);
       ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
@@ -33,7 +69,7 @@ angular.module('linagora.esn.chat')
     });
 
     $scope.notifyNewMessage = function(message) {
-      var channel = _.find($scope.channels, {_id: message.channel});
+      var channel = $scope.channel;
 
       function canSendNotification() {
         return !$window.document.hasFocus() && !channel.isNotRead && $scope.isNotificationEnabled && message.user !== $scope.user._id;
@@ -57,7 +93,10 @@ angular.module('linagora.esn.chat')
       $scope.notifyNewMessage(message);
 
       if (message.channel !== $scope.channel._id) {
-        _.find($scope.channels, {_id: message.channel}).isNotRead = true;
+        var channel = _.find($scope.channels.concat($scope.groups), {_id: message.channel});
+        if (channel) {
+          channel.isNotRead = true;
+        }
       }
 
       ChatMessageAdapter.fromAPI(message).then(function(message) {
@@ -66,17 +105,20 @@ angular.module('linagora.esn.chat')
       });
     };
 
-    $scope.$on('chat:message:text', function(evt, message) {
+    var unbind = $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(evt, message) {
       $scope.newMessage(message);
     });
 
-    headerService.subHeader.setInjection('chat-channel-subheader', $scope);
+    $scope.$on('$destroy', function() {
+      unbind();
+    });
   })
 
-  .controller('chatAddChannelController', function($scope, $state, ChatConversationService, headerService) {
+  .controller('chatAddChannelController', function($scope, $state, ChatConversationService) {
     $scope.addChannel = function() {
       var channel = {
         name: $scope.channel.name,
+        type: 'channel',
         topic: $scope.channel.topic || '',
         purpose: $scope.channel.purpose || '',
         isNotRead: false
@@ -84,9 +126,28 @@ angular.module('linagora.esn.chat')
 
       ChatConversationService.postChannels(channel).then(function(response) {
         $state.go('chat.channels-views', {id: response.data._id});
-        $scope.channels.push(response.data);
       });
     };
+  })
 
-    headerService.subHeader.setInjection('chat-channel-subheader', $scope);
+  .controller('chatAddGroupController', function($scope, $state, ChatConversationService, _) {
+    $scope.members = [];
+    $scope.addGroup = function() {
+      var group = {
+        members: _.map($scope.members, '_id'),
+        type: 'group'
+      };
+
+      ChatConversationService.postChannels(group).then(function(response) {
+        $state.go('chat.channels-views', { id: response.data._id});
+      });
+    };
+  })
+
+  .controller('chatChannelSubheaderController', function($scope, $rootScope, CHAT_EVENTS) {
+    var unbind = $rootScope.$on(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, function(event, channel) {
+      $scope.channel = channel;
+    });
+
+    $scope.$on('$destroy', unbind);
   });

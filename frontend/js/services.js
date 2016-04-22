@@ -118,7 +118,75 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('ChatConversationService', function($q, session, ChatRestangular) {
+  .factory('listenChatWebsocket', function(
+        $rootScope,
+        session,
+        _,
+        livenotification,
+        ChatConversationService,
+        CHAT_NAMESPACE,
+        CHAT_EVENTS) {
+    return {
+      initListener: function() {
+        session.ready.then(function(session) {
+          var sio = livenotification(CHAT_NAMESPACE);
+          [{
+            event: CHAT_EVENTS.USER_CHANGE_STATE,
+            transformer: angular.identity
+          }, {
+            event: CHAT_EVENTS.NEW_CHANNEL,
+            transformer: function(channel) {
+              if (channel.type === 'group') {
+                if (_.filter(channel.members, {_id: session.user._id}).length === 0) {
+                  return null;
+                }
+                channel.name = ChatConversationService.computeGroupName(session.user._id, channel);
+              }
+              return channel;
+            }
+          }].forEach(function(o) {
+            sio.on(o.event, function(data) {
+              var transformedData = o.transformer(data);
+              transformedData && $rootScope.$broadcast(o.event, transformedData);
+            });
+          });
+        });
+      }
+    };
+  })
+
+  .factory('userState', function($q, $rootScope, _, CHAT_EVENTS, ChatRestangular) {
+    var cache = {};
+
+    $rootScope.$on(CHAT_EVENTS.USER_CHANGE_STATE, function(event, data) {
+      cache[data.userId] = data.state;
+    });
+
+    return {
+      get: function(userId) {
+        if (cache[userId]) {
+          return $q.when(cache[userId]);
+        }
+
+        return ChatRestangular.one('state', userId).get().then(function(response) {
+          var state = response.data.state;
+          cache[userId] = state;
+          return state;
+        });
+      }
+    };
+  })
+
+  .factory('ChatConversationService', function($q, session, ChatRestangular, _) {
+    function computeGroupName(myId, group) {
+      return _.chain(group.members)
+        .reject({_id: myId})
+        .map(function(u) {
+          return u.firstname + ' ' + u.lastname;
+        })
+        .value()
+        .join(', ');
+    }
 
     function fetchMessages(channel, options) {
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
@@ -130,8 +198,36 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function getGroups(options) {
+      return $q.all({
+        session: session.ready,
+        groups: ChatRestangular.one('me').all('groups').getList(options)
+      }).then(function(resolved) {
+        return resolved.groups.data.map(function(group) {
+          group.name = computeGroupName(resolved.session.user._id, group);
+          return group;
+        });
+      });
+    }
+
     function getChannels(options) {
-      return ChatRestangular.all('channels').getList(options);
+      return ChatRestangular.all('channels').getList(options).then(function(response) {
+        return response.data;
+      });
+    }
+
+    function getChannel(channelId) {
+      return ChatRestangular.one('channels', channelId).get().then(function(response) {
+        var channel =  response.data;
+        if (!channel || channel.type !== 'group') {
+          return channel;
+        }
+
+        return session.ready.then(function(session) {
+          channel.name = computeGroupName(session.user._id, channel);
+          return channel;
+        });
+      });
     }
 
     function postChannels(channel) {
@@ -140,7 +236,10 @@ angular.module('linagora.esn.chat')
 
     return {
       fetchMessages: fetchMessages,
+      computeGroupName: computeGroupName,
       getChannels: getChannels,
+      getChannel: getChannel,
+      getGroups: getGroups,
       postChannels: postChannels
     };
   })
@@ -192,7 +291,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('ChatWSTransport', function($rootScope, $log, $q, livenotification) {
+  .factory('ChatWSTransport', function($rootScope, $log, $q, livenotification, CHAT_NAMESPACE) {
 
     function ChatWSTransport(options) {
       this.options = options;
@@ -208,7 +307,7 @@ angular.module('linagora.esn.chat')
     ChatWSTransport.prototype.connect = function(onMessage) {
       var self = this;
       if (!this.sio) {
-        this.sio = livenotification(self.options.ns, self.options.room);
+        this.sio = livenotification(self.options.ns || CHAT_NAMESPACE, self.options.room);
 
         this.sio.on('message', function(message) {
           $log.debug('Got a message on transport', message);

@@ -1,5 +1,9 @@
 'use strict';
 
+var CONSTANTS = require('../lib/constants');
+var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var async = require('async');
+
 module.exports = function(dependencies) {
 
   var mongoose = dependencies('db').mongo.mongoose;
@@ -7,12 +11,16 @@ module.exports = function(dependencies) {
   var Channel = mongoose.model('ChatChannel');
   var ChatMessage = mongoose.model('ChatMessage');
 
+  var pubsubGlobal = dependencies('pubsub').global;
+
+  var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+
   function getChannels(options, callback) {
-    Channel.find(callback);
+    Channel.find({type: 'channel'}).populate('members').exec(callback);
   }
 
   function getChannel(channel, callback) {
-    Channel.findById(channel, callback);
+    Channel.findById(channel).populate('members').exec(callback);
   }
 
   function deleteChannel(channel, callback) {
@@ -33,12 +41,23 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Channel.find(request, callback);
+    Channel.find(request).populate('members').exec(callback);
   }
 
   function createChannel(options, callback) {
-    var channel = new Channel(options);
-    channel.save(callback);
+    async.waterfall([
+        function(callback) {
+          var channel = new Channel(options);
+          channel.save(callback);
+        },
+        function(channel, _num, callback) {
+          Channel.populate(channel, 'members', callback);
+        },
+        function(channel, callback) {
+          channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
+          callback(null, channel);
+        }
+    ], callback);
   }
 
   function createMessage(message, callback) {

@@ -13,6 +13,7 @@ module.exports = {
     MESSAGE_RECEIVED: 'chat:message:received',
     USER_STATE: 'user:state',
     USER_CONNECTION: 'user:connection',
-    USER_DISCONNECTION: 'user:disconnection'
+    USER_DISCONNECTION: 'user:disconnection',
+    CHANNEL_CREATION: 'chat:channel:creation'
   }
 };

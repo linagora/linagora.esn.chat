@@ -46,6 +46,15 @@ angular.module('linagora.esn.chat', [
           }
         }
       })
+      .state('chat.groups-add', {
+        url: '/groups/add',
+        views: {
+          'main@chat': {
+            templateUrl: '/chat/views/channels/group-add.html',
+            controller: 'chatAddGroupController'
+          }
+        }
+      })
       .state('chat.channels-add', {
         url: '/channels/add',
         views: {
@@ -59,4 +68,7 @@ angular.module('linagora.esn.chat', [
   .config(function(dynamicDirectiveServiceProvider) {
     var chatItem = new dynamicDirectiveServiceProvider.DynamicDirective(true, 'chat-application-menu', {priority: 35});
     dynamicDirectiveServiceProvider.addInjection('esn-application-menu', chatItem);
+  })
+  .run(function(listenChatWebsocket) {
+    listenChatWebsocket.initListener();
   });
