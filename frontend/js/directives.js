@@ -44,27 +44,6 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatManager', function(ChatWSTransport, ChatService, session) {
-    return {
-      restrict: 'A',
-      link: function(scope) {
-        var transport = new ChatWSTransport({
-          room: session.domain._id,
-          user: session.user._id
-        });
-
-        var chat = new ChatService({
-          user: session.user._id,
-          transport: transport
-        });
-
-        chat.connect();
-
-        scope.chatService = chat;
-      }
-    };
-  })
-
   .directive('chatSidebar', function(localStorageService) {
     return {
       restrict: 'E',
@@ -152,13 +131,12 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, deviceDetector, ChatScroll, ChatMessageSender) {
+  .directive('chatMessageCompose', function($log, deviceDetector, ChatScroll, messageService) {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/messages/message-compose.html',
       link: function(scope, element) {
-
-        var sender = ChatMessageSender.get(scope.chatService);
+        messageService.connect();
         var timer = null;
 
         scope.typing = false;
@@ -166,14 +144,13 @@ angular.module('linagora.esn.chat')
 
         function sendUserTyping(state) {
           var message = {
-            type: 'user_typing',
             state: state,
             user: scope.user._id,
             channel: scope.channel._id,
             date: Date.now()
           };
 
-          sender.sendMessage(message).then(function(result) {
+          messageService.sendUserTyping(message).then(function(result) {
             $log.debug('Message ACK', result);
           }, function(err) {
             $log.error('Error while sending message', err);
@@ -225,7 +202,7 @@ angular.module('linagora.esn.chat')
           $('textarea')[0].style.height = '56px';
           ChatScroll.scrollDown();
 
-          sender.sendMessage(message).then(function(result) {
+          messageService.sendMessage(message).then(function(result) {
             $log.debug('Message ACK', result);
           }, function(err) {
             $log.error('Error while sending message', err);
@@ -234,7 +211,7 @@ angular.module('linagora.esn.chat')
 
         scope.onFileSelect = function(files) {
           $log.debug('Sending message with attachments', files);
-          sender.sendMessageWithAttachments(buildCurrentMessage(), files).then(function(response) {
+          messageService.sendMessageWithAttachments(buildCurrentMessage(), files).then(function(response) {
             scope.newMessage(response);
             scope.text = '';
           }, function(err) {
