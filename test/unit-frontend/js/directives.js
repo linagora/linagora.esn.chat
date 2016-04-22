@@ -13,8 +13,7 @@ describe('The linagora.esn.chat module directive', function() {
   session,
   chatNamespace,
   user,
-  CHAT_EVENTS,
-  listenChatWebsocketMock;
+  CHAT_EVENTS;
 
   beforeEach(function() {
     userState = {
@@ -25,15 +24,12 @@ describe('The linagora.esn.chat module directive', function() {
 
     chatNamespace = {on: sinon.spy()};
 
-    listenChatWebsocketMock = {initListener: angular.noop};
-
     session = {};
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('userState', userState);
       $provide.value('_', _);
       $provide.value('session', session);
-      $provide.value('listenChatWebsocket', listenChatWebsocketMock);
     });
 
     user = {

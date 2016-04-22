@@ -15,7 +15,6 @@ describe('The linagora.esn.chat messages', function() {
   messageService,
   ChatWSTransportMock,
   ChatWSTransportMockInstance,
-  listenChatWebsocketMock,
   fileUploadServiceMock,
   backgroundProcessorServiceMock,
   sessionFactory,
@@ -50,8 +49,6 @@ describe('The linagora.esn.chat messages', function() {
         });
       });
 
-      listenChatWebsocketMock = {initListener: angular.noop};
-
       fileUploadServiceMock = {};
 
       backgroundProcessorServiceMock = {};
@@ -63,7 +60,6 @@ describe('The linagora.esn.chat messages', function() {
         $provide.value('_', _);
         $provide.value('ChatWSTransport', ChatWSTransportMock);
         $provide.value('backgroundProcessorService', backgroundProcessorServiceMock);
-        $provide.value('listenChatWebsocket', listenChatWebsocketMock);
         $provide.value('fileUploadService', fileUploadServiceMock);
         $provide.value('DEFAULT_FILE_TYPE', DEFAULT_FILE_TYPE);
       });
@@ -166,8 +162,6 @@ describe('The linagora.esn.chat messages', function() {
         });
       });
 
-      listenChatWebsocketMock = {initListener: angular.noop};
-
       fileUploadServiceMock = {};
 
       backgroundProcessorServiceMock = {};
@@ -194,7 +188,6 @@ describe('The linagora.esn.chat messages', function() {
       module('linagora.esn.chat', function($provide) {
         $provide.factory('session', sessionFactory);
         $provide.value('_', _);
-        $provide.value('listenChatWebsocket', listenChatWebsocketMock);
         $provide.factory('livenotification', livenotificationFactory);
       });
     });

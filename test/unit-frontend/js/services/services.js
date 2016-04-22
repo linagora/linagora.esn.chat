@@ -11,7 +11,6 @@ describe('The linagora.esn.chat services', function() {
     CHAT_EVENTS,
     sessionMock,
     user,
-    listenChatWebsocket,
     livenotificationMock,
     $rootScope,
     userState,
@@ -50,9 +49,8 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _listenChatWebsocket_, _ChatConversationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _userState_, _$httpBackend_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _userState_, _$httpBackend_) {
     $q = _$q_;
-    listenChatWebsocket = _listenChatWebsocket_;
     ChatConversationService = _ChatConversationService_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
@@ -61,25 +59,34 @@ describe('The linagora.esn.chat services', function() {
     $httpBackend =  _$httpBackend_;
   }));
 
-  describe('listenChatWebsocket', function() {
-    describe('initListener', function() {
-      beforeEach(function() {
-        listenChatWebsocket.initListener();
-        $rootScope.$broadcast = sinon.spy();
-      });
-
-      it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.USER_CHANGE_STATE and broadcast it on $rootScope', function() {
-        expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(callback) {
-          var data = {};
-          callback(data);
-          expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, data);
-          return true;
-        }));
-      });
-    });
-  });
-
   describe('userState service', function() {
+
+    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.USER_CHANGE_STATE and broadcast it on $rootScope', function() {
+      $rootScope.$broadcast = sinon.spy();
+      expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(callback) {
+        var data = {};
+        callback(data);
+        expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, data);
+        return true;
+      }));
+    });
+
+    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.USER_CHANGE_STATE and save change', function() {
+      $rootScope.$broadcast = sinon.spy();
+      expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(callback) {
+        var state = 'of alabama';
+        callback({
+          userId: 'userId',
+          state: state
+        });
+        var promiseCallback = sinon.spy();
+        userState.get('userId').then(promiseCallback);
+        $rootScope.$digest();
+        expect(promiseCallback).to.have.been.calledWith(state);
+        return true;
+      }));
+    });
+
     it('should get /chat/api/status/userId to get the data the first time and cache it for the second time', function() {
       var state = 'state';
       var callback = sinon.spy();
@@ -90,19 +97,6 @@ describe('The linagora.esn.chat services', function() {
       expect(callback).to.have.been.calledWith(state);
       callback.reset();
 
-      userState.get('userId').then(callback);
-      $rootScope.$digest();
-      expect(callback).to.have.been.calledWith(state);
-    });
-
-    it('should save broadcasted change', function() {
-      var state = 'of alabama';
-      $rootScope.$broadcast(CHAT_EVENTS.USER_CHANGE_STATE, {
-        userId: 'userId',
-        state: state
-      });
-
-      var callback = sinon.spy();
       userState.get('userId').then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(state);

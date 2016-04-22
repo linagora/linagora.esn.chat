@@ -41,31 +41,15 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('listenChatWebsocket', function(
-        $rootScope,
-        session,
-        _,
-        livenotification,
-        ChatConversationService,
-        CHAT_NAMESPACE,
-        CHAT_EVENTS) {
-    return {
-      initListener: function() {
-        session.ready.then(function(session) {
-          var sio = livenotification(CHAT_NAMESPACE);
-          sio.on(CHAT_EVENTS.USER_CHANGE_STATE, function(data) {
-            $rootScope.$broadcast(CHAT_EVENTS.USER_CHANGE_STATE, data);
-          });
-        });
-      }
-    };
-  })
-
-  .factory('userState', function($q, $rootScope, _, CHAT_EVENTS, ChatRestangular) {
+  .factory('userState', function($q, $rootScope, _, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
     var cache = {};
 
-    $rootScope.$on(CHAT_EVENTS.USER_CHANGE_STATE, function(event, data) {
-      cache[data.userId] = data.state;
+    session.ready.then(function(session) {
+      var sio = livenotification(CHAT_NAMESPACE);
+      sio.on(CHAT_EVENTS.USER_CHANGE_STATE, function(data) {
+        $rootScope.$broadcast(CHAT_EVENTS.USER_CHANGE_STATE, data);
+        cache[data.userId] = data.state;
+      });
     });
 
     return {
