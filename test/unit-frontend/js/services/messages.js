@@ -12,7 +12,7 @@ describe('The linagora.esn.chat messages', function() {
   user,
   domain,
   $rootScope,
-  messageService,
+  chatMessageService,
   ChatWSTransportMock,
   ChatWSTransportMockInstance,
   fileUploadServiceMock,
@@ -37,7 +37,7 @@ describe('The linagora.esn.chat messages', function() {
     };
   });
 
-  describe('messageService', function() {
+  describe('chatMessageService', function() {
     beforeEach(function() {
 
       ChatWSTransportMock = sinon.spy(function() {
@@ -65,11 +65,11 @@ describe('The linagora.esn.chat messages', function() {
       });
     });
 
-    beforeEach(angular.mock.inject(function(_$q_, _CHAT_EVENTS_, _$rootScope_, _messageService_) {
+    beforeEach(angular.mock.inject(function(_$q_, _CHAT_EVENTS_, _$rootScope_, _chatMessageService_) {
       $q = _$q_;
       CHAT_EVENTS = _CHAT_EVENTS_;
       $rootScope = _$rootScope_;
-      messageService = _messageService_;
+      chatMessageService = _chatMessageService_;
       sessionMock.ready = $q.when({user:user, domain: domain});
     }));
 
@@ -84,7 +84,7 @@ describe('The linagora.esn.chat messages', function() {
     describe('sendMessage function', function() {
       it('should send a message with text as type', function() {
         var promiseCallback = sinon.spy();
-        messageService.sendMessage({data: 'data'}).then(promiseCallback);
+        chatMessageService.sendMessage({data: 'data'}).then(promiseCallback);
         $rootScope.$digest();
         expect(ChatWSTransportMockInstance.sendMessage).to.have.been.calledWith({data: 'data', type: 'text'});
         expect(promiseCallback).to.have.been.calledOnce;
@@ -94,7 +94,7 @@ describe('The linagora.esn.chat messages', function() {
     describe('sendUserTyping function ', function() {
       it('should send a message with user_typing as type', function() {
         var promiseCallback = sinon.spy();
-        messageService.sendUserTyping({data: 'data'}).then(promiseCallback);
+        chatMessageService.sendUserTyping({data: 'data'}).then(promiseCallback);
         $rootScope.$digest();
         expect(ChatWSTransportMockInstance.sendMessage).to.have.been.calledWith({data: 'data', type: 'user_typing'});
         expect(promiseCallback).to.have.been.calledOnce;
@@ -103,16 +103,16 @@ describe('The linagora.esn.chat messages', function() {
 
     describe('connect function', function() {
       it('should call transport.connect only once', function() {
-        messageService.connect();
+        chatMessageService.connect();
         $rootScope.$digest();
-        messageService.connect();
+        chatMessageService.connect();
         expect(ChatWSTransportMockInstance.connect).to.have.been.calledOnce;
       });
 
       describe('connect given handler', function() {
         var callback;
         beforeEach(function() {
-          messageService.connect();
+          chatMessageService.connect();
           $rootScope.$digest();
           expect(ChatWSTransportMockInstance.connect).to.have.been.calledWith(sinon.match.func.and(sinon.match(function(_callback_) {
             callback = _callback_;

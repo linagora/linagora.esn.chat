@@ -2,7 +2,7 @@
 
 angular.module('linagora.esn.chat')
 
-  .factory('messageService', function(
+  .factory('chatMessageService', function(
         $q,
         $log,
         $rootScope,
@@ -12,7 +12,7 @@ angular.module('linagora.esn.chat')
         backgroundProcessorService,
         DEFAULT_FILE_TYPE) {
 
-    var messageServicePromise = session.ready.then(function(session) {
+    var chatMessageServicePromise = session.ready.then(function(session) {
       var userId = session.user._id;
       var domainId = session.domain._id;
 
@@ -130,10 +130,10 @@ angular.module('linagora.esn.chat')
     }
 
     return {
-      connect: bindToPromiseResult(messageServicePromise, 'connect'),
-      sendMessage: bindToPromiseResult(messageServicePromise, 'sendMessage'),
-      sendUserTyping: bindToPromiseResult(messageServicePromise, 'sendUserTyping'),
-      sendMessageWithAttachments: bindToPromiseResult(messageServicePromise, 'sendMessageWithAttachments'),
+      connect: bindToPromiseResult(chatMessageServicePromise, 'connect'),
+      sendMessage: bindToPromiseResult(chatMessageServicePromise, 'sendMessage'),
+      sendUserTyping: bindToPromiseResult(chatMessageServicePromise, 'sendUserTyping'),
+      sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments'),
     };
   })
 
