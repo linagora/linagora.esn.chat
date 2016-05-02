@@ -30,7 +30,7 @@ angular.module('linagora.esn.chat')
       scope: {
         item: '='
       },
-      controller: function($scope, $rootScope, $q, _, CHAT_EVENTS, userState, session) {
+      controller: function($scope, $rootScope, $q, _, CHAT_EVENTS, chatUserState, session) {
         $scope.allUsersConnected = true;
         var userToConnected = {};
 
@@ -42,7 +42,7 @@ angular.module('linagora.esn.chat')
           var statesPromises = _.chain($scope.item.members)
             .reject({_id: session.user._id})
             .map(function(member) {
-              return userState.get(member._id).then(function(state) {
+              return chatUserState.get(member._id).then(function(state) {
                 userToConnected[member._id] = state !== 'disconnected';
               });
             });

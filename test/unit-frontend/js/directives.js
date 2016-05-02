@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The linagora.esn.chat module directive', function() {
-  var userState,
+  var chatUserState,
   $q,
   $rootScope,
   userStateResult,
@@ -16,7 +16,7 @@ describe('The linagora.esn.chat module directive', function() {
   CHAT_EVENTS;
 
   beforeEach(function() {
-    userState = {
+    chatUserState = {
       get: sinon.spy(function(id) {
         return $q.when(userStateResult(id));
       })
@@ -27,7 +27,7 @@ describe('The linagora.esn.chat module directive', function() {
     session = {};
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
-      $provide.value('userState', userState);
+      $provide.value('chatUserState', chatUserState);
       $provide.value('_', _);
       $provide.value('session', session);
     });
@@ -69,8 +69,8 @@ describe('The linagora.esn.chat module directive', function() {
       };
       initDirective();
       $rootScope.$digest();
-      expect(userState.get).to.have.been.calledWith(2);
-      expect(userState.get).to.have.been.calledWith(3);
+      expect(chatUserState.get).to.have.been.calledWith(2);
+      expect(chatUserState.get).to.have.been.calledWith(3);
       expect(eleScope.allUsersConnected).to.be.true;
     });
 
@@ -80,8 +80,8 @@ describe('The linagora.esn.chat module directive', function() {
       };
       initDirective();
       $rootScope.$digest();
-      expect(userState.get).to.have.been.calledWith(2);
-      expect(userState.get).to.have.been.calledWith(3);
+      expect(chatUserState.get).to.have.been.calledWith(2);
+      expect(chatUserState.get).to.have.been.calledWith(3);
       expect(eleScope.allUsersConnected).to.be.false;
     });
 

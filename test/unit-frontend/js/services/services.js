@@ -13,7 +13,7 @@ describe('The linagora.esn.chat services', function() {
     user,
     livenotificationMock,
     $rootScope,
-    userState,
+    chatUserState,
     chatNamespace,
     $httpBackend;
 
@@ -49,17 +49,17 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _userState_, _$httpBackend_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_) {
     $q = _$q_;
     ChatConversationService = _ChatConversationService_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
-    userState = _userState_;
+    chatUserState = _chatUserState_;
     $httpBackend =  _$httpBackend_;
   }));
 
-  describe('userState service', function() {
+  describe('chatUserState service', function() {
 
     it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.USER_CHANGE_STATE and broadcast it on $rootScope', function() {
       $rootScope.$broadcast = sinon.spy();
@@ -80,7 +80,7 @@ describe('The linagora.esn.chat services', function() {
           state: state
         });
         var promiseCallback = sinon.spy();
-        userState.get('userId').then(promiseCallback);
+        chatUserState.get('userId').then(promiseCallback);
         $rootScope.$digest();
         expect(promiseCallback).to.have.been.calledWith(state);
         return true;
@@ -91,13 +91,13 @@ describe('The linagora.esn.chat services', function() {
       var state = 'state';
       var callback = sinon.spy();
       $httpBackend.expectGET('/chat/api/chat/state/userId').respond({state: state});
-      userState.get('userId').then(callback);
+      chatUserState.get('userId').then(callback);
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledWith(state);
       callback.reset();
 
-      userState.get('userId').then(callback);
+      chatUserState.get('userId').then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(state);
     });

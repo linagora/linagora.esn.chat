@@ -41,7 +41,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('userState', function($q, $rootScope, _, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
+  .factory('chatUserState', function($q, $rootScope, _, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
     var cache = {};
 
     session.ready.then(function(session) {
