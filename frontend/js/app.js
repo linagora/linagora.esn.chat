@@ -41,8 +41,10 @@ angular.module('linagora.esn.chat', [
         url: '/channels/view/:id',
         views: {
           'main@chat': {
-            template: '<chat-channel-view>',
-            controller: 'chatController'
+            template: '<sub-header><chat-channel-subheader/></sub-header><chat-channel-view channel-id="channelId"/>',
+            controller: function($scope, $stateParams) {
+              $scope.channelId = $stateParams.id;
+            }
           }
         }
       })
@@ -68,7 +70,4 @@ angular.module('linagora.esn.chat', [
   .config(function(dynamicDirectiveServiceProvider) {
     var chatItem = new dynamicDirectiveServiceProvider.DynamicDirective(true, 'chat-application-menu', {priority: 35});
     dynamicDirectiveServiceProvider.addInjection('esn-application-menu', chatItem);
-  })
-  .run(function(listenChatWebsocket) {
-    listenChatWebsocket.initListener();
   });
