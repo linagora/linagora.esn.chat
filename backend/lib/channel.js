@@ -12,11 +12,21 @@ module.exports = function(dependencies) {
   var ChatMessage = mongoose.model('ChatMessage');
 
   var pubsubGlobal = dependencies('pubsub').global;
-
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
 
   function getChannels(options, callback) {
-    Channel.find({type: 'channel'}).populate('members').exec(callback);
+    Channel.find({type: 'channel'}).populate('members').exec(function(err, channels) {
+      channels = channels || [];
+      if (channels.length === 0) {
+        return createChannel(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
+          if (err) {
+            return callback(new Error('Can not create the default channel'));
+          }
+          callback(null, [channel]);
+        });
+      }
+      callback(err, channels);
+    });
   }
 
   function getChannel(channel, callback) {

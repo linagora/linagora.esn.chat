@@ -15,5 +15,13 @@ module.exports = {
     USER_CONNECTION: 'user:connection',
     USER_DISCONNECTION: 'user:disconnection',
     CHANNEL_CREATION: 'chat:channel:creation'
+  },
+  DEFAULT_CHANNEL: {
+    name: 'general',
+    type: 'channel',
+    topic: 'default',
+    purpose: 'default',
+    isNotRead: false
   }
+
 };
