@@ -2,6 +2,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var mongoose = require('mongoose');
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 
@@ -82,10 +83,45 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The getChannels function', function() {
 
+    beforeEach(function() {
+      modelsMock.ChatChannel = sinon.spy();
+      modelsMock.ChatChannel.find = sinon.spy(function(options, cb) {
+        cb && cb();
+        return mq;
+      });
+
+      modelsMock.ChatChannel.prototype.save = function(cb) {
+        cb(null, CONSTANTS.DEFAULT_CHANNEL, 1);
+      };
+
+      modelsMock.ChatChannel.populate = function(_channel, name, cb) {
+        expect(name).to.equal('members');
+        expect(_channel).to.equal(CONSTANTS.DEFAULT_CHANNEL);
+        cb(null, _channel);
+      };
+    });
+
     it('should call ChatChannel.findById and populate members', function(done) {
+      mq.exec = function(cb) {
+        cb(null, {});
+      };
       require('../../../backend/lib/channel')(dependencies).getChannels({}, function() {
         expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: 'channel'});
         expect(mq.populate).to.have.been.calledWith('members');
+        done();
+      });
+    });
+
+    it('should return the default channel', function(done) {
+      var module = require('../../../backend/lib/channel')(dependencies);
+      module.getChannels({}, function(err, channels) {
+        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: 'channel'});
+        expect(mq.populate).to.have.been.calledWith('members');
+        expect(err).to.be.equal(null);
+        expect(channels).not.to.be.empty;
+        expect(channels).not.to.be.undefined;
+        expect(channels).to.be.an('Array');
+        expect(channels[0]).to.shallowDeepEqual(CONSTANTS.DEFAULT_CHANNEL);
         done();
       });
     });
@@ -95,7 +131,6 @@ describe('The linagora.esn.chat channel lib', function() {
 
     it('should call ChatChannel.findById', function(done) {
       var channelId = 1;
-
       require('../../../backend/lib/channel')(dependencies).getChannel(channelId, function() {
         expect(modelsMock.ChatChannel.findById).to.have.been.calledWith(1);
         expect(mq.populate).to.have.been.calledWith('members');
