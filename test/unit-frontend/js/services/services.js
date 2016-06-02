@@ -13,9 +13,15 @@ describe('The linagora.esn.chat services', function() {
     user,
     livenotificationMock,
     $rootScope,
+    scope,
     chatUserState,
     chatNamespace,
-    $httpBackend;
+    $httpBackend,
+    getItemResult,
+    getItem,
+    setItem,
+    localStorageService,
+    chatNotification;
 
   beforeEach(function() {
 
@@ -42,19 +48,38 @@ describe('The linagora.esn.chat services', function() {
       return livenotificationMock;
     }
 
+    getItemResult = 'true';
+    getItem = sinon.spy(function(key) {
+      return $q.when(({
+        isNotificationEnabled: getItemResult
+      })[key]);
+    });
+    setItem = sinon.spy(function() {
+      return $q.when({});
+    });
+    localStorageService = {
+      getOrCreateInstance: sinon.stub().returns({
+        getItem: getItem,
+        setItem:  setItem
+      })
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
       $provide.value('_', _);
+      $provide.value('localStorageService', localStorageService);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_) {
     $q = _$q_;
     ChatConversationService = _ChatConversationService_;
+    chatNotification = _chatNotification_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
+    scope = $rootScope.$new();
     chatUserState = _chatUserState_;
     $httpBackend =  _$httpBackend_;
   }));
@@ -104,5 +129,25 @@ describe('The linagora.esn.chat services', function() {
   });
 
   describe('ChatConversationService service', function() {
+  });
+
+  describe('chatNotification service', function() {
+    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.TEXT_MESSAGE', function() {
+      $rootScope.$broadcast = sinon.spy();
+      expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
+    });
+
+    it('should set the isNotificationEnabled value from user preferences', function() {
+      expect(localStorageService.getOrCreateInstance).to.have.been.calledWith('linagora.esn.chat');
+      expect(getItem).to.have.been.calledWith('isNotificationEnabled');
+      expect(scope.isNotificationEnabled).to.be.a('boolean');
+    });
+
+    it('should initialize isNotificationEnabled in user preferences if not set', function() {
+      getItemResult = undefined;
+      expect(scope.isNotificationEnabled).to.be.true;
+      expect(setItem).to.have.been.calledWith('isNotificationEnabled', 'true');
+    });
+
   });
 });

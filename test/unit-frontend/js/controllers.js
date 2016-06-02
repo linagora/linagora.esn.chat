@@ -25,6 +25,7 @@ describe('The linagora.esn.chat module controllers', function() {
     user,
     livenotificationMock,
     ChatMessageAdapter,
+    chatNotification,
     ChatScroll,
     CHAT_EVENTS;
 
@@ -98,12 +99,13 @@ describe('The linagora.esn.chat module controllers', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_) {
+  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotification_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
     CHAT_EVENTS = _CHAT_EVENTS_;
+    chatNotification = _chatNotification_;
   }));
 
   function initController(ctrl) {
@@ -132,21 +134,9 @@ describe('The linagora.esn.chat module controllers', function() {
       expect(scope.groups).to.equal(groups);
     });
 
-    it('should set the isNotificationEnabled value from user preferences', function() {
+    it('should set the isNotificationEnabled value from chatNotification service', function() {
       initCtrl();
-      expect(localStorageService.getOrCreateInstance).to.have.been.calledWith('linagora.esn.chat');
-      expect(getItem).to.have.been.calledWith('isNotificationEnabled');
-      expect(scope.isNotificationEnabled).to.be.true;
-      getItemResult = 'false';
-      initCtrl();
-      expect(scope.isNotificationEnabled).to.be.false;
-    });
-
-    it('should initialize isNotificationEnabled in user preferences if not set', function() {
-      getItemResult = undefined;
-      initCtrl();
-      expect(scope.isNotificationEnabled).to.be.true;
-      expect(setItem).to.have.been.calledWith('isNotificationEnabled', 'true');
+      expect(chatNotification.isEnabled).to.have.been.called;
     });
   });
 

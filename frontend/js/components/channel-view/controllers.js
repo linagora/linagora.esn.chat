@@ -15,7 +15,8 @@ angular.module('linagora.esn.chat')
         CHAT_EVENTS,
         ChatScroll,
         _,
-        webNotification) {
+        webNotification,
+        channelActive) {
 
     $scope.user = session.user;
 
@@ -31,6 +32,9 @@ angular.module('linagora.esn.chat')
 
     getChannel().then(function(channel) {
       $scope.channel = channel;
+      channelActive.setChannelId(channel._id);
+      $scope.channel.isNotRead = false;
+      $scope.channel.unreadMessageCount = 0;
       $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channel);
       var conversation = _.find($scope.channels, {_id: $scope.channel._id});
       conversation && (conversation.isNotRead = false);
@@ -40,36 +44,7 @@ angular.module('linagora.esn.chat')
       });
     });
 
-    $scope.notifyNewMessage = function(message) {
-      var channel = $scope.channel;
-
-      function canSendNotification() {
-        return !$window.document.hasFocus() && !channel.isNotRead && $scope.isNotificationEnabled && message.user !== $scope.user._id;
-      }
-
-      if (canSendNotification()) {
-        var channelName = channel.name || 'OpenPaas Chat';
-        webNotification.showNotification('New message in ' + channelName, {
-          body: message.text,
-          icon: '/images/facebook-messenger.png',
-          autoClose: 4000
-        }, function onShow(err) {
-          if (err) {
-            $log.error('Unable to show notification: ' + err);
-          }
-        });
-      }
-    };
-
     $scope.newMessage = function(message) {
-      $scope.notifyNewMessage(message);
-
-      if (message.channel !== $scope.channel._id) {
-        var channel = _.find($scope.channels.concat($scope.groups), {_id: message.channel});
-        if (channel) {
-          channel.isNotRead = true;
-        }
-      }
 
       ChatMessageAdapter.fromAPI(message).then(function(message) {
         $scope.messages.push(message);
@@ -77,7 +52,10 @@ angular.module('linagora.esn.chat')
       });
     };
 
-    $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(evt, message) {
+    $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
+      if (message.channel !== channelActive.getChannelId()) {
+        channelsService.unreadMessage(message);
+      }
       $scope.newMessage(message);
     });
   });

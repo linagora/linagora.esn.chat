@@ -9,16 +9,15 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatSidebar', function(localStorageService) {
+  .directive('chatSidebar', function(chatNotification) {
     return {
       restrict: 'E',
       templateUrl: '/chat/views/aside/sidebar.html',
       link: function(scope) {
         scope.toggleNotification = function() {
-          var newState = !scope.isNotificationEnabled;
-          localStorageService.getOrCreateInstance('linagora.esn.chat').setItem('isNotificationEnabled', newState.toString()).then(function() {
-            scope.isNotificationEnabled = newState;
-          });
+          var enable = chatNotification.isEnabled();
+          chatNotification.setNotificationStatus(!enable);
+          scope.isNotificationEnabled = !enable;
         };
       }
     };
@@ -71,4 +70,3 @@ angular.module('linagora.esn.chat')
       controller: 'chatChannelSubheaderController'
     };
   });
-
