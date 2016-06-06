@@ -13,7 +13,7 @@ angular.module('linagora.esn.chat')
         scope.$on('chat:message:user_typing', function(evt, message) {
           scope.typing[message.user] = message.state;
           var areTyping = _.map(scope.typing, function(value, key) {
-            if (value && scope.channel._id === message.channel) {
+            if (value && scope.chatLocalStateService.activeRoom._id === message.channel) {
               return key;
             }
           }).filter(function(element) {
@@ -57,9 +57,6 @@ angular.module('linagora.esn.chat')
   .directive('chatChannelView', function() {
     return {
       restrict: 'E',
-      scope: {
-        channelId: '=?'
-      },
       controller: 'channelViewController',
       templateUrl: '/chat/views/components/channel-view/channel-view.html'
     };
@@ -80,7 +77,7 @@ angular.module('linagora.esn.chat')
           var message = {
             state: state,
             user: scope.user._id,
-            channel: scope.channel._id,
+            channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };
 
@@ -117,7 +114,7 @@ angular.module('linagora.esn.chat')
             type: 'text',
             text: scope.text,
             user: scope.user._id,
-            channel: scope.channel._id,
+            channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };
         }

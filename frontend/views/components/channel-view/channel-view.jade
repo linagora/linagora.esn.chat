@@ -1,6 +1,6 @@
 #messages-main
   .block-header.visible-md
-    h2 \#{{::channel.name}}
+    h2 \#{{::chatLocalStateService.activeRoom.name}}
     ul.actions
       li
         a(href='')
@@ -16,14 +16,14 @@
       .listview.lv-message
         .lv-header.message-header
           .lvh-label
-            a(href='') {{(channel.members || []).length}} #{__('members')}
+            a(href='') {{(chatLocalStateService.activeRoom.members || []).length}} #{__('members')}
             span.divider |
-            span(ng-if="!channel.topic.value")
+            span(ng-if="!chatLocalStateService.activeRoom.topic.value")
               a(href='')
                 | Add a topic
                 i.mdi.mdi-plus
-            span(ng-if="channel.topic.value")
-              | {{::channel.topic.value}}
+            span(ng-if="chatLocalStateService.activeRoom.topic.value")
+              | {{::chatLocalStateService.activeRoom.topic.value}}
               a(href='')
                 | Edit
                 i.mdi.mdi-pencil
@@ -32,5 +32,5 @@
               a(href='')
                 i.mdi.mdi-information-outline
         .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true")
-          chat-message(ng-repeat="message in messages | filter:{ channel: channel._id } | orderBy: ['timestamps.creation'] track by $index", message="message")
+          chat-message(ng-repeat="message in messages | filter:{ channel: chatLocalStateService.activeRoom._id } | orderBy: ['timestamps.creation'] track by $index", message="message")
         chat-footer

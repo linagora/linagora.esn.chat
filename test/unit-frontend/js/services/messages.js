@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
@@ -57,7 +57,6 @@ describe('The linagora.esn.chat messages', function() {
 
       module('linagora.esn.chat', function($provide) {
         $provide.factory('session', sessionFactory);
-        $provide.value('_', _);
         $provide.value('ChatWSTransport', ChatWSTransportMock);
         $provide.value('backgroundProcessorService', backgroundProcessorServiceMock);
         $provide.value('fileUploadService', fileUploadServiceMock);
@@ -70,7 +69,7 @@ describe('The linagora.esn.chat messages', function() {
       CHAT_EVENTS = _CHAT_EVENTS_;
       $rootScope = _$rootScope_;
       chatMessageService = _chatMessageService_;
-      sessionMock.ready = $q.when({user:user, domain: domain});
+      sessionMock.ready = $q.when({user: user, domain: domain});
     }));
 
     it('should pass correct argument when constructing transport object', function() {
@@ -187,7 +186,6 @@ describe('The linagora.esn.chat messages', function() {
 
       module('linagora.esn.chat', function($provide) {
         $provide.factory('session', sessionFactory);
-        $provide.value('_', _);
         $provide.factory('livenotification', livenotificationFactory);
       });
     });

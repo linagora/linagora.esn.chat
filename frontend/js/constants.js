@@ -15,4 +15,17 @@ angular.module('linagora.esn.chat')
   .constant('CHAT_NOTIF', {
     CHAT_AUTO_CLOSE: 4000,
     CHAT_DEFAULT_ICON: '/images/default_avatar.png'
+  })
+  .constant('CHAT_CHANNEL_TYPE', {
+    CHANNEL: 'channel',
+    GROUP: 'group'
+  })
+  .constant('CHAT_DEFAULT_CHANNEL', {
+    CHANNEL: {
+      name: 'general',
+      type: 'channel',
+      topic: 'default',
+      purpose: 'default',
+      isNotRead: false
+    }
   });

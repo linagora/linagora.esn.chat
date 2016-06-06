@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
@@ -47,7 +47,6 @@ describe('The linagora.esn.chat channelsServices', function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
-      $provide.value('_', _);
     });
   });
 
@@ -58,7 +57,7 @@ describe('The linagora.esn.chat channelsServices', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
     $httpBackend =  _$httpBackend_;
     $rootScope = _$rootScope_;
-    sessionMock.ready = $q.when({user:user});
+    sessionMock.ready = $q.when({user: user});
   }));
 
   describe('computeGroupName', function() {
@@ -76,14 +75,14 @@ describe('The linagora.esn.chat channelsServices', function() {
 
     it('should display all user if more than one', function() {
       expect(channelsService.computeGroupName('userId', {
-        members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id:3, firstname: 'Kenny', lastname: 'McCormick'}]
+        members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
       })).to.equal('Eric Cartman, Stan Marsh, Kenny McCormick');
     });
   });
 
   describe('getChannel', function() {
     it('should fetch data from the rest API if not in cached data', function() {
-      var channel = {_id:'channelId'};
+      var channel = {_id: 'channelId'};
       var callback = sinon.spy();
       $httpBackend.expectGET('/chat/api/chat/channels/channelId').respond(channel);
       channelsService.getChannel('channelId').then(callback);
@@ -93,7 +92,7 @@ describe('The linagora.esn.chat channelsServices', function() {
     });
 
     it('should not fetch data from the rest API if channel is in the cached data', function() {
-      var channel = {_id:'channelId'};
+      var channel = {_id: 'channelId'};
       $httpBackend.expectGET('/chat/api/chat/channels').respond([channel]);
       channelsService.getChannels();
       $rootScope.$digest();
@@ -144,7 +143,7 @@ describe('The linagora.esn.chat channelsServices', function() {
 
   describe('getGroups', function() {
     it('should fetch data from the rest API the first time', function() {
-      sessionMock.ready = $q.when({user:user});
+      sessionMock.ready = $q.when({user: user});
       var groups = [1, 2].map(function(i) {
         return {_id: i, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
@@ -206,7 +205,7 @@ describe('The linagora.esn.chat channelsServices', function() {
 
     it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CHANNEL and add regular channel in channel cache', function() {
       var id =  'justAdded';
-      var data = {_id:id};
+      var data = {_id: id};
       callback(data);
       var thenCallback = sinon.spy();
       channelsService.getChannel(id).then(thenCallback);
@@ -228,7 +227,7 @@ describe('The linagora.esn.chat channelsServices', function() {
       expect(thenCallback).to.have.been.calledWith(data);
       callback(data);
       expect(thenCallback).to.have.been.calledWith({
-        _id:id,
+        _id: id,
         type: 'group',
         members: [user, {firstname: 'Eric', lastname: 'Cartman'}],
         name: 'Eric Cartman'
