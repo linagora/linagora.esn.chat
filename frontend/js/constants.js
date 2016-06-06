@@ -11,4 +11,8 @@ angular.module('linagora.esn.chat')
     SWITCH_CURRENT_CHANNEL: 'chat:channel:switch_current_channel',
     TEXT_MESSAGE: 'chat:message:text'
   })
-  .constant('CHAT_NAMESPACE', '/chat');
+  .constant('CHAT_NAMESPACE', '/chat')
+  .constant('CHAT_NOTIF', {
+    CHAT_AUTO_CLOSE: 4000,
+    CHAT_DEFAULT_ICON: '/images/default_avatar.png'
+  });

@@ -86,12 +86,22 @@ angular.module('linagora.esn.chat')
       return postChannels(channel);
     }
 
+    function unreadMessage(message) {
+      getChannel(message.channel).then(function(channel) {
+        if (channel) {
+          channel.isNotRead = true;
+          channel.unreadMessageCount = (channel.unreadMessageCount || 0) + 1;
+        }
+      });
+    }
+
     return {
       computeGroupName: computeGroupName,
       getChannels: getChannels,
       getChannel: getChannel,
       getGroups: getGroups,
       addGroups: addGroups,
-      addChannels: addChannels
+      addChannels: addChannels,
+      unreadMessage: unreadMessage
     };
   });

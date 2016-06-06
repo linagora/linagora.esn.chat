@@ -2,7 +2,6 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var mongoose = require('mongoose');
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 

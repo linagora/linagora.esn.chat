@@ -92,5 +92,68 @@ angular.module('linagora.esn.chat')
     return {
       scrollDown: scrollDown
     };
-  });
+  })
 
+  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, channelsService) {
+    var enable, _channel, _message;
+    var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
+
+    var initLocalPermission = function() {
+      localForage.getItem('isNotificationEnabled').then(function(value) {
+        if (value) {
+          enable = value;
+        } else {
+          localForage.setItem('isNotificationEnabled', webNotification.permissionGranted);
+          enable = webNotification.permissionGranted;
+        }
+      });
+    };
+
+    var canSendNotification = function() {
+      return !$window.document.hasFocus() && !_channel.isNotRead && enable && _message.user !== session.user._id;
+    };
+
+    return {
+      start: function() {
+        initLocalPermission();
+        $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
+          channelsService.getChannel(message.channel).then(function(channel) {
+            _channel = channel;
+            _message = message;
+            if (canSendNotification()) {
+              var channelName = channel.name || 'OpenPaas Chat';
+              webNotification.showNotification('New message in ' + channelName, {
+                body: message.text,
+                icon: CHAT_NOTIF.CHAT_DEFAULT_ICON,
+                autoClose: CHAT_NOTIF.CHAT_AUTO_CLOSE
+              }, function onShow(err) {
+                if (err) {
+                  err && $log.error('Unable to show notification: ' + err);
+                }
+              });
+            }
+          });
+        });
+      },
+      isEnabled: function() {
+        return enable;
+      },
+      setNotificationStatus: function(status) {
+        localForage.setItem('isNotificationEnabled', status);
+        enable = status;
+      }
+    };
+
+  })
+
+  .factory('channelActive', function() {
+    var channelId;
+    return {
+      setChannelId: function(_channelId) {
+        channelId = _channelId;
+      },
+      getChannelId: function() {
+        return channelId;
+      }
+    };
+  });
