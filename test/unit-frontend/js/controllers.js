@@ -99,7 +99,7 @@ describe('The linagora.esn.chat module controllers', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotification_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotification_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
@@ -135,6 +135,7 @@ describe('The linagora.esn.chat module controllers', function() {
     });
 
     it('should set the isNotificationEnabled value from chatNotification service', function() {
+      chatNotification.isEnabled = sinon.spy();
       initCtrl();
       expect(chatNotification.isEnabled).to.have.been.called;
     });

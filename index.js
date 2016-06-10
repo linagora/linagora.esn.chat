@@ -42,6 +42,9 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
       var webserverWrapper = dependencies('webserver-wrapper');
       var frontendModules = [
         'app.js',
+        'app.config.js',
+        'app.routes.js',
+        'app.run.js',
         'constants.js',
         'controllers.js',
         'directives.js',
