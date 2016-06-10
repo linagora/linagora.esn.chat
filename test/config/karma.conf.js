@@ -23,7 +23,11 @@ module.exports = function(config) {
       'frontend/components/HTML5-Desktop-Notifications2/desktop-notify.js',
       'frontend/components/angular-file-upload/dist/angular-file-upload-all.js',
       'test/unit-frontend/module.js',
-      'frontend/js/**/*.js',
+      'frontend/js/app.js',
+      'frontend/js/constants.js',
+      'frontend/js/controllers.js',
+      'frontend/js/directives.js',
+      'frontend/js/*/**/*.js',
       'test/unit-frontend/js/**/*.js',
       'frontend/views/**/*.jade'
     ],
@@ -54,7 +58,6 @@ module.exports = function(config) {
       stripPrefix: 'frontend',
       cacheIdFromPath: function(filepath) {
         var cacheId = filepath.replace(/jade$/, 'html').replace(/^frontend/, '/chat');
-        console.log(cacheId);
         return cacheId;
       },
       prependPrefix: '/linagora.esn.chat',

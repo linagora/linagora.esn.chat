@@ -132,22 +132,19 @@ describe('The linagora.esn.chat services', function() {
   });
 
   describe('chatNotification service', function() {
-    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.TEXT_MESSAGE', function() {
-      $rootScope.$broadcast = sinon.spy();
-      expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
-    });
+    describe('start() method', function() {
+      it('should listen to $rootScope CHAT_EVENTS.TEXT_MESSAGE events', function() {
+        $rootScope.$on = sinon.spy();
+        chatNotification.start();
+        expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
+      });
 
-    it('should set the isNotificationEnabled value from user preferences', function() {
-      expect(localStorageService.getOrCreateInstance).to.have.been.calledWith('linagora.esn.chat');
-      expect(getItem).to.have.been.calledWith('isNotificationEnabled');
-      expect(scope.isNotificationEnabled).to.be.a('boolean');
-    });
+      it('should read the isNotificationEnabled value from user preferences', function() {
+        chatNotification.start();
+        expect(localStorageService.getOrCreateInstance).to.have.been.calledWith('linagora.esn.chat');
+        expect(getItem).to.have.been.calledWith('isNotificationEnabled');
+      });
 
-    it('should initialize isNotificationEnabled in user preferences if not set', function() {
-      getItemResult = undefined;
-      expect(scope.isNotificationEnabled).to.be.true;
-      expect(setItem).to.have.been.calledWith('isNotificationEnabled', 'true');
     });
-
   });
 });
