@@ -95,7 +95,7 @@ angular.module('linagora.esn.chat')
   })
 
   .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, channelsService, chatLocalStateService) {
-    var enable, _channel, _message;
+    var enable;
     var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
 
     var initLocalPermission = function() {
@@ -109,8 +109,8 @@ angular.module('linagora.esn.chat')
       });
     };
 
-    var canSendNotification = function() {
-      return !$window.document.hasFocus() && enable && _message.user !== session.user._id;
+    var canSendNotification = function(message) {
+      return !$window.document.hasFocus() && enable && message.user !== session.user._id;
     };
 
     return {
@@ -118,9 +118,7 @@ angular.module('linagora.esn.chat')
         initLocalPermission();
         $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
           channelsService.getChannel(message.channel).then(function(channel) {
-            _channel = channel;
-            _message = message;
-            if (canSendNotification()) {
+            if (canSendNotification(message)) {
               var channelName = channel.name || 'OpenPaas Chat';
               webNotification.showNotification('New message in ' + channelName, {
                 body: message.text,
