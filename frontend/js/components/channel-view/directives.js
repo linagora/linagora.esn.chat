@@ -62,12 +62,36 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, deviceDetector, ChatScroll, chatMessageService) {
+  .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService) {
+
+    function ChatMessageComposeController() {
+      var self = this;
+      var eventInterceptors = [];
+
+      self.addEventInterceptor = function(callback) {
+        eventInterceptors.push(callback);
+        return function removeEventInterceptor() {
+          var cbIdx = eventInterceptors.indexOf(callback);
+          if (cbIdx >= 0) {
+            eventInterceptors.splice(cbIdx, 1);
+          }
+        };
+      };
+      self.shouldBypassEvent = function(evt) {
+        return eventInterceptors.some(function(callback) {
+          return callback(evt);
+        });
+      };
+    }
+
     return {
       restrict: 'E',
+      controller: ChatMessageComposeController,
       templateUrl: '/chat/views/components/channel-view/messages/message-compose.html',
-      link: function(scope, element) {
+      require: 'chatMessageCompose',
+      link: function(scope, element, attrs, ctlr) {
         chatMessageService.connect();
+        var textarea = element.find('textarea').get(0);
         var timer = null;
 
         scope.typing = false;
@@ -88,13 +112,33 @@ angular.module('linagora.esn.chat')
           });
         }
 
-        element.on('keydown', function(event) {
-          if (!deviceDetector.isMobile() && event.keyCode === 13) {
-            if (!event.shiftKey) {
-              event.preventDefault();
-              scope.sendMessage();
+        function textareaAdapter() {
+          return {
+            value: scope.text,
+            selectionStart: textarea.selectionStart,
+            selectionEnd: textarea.selectionEnd,
+            focus: function() {
+              textarea.focus();
+            },
+            replaceText: function(value, selectionStart, selectionEnd) {
+              scope.text = value;
+              scope.$evalAsync(function() {
+                textarea.focus();
+                textarea.setSelectionRange(selectionStart, selectionEnd);
+              });
             }
+          };
+        }
+
+        element.on('keydown', function(event) {
+          var bypassEvent = ctlr.shouldBypassEvent(event);
+
+          if (!bypassEvent && !deviceDetector.isMobile() && event.keyCode === 13 && !event.shiftKey) {
+            event.preventDefault();
+            scope.sendMessage();
           }
+
+          $rootScope.$broadcast('chat:message:compose:keydown', event);
         });
 
         scope.onTextChanged = function() {
@@ -107,6 +151,7 @@ angular.module('linagora.esn.chat')
             scope.typing = false;
             sendUserTyping(false);
           }, 2000);
+          $rootScope.$broadcast('chat:message:compose:textChanged', textareaAdapter());
         };
 
         function buildCurrentMessage() {
