@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
@@ -17,11 +17,19 @@ describe('The linagora.esn.chat services', function() {
     chatUserState,
     chatNamespace,
     $httpBackend,
-    getItemResult,
+    chatNotification,
+    chatLocalStateService,
+    channelsServiceMock,
+    groups,
+    channels,
+    localStorageService,
     getItem,
     setItem,
-    localStorageService,
-    chatNotification;
+    getItemResult;
+
+  beforeEach(
+    angular.mock.module('linagora.esn.chat')
+  );
 
   beforeEach(function() {
 
@@ -37,16 +45,17 @@ describe('The linagora.esn.chat services', function() {
       }
     };
 
-    function livenotificationFactory(CHAT_NAMESPACE) {
-      livenotificationMock = function(name) {
-        if (name === CHAT_NAMESPACE) {
-          return chatNamespace;
-        } else {
-          throw new Error(name + 'namespace has not been mocked');
-        }
-      };
-      return livenotificationMock;
-    }
+    groups = [{_id: 'group1', type: 'group'}, {_id: 'group2', type: 'group'}];
+    channels = [{_id: 'channel1', type: 'channel'}, {_id: 'channel2', type: 'channel'}];
+
+    channelsServiceMock = {
+      getChannels: function() {
+        return $q.when(channels);
+      },
+      getGroups: function() {
+        return $q.when(groups);
+      }
+    };
 
     getItemResult = 'true';
     getItem = sinon.spy(function(key) {
@@ -64,15 +73,26 @@ describe('The linagora.esn.chat services', function() {
       })
     };
 
-    module('linagora.esn.chat', function($provide) {
+    function livenotificationFactory(CHAT_NAMESPACE) {
+      livenotificationMock = function(name) {
+        if (name === CHAT_NAMESPACE) {
+          return chatNamespace;
+        } else {
+          throw new Error(name + 'namespace has not been mocked');
+        }
+      };
+      return livenotificationMock;
+    }
+
+    angular.mock.module(function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
-      $provide.value('_', _);
+      $provide.value('channelsService', channelsServiceMock);
       $provide.value('localStorageService', localStorageService);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_) {
     $q = _$q_;
     ChatConversationService = _ChatConversationService_;
     chatNotification = _chatNotification_;
@@ -82,6 +102,7 @@ describe('The linagora.esn.chat services', function() {
     scope = $rootScope.$new();
     chatUserState = _chatUserState_;
     $httpBackend =  _$httpBackend_;
+    chatLocalStateService = _chatLocalStateService_;
   }));
 
   describe('chatUserState service', function() {
@@ -133,18 +154,84 @@ describe('The linagora.esn.chat services', function() {
 
   describe('chatNotification service', function() {
     describe('start() method', function() {
-      it('should listen to $rootScope CHAT_EVENTS.TEXT_MESSAGE events', function() {
+      it('should listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
         $rootScope.$on = sinon.spy();
         chatNotification.start();
         expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
       });
+    });
+  });
 
-      it('should read the isNotificationEnabled value from user preferences', function() {
-        chatNotification.start();
-        expect(localStorageService.getOrCreateInstance).to.have.been.calledWith('linagora.esn.chat');
-        expect(getItem).to.have.been.calledWith('isNotificationEnabled');
+  describe('chatLocalState service', function() {
+    var chatLocalStateService, CHAT_CHANNEL_TYPE, CHAT_DEFAULT_CHANNEL;
+
+    beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CHANNEL_TYPE_, _CHAT_DEFAULT_CHANNEL_) {
+      chatLocalStateService = _chatLocalStateService_;
+      CHAT_CHANNEL_TYPE = _CHAT_CHANNEL_TYPE_;
+      CHAT_DEFAULT_CHANNEL = _CHAT_DEFAULT_CHANNEL_;
+    }));
+
+    beforeEach(function() {
+      chatLocalStateService.initLocalState();
+      $rootScope.$digest();
+    });
+
+    describe('setActive', function() {
+      it('should set activeRoom the channel and broadcast it on $rootScope', function() {
+        $rootScope.$broadcast = sinon.spy();
+        var isSet = chatLocalStateService.setActive(channels[0]);
+        expect(chatLocalStateService.activeRoom).to.be.deep.equal(channels[0]);
+        expect(isSet).to.be.equal(true);
+        expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channels[0]);
       });
 
+      it('should set activeRoom the group channel and broadcast it on $rootScope', function() {
+        $rootScope.$broadcast = sinon.spy();
+        var isSet = chatLocalStateService.setActive(groups[1]);
+        expect(chatLocalStateService.activeRoom).to.be.deep.equal(groups[1]);
+        expect(isSet).to.be.equal(true);
+        expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, groups[1]);
+      });
+
+      it('should not set activeRoom a channel who don\'t exist', function() {
+        $rootScope.$broadcast = sinon.spy();
+        var isSet = chatLocalStateService.setActive({_id: 'channel3'});
+        expect(chatLocalStateService.activeRoom).to.not.be.deep.equal({_id: 'channel3'});
+        expect(isSet).to.be.equal(false);
+      });
+    });
+
+    describe('initLocalState', function() {
+      it('should initialize the channels/groups and the activeRoom/activeRoom', function() {
+        chatLocalStateService.initLocalState();
+        expect(chatLocalStateService.activeRoom).to.be.deep.equal({});
+      });
+    });
+
+    describe('unreadMessage', function() {
+
+      it('should upgrade messageCount of channel', function() {
+        chatLocalStateService.unreadMessage({channel: 'channel1'});
+        chatLocalStateService.unreadMessage({channel: 'channel1'});
+        expect(channels[0].unreadMessageCount).to.equal(2);
+      });
+
+      it('should upgrade messageCount of group', function() {
+        chatLocalStateService.unreadMessage({channel: 'group2'});
+        chatLocalStateService.unreadMessage({channel: 'group2'});
+        expect(groups[1].unreadMessageCount).to.equal(2);
+      });
+
+      it('should not upgrade messageCount of active group or channel', function() {
+        channels[0].unreadMessageCount = 1;
+        chatLocalStateService.setActive({_id: 'channel1', type: CHAT_CHANNEL_TYPE.CHANNEL});
+        chatLocalStateService.unreadMessage({channel: 'channel1'});
+        expect(channels[0].unreadMessageCount).to.equal(0);
+      });
+
+      it('should not fail if channel does not exist', function() {
+        chatLocalStateService.unreadMessage({_id: 'channel42'});
+      });
     });
   });
 });

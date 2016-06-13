@@ -28,7 +28,6 @@ describe('The linagora.esn.chat module directive', function() {
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('chatUserState', chatUserState);
-      $provide.value('_', _);
       $provide.value('session', session);
     });
 
@@ -40,7 +39,7 @@ describe('The linagora.esn.chat module directive', function() {
   beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _$compile_, _CHAT_EVENTS_) {
     userStateResult = _.constant(true);
     $q = _$q_;
-    session.ready = $q.when({user:user});
+    session.ready = $q.when({user: user});
     $rootScope = _$rootScope_;
     $compile = _$compile_;
     CHAT_EVENTS = _CHAT_EVENTS_;
@@ -59,7 +58,7 @@ describe('The linagora.esn.chat module directive', function() {
 
     beforeEach(function() {
       item = {
-        members: [user, {_id:2}, {_id: 3}]
+        members: [user, {_id: 2}, {_id: 3}]
       };
     });
 
@@ -117,7 +116,7 @@ describe('The linagora.esn.chat module directive', function() {
 
       it('should ignore state changement of user which are not in the group', function() {
         callback(null, {
-          userId:4,
+          userId: 4,
           state: 'disconnected'
         });
 
@@ -126,24 +125,24 @@ describe('The linagora.esn.chat module directive', function() {
 
       it('should set state back to connected if user was the last one disconnected before he get connected', function() {
         callback(null, {
-          userId:2,
+          userId: 2,
           state: 'disconnected'
         });
 
         callback(null, {
-          userId:1,
+          userId: 1,
           state: 'disconnected'
         });
 
         callback(null, {
-          userId:1,
+          userId: 1,
           state: 'connected'
         });
 
         expect(eleScope.allUsersConnected).to.be.false;
 
         callback(null, {
-          userId:2,
+          userId: 2,
           state: 'connected'
         });
 

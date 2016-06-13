@@ -16,32 +16,14 @@ angular.module('linagora.esn.chat')
         ChatScroll,
         _,
         webNotification,
-        channelActive) {
+        chatLocalStateService,
+        $stateParams) {
 
     $scope.user = session.user;
 
-    function getChannel() {
-      if ($scope.channelId) {
-        return channelsService.getChannel($scope.channelId);
-      } else {
-        return channelsService.getChannels().then(function(channels) {
-          return channels[0];
-        });
-      }
-    }
-
-    getChannel().then(function(channel) {
-      $scope.channel = channel;
-      channelActive.setChannelId(channel._id);
-      $scope.channel.isNotRead = false;
-      $scope.channel.unreadMessageCount = 0;
-      $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channel);
-      var conversation = _.find($scope.channels, {_id: $scope.channel._id});
-      conversation && (conversation.isNotRead = false);
-      ChatConversationService.fetchMessages($scope.channel._id, {}).then(function(result) {
-        $scope.messages = result;
-        ChatScroll.scrollDown();
-      });
+    ChatConversationService.fetchMessages($scope.chatLocalStateService.activeRoom._id, {}).then(function(result) {
+      $scope.messages = result;
+      ChatScroll.scrollDown();
     });
 
     $scope.newMessage = function(message) {
@@ -53,9 +35,10 @@ angular.module('linagora.esn.chat')
     };
 
     $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-      if (message.channel !== channelActive.getChannelId()) {
-        channelsService.unreadMessage(message);
+      if (message.channel === $scope.chatLocalStateService.activeRoom._id) {
+        $scope.newMessage(message);
+      } else {
+        chatLocalStateService.unreadMessage(message);
       }
-      $scope.newMessage(message);
     });
   });

@@ -94,23 +94,23 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, channelsService) {
+  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, channelsService, chatLocalStateService) {
     var enable, _channel, _message;
     var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
 
     var initLocalPermission = function() {
       localForage.getItem('isNotificationEnabled').then(function(value) {
         if (value) {
-          enable = value;
+          enable = JSON.parse(value);
         } else {
-          localForage.setItem('isNotificationEnabled', webNotification.permissionGranted);
+          localForage.setItem('isNotificationEnabled', JSON.stringify(webNotification.permissionGranted));
           enable = webNotification.permissionGranted;
         }
       });
     };
 
     var canSendNotification = function() {
-      return !$window.document.hasFocus() && !_channel.isNotRead && enable && _message.user !== session.user._id;
+      return !$window.document.hasFocus() && enable && _message.user !== session.user._id;
     };
 
     return {
@@ -139,21 +139,67 @@ angular.module('linagora.esn.chat')
         return enable;
       },
       setNotificationStatus: function(status) {
-        localForage.setItem('isNotificationEnabled', status);
+        localForage.setItem('isNotificationEnabled', JSON.stringify(status));
         enable = status;
       }
     };
 
   })
 
-  .factory('channelActive', function() {
-    var channelId;
-    return {
-      setChannelId: function(_channelId) {
-        channelId = _channelId;
-      },
-      getChannelId: function() {
-        return channelId;
+  .factory('chatLocalStateService', function($rootScope, $q, _, channelsService, CHAT_CHANNEL_TYPE, CHAT_EVENTS) {
+
+    var service;
+
+    function initLocalState() {
+      $q.all([channelsService.getChannels(), channelsService.getGroups()]).then(function(result) {
+        service.channels = result[0];
+        service.groups = result[1];
+      });
+      service.activeRoom = {};
+    }
+
+    function findChannel(channelId) {
+      return _.find((service.channels || []).concat(service.groups || []), {_id: channelId});
+    }
+
+    function isActiveRoom(channelId) {
+      return channelId === service.activeRoom._id;
+    }
+
+    function setActive(chatChannel) {
+      var channel;
+      if (isActiveRoom(chatChannel._id)) {
+        return true;
       }
+      channel = findChannel(chatChannel._id);
+      if (!channel) {
+        return false;
+      }
+      channel.unreadMessageCount = 0;
+      service.activeRoom = channel;
+
+      $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channel);
+
+      return true;
+    }
+
+    function unreadMessage(message) {
+      var channel = findChannel(message.channel);
+      if (channel && !isActiveRoom(channel._id)) {
+        channel.unreadMessageCount = (channel.unreadMessageCount || 0) + 1;
+      }
+    }
+
+    service = {
+      setActive: setActive,
+      unreadMessage: unreadMessage,
+      initLocalState: initLocalState,
+      findChannel: findChannel,
+      isActiveRoom: isActiveRoom,
+      channels: [],
+      groups: [],
+      activeRoom: {}
     };
+
+    return service;
   });

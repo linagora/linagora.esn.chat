@@ -89,7 +89,6 @@ angular.module('linagora.esn.chat')
     function unreadMessage(message) {
       getChannel(message.channel).then(function(channel) {
         if (channel) {
-          channel.isNotRead = true;
           channel.unreadMessageCount = (channel.unreadMessageCount || 0) + 1;
         }
       });

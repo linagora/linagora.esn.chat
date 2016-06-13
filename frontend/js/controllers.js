@@ -2,16 +2,15 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('chatRootController', function($scope, $rootScope, channelsService, CHAT_EVENTS, chatNotification) {
-    $scope.isNotificationEnabled = chatNotification.isEnabled();
+  .controller('chatRootController', function($scope, $rootScope, CHAT_EVENTS, chatNotification, chatLocalStateService) {
+    $scope.isEnabled = function() {
+      return chatNotification.isEnabled();
+    };
 
-    channelsService.getChannels().then(function(channels) {
-      $scope.channels = channels;
-    });
-
-    channelsService.getGroups().then(function(groups) {
-      $scope.groups = groups;
-    });
+    $scope.chatLocalStateService = chatLocalStateService;
+    if (!chatLocalStateService.activeRoom._id) {
+      chatLocalStateService.setActive(chatLocalStateService.channels[0]);
+    }
   })
 
   .controller('chatAddChannelController', function($scope, $state, channelsService) {
@@ -20,8 +19,7 @@ angular.module('linagora.esn.chat')
         name: $scope.channel.name,
         type: 'channel',
         topic: $scope.channel.topic || '',
-        purpose: $scope.channel.purpose || '',
-        isNotRead: false
+        purpose: $scope.channel.purpose || ''
       };
 
       channelsService.addChannels(channel).then(function(response) {
@@ -43,11 +41,5 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatChannelSubheaderController', function($scope, $rootScope, CHAT_EVENTS, channelActive) {
-    var unbind = $rootScope.$on(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, function(event, channel) {
-      $scope.channel = channel;
-      channelActive.setChannelId(channel._id);
-    });
-
-    $scope.$on('$destroy', unbind);
+  .controller('chatChannelSubheaderController', function() {
   });
