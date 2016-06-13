@@ -18,5 +18,6 @@ angular.module('linagora.esn.chat', [
   'esn.localstorage',
   'esn.file',
   'ui.router',
-  'angularFileUpload'
+  'angularFileUpload',
+  'linagora.esn.emoticon'
 ]);

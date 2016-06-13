@@ -26,3 +26,4 @@ angular.module('esn.core', [])
     }];
   }
 });
+angular.module('linagora.esn.emoticon', []);
