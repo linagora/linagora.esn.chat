@@ -35,6 +35,7 @@
     "jquery": "2.1.4",
     "angular-mocks": "1.3.16",
     "angular-ui-router": "0.2.15",
+    "angular-component": "https://github.com/toddmotto/angular-component.git#~0.1.2",
     "dynamic-directive": "2.0.0",
     "uuid4": "~1.1.0",
     "angular-uuid4": "~0.3.1",

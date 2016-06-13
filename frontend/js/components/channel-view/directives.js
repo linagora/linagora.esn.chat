@@ -64,32 +64,18 @@ angular.module('linagora.esn.chat')
 
   .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService) {
 
-    function ChatMessageComposeController() {
-      var self = this;
-      var eventInterceptors = [];
-
-      self.addEventInterceptor = function(callback) {
-        eventInterceptors.push(callback);
-        return function removeEventInterceptor() {
-          var cbIdx = eventInterceptors.indexOf(callback);
-          if (cbIdx >= 0) {
-            eventInterceptors.splice(cbIdx, 1);
-          }
-        };
-      };
-      self.shouldBypassEvent = function(evt) {
-        return eventInterceptors.some(function(callback) {
-          return callback(evt);
-        });
-      };
+    function isEventPrevented(event) {
+      if ('isDefaultPrevented' in event) {
+        return event.isDefaultPrevented();
+      } else {
+        return event.defaultPrevented;
+      }
     }
 
     return {
       restrict: 'E',
-      controller: ChatMessageComposeController,
       templateUrl: '/chat/views/components/channel-view/messages/message-compose.html',
-      require: 'chatMessageCompose',
-      link: function(scope, element, attrs, ctlr) {
+      link: function(scope, element, attrs) {
         chatMessageService.connect();
         var textarea = element.find('textarea').get(0);
         var timer = null;
@@ -117,9 +103,6 @@ angular.module('linagora.esn.chat')
             value: scope.text,
             selectionStart: textarea.selectionStart,
             selectionEnd: textarea.selectionEnd,
-            focus: function() {
-              textarea.focus();
-            },
             replaceText: function(value, selectionStart, selectionEnd) {
               scope.text = value;
               scope.$evalAsync(function() {
@@ -131,14 +114,13 @@ angular.module('linagora.esn.chat')
         }
 
         element.on('keydown', function(event) {
-          var bypassEvent = ctlr.shouldBypassEvent(event);
+          $rootScope.$broadcast('chat:message:compose:keydown', event);
 
-          if (!bypassEvent && !deviceDetector.isMobile() && event.keyCode === 13 && !event.shiftKey) {
+          if (!isEventPrevented(event) && !deviceDetector.isMobile() && event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             scope.sendMessage();
           }
 
-          $rootScope.$broadcast('chat:message:compose:keydown', event);
         });
 
         scope.onTextChanged = function() {
