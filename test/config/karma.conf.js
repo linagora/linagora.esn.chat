@@ -22,6 +22,7 @@ module.exports = function(config) {
       'frontend/components/angular-web-notification/angular-web-notification.js',
       'frontend/components/HTML5-Desktop-Notifications2/desktop-notify.js',
       'frontend/components/angular-file-upload/dist/angular-file-upload-all.js',
+      'frontend/components/angular-xeditable/dist/js/xeditable.js',
       'test/unit-frontend/module.js',
       'frontend/js/app.js',
       'frontend/js/constants.js',

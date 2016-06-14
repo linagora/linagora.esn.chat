@@ -324,4 +324,34 @@ describe('The linagora.esn.chat channel lib', function() {
       require('../../../backend/lib/channel')(dependencies).getMessages(options, query, done);
     });
   });
+
+  describe('The updateTopic function', function() {
+    it('should call Channel.update with the correct parameter', function(done) {
+      var now = new Date();
+      var clock = sinon.useFakeTimers(now.getTime());
+      var channelId = 'channelId';
+      var userId = 'userId';
+      var topic = {
+        value: 'value',
+        creator: userId,
+        last_set: new Date(clock.now)
+      };
+      var setTopic = {$set: {
+          topic: {
+            value: 'value',
+            creator: userId,
+            last_set: new Date(clock.now)
+          }
+        }
+      };
+
+      modelsMock.ChatChannel.update = function(_channelId, _topic, cb) {
+        expect(_channelId).to.deep.equals({_id: channelId});
+        expect(_topic).to.deep.equals(setTopic);
+        cb();
+      };
+
+      require('../../../backend/lib/channel')(dependencies).updateTopic(channelId, topic, done);
+    });
+  });
 });

@@ -54,5 +54,9 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.deleteChannel);
 
+  router.put('/channels/:id/topic',
+    authorizationMW.requiresAPILogin,
+    controller.updateTopic);
+
   return router;
 };
