@@ -18,13 +18,13 @@
           .lvh-label
             a(href='') {{(chatLocalStateService.activeRoom.members || []).length}} #{__('members')}
             span.divider |
-            span(ng-if="!chatLocalStateService.activeRoom.topic.value")
-              a(href='')
+            span(ng-if="!chatLocalStateService.activeRoom.topic.value" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
+              a(href="#" )
                 | Add a topic
                 i.mdi.mdi-plus
-            span(ng-if="chatLocalStateService.activeRoom.topic.value")
-              | {{::chatLocalStateService.activeRoom.topic.value}}
-              a(href='')
+            span(ng-if="chatLocalStateService.activeRoom.topic.value" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
+              | {{chatLocalStateService.activeRoom.topic.value}}
+              a(href="#")
                 | Edit
                 i.mdi.mdi-pencil
           ul.lv-actions.actions

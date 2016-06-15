@@ -224,6 +224,26 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function updateTopic(req, res) {
+    var topic = {
+      value: req.body.value,
+      creator: req.user._id,
+      last_set: new Date()
+    };
+    lib.channel.updateTopic(req.params.id, topic, function(err, numAffected) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while update the topic, ' + numAffected + 'affected for channel' + req.params.id
+          }
+        });
+      }
+      res.status(200).json(numAffected);
+    });
+  }
+
   return {
     getMessages: getMessages,
     getChannels: getChannels,
@@ -235,6 +255,7 @@ module.exports = function(dependencies, lib) {
     joinChannel: joinChannel,
     leaveChannel: leaveChannel,
     deleteChannel: deleteChannel,
-    createChannel: createChannel
+    createChannel: createChannel,
+    updateTopic: updateTopic
   };
 };

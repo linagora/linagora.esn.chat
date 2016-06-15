@@ -235,4 +235,21 @@ describe('The linagora.esn.chat channelsServices', function() {
     });
   });
 
+  describe('updateChannelTopic', function() {
+    beforeEach(function() {
+      sessionMock.user = $q.when({user: user});
+    });
+
+    it('should return 1 row affected', function() {
+      var value = 'Default';
+
+      $httpBackend.expectPUT('/chat/api/chat/channels/channelId/topic', {
+        value: value,
+      }).respond(1);
+      channelsService.updateChannelTopic(value, 'channelId');
+      $rootScope.$digest();
+      $httpBackend.flush();
+    });
+  });
+
 });

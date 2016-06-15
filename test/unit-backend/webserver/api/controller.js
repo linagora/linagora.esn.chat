@@ -32,6 +32,9 @@ describe('The linagora.esn.chat webserver controller', function() {
         }),
         addMemberToChannel: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
+        }),
+        updateTopic: sinon.spy(function(channelId, topic, callback) {
+          return callback(err, result);
         })
       }
     };
@@ -134,7 +137,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should send back HTTP 200 with the lib.findGroupByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findMyUsersGroups({query:{members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.findMyUsersGroups({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
@@ -153,7 +156,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.leaveChannel({params:{id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
@@ -169,7 +172,7 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('shoud send back HTTP 204 when lib.leaveChannel success', function(done) {
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.leaveChannel({params:{id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
           return {
@@ -187,7 +190,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.joinChannel({params:{id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
@@ -203,7 +206,7 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('shoud send back HTTP 204 when lib.joinChannel success', function(done) {
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.joinChannel({params:{id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
           return {
@@ -221,7 +224,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query:{members: 'id'}, user: {_id: 'id'}}, {
+      controller.findGroupByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
@@ -238,7 +241,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should send back HTTP 200 with the lib.findGroupByMembers result calledWith exactMatch === true', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query:{members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.findGroupByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
@@ -255,7 +258,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should handle query with more than one member and add auth user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query:{members: ['1', '2']}, user: {_id: 'id'}}, {
+      controller.findGroupByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
@@ -271,7 +274,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query:{members: '1'}, user: {_id: 'id'}}, {
+      controller.findGroupByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
@@ -287,7 +290,7 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should not add auth user if already passed as membres arguments', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query:{members: ['1', 'id']}, user: {_id: 'id'}}, {
+      controller.findGroupByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
@@ -319,22 +322,22 @@ describe('The linagora.esn.chat webserver controller', function() {
         }
       }, {
         status: _.constant({json: function() {
-          expect(lib.channel.createChannel).to.have.been.calledWith({
-            name: name,
-            type: 'type',
-            creator: user,
-            topic: {
-              value: topic,
-              creator: user
-            },
-            purpose: {
-              value: purpose,
-              creator: user
-            },
-            members: ['1']
-          });
-          done();
-        }})
+            expect(lib.channel.createChannel).to.have.been.calledWith({
+              name: name,
+              type: 'type',
+              creator: user,
+              topic: {
+                value: topic,
+                creator: user
+              },
+              purpose: {
+                value: purpose,
+                creator: user
+              },
+              members: ['1']
+            });
+            done();
+          }})
       });
     });
 
@@ -354,11 +357,11 @@ describe('The linagora.esn.chat webserver controller', function() {
         }
       }, {
         status: _.constant({json: function() {
-          expect(lib.channel.createChannel).to.have.been.calledWith(sinon.match({
-            members: ['2', '3', '1']
-          }));
-          done();
-        }})
+            expect(lib.channel.createChannel).to.have.been.calledWith(sinon.match({
+              members: ['2', '3', '1']
+            }));
+            done();
+          }})
       });
     });
 
@@ -390,6 +393,43 @@ describe('The linagora.esn.chat webserver controller', function() {
           return {
             json: function(json) {
               expect(json).to.deep.equal(channel);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
+
+  describe('The updateTopic function', function() {
+    it('should send back HTTP 500 with error when channel can not be updated', function(done) {
+      err = new Error('failed');
+      var req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.updateTopic(req, {
+        status: function(code) {
+          expect(code).to.equal(500);
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 when channel has been updated', function(done) {
+      var channel = {id: 1};
+      result = 1;
+      var req = {body: {}, params: {id: channel.id}, query: {}, user: user};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.updateTopic(req, {
+        status: function(code) {
+          expect(code).to.be.equal(200);
+          return {
+            json: function(json) {
+              expect(json).to.be.equal(1);
               done();
             }
           };

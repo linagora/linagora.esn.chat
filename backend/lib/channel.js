@@ -99,6 +99,18 @@ module.exports = function(dependencies) {
     mq.exec(callback);
   }
 
+  function updateTopic(channelId, topic, callback) {
+    Channel.update({_id: channelId}, {
+      $set: {
+        topic: {
+          value: topic.value,
+          creator: topic.creator,
+          last_set: topic.last_set
+        }
+      }
+    }, callback);
+  }
+
   return {
     getMessages: getMessages,
     addMemberToChannel: addMemberToChannel,
@@ -108,6 +120,7 @@ module.exports = function(dependencies) {
     createChannel: createChannel,
     getChannel: getChannel,
     getChannels: getChannels,
-    deleteChannel: deleteChannel
+    deleteChannel: deleteChannel,
+    updateTopic: updateTopic
   };
 };
