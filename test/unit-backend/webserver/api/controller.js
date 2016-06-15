@@ -421,15 +421,20 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 200 when channel has been updated', function(done) {
       var channel = {id: 1};
-      result = 1;
-      var req = {body: {}, params: {id: channel.id}, query: {}, user: user};
+      var topic = {
+        value: 'topic',
+        creator: user._id,
+        last: new Date()
+      };
+      result = topic;
+      var req = {body: topic, params: {id: channel.id}, query: {}, user: user};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.updateTopic(req, {
         status: function(code) {
           expect(code).to.be.equal(200);
           return {
             json: function(json) {
-              expect(json).to.be.equal(1);
+              expect(json).to.be.deep.equal(topic);
               done();
             }
           };
