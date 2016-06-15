@@ -100,7 +100,7 @@ module.exports = function(dependencies) {
   }
 
   function updateTopic(channelId, topic, callback) {
-    Channel.update({_id: channelId}, {
+    Channel.findByIdAndUpdate({_id: channelId}, {
       $set: {
         topic: {
           value: topic.value,

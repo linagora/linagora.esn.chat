@@ -230,17 +230,17 @@ module.exports = function(dependencies, lib) {
       creator: req.user._id,
       last_set: new Date()
     };
-    lib.channel.updateTopic(req.params.id, topic, function(err, numAffected) {
+    lib.channel.updateTopic(req.params.id, topic, function(err, topic) {
       if (err) {
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while update the topic, ' + numAffected + 'affected for channel' + req.params.id
+            details: err.message || 'Error while update the topic for channel' + req.params.id
           }
         });
       }
-      res.status(200).json(numAffected);
+      res.status(200).json(topic);
     });
   }
 

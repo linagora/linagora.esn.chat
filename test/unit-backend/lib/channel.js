@@ -345,7 +345,7 @@ describe('The linagora.esn.chat channel lib', function() {
         }
       };
 
-      modelsMock.ChatChannel.update = function(_channelId, _topic, cb) {
+      modelsMock.ChatChannel.findByIdAndUpdate = function(_channelId, _topic, cb) {
         expect(_channelId).to.deep.equals({_id: channelId});
         expect(_topic).to.deep.equals(setTopic);
         cb();
