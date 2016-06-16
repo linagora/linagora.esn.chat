@@ -62,12 +62,22 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, deviceDetector, ChatScroll, chatMessageService) {
+  .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService) {
+
+    function isEventPrevented(event) {
+      if ('isDefaultPrevented' in event) {
+        return event.isDefaultPrevented();
+      } else {
+        return event.defaultPrevented;
+      }
+    }
+
     return {
       restrict: 'E',
       templateUrl: '/chat/views/components/channel-view/messages/message-compose.html',
-      link: function(scope, element) {
+      link: function(scope, element, attrs) {
         chatMessageService.connect();
+        var textarea = element.find('textarea').get(0);
         var timer = null;
 
         scope.typing = false;
@@ -88,13 +98,29 @@ angular.module('linagora.esn.chat')
           });
         }
 
-        element.on('keydown', function(event) {
-          if (!deviceDetector.isMobile() && event.keyCode === 13) {
-            if (!event.shiftKey) {
-              event.preventDefault();
-              scope.sendMessage();
+        function textareaAdapter() {
+          return {
+            value: scope.text,
+            selectionStart: textarea.selectionStart,
+            selectionEnd: textarea.selectionEnd,
+            replaceText: function(value, selectionStart, selectionEnd) {
+              scope.text = value;
+              scope.$evalAsync(function() {
+                textarea.focus();
+                textarea.setSelectionRange(selectionStart, selectionEnd);
+              });
             }
+          };
+        }
+
+        element.on('keydown', function(event) {
+          $rootScope.$broadcast('chat:message:compose:keydown', event);
+
+          if (!isEventPrevented(event) && !deviceDetector.isMobile() && event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            scope.sendMessage();
           }
+
         });
 
         scope.onTextChanged = function() {
@@ -107,6 +133,7 @@ angular.module('linagora.esn.chat')
             scope.typing = false;
             sendUserTyping(false);
           }, 2000);
+          $rootScope.$broadcast('chat:message:compose:textChanged', textareaAdapter());
         };
 
         function buildCurrentMessage() {

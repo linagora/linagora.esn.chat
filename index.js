@@ -54,6 +54,7 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
         'services/message.js',
         'components/channel-view/controllers.js',
         'components/channel-view/directives.js',
+        'components/channel-view/chat-emoticon-chooser.component.js',
       ];
       webserverWrapper.injectAngularModules(NAME, frontendModules, MODULE_NAME, ['esn']);
       var lessFile = path.resolve(__dirname, './frontend/css/styles.less');
