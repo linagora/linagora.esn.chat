@@ -230,7 +230,7 @@ module.exports = function(dependencies, lib) {
       creator: req.user._id,
       last_set: new Date()
     };
-    lib.channel.updateTopic(req.params.id, topic, function(err, topic) {
+    lib.channel.updateTopic(req.params.id, topic, function(err, channel) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -240,7 +240,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-      res.status(200).json(topic);
+      res.status(200).json(channel);
     });
   }
 

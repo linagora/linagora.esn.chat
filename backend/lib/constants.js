@@ -14,7 +14,8 @@ module.exports = {
     USER_STATE: 'user:state',
     USER_CONNECTION: 'user:connection',
     USER_DISCONNECTION: 'user:disconnection',
-    CHANNEL_CREATION: 'chat:channel:creation'
+    CHANNEL_CREATION: 'chat:channel:creation',
+    TOPIC_UPDATED: 'chat:message:text:channel:topic'
   },
   DEFAULT_CHANNEL: {
     name: 'general',

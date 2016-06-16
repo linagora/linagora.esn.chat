@@ -9,7 +9,8 @@ angular.module('linagora.esn.chat')
     USER_CHANGE_STATE: 'user:state',
     NEW_CHANNEL: 'chat:channel:creation',
     SWITCH_CURRENT_CHANNEL: 'chat:channel:switch_current_channel',
-    TEXT_MESSAGE: 'chat:message:text'
+    TEXT_MESSAGE: 'chat:message:text',
+    TOPIC_UPDATED: 'chat:message:text:channel:topic'
   })
   .constant('CHAT_NAMESPACE', '/chat')
   .constant('CHAT_NOTIF', {

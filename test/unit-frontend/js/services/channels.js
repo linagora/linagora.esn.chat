@@ -14,7 +14,15 @@ describe('The linagora.esn.chat channelsServices', function() {
   livenotificationMock,
   chatNamespace,
   $httpBackend,
-  $rootScope;
+  $rootScope,
+  _,
+  channelsServiceMock,
+  groups,
+  channels;
+
+  beforeEach(
+    angular.mock.module('linagora.esn.chat')
+  );
 
   beforeEach(function() {
 
@@ -29,6 +37,22 @@ describe('The linagora.esn.chat channelsServices', function() {
         then: function(callback) {
           return callback({user: user});
         }
+      }
+    };
+
+    groups = [{_id: 'group1', type: 'group'}, {_id: 'group2', type: 'group'}];
+    channels = [{_id: 'channel1', type: 'channel'}, {_id: 'channel2', type: 'channel'}];
+
+    channelsServiceMock = {
+      getChannels: function() {
+        return $q.when(channels);
+      },
+      getGroups: function() {
+        return $q.when(groups);
+      },
+      getChannel: function(id) {
+        var channel = _.find((channels || []).concat(groups || []), {_id: id});
+        return $q.when(channel);
       }
     };
 
@@ -240,16 +264,50 @@ describe('The linagora.esn.chat channelsServices', function() {
       sessionMock.user = $q.when({user: user});
     });
 
-    it('should return 1 row affected', function() {
+    it('should return the channel affected', function() {
       var value = 'Default';
+      var channel = {
+        _id: 'channelId'
+      };
 
       $httpBackend.expectPUT('/chat/api/chat/channels/channelId/topic', {
         value: value,
-      }).respond(1);
+      }).respond(channel);
       channelsService.updateChannelTopic(value, 'channelId');
       $rootScope.$digest();
       $httpBackend.flush();
     });
   });
 
+  describe('setTopicChannel', function() {
+    var topic;
+    beforeEach(function() {
+      topic = {
+        channel: 'channel1',
+        topic: {
+          value: 'topic'
+        }
+      };
+    });
+
+    it('should set the topic of a room', function() {
+
+      $httpBackend.expectGET('/chat/api/chat/channels').respond(channels);
+      channelsService.getChannels();
+      $httpBackend.flush();
+      channelsService.setTopicChannel(topic).then(function(isSet) {
+        expect(isSet).to.be.equal(true);
+      });
+      channelsService.getChannel(topic.channel).then(function(channel) {
+        expect(channel.topic).to.be.deep.equal(topic.topic);
+      });
+    });
+
+    it('should not set the topic for a channel who don\'t exist', function() {
+      topic.channel = 'channel3';
+      channelsService.setTopicChannel(topic).then(function(isSet) {
+        expect(isSet).to.be.equal(false);
+      });
+    });
+  });
 });

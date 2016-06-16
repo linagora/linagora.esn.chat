@@ -6,6 +6,7 @@ var NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
 var chatNamespace;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 
 function init(dependencies) {
   var logger = dependencies('logger');
@@ -56,6 +57,10 @@ function init(dependencies) {
 
   globalPubsub.topic(CHANNEL_CREATION).subscribe(function(data) {
     chatNamespace.emit(CHANNEL_CREATION, data);
+  });
+
+  globalPubsub.topic(TOPIC_UPDATED).subscribe(function(data) {
+    chatNamespace.emit(TOPIC_UPDATED, data);
   });
 }
 

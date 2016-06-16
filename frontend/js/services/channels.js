@@ -14,6 +14,10 @@ angular.module('linagora.esn.chat')
 
         ((channel.type === 'group' ? groups : channels) || []).push(channel);
       });
+
+      $rootScope.$on(CHAT_EVENTS.TOPIC_UPDATED, function(event, data) {
+        setTopicChannel(data);
+      });
     });
 
     function computeGroupName(myId, group) {
@@ -92,6 +96,15 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function setTopicChannel(topic) {
+      return getChannel(topic.channel).then(function(channel) {
+        channel.topic = topic.topic;
+        return true;
+      }, function() {
+          return false;
+        });
+    }
+
     return {
       computeGroupName: computeGroupName,
       getChannels: getChannels,
@@ -99,6 +112,7 @@ angular.module('linagora.esn.chat')
       getGroups: getGroups,
       addGroups: addGroups,
       addChannels: addChannels,
-      updateChannelTopic: updateChannelTopic
+      updateChannelTopic: updateChannelTopic,
+      setTopicChannel: setTopicChannel
     };
   });
