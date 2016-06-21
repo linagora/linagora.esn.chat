@@ -70,10 +70,14 @@ angular.module('linagora.esn.chat')
   .factory('ChatConversationService', function($q, session, ChatRestangular, _) {
     function fetchMessages(channel, options) {
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
-        return response.data.map(function(message) {
+        var data = ChatRestangular.stripRestangular(response.data);
+        return data.map(function(message) {
           message.user = message.creator;
           message.date = message.timestamps.creation;
           return message;
+        })
+        .sort(function(msgA, msgB) {
+          return msgA.date > msgB.date;
         });
       });
     }

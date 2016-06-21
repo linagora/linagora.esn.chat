@@ -21,15 +21,33 @@ angular.module('linagora.esn.chat')
 
     $scope.user = session.user;
 
+    function addUniqId(message) {
+      message._uniqId = message.user._id + ':' + message.date  + '' + message.text;
+    }
+
     ChatConversationService.fetchMessages($scope.chatLocalStateService.activeRoom._id, {}).then(function(result) {
+      result.forEach(addUniqId);
       $scope.messages = result;
       ChatScroll.scrollDown();
     });
 
+    function insertMessage(messages, message) {
+      addUniqId(message);
+      // chances are, the new message is the most recent
+      // So we traverse the array starting by the end
+      for (var i = messages.length - 1; i > -1; i--) {
+        if (messages[i].date < message.date) {
+          messages.splice(i + 1, 0, message);
+          return;
+        }
+      }
+      messages.unshift(message);
+    }
+
     $scope.newMessage = function(message) {
 
       ChatMessageAdapter.fromAPI(message).then(function(message) {
-        $scope.messages.push(message);
+        insertMessage($scope.messages, message);
         ChatScroll.scrollDown();
       });
     };
