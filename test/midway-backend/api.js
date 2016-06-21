@@ -169,7 +169,7 @@ describe('The chat API', function() {
               creator: userId.toString(),
             },
             members: {
-              0: {_id:userId.toString()},
+              0: {_id: userId.toString()},
               length: 1
             },
             purpose: {
@@ -199,7 +199,7 @@ describe('The chat API', function() {
         return Q.denodeify(app.lib.channel.getChannel)(channelId);
       }).then(function(channel) {
         expect(channel.members).to.shallowDeepEqual({
-          0: {_id: userId.toString()},
+          0: {_id: userId},
           length: 1
         });
         done();
@@ -226,7 +226,7 @@ describe('The chat API', function() {
       }).then(function(res) {
         return Q.denodeify(app.lib.channel.getChannel)(channelId);
       }).then(function(channel) {
-        expect(channel.members).to.deep.equal([]);
+        expect(channel.members.length).to.deep.equal(0);
         done();
       }).catch(done);
 
