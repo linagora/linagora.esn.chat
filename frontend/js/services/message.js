@@ -34,7 +34,11 @@ angular.module('linagora.esn.chat')
           return;
         }
 
-        $rootScope.$broadcast('chat:message:' + message.type, message);
+        var eventName = 'chat:message:' + message.type;
+        if (message.subtype) {
+          eventName += ':' + message.subtype;
+        }
+        $rootScope.$broadcast(eventName, message);
       }
 
       var connected = false;
@@ -137,7 +141,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('ChatWSTransport', function($rootScope, $log, $q, livenotification, CHAT_NAMESPACE) {
+  .factory('ChatWSTransport', function($rootScope, $log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
 
     function ChatWSTransport(options) {
       this.options = options;
@@ -163,6 +167,8 @@ angular.module('linagora.esn.chat')
         this.sio.on('connected', function() {
           $log.info('Connected');
         });
+        this.sio = livenotification(CHAT_NAMESPACE);
+        this.sio.on(CHAT_EVENTS.TOPIC_UPDATED, onMessage);
       }
     };
 

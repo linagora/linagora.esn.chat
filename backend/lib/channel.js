@@ -2,6 +2,7 @@
 
 var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
 
 module.exports = function(dependencies) {
@@ -13,6 +14,7 @@ module.exports = function(dependencies) {
 
   var pubsubGlobal = dependencies('pubsub').global;
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
 
   function getChannels(options, callback) {
     Channel.find({type: 'channel'}).populate('members').exec(function(err, channels) {
@@ -108,7 +110,23 @@ module.exports = function(dependencies) {
           last_set: topic.last_set
         }
       }
-    }, callback);
+    }, function(err, channel) {
+      var message = {
+        type: 'text',
+        subtype: 'channel:topic',
+        date: Date.now(),
+        channel: String(channel._id),
+        user: String(topic.creator),
+        topic: {
+          value: channel.topic.value,
+          creator: String(channel.topic.creator),
+          last_set: channel.topic.last_set
+        },
+        text: 'set the channel topic: ' + topic.value,
+      };
+      updateChannelTopic.publish(message);
+      callback(err, channel);
+    });
   }
 
   return {

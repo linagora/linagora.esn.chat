@@ -4,10 +4,11 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 
 describe('The linagora.esn.chat channel lib', function() {
 
-  var deps, logger, channelCreationTopic, modelsMock, ObjectIdMock, mq;
+  var deps, logger, channelCreationTopic, modelsMock, ObjectIdMock, mq, channelTopicUptated;
 
   function dependencies(name) {
     return deps[name];
@@ -16,6 +17,11 @@ describe('The linagora.esn.chat channel lib', function() {
   beforeEach(function() {
 
     channelCreationTopic = {
+      publish: sinon.spy()
+    };
+
+    channelTopicUptated = {
+      subscribe: sinon.spy(),
       publish: sinon.spy()
     };
 
@@ -73,6 +79,9 @@ describe('The linagora.esn.chat channel lib', function() {
           topic: function(name) {
             if (name === CHANNEL_CREATION) {
               return channelCreationTopic;
+            }
+            if (name === TOPIC_UPDATED) {
+              return channelTopicUptated;
             }
           }
         }
@@ -326,29 +335,34 @@ describe('The linagora.esn.chat channel lib', function() {
   });
 
   describe('The updateTopic function', function() {
-    it('should call Channel.update with the correct parameter', function(done) {
+    it('should call Channel.findByIdAndUpdate with the correct parameter', function(done) {
       var now = new Date();
       var clock = sinon.useFakeTimers(now.getTime());
-      var channelId = 'channelId';
-      var userId = 'userId';
+      var channelId = {
+        _id: 'channelId',
+        toHexString: function() {
+          return this._id;
+        }
+      };
+      var userId = {
+        _id: 'userId',
+        toHexString: function() {
+          return this._id;
+        }
+      };
       var topic = {
         value: 'value',
         creator: userId,
         last_set: new Date(clock.now)
       };
       var setTopic = {$set: {
-          topic: {
-            value: 'value',
-            creator: userId,
-            last_set: new Date(clock.now)
-          }
+          topic: topic
         }
       };
-
       modelsMock.ChatChannel.findByIdAndUpdate = function(_channelId, _topic, cb) {
         expect(_channelId).to.deep.equals({_id: channelId});
         expect(_topic).to.deep.equals(setTopic);
-        cb();
+        cb(null, {_id: channelId, topic: topic});
       };
 
       require('../../../backend/lib/channel')(dependencies).updateTopic(channelId, topic, done);

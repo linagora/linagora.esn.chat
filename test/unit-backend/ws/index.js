@@ -5,11 +5,12 @@ var sinon = require('sinon');
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
+var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var messageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic;
+  var messageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelTopicUptated;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies);
@@ -29,6 +30,11 @@ describe('The Chat WS server', function() {
     };
 
     channelCreationTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelTopicUptated = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -60,6 +66,9 @@ describe('The Chat WS server', function() {
             }
             if (name === CHANNEL_CREATION) {
               return channelCreationTopic;
+            }
+            if (name === TOPIC_UPDATED) {
+              return channelTopicUptated;
             }
           }
         }
@@ -106,6 +115,20 @@ describe('The Chat WS server', function() {
     callbackOnCreationChannelPubsub(data);
 
     expect(chatNamespace.emit).to.have.been.calledWith(CHANNEL_CREATION, data);
+  });
+
+  it('should listen TOPIC_UPDATED pubsub and emit it on ws', function() {
+    initWs();
+    var callbackOnTopicUpdatePubsub;
+    expect(channelTopicUptated.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+      callbackOnTopicUpdatePubsub = callback;
+      return _.isFunction(callback);
+    }));
+
+    var data = {};
+    callbackOnTopicUpdatePubsub(data);
+
+    expect(chatNamespace.emit).to.have.been.calledWith(TOPIC_UPDATED, data);
   });
 
   describe('The connexion handler', function() {
