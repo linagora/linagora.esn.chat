@@ -24,11 +24,10 @@ angular.module('linagora.esn.chat')
         'main@chat': {
           template: '<sub-header><chat-channel-subheader/></sub-header><chat-channel-view/>',
           controller: function($stateParams, chatLocalStateService) {
-            var channel = chatLocalStateService.findChannel($stateParams.id);
-            if (channel) {
-              chatLocalStateService.setActive(channel);
+            if (!$stateParams.id) {
+              chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
             } else {
-              chatLocalStateService.setActive(chatLocalStateService.channels[0]);
+              chatLocalStateService.setActive($stateParams.id);
             }
           },
           controllerAs: 'ctrl'

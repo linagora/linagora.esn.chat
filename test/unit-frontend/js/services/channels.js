@@ -15,7 +15,6 @@ describe('The linagora.esn.chat channelsServices', function() {
   chatNamespace,
   $httpBackend,
   $rootScope,
-  _,
   channelsServiceMock,
   groups,
   channels;
@@ -49,10 +48,6 @@ describe('The linagora.esn.chat channelsServices', function() {
       },
       getGroups: function() {
         return $q.when(groups);
-      },
-      getChannel: function(id) {
-        var channel = _.find((channels || []).concat(groups || []), {_id: id});
-        return $q.when(channel);
       }
     };
 

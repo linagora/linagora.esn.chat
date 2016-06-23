@@ -9,11 +9,11 @@ angular.module('linagora.esn.chat')
 
     $scope.chatLocalStateService = chatLocalStateService;
     if (!chatLocalStateService.activeRoom._id) {
-      chatLocalStateService.setActive(chatLocalStateService.channels[0]);
+      chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
     }
   })
 
-  .controller('chatAddChannelController', function($scope, $state, channelsService) {
+  .controller('chatAddChannelController', function($scope, $state, channelsService, chatLocalStateService) {
     $scope.addChannel = function() {
       var channel = {
         name: $scope.channel.name,
@@ -23,12 +23,13 @@ angular.module('linagora.esn.chat')
       };
 
       channelsService.addChannels(channel).then(function(response) {
+        chatLocalStateService.addChannel(response.data);
         $state.go('chat.channels-views', {id: response.data._id});
       });
     };
   })
 
-  .controller('chatAddGroupController', function($scope, $state, channelsService, _) {
+  .controller('chatAddGroupController', function($scope, $state, channelsService, _, chatLocalStateService) {
     $scope.members = [];
     $scope.addGroup = function() {
       var group = {
@@ -36,6 +37,7 @@ angular.module('linagora.esn.chat')
       };
 
       channelsService.addGroups(group).then(function(response) {
+        chatLocalStateService.addGroup(response.data);
         $state.go('chat.channels-views', { id: response.data._id});
       });
     };

@@ -142,7 +142,7 @@ describe('The linagora.esn.chat module controllers', function() {
     it('should call setActive with the default channel', function() {
       initCtrl();
       $rootScope.$digest();
-      expect(chatLocalStateService.setActive).to.be.calledWith(channels[0]);
+      expect(chatLocalStateService.setActive).to.be.calledWith(channels[0]._id);
     });
 
     it('should set the isNotificationEnabled value from chatNotification service', function() {
