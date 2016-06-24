@@ -22,8 +22,7 @@
               a(href="#" )
                 | Add a topic
                 i.mdi.mdi-plus
-            span(ng-if="chatLocalStateService.activeRoom.topic.value" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
-              | {{chatLocalStateService.activeRoom.topic.value}}
+            span(ng-if="chatLocalStateService.activeRoom.topic.value" ng-bind-html="chatLocalStateService.activeRoom.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
               a(href="#")
                 | Edit
                 i.mdi.mdi-pencil
