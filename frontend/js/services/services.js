@@ -164,12 +164,12 @@ angular.module('linagora.esn.chat')
       return channelId === service.activeRoom._id;
     }
 
-    function setActive(chatChannel) {
+    function setActive(channelId) {
       var channel;
-      if (isActiveRoom(chatChannel._id)) {
+      if (isActiveRoom(channelId)) {
         return true;
       }
-      channel = findChannel(chatChannel._id);
+      channel = findChannel(channelId);
       if (!channel) {
         return false;
       }
@@ -188,12 +188,22 @@ angular.module('linagora.esn.chat')
       }
     }
 
+    function addChannel(channel) {
+      service.channels.push(channel);
+    }
+
+    function addGroup(group) {
+      service.groups.push(group);
+    }
+
     service = {
       setActive: setActive,
       unreadMessage: unreadMessage,
       initLocalState: initLocalState,
       findChannel: findChannel,
       isActiveRoom: isActiveRoom,
+      addChannel: addChannel,
+      addGroup: addGroup,
       channels: [],
       groups: [],
       activeRoom: {}

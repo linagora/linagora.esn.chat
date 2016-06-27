@@ -179,7 +179,7 @@ describe('The linagora.esn.chat services', function() {
     describe('setActive', function() {
       it('should set activeRoom the channel and broadcast it on $rootScope', function() {
         $rootScope.$broadcast = sinon.spy();
-        var isSet = chatLocalStateService.setActive(channels[0]);
+        var isSet = chatLocalStateService.setActive(channels[0]._id);
         expect(chatLocalStateService.activeRoom).to.be.deep.equal(channels[0]);
         expect(isSet).to.be.equal(true);
         expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channels[0]);
@@ -187,7 +187,7 @@ describe('The linagora.esn.chat services', function() {
 
       it('should set activeRoom the group channel and broadcast it on $rootScope', function() {
         $rootScope.$broadcast = sinon.spy();
-        var isSet = chatLocalStateService.setActive(groups[1]);
+        var isSet = chatLocalStateService.setActive(groups[1]._id);
         expect(chatLocalStateService.activeRoom).to.be.deep.equal(groups[1]);
         expect(isSet).to.be.equal(true);
         expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, groups[1]);
@@ -195,7 +195,7 @@ describe('The linagora.esn.chat services', function() {
 
       it('should not set activeRoom a channel who don\'t exist', function() {
         $rootScope.$broadcast = sinon.spy();
-        var isSet = chatLocalStateService.setActive({_id: 'channel3'});
+        var isSet = chatLocalStateService.setActive('channel3');
         expect(chatLocalStateService.activeRoom).to.not.be.deep.equal({_id: 'channel3'});
         expect(isSet).to.be.equal(false);
       });
@@ -224,13 +224,43 @@ describe('The linagora.esn.chat services', function() {
 
       it('should not upgrade messageCount of active group or channel', function() {
         channels[0].unreadMessageCount = 1;
-        chatLocalStateService.setActive({_id: 'channel1', type: CHAT_CHANNEL_TYPE.CHANNEL});
+        chatLocalStateService.setActive('channel1');
         chatLocalStateService.unreadMessage({channel: 'channel1'});
         expect(channels[0].unreadMessageCount).to.equal(0);
       });
 
       it('should not fail if channel does not exist', function() {
         chatLocalStateService.unreadMessage({_id: 'channel42'});
+      });
+    });
+
+    describe('add channel & group', function() {
+
+      it('should add a channel', function() {
+        var channel = {_id: 'channel3', type: 'channel'};
+        chatLocalStateService.addChannel(channel);
+        expect(channels).to.include(channel);
+      });
+
+      it('should add a group', function() {
+        var group = {_id: 'group3', type: 'group'};
+        chatLocalStateService.addGroup(group);
+        expect(groups).to.include(group);
+      });
+    });
+
+    describe('isActiveRoom', function() {
+
+      it('should return true if channel is the active channel', function() {
+        chatLocalStateService.setActive(channels[0]._id);
+        var isActive = chatLocalStateService.isActiveRoom(channels[0]._id);
+        expect(isActive).to.be.equal(true);
+      });
+
+      it('should return false if channel is not the active channel', function() {
+        chatLocalStateService.setActive(channels[0]._id);
+        var isActive = chatLocalStateService.isActiveRoom(channels[1]._id);
+        expect(isActive).to.be.equal(false);
       });
     });
   });

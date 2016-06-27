@@ -2,17 +2,21 @@
 
 angular.module('linagora.esn.chat')
   .factory('channelsService', function($rootScope, $q, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
-    var groups;
-    var channels;
+    var groups = [];
+    var channels = [];
 
     session.ready.then(function(session) {
       var sio = livenotification(CHAT_NAMESPACE);
       sio.on(CHAT_EVENTS.NEW_CHANNEL, function(channel) {
-        if (channel.type === 'group') {
-          channel.name = computeGroupName(session.user._id, channel);
+        var room = _.find((channels || []).concat(groups || []), {_id: channel._id});
+        if (!room) {
+          if (channel.type === 'group') {
+            channel.name = computeGroupName(session.user._id, channel);
+            groups.push(channel);
+          } else {
+            channels.push(channel);
+          }
         }
-
-        ((channel.type === 'group' ? groups : channels) || []).push(channel);
       });
 
       $rootScope.$on(CHAT_EVENTS.TOPIC_UPDATED, function(event, data) {
@@ -31,7 +35,7 @@ angular.module('linagora.esn.chat')
     }
 
     function getGroups(options) {
-      if (groups) {
+      if (groups.length) {
         return $q.when(groups);
       }
 
@@ -48,7 +52,7 @@ angular.module('linagora.esn.chat')
     }
 
     function getChannels(options) {
-      if (channels) {
+      if (channels.length) {
         return $q.when(channels);
       }
       return ChatRestangular.all('channels').getList(options).then(function(response) {
