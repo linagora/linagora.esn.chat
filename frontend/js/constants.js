@@ -29,4 +29,8 @@ angular.module('linagora.esn.chat')
       purpose: 'default',
       isNotRead: false
     }
+  })
+  .constant('MESSAGE_TYPE', {
+    TYPING: 'user_typing',
+    TEXT: 'text'
   });

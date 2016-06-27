@@ -133,11 +133,18 @@ describe('The linagora.esn.chat messages', function() {
           expect($rootScope.$broadcast).to.have.been.calledWith('chat:message:' + message.type, sinon.match.same(message));
         });
 
-        it('should ignore message from myself', function() {
+        it('should ignore user_typing from myself', function() {
           $rootScope.$broadcast = sinon.spy();
-          var message = {type: 'aType', user: 'userId'};
+          var message = {type: 'user_typing', user: 'userId'};
           callback(message);
           expect($rootScope.$broadcast).to.have.not.been.calledOnce;
+        });
+
+        it('should broadcast text message from myself', function() {
+          $rootScope.$broadcast = sinon.spy();
+          var message = {type: 'text', user: 'userId'};
+          callback(message);
+          expect($rootScope.$broadcast).to.have.been.calledOnce;
         });
       });
     });
