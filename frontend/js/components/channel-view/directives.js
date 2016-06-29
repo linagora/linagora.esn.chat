@@ -153,7 +153,6 @@ angular.module('linagora.esn.chat')
           }
 
           var message = buildCurrentMessage();
-          scope.newMessage(message);
           scope.text = '';
 
           // hack to reset autoSize

@@ -10,6 +10,7 @@ angular.module('linagora.esn.chat')
         ChatWSTransport,
         fileUploadService,
         backgroundProcessorService,
+        MESSAGE_TYPE,
         DEFAULT_FILE_TYPE) {
 
     var chatMessageServicePromise = session.ready.then(function(session) {
@@ -21,6 +22,10 @@ angular.module('linagora.esn.chat')
         user: userId
       });
 
+      function isMeTyping(message) {
+        return message.user && message.user === userId && message.type === MESSAGE_TYPE.TYPING;
+      }
+
       function receiveMessage(message) {
         $log.debug('Got a message on chat service', message);
 
@@ -29,7 +34,7 @@ angular.module('linagora.esn.chat')
           return;
         }
 
-        if (message.user && message.user === userId) {
+        if (isMeTyping(message)) {
           $log.debug('My message, skipping');
           return;
         }
