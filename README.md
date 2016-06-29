@@ -6,11 +6,16 @@ Chat component for OpenPaaS ESN.
 
 While waiting for a npm-based dependency injection handler, you have to install this component in OpenPaaS like this:
 
-**1. NPM install**
+**1. Clone linagora.esn.chat and linagora.esn.emoticon**
 
-In your OpenPaaS ESN directory
+Clone somewhere, the two following git repository:
 
-    npm install linagora.esn.chat
+ * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.emoticon/browse
+ * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.chat/browse
+
+Go inside each repo and run:
+
+    npm install
 
 **2. Add component in the configuration file**
 
@@ -26,5 +31,6 @@ Add "linagora.esn.chat" in config/default.json:
 
 In your OpenPaaS ESN directory
 
-    ln -s node_modules/linagora.esn.chat modules/linagora.esn.chat
-
+    cd path_to_rse
+    ln -s path_to_emoticon modules/linagora.esn.emoticon
+    ln -s path_to_chat modules/linagora.esn.chat
