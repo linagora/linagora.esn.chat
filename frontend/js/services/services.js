@@ -122,7 +122,7 @@ angular.module('linagora.esn.chat')
               var channelName = channel.name || 'OpenPaas Chat';
               webNotification.showNotification('New message in ' + channelName, {
                 body: message.text,
-                icon: CHAT_NOTIF.CHAT_DEFAULT_ICON,
+                icon: '/api/users/' + message.user + '/profile/avatar',
                 autoClose: CHAT_NOTIF.CHAT_AUTO_CLOSE
               }, function onShow(err) {
                 if (err) {
