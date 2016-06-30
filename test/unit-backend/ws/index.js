@@ -6,11 +6,12 @@ var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var messageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelTopicUptated;
+  var globalMessageReceivedTopic, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelTopicUptated;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies);
@@ -19,7 +20,12 @@ describe('The Chat WS server', function() {
   beforeEach(function() {
     self = this;
     getUserIdResult = null;
-    messageReceivedTopic = {
+    localMessageReceivedTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    globalMessageReceivedTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -54,8 +60,8 @@ describe('The Chat WS server', function() {
       pubsub: {
         local: {
           topic: function(name) {
-            if (name === CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED) {
-              return messageReceivedTopic;
+            if (name === MESSAGE_RECEIVED) {
+              return localMessageReceivedTopic;
             }
           }
         },
@@ -69,6 +75,9 @@ describe('The Chat WS server', function() {
             }
             if (name === TOPIC_UPDATED) {
               return channelTopicUptated;
+            }
+            if (name === MESSAGE_RECEIVED) {
+              return globalMessageReceivedTopic;
             }
           }
         }
@@ -173,12 +182,17 @@ describe('The Chat WS server', function() {
         expect(socket.join).to.have.been.calledWith(room);
       });
 
-      it('should listen on message and publish same on local pubsub for received message', function() {
+      it('should listen on message and publish same on local pubsub and global pubsub for received message', function() {
         onSubscribeHandler(room);
         expect(socket.on).to.have.been.calledWith('message', sinon.match.func.and(sinon.match(function(handler) {
           var data = {};
           handler(data);
-          expect(messageReceivedTopic.publish).to.have.been.calledWith({
+          expect(localMessageReceivedTopic.publish).to.have.been.calledWith({
+            room: room,
+            message: data
+          });
+
+          expect(globalMessageReceivedTopic.publish).to.have.been.calledWith({
             room: room,
             message: data
           });
@@ -188,13 +202,10 @@ describe('The Chat WS server', function() {
 
       it('should listen on message and send them into the channel', function() {
         onSubscribeHandler(room);
-        expect(socket.on).to.have.been.calledWith('message', sinon.match.func.and(sinon.match(function(handler) {
+        expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match.func.and(sinon.match(function(handler) {
           var data = {};
-          handler(data);
-          expect(chatNamespace.emit).to.have.been.calledWith('message', {
-            room: room,
-            data: data
-          });
+          handler({room: room, message: data});
+          expect(chatNamespace.emit).to.have.been.calledWith('message', {room: room, data: data});
           return true;
         })));
       });

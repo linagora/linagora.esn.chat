@@ -7,6 +7,7 @@ var chatNamespace;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 
 function init(dependencies) {
   var logger = dependencies('logger');
@@ -43,8 +44,8 @@ function init(dependencies) {
       socket.on('message', function(data) {
         data.date = Date.now();
         data.room = room;
-        localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: room, message: data});
-        sendMessage(room, data);
+        localPubsub.topic(MESSAGE_RECEIVED).publish({room: room, message: data});
+        globalPubsub.topic(MESSAGE_RECEIVED).publish({room: room, message: data});
       });
     });
 
@@ -61,6 +62,10 @@ function init(dependencies) {
 
   globalPubsub.topic(TOPIC_UPDATED).subscribe(function(data) {
     chatNamespace.emit(TOPIC_UPDATED, data);
+  });
+
+  globalPubsub.topic(MESSAGE_RECEIVED).subscribe(function(data) {
+    sendMessage(data.room, data.message);
   });
 }
 
