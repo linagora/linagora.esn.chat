@@ -33,7 +33,7 @@ angular.module('linagora.esn.chat')
     $scope.members = [];
     $scope.addGroup = function() {
       var group = {
-        members: _.map($scope.members, '_id')
+        members: $scope.members
       };
 
       channelsService.addGroups(group).then(function(response) {

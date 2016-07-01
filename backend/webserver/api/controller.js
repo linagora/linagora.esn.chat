@@ -71,9 +71,13 @@ module.exports = function(dependencies, lib) {
   }
 
   function createChannel(req, res) {
-    var members;
+    var members = [];
 
-    members = req.body.members || [];
+    if (req.body.members) {
+      members = req.body.members.map(function(member) {
+        return _.isString(member) ? member : member._id;
+      });
+    }
 
     if (members.indexOf(String(req.user._id)) === -1) {
       members.push(String(req.user._id));
