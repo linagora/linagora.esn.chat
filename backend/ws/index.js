@@ -9,7 +9,7 @@ var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 
-function init(dependencies) {
+function init(dependencies, lib) {
   var logger = dependencies('logger');
   var pubsub = dependencies('pubsub');
   var localPubsub = pubsub.local;
@@ -17,8 +17,27 @@ function init(dependencies) {
   var io = dependencies('wsserver').io;
   var helper = dependencies('wsserver').ioHelper;
 
+  function sendDataToChannel(channel, type, data) {
+    if (channel.type === 'group') {
+      channel.members.forEach(function(user) {
+        var sockets = helper.getUserSocketsFromNamespace(user._id, chatNamespace.sockets) || [];
+        sockets.forEach(function(socket) {
+          socket.emit(type, data);
+        });
+      });
+    } else {
+      chatNamespace.emit(type, data);
+    }
+  }
+
   function sendMessage(room, message) {
-    chatNamespace.emit('message', {room: room, data: message});
+    lib.channel.getChannel(message.channel, function(err, channel) {
+      if (err) {
+        logger.warn('Message sended to inexisting channel', message);
+        return;
+      }
+      sendDataToChannel(channel, 'message', {room: room, data: message});
+    });
   }
 
   if (initialized) {
@@ -57,7 +76,7 @@ function init(dependencies) {
   });
 
   globalPubsub.topic(CHANNEL_CREATION).subscribe(function(data) {
-    chatNamespace.emit(CHANNEL_CREATION, data);
+    sendDataToChannel(data, CHANNEL_CREATION, data);
   });
 
   globalPubsub.topic(TOPIC_UPDATED).subscribe(function(data) {
