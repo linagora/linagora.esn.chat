@@ -33,4 +33,12 @@ angular.module('linagora.esn.chat')
   .constant('MESSAGE_TYPE', {
     TYPING: 'user_typing',
     TEXT: 'text'
+  })
+  .constant('KEY_CODE', {
+    ENTER: 13,
+    TAB: 9,
+    ARROW_LEFT: 37,
+    ARROW_UP: 38,
+    ARROW_RIGHT: 39,
+    ARROW_DOWN: 40
   });

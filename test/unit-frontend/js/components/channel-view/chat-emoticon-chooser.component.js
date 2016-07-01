@@ -4,14 +4,15 @@
 var expect = chai.expect;
 
 describe('the chatEmoticonChooser component', function() {
-  var scope, $componentController, esnEmoticonList, $rootScope;
+  var scope, $componentController, esnEmoticonList, $rootScope, KEY_CODE;
 
   beforeEach(module('linagora.esn.chat'));
 
-  beforeEach(inject(function(_$rootScope_, _$componentController_) {
+  beforeEach(inject(function(_$rootScope_, _$componentController_, _KEY_CODE_) {
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     $componentController = _$componentController_;
+    KEY_CODE = _KEY_CODE_;
     esnEmoticonList = 'smile_a,smile_b,smile_c,smile_ko,smile_ok';
   }));
 
@@ -103,9 +104,9 @@ describe('the chatEmoticonChooser component', function() {
 
   describe('keydown event', function() {
 
-    function getEvt(name) {
+    function getEvt(keyCode) {
       return {
-        key: name,
+        keyCode: keyCode,
         preventDefault: sinon.spy()
       };
     }
@@ -120,7 +121,7 @@ describe('the chatEmoticonChooser component', function() {
         controller.focusIndex = 1;
         controller.select = sinon.spy();
 
-        $rootScope.$broadcast('chat:message:compose:keydown', getEvt('Enter'));
+        $rootScope.$broadcast('chat:message:compose:keydown', getEvt(KEY_CODE.ENTER));
         expect(controller.select).to.have.been.calledWith('smile_b');
       });
     });
@@ -134,10 +135,10 @@ describe('the chatEmoticonChooser component', function() {
         );
 
         [
-          { event: getEvt('ArrowUp'), expected: 4 },
-          { event: getEvt('ArrowUp'), expected: 3 },
-          { event: getEvt('ArrowLeft'), expected: 2 },
-          { event: getEvt('ArrowLeft'), expected: 1 },
+          { event: getEvt(KEY_CODE.ARROW_UP), expected: 4 },
+          { event: getEvt(KEY_CODE.ARROW_UP), expected: 3 },
+          { event: getEvt(KEY_CODE.ARROW_LEFT), expected: 2 },
+          { event: getEvt(KEY_CODE.ARROW_LEFT), expected: 1 },
         ].forEach(function(testSpec) {
           $rootScope.$broadcast('chat:message:compose:keydown', testSpec.event);
           $rootScope.$digest();
@@ -154,11 +155,11 @@ describe('the chatEmoticonChooser component', function() {
         );
 
         [
-          { event: getEvt('ArrowDown'), expected: 1 },
-          { event: getEvt('ArrowDown'), expected: 2 },
-          { event: getEvt('ArrowRight'), expected: 3 },
-          { event: getEvt('Tab'), expected: 4 },
-          { event: getEvt('ArrowRight'), expected: 0 }
+          { event: getEvt(KEY_CODE.ARROW_DOWN), expected: 1 },
+          { event: getEvt(KEY_CODE.ARROW_DOWN), expected: 2 },
+          { event: getEvt(KEY_CODE.ARROW_RIGHT), expected: 3 },
+          { event: getEvt(KEY_CODE.TAB), expected: 4 },
+          { event: getEvt(KEY_CODE.ARROW_RIGHT), expected: 0 }
         ].forEach(function(testSpec) {
           $rootScope.$broadcast('chat:message:compose:keydown', testSpec.event);
           $rootScope.$digest();
@@ -188,6 +189,28 @@ describe('the chatEmoticonChooser component', function() {
 
     });
 
+    describe('event.which', function() {
+
+      function getEvt(keyCode) {
+        return {
+          which: keyCode,
+          preventDefault: sinon.spy()
+        };
+      }
+
+      it('should use event.which if event.keyCode is undefined', function() {
+        var controller = getController();
+        $rootScope.$broadcast(
+          'chat:message:compose:textChanged',
+          getTextAreaAdapter(6, 6, ':smile')
+        );
+        controller.focusIndex = 1;
+        controller.select = sinon.spy();
+
+        $rootScope.$broadcast('chat:message:compose:keydown', getEvt(KEY_CODE.ENTER));
+        expect(controller.select).to.have.been.calledWith('smile_b');
+      });
+    });
   });
 
   describe('select() method', function() {
