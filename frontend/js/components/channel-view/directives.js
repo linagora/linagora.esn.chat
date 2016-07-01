@@ -62,7 +62,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService) {
+  .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService, KEY_CODE) {
 
     function isEventPrevented(event) {
       if ('isDefaultPrevented' in event) {
@@ -116,11 +116,17 @@ angular.module('linagora.esn.chat')
         element.on('keydown', function(event) {
           $rootScope.$broadcast('chat:message:compose:keydown', event);
 
-          if (!isEventPrevented(event) && !deviceDetector.isMobile() && event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            scope.sendMessage();
-          }
+          var keyCode = event.keyCode || event.which || 0;
 
+          if (!isEventPrevented(event) && !deviceDetector.isMobile() && keyCode === KEY_CODE.ENTER && !event.shiftKey) {
+            if (!event.ctrlKey) {
+              event.preventDefault();
+              scope.sendMessage();
+            } else {
+              textarea.value = textarea.value + '\n';
+              textarea.scrollTop = textarea.scrollHeight;
+            }
+          }
         });
 
         scope.onTextChanged = function() {

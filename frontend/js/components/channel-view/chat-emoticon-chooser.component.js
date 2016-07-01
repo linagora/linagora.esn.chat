@@ -1,17 +1,13 @@
 (function() {
   'use strict';
 
-  function isTab(event) {
-    return event.key === 'Tab' && !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey;
-  }
-
   angular.module('linagora.esn.chat').component('chatEmoticonChooser', {
     templateUrl: '/chat/views/components/channel-view/messages/chat-emoticon-chooser.html',
     controllerAs: 'ctlr',
     controller: ChatEmoticonChooserController
   });
 
-  function ChatEmoticonChooserController($scope, esnEmoticonList) {
+  function ChatEmoticonChooserController($scope, esnEmoticonList, KEY_CODE) {
     var self = this;
     var textarea;
     var emoticonList = esnEmoticonList.split(',');
@@ -19,6 +15,12 @@
     self.visible = false;
     self.focusIndex = 0;
     self.emojiStart = '';
+
+    function isTab(event) {
+      var keyCode = event.keyCode || event.which || 0;
+
+      return keyCode === KEY_CODE.TAB && !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey;
+    }
 
     function _resetState() {
       if (!self.visible) {
@@ -53,13 +55,15 @@
         return;
       }
 
-      if (event.key === 'Enter') {
+      var keyCode = event.keyCode || event.which || 0;
+
+      if (keyCode === KEY_CODE.ENTER) {
         event.preventDefault();
         self.select(self.emoticonList[self.focusIndex]);
-      } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+      } else if (keyCode === KEY_CODE.ARROW_UP || keyCode === KEY_CODE.ARROW_LEFT) {
         event.preventDefault();
         _updateFocusIndex(-1);
-      } else if (event.key === 'ArrowDown' || event.key === 'ArrowRight' || isTab(event)) {
+      } else if (keyCode === KEY_CODE.ARROW_DOWN || keyCode === KEY_CODE.ARROW_RIGHT || isTab(event)) {
         event.preventDefault();
         _updateFocusIndex(1);
       }
