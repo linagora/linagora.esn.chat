@@ -64,7 +64,7 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
     },
 
     start: function(dependencies, callback) {
-      require('./backend/ws').init(dependencies);
+      require('./backend/ws').init(dependencies, this.lib);
       this.lib.start(callback);
     }
   }

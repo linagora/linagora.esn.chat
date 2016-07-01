@@ -6,7 +6,7 @@ describe('The linagora.esn.chat lib listener module', function() {
 
   describe('The start function', function() {
 
-    var deps;
+    var deps, listener;
     var dependencies = function(name) {
       return deps[name];
     };
@@ -17,12 +17,22 @@ describe('The linagora.esn.chat lib listener module', function() {
           error: console.log,
           info: console.log,
           debug: console.log
+        },
+        pubsub: {
+          local: {
+            topic: function() {
+              return {
+                subscribe: function(cb) {
+                  listener = cb;
+                }
+              };
+            }
+          }
         }
       };
     });
 
     it('should not save the message when message.type is user_typing', function(done) {
-      var listener = null;
       var data = {
         message: {
           type: 'user_typing'
@@ -35,18 +45,6 @@ describe('The linagora.esn.chat lib listener module', function() {
         }
       };
 
-      deps.pubsub = {
-        local: {
-          topic: function() {
-            return {
-              subscribe: function(cb) {
-                listener = cb;
-              }
-            };
-          }
-        }
-      };
-
       var module = require('../../../backend/lib/listener')(dependencies);
       module.start(channel);
 
@@ -55,7 +53,6 @@ describe('The linagora.esn.chat lib listener module', function() {
     });
 
     it('should save the message when message.type is not user_typing', function(done) {
-      var listener = null;
       var type = 'text';
       var text = 'yolo';
       var user = '1';
@@ -81,18 +78,6 @@ describe('The linagora.esn.chat lib listener module', function() {
             attachments: attachments
           });
           done();
-        }
-      };
-
-      deps.pubsub = {
-        local: {
-          topic: function() {
-            return {
-              subscribe: function(cb) {
-                listener = cb;
-              }
-            };
-          }
         }
       };
 
