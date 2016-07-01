@@ -119,8 +119,13 @@ angular.module('linagora.esn.chat')
           var keyCode = event.keyCode || event.which || 0;
 
           if (!isEventPrevented(event) && !deviceDetector.isMobile() && keyCode === KEY_CODE.ENTER && !event.shiftKey) {
-            event.preventDefault();
-            scope.sendMessage();
+            if (!event.ctrlKey) {
+              event.preventDefault();
+              scope.sendMessage();
+            } else {
+              textarea.value = textarea.value + '\n';
+              textarea.scrollTop = textarea.scrollHeight;
+            }
           }
         });
 
