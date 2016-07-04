@@ -193,7 +193,9 @@ angular.module('linagora.esn.chat')
     }
 
     function addGroup(group) {
-      service.groups.push(group);
+      if (!findChannel(group._id)) {
+        service.groups.push(group);
+      }
     }
 
     service = {
