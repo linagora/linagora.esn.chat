@@ -247,6 +247,13 @@ describe('The linagora.esn.chat services', function() {
         chatLocalStateService.addGroup(group);
         expect(groups).to.include(group);
       });
+
+      it('should do nothing if group existed', function() {
+        var group = {_id: 'group1', type: 'group'};
+        var oldGroups = groups;
+        chatLocalStateService.addGroup(group);
+        expect(groups).to.be.deep.equal(oldGroups);
+      });
     });
 
     describe('isActiveRoom', function() {

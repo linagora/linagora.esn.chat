@@ -83,32 +83,48 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    var channel = {
-      name: req.body.name,
-      type: req.body.type,
-      creator: req.user,
-      topic: {
-        value: req.body.topic,
-        creator: req.user
-      },
-      members: members,
-      purpose: {
-        value: req.body.purpose,
-        creator: req.user
-      }
-    };
-
-    lib.channel.createChannel(channel, function(err, result) {
+    lib.channel.findGroupByMembers(true, members, function(err, groups) {
       if (err) {
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while creating channel'
+            details: err.message || 'Error while finding groups with users' + members.join(', ')
           }
         });
       }
-      res.status(201).json(result);
+
+      if (groups && groups.length > 0) {
+        res.status(201).json(groups[0]);
+      } else {
+        var channel = {
+          name: req.body.name,
+          type: req.body.type,
+          creator: req.user,
+          topic: {
+            value: req.body.topic,
+            creator: req.user
+          },
+          members: members,
+          purpose: {
+            value: req.body.purpose,
+            creator: req.user
+          }
+        };
+
+        lib.channel.createChannel(channel, function(err, result) {
+          if (err) {
+            return res.status(500).json({
+              error: {
+                code: 500,
+                message: 'Server Error',
+                details: err.message || 'Error while creating channel'
+              }
+            });
+          }
+          res.status(201).json(result);
+        });
+      }
     });
   }
 

@@ -399,6 +399,29 @@ describe('The linagora.esn.chat webserver controller', function() {
         }
       });
     });
+
+    it('should send back previous channel if channel existed', function(done) {
+      var channel = {id: 1, members: ['user1']};
+      result = [channel, {id: 2}];
+      var query = {
+        body: {
+          members: ['user1']
+        }
+      };
+      var req = {body: {}, query: query, user: user};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.createChannel(req, {
+        status: function(code) {
+          expect(code).to.equal(201);
+          return {
+            json: function(json) {
+              expect(json).to.deep.equal(channel);
+              done();
+            }
+          };
+        }
+      });
+    });
   });
 
   describe('The updateTopic function', function() {
