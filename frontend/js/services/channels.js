@@ -86,6 +86,7 @@ angular.module('linagora.esn.chat')
 
     function addGroups(group) {
       group.type = 'group';
+      group.name = computeGroupName(session.user._id, group);
       return postChannels(group);
     }
 
