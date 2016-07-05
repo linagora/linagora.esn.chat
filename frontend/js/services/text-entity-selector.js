@@ -1,10 +1,11 @@
 (function() {
   'use strict';
 
-  angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE, $q) {
+  angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE, $q, _) {
 
-    function ChatTextEntitySelector(entityListResolver, startChar, endChar) {
+    function ChatTextEntitySelector(entityListResolver, startChar, endChar, toString) {
       this._entityListResolver = entityListResolver;
+      this.toString = toString || _.identity;
       this._resetState();
 
       var matchStartChar = startChar === '^' ? '\\^' : '[' + startChar + ']';
@@ -84,7 +85,7 @@
       valueEnd = value.substring(selectionStart);
 
       var distanceToColon = valueStart.match(this.REGEXP_ENTITY_IN_EDITION)[1].length;
-      var newValueStart = valueStart.substr(0, valueStart.length - distanceToColon) + entity + this.endChar;
+      var newValueStart = valueStart.substr(0, valueStart.length - distanceToColon) + this.toString(entity) + this.endChar;
       this.textarea.replaceText(newValueStart  + valueEnd, newValueStart.length, newValueStart.length);
     };
 

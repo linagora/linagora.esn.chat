@@ -209,5 +209,19 @@ describe('the ChatTextEntitySelector constructor', function() {
       entitySelector.select('smile_c');
       expect(adapter.replaceText).to.have.been.calledWith(':smile test :smile_c# test', 21, 21);
     });
+
+    it('should use the given toString method if one his provided', function() {
+      var toStringMockResult = 'toStringMockResult';
+      var toStringMock = sinon.stub().returns(toStringMockResult);
+      var adapter = getTextAreaAdapter(6, 6, ':smile');
+
+      entitySelector = new ChatTextEntitySelector(ChatTextEntitySelector.entityListResolverFromList(entityList), ':', '#', toStringMock);
+      entitySelector.textChanged(adapter);
+      $rootScope.$digest();
+      entitySelector.select('smile_c');
+
+      var size = toStringMockResult.length + 2;
+      expect(adapter.replaceText).to.have.been.calledWith(':' + toStringMockResult + '#', size, size);
+    });
   });
 });
