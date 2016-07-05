@@ -31,5 +31,5 @@
               a(href='')
                 i.mdi.mdi-information-outline
         .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true")
-          chat-message(ng-repeat="message in messages | filter:{ channel: chatLocalStateService.activeRoom._id } | orderBy: ['timestamps.creation'] track by $index", message="message")
+          chat-message(ng-repeat="message in messages track by message._uniqId", message="message")
         chat-footer

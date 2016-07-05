@@ -50,7 +50,14 @@ angular.module('linagora.esn.chat')
       scope: {
         message: '='
       },
-      templateUrl: '/chat/views/components/channel-view/messages/message.html'
+      templateUrl: '/chat/views/components/channel-view/messages/message.html',
+      controller: function($scope, $filter) {
+        var parsedText = $filter('linky')($scope.message.text, '_blank');
+        parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
+        $scope.parsed = {
+          text: parsedText
+        };
+      }
     };
   })
 

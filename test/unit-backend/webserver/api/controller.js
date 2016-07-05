@@ -41,6 +41,27 @@ describe('The linagora.esn.chat webserver controller', function() {
   });
 
   describe('The getMessages function', function() {
+
+    function createMessage(base, timestamp) {
+      var msg = _.cloneDeep(base);
+      var jsonMsg = _.cloneDeep(base);
+      msg.creator = {
+        password: 'yolo'
+      };
+      jsonMsg.creator = {};
+      msg.timestamps = {
+        creation: new Date(timestamp)
+      };
+      jsonMsg.timestamps = {
+        creation: timestamp
+      };
+      msg.toJSON = function() {
+        return msg;
+      };
+
+      return {source: msg, dest: jsonMsg};
+    }
+
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       var channelId = 1;
       err = new Error('failed');
@@ -62,7 +83,9 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 200 with the lib.getMessages result', function(done) {
       var channelId = 1;
-      result = [{text: 'foo'}, {text: 'bar'}];
+      var msg1 = createMessage({text: 'foo'}, 156789);
+      var msg2 = createMessage({text: 'bar'}, 2345677);
+      result = [msg1.source, msg2.source];
       var req = {params: {channel: channelId}};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.getMessages(req, {
@@ -70,7 +93,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(json).to.shallowDeepEqual(result);
+              expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
               expect(lib.channel.getMessages).to.have.been.calledWith(channelId);
               done();
             }

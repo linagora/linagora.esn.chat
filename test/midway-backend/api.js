@@ -113,7 +113,7 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/:channel/messages', function() {
-    it('should return an array of messages from a channesl', function(done) {
+    it('should return an array of messages from a channel', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.channel.createChannel)({
@@ -123,7 +123,8 @@ describe('The chat API', function() {
         return Q.denodeify(app.lib.channel.createMessage)({
           channel: channelId,
           text: 'hello world',
-          type: 'text'
+          type: 'text',
+          creator: userId
         });
       }).then(function(mongoResult) {
         request(app.express)
@@ -135,7 +136,14 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            expect(res.body).to.deep.equal([mongoResult[0]].map(jsonnify));
+            var expected = JSON.parse(JSON.stringify(mongoResult[0]));
+            expected.creator = {
+              username: user.username,
+              _id: user._id + '',
+              __v: 0
+            };
+            expected.timestamps.creation = mongoResult[0].timestamps.creation.getTime();
+            expect(res.body).to.deep.equal([expected]);
             done();
           });
       }).catch(done);
