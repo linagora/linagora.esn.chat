@@ -4,7 +4,7 @@
 var expect = chai.expect;
 
 describe('the chatEmoticonChooser component', function() {
-  var scope, $componentController, esnEmoticonList, $rootScope, KEY_CODE, ChatTextEntitySelectorMock, textEntitySelectorMockInstance, controller;
+  var scope, $componentController, esnEmoticonList, $rootScope, KEY_CODE, ChatTextEntitySelectorMock, textEntitySelectorMockInstance, controller, entityListResolverFromListResult;
 
   beforeEach(function() {
     ChatTextEntitySelectorMock = sinon.spy(function() {
@@ -13,6 +13,11 @@ describe('the chatEmoticonChooser component', function() {
       textEntitySelectorMockInstance = self;
       this.keyDown = sinon.spy();
       this.textChanged = sinon.spy();
+    });
+
+    ChatTextEntitySelectorMock.entityListResolverFromList = sinon.spy(function() {
+      entityListResolverFromListResult = {};
+      return entityListResolverFromListResult;
     });
   });
 
@@ -45,7 +50,8 @@ describe('the chatEmoticonChooser component', function() {
 
   it('should instantiate a ChatTextEntitySelector and put it in the scope', function() {
     expect(controller.entitySelector).to.equals(textEntitySelectorMockInstance);
-    expect(ChatTextEntitySelectorMock).to.have.been.calledWith(esnEmoticonList.split(','), ':', ':');
+    expect(ChatTextEntitySelectorMock.entityListResolverFromList).to.have.been.calledWith(esnEmoticonList.split(','));
+    expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.same(entityListResolverFromListResult), ':', ':');
   });
 
   it('should listen to the chat:message:compose:textChanged and pass the textAreaAdaptor to the entitySelector\'s textChanged method', function() {

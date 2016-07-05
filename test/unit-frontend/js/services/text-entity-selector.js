@@ -14,7 +14,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     KEY_CODE = _KEY_CODE_;
     ChatTextEntitySelector = _ChatTextEntitySelector_;
     entityList = ['smile_a', 'smile_b', 'smile_c', 'smile_ko', 'smile_ok'];
-    entitySelector = new ChatTextEntitySelector(entityList, ':', '#');
+    entitySelector = new ChatTextEntitySelector(ChatTextEntitySelector.entityListResolverFromList(entityList), ':', '#');
   }));
 
   function getTextAreaAdapter(selectionStart, selectionEnd, text) {
@@ -26,35 +26,67 @@ describe('the ChatTextEntitySelector constructor', function() {
     };
   }
 
+  describe('ChatTextEntitySelector.entityListResolverFromList', function() {
+    var list, resolver, thenSpy;
+
+    beforeEach(function() {
+      list = ['atom', 'batman', 'kitten', 'koala'];
+      resolver = ChatTextEntitySelector.entityListResolverFromList(list);
+      thenSpy = sinon.spy();
+    });
+
+    it('should return a promess of strings starting with the given string', function() {
+      resolver('k').then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy).to.have.been.calledWith(['kitten', 'koala']);
+      resolver('a').then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy.secondCall).to.have.been.calledWith(['atom']);
+    });
+
+    it('should return an empty array if none', function() {
+      resolver('boa').then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy).to.have.been.calledWith([]);
+    });
+  });
+
   describe('textChanged method', function() {
     it('should switch state to visible when the text is :something', function() {
       entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.true;
       expect(entitySelector.entityStart).to.equal('smile');
     });
 
     it('should switch state to not visible when the emoji becomes unkonwn', function() {
       entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.true;
       expect(entitySelector.entityStart).to.equal('smile');
       entitySelector.textChanged(getTextAreaAdapter(7, 7, ':smilee'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.false;
     });
 
     it('should not switch state to visible when the emoji text is not in the list', function() {
       entitySelector.textChanged(getTextAreaAdapter(6, 6, ':micro'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.false;
     });
 
     it('should not switch state to visible when text is selected', function() {
       entitySelector.textChanged(getTextAreaAdapter(3, 6, ':smile'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.false;
     });
 
     it('should switch state to not visible when text is selected', function() {
       entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.true;
       entitySelector.textChanged(getTextAreaAdapter(3, 6, ':smile'));
+      $rootScope.$digest();
       expect(entitySelector.visible).to.be.false;
     });
   });
@@ -71,6 +103,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     describe('reaction to enter event', function() {
       it('should call self.select with the selected emoji', function() {
         entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+        $rootScope.$digest();
         entitySelector.focusIndex = 1;
         entitySelector.select = sinon.spy();
 
@@ -82,6 +115,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     describe('ArrowUp/ArrowLeft event', function() {
       it('should update the selected emoji index', function() {
         entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+        $rootScope.$digest();
 
         [
           { event: getEvt(KEY_CODE.ARROW_UP), expected: 4 },
@@ -98,6 +132,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     describe('ArrowDown/ArrowRight/Tab event', function() {
       it('should update the selected emoji index', function() {
         entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+        $rootScope.$digest();
 
         [
           { event: getEvt(KEY_CODE.ARROW_DOWN), expected: 1 },
@@ -113,6 +148,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
       it('should not update the selected emoji index if there is a meta key with Tab', function() {
         entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+        $rootScope.$digest();
 
         [
           {evt: getEvt('Tab'), k: 'altKey'},
@@ -139,6 +175,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
       it('should use event.which if event.keyCode is undefined', function() {
         entitySelector.textChanged(getTextAreaAdapter(6, 6, ':smile'));
+        $rootScope.$digest();
         entitySelector.focusIndex = 1;
         entitySelector.select = sinon.spy();
 
@@ -152,6 +189,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     it('should update the textarea text', function() {
       var adapter = getTextAreaAdapter(6, 6, ':smile');
       entitySelector.textChanged(adapter);
+      $rootScope.$digest();
       entitySelector.select('smile_c');
       expect(adapter.replaceText).to.have.been.calledWith(':smile_c#', 9, 9);
     });
@@ -159,6 +197,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     it('should update the textarea text in the middle of text', function() {
       var adapter = getTextAreaAdapter(20, 20, ':smile_a# test :smil test');
       entitySelector.textChanged(adapter);
+      $rootScope.$digest();
       entitySelector.select('smile_c');
       expect(adapter.replaceText).to.have.been.calledWith(':smile_a# test :smile_c# test', 24, 24);
     });
@@ -166,6 +205,7 @@ describe('the ChatTextEntitySelector constructor', function() {
     it('should not be confused when there is two times the same emoji start', function() {
       var adapter = getTextAreaAdapter(18, 18, ':smile test :smile test');
       entitySelector.textChanged(adapter);
+      $rootScope.$digest();
       entitySelector.select('smile_c');
       expect(adapter.replaceText).to.have.been.calledWith(':smile test :smile_c# test', 21, 21);
     });

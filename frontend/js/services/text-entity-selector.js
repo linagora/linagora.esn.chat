@@ -1,16 +1,24 @@
 (function() {
   'use strict';
 
-  angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE) {
+  angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE, $q) {
 
-    function ChatTextEntitySelector(entityList, startChar, endChar) {
-      this._fullEntityList = entityList;
+    function ChatTextEntitySelector(entityListResolver, startChar, endChar) {
+      this._entityListResolver = entityListResolver;
       this._resetState();
 
       var matchStartChar = startChar === '^' ? '\\^' : '[' + startChar + ']';
       this.REGEXP_ENTITY_IN_EDITION = new RegExp(matchStartChar + '([a-zA-Z0-9_+-]+)$');
       this.endChar = endChar || '';
     }
+
+    ChatTextEntitySelector.entityListResolverFromList = function(entityList) {
+      return function(start) {
+        return $q.when(entityList.filter(function(e) {
+          return e.indexOf(start) === 0;
+        }));
+      };
+    };
 
     ChatTextEntitySelector.prototype._resetState = function() {
       this.visible = false;
@@ -24,6 +32,7 @@
     };
 
     ChatTextEntitySelector.prototype.textChanged = function(textareaAdapter) {
+      var self = this;
       this.textarea = textareaAdapter;
 
       if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
@@ -38,17 +47,15 @@
         return;
       }
 
-      this.entityList = this._fullEntityList.filter(function(e) {
-        return e.indexOf(inEdition) === 0;
+      this._entityListResolver(inEdition).then(function(entityList) {
+        self.entityList = entityList;
+        if (self.entityList.length) {
+          self.entityStart = inEdition;
+          self.visible = true;
+        } else {
+          self._resetState();
+        }
       });
-
-      if (this.entityList.length) {
-        this.entityStart = inEdition;
-        this.visible = true;
-        return;
-      }
-
-      this._resetState();
     };
 
     ChatTextEntitySelector.prototype.keyDown = function(event) {
