@@ -16,7 +16,7 @@ describe('the chatMentionChooser component', function() {
       this.textChanged = sinon.spy();
     });
 
-    members = {data: [{firstname: 'John', lastname:'Doe', _id: '42'}]};
+    members = {data: [{firstname: 'John', lastname:'Doe', _id: '42'}, {_id: '_userId'}]};
 
     domainAPIMock = {
       getMembers: sinon.spy(function(a, b) {
@@ -26,6 +26,9 @@ describe('the chatMentionChooser component', function() {
 
     sessionMock = {
       _id: 'id',
+      user: {
+        _id: '_userId'
+      },
       domain: {_id: 'domainId'}
     };
 
@@ -80,13 +83,13 @@ describe('the chatMentionChooser component', function() {
       })));
     });
 
-    it('should return a list of user', function() {
+    it('should return a list of user without current user', function() {
       expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.func.and(sinon.match(function(resolver) {
         var thenSpy = sinon.spy();
 
         resolver('').then(thenSpy);
         $rootScope.$digest();
-        expect(thenSpy).to.have.been.calledWith(members.data);
+        expect(thenSpy).to.have.been.calledWith([members.data[0]]);
 
         return true;
       })));

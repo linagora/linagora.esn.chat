@@ -16,7 +16,11 @@
           search: string.replace(/_/g, ' '),
           limit: MENTION_CHOOSER_MAX_RESULT,
           offset: 0
-        }).then(_.property('data'));
+        }).then(function(response) {
+          return response.data.filter(function(user) {
+            return user._id !== session.user._id;
+          });
+        });
       });
     };
 
