@@ -20,5 +20,7 @@ angular.module('linagora.esn.chat', [
   'ui.router',
   'angularFileUpload',
   'linagora.esn.emoticon',
-  'xeditable'
+  'xeditable',
+  'angularMoment',
+  'ngSanitize'
 ]);

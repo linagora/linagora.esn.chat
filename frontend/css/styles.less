@@ -42,6 +42,28 @@
   }
 }
 
+.day-divider {
+  padding: 1.75rem 0 1.25rem;
+
+  .day-divider-line {
+    line-height: 0;
+    text-align: center;
+    height: 1px;
+    background: #dbdbdb;
+
+    .day-divider-label span {
+      top: -.375rem;
+      background: #fff;
+      padding: .25rem .75rem;
+      display: inline-block;
+      position: relative;
+      border-radius: 1rem;
+      color: #666;
+      font-weight: 600;
+    }
+  }
+}
+
 @media (min-width: @screen-sm-min) {
   #messages-main .ms-body {
     padding-left: 0;

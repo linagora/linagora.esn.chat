@@ -190,4 +190,28 @@ angular.module('linagora.esn.chat')
         };
       }
     };
+  })
+
+  .directive('chatMessageSeparator', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        prevMessage: '=?',
+        currentMessage: '='
+      },
+      templateUrl: '/chat/views/components/channel-view/messages/message-separation.html',
+      controller: function($scope, moment) {
+        $scope.sameDay = function(date1, date2) {
+          return moment(date1).isSame(date2, 'day');
+        };
+
+        $scope.diffDate = function(date) {
+          return moment().diff(date, 'day');
+        };
+
+        $scope.formatDate = function(date) {
+          return moment(date).format('MMMM Do');
+        };
+      }
+    };
   });
