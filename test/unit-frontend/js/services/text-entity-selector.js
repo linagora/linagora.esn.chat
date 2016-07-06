@@ -4,9 +4,17 @@
 var expect = chai.expect;
 
 describe('the ChatTextEntitySelector constructor', function() {
-  var scope, entityList, $rootScope, KEY_CODE, ChatTextEntitySelector, entitySelector;
+  var scope, entityList, $rootScope, KEY_CODE, ChatTextEntitySelector, entitySelector, chatHumanizeEntitiesLabelMock, addHumanRepresentationResult;
 
-  beforeEach(module('linagora.esn.chat'));
+  beforeEach(module('linagora.esn.chat', function($provide) {
+    addHumanRepresentationResult = 'addHumanRepresentationResult';
+    chatHumanizeEntitiesLabelMock = {
+      addHumanRepresentation: sinon.spy(function() {
+        return addHumanRepresentationResult;
+      })
+    };
+    $provide.value('chatHumanizeEntitiesLabel', chatHumanizeEntitiesLabelMock);
+  }));
 
   beforeEach(inject(function(_$rootScope_, _ChatTextEntitySelector_, _KEY_CODE_) {
     $rootScope = _$rootScope_;
@@ -210,18 +218,23 @@ describe('the ChatTextEntitySelector constructor', function() {
       expect(adapter.replaceText).to.have.been.calledWith(':smile test :smile_c# test', 21, 21);
     });
 
-    it('should use the given toString method if one his provided', function() {
-      var toStringMockResult = 'toStringMockResult';
-      var toStringMock = sinon.stub().returns(toStringMockResult);
+    it('should use the given toHumanLabel and toRealValue method if there are provided', function() {
+      var toHumanLabelResult = 'toHumanValueResult';
+      var toRealValueResult = 'toRealValueResult';
+      var toHumanLabel = sinon.stub().returns(toHumanLabelResult);
+      var toRealValue = sinon.stub().returns(toRealValueResult);
       var adapter = getTextAreaAdapter(6, 6, ':smile');
 
-      entitySelector = new ChatTextEntitySelector(ChatTextEntitySelector.entityListResolverFromList(entityList), ':', '#', toStringMock);
+      entitySelector = new ChatTextEntitySelector(ChatTextEntitySelector.entityListResolverFromList(entityList), ':', '#', toHumanLabel, toRealValue);
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
 
-      var size = toStringMockResult.length + 2;
-      expect(adapter.replaceText).to.have.been.calledWith(':' + toStringMockResult + '#', size, size);
+      var size = addHumanRepresentationResult.length;
+      expect(toRealValue).to.have.been.calledWith('smile_c');
+      expect(toHumanLabel).to.have.been.calledWith('smile_c');
+      expect(chatHumanizeEntitiesLabelMock.addHumanRepresentation).to.have.been.calledWith(':' + toHumanLabelResult + '#', ':' + toRealValueResult + '#');
+      expect(adapter.replaceText).to.have.been.calledWith(addHumanRepresentationResult, size, size);
     });
   });
 });

@@ -69,7 +69,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService, KEY_CODE) {
+  .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, ChatScroll, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
 
     function isEventPrevented(event) {
       if ('isDefaultPrevented' in event) {
@@ -152,7 +152,7 @@ angular.module('linagora.esn.chat')
         function buildCurrentMessage() {
           return {
             type: 'text',
-            text: scope.text,
+            text: chatHumanizeEntitiesLabel.replaceHumanPresentationByRealData(scope.text),
             user: scope.user._id,
             channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
@@ -166,7 +166,9 @@ angular.module('linagora.esn.chat')
           }
 
           var message = buildCurrentMessage();
+
           scope.text = '';
+          chatHumanizeEntitiesLabel.reset();
 
           // hack to reset autoSize
           $('textarea')[0].style.height = '56px';

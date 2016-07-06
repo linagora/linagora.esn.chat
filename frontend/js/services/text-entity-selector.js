@@ -1,16 +1,22 @@
 (function() {
   'use strict';
 
-  angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE, $q, _) {
+  angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE, $q, chatHumanizeEntitiesLabel, _) {
 
-    function ChatTextEntitySelector(entityListResolver, startChar, endChar, toString) {
+    function ChatTextEntitySelector(entityListResolver, startChar, endChar, toHumanLabel, toRealValue) {
+      if (Boolean(toHumanLabel) !== Boolean(toRealValue)) {
+        throw new Error('You should provide toRealValue if you give toHumanValue');
+      }
+
       this._entityListResolver = entityListResolver;
-      this.toString = toString || _.identity;
+      this.toHumanLabel = toHumanLabel || _.identity;
+      this.toRealValue = toRealValue || _.identity;
       this._resetState();
 
       var matchStartChar = startChar === '^' ? '\\^' : '[' + startChar + ']';
       this.REGEXP_ENTITY_IN_EDITION = new RegExp(matchStartChar + '([a-zA-Z0-9_+-]+)$');
       this.endChar = endChar || '';
+      this.startChar = startChar;
     }
 
     ChatTextEntitySelector.entityListResolverFromList = function(entityList) {
@@ -84,8 +90,14 @@
       valueStart = value.substring(0, selectionStart),
       valueEnd = value.substring(selectionStart);
 
-      var distanceToColon = valueStart.match(this.REGEXP_ENTITY_IN_EDITION)[1].length;
-      var newValueStart = valueStart.substr(0, valueStart.length - distanceToColon) + this.toString(entity) + this.endChar;
+      var distanceToColon = valueStart.match(this.REGEXP_ENTITY_IN_EDITION)[1].length  + this.startChar.length;
+      var humanLabel = this.startChar + this.toHumanLabel(entity) + this.endChar;
+
+      if (this.toHumanLabel !== this.toRealValue) {
+        humanLabel = chatHumanizeEntitiesLabel.addHumanRepresentation(humanLabel, this.startChar + this.toRealValue(entity) + this.endChar);
+      }
+
+      var newValueStart = valueStart.substr(0, valueStart.length - distanceToColon) + humanLabel;
       this.textarea.replaceText(newValueStart  + valueEnd, newValueStart.length, newValueStart.length);
     };
 
