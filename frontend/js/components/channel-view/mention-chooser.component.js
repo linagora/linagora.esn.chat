@@ -13,14 +13,16 @@
     var membersResolver = function(string) {
       return session.ready.then(function(session) {
         return domainAPI.getMembers(session.domain._id, {
-          search: string,
+          search: string.replace(/_/g, ' '),
           limit: MENTION_CHOOSER_MAX_RESULT,
           offset: 0
         }).then(_.property('data'));
       });
     };
 
-    self.entitySelector = new ChatTextEntitySelector(membersResolver, '@', null, _.property('_id'));
+    self.entitySelector = new ChatTextEntitySelector(membersResolver, '@', null, function(user) {
+      return user.firstname + '_' + user.lastname;
+    }, _.property('_id'));
 
     $scope.$on('chat:message:compose:keydown', function(angularEvent, event) {
       self.entitySelector.keyDown(event);

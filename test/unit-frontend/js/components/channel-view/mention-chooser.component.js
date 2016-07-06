@@ -63,17 +63,17 @@ describe('the chatMentionChooser component', function() {
     return component;
   }
 
-  describe('The members resolver given to testEntitySelector', function() {
+  describe('The members resolver given to textEntitySelector', function() {
     it('should use domainAPI', function() {
       expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.func.and(sinon.match(function(resolver) {
-        var string = 'string';
+        var string = 'string_string';
 
         resolver(string);
         $rootScope.$digest();
         expect(domainAPIMock.getMembers).to.have.been.calledWith(sessionMock.domain._id, {
           limit: MENTION_CHOOSER_MAX_RESULT,
           offset: 0,
-          search: string
+          search: string.replace('_', ' ')
         });
 
         return true;
@@ -89,6 +89,22 @@ describe('the chatMentionChooser component', function() {
         expect(thenSpy).to.have.been.calledWith(members.data);
 
         return true;
+      })));
+    });
+  });
+
+  describe('The toHumanValue method given to ChatTextEntitySelector', function() {
+    it('shoud concat firstname and lastname with _', function() {
+      expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.func.and(sinon.match(function(toHumanValue) {
+        return toHumanValue({firstname: 'firstname', lastname: 'lastname'}) === 'firstname_lastname';
+      })));
+    });
+  });
+
+  describe('The toRealValue method given to ChatTextEntitySelector', function() {
+    it('shoud concat firstname and lastname with _', function() {
+      expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.func.and(sinon.match(function(toRealValue) {
+        return toRealValue({_id:'entity'}) === 'entity';
       })));
     });
   });
