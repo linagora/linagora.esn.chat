@@ -25,9 +25,9 @@ angular.module('linagora.esn.chat')
     }
 
     function fromAPI(message) {
-      if (message.user) {
-        return getUser(message.user).then(function(user) {
-          message.user = user;
+      if (message.creator && !message.creator._id) {
+        return getUser(message.creator).then(function(user) {
+          message.creator = user;
           return message;
         });
       }
@@ -72,7 +72,6 @@ angular.module('linagora.esn.chat')
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
         var data = ChatRestangular.stripRestangular(response.data);
         return data.map(function(message) {
-          message.user = message.creator;
           message.date = message.timestamps.creation;
           return message;
         })
@@ -114,7 +113,7 @@ angular.module('linagora.esn.chat')
     };
 
     var canSendNotification = function(message) {
-      return !$window.document.hasFocus() && enable && message.user !== session.user._id;
+      return !$window.document.hasFocus() && enable && message.creator !== session.user._id;
     };
 
     return {
@@ -126,7 +125,7 @@ angular.module('linagora.esn.chat')
               var channelName = channel.name || 'OpenPaas Chat';
               webNotification.showNotification('New message in ' + channelName, {
                 body: message.text,
-                icon: '/api/users/' + message.user + '/profile/avatar',
+                icon: '/api/users/' + message.creator + '/profile/avatar',
                 autoClose: CHAT_NOTIF.CHAT_AUTO_CLOSE
               }, function onShow(err) {
                 if (err) {

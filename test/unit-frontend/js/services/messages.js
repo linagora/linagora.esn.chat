@@ -135,14 +135,14 @@ describe('The linagora.esn.chat messages', function() {
 
         it('should ignore user_typing from myself', function() {
           $rootScope.$broadcast = sinon.spy();
-          var message = {type: 'user_typing', user: 'userId'};
+          var message = {type: 'user_typing', creator: 'userId'};
           callback(message);
           expect($rootScope.$broadcast).to.have.not.been.calledOnce;
         });
 
         it('should broadcast text message from myself', function() {
           $rootScope.$broadcast = sinon.spy();
-          var message = {type: 'text', user: 'userId'};
+          var message = {type: 'text', creator: 'userId'};
           callback(message);
           expect($rootScope.$broadcast).to.have.been.calledOnce;
         });

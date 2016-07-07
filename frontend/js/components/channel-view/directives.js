@@ -11,7 +11,7 @@ angular.module('linagora.esn.chat')
 
         scope.typing = {};
         scope.$on('chat:message:user_typing', function(evt, message) {
-          scope.typing[message.user] = message.state;
+          scope.typing[message.creator] = message.state;
           var areTyping = _.map(scope.typing, function(value, key) {
             if (value && scope.chatLocalStateService.activeRoom._id === message.channel) {
               return key;
@@ -95,7 +95,7 @@ angular.module('linagora.esn.chat')
         function sendUserTyping(state) {
           var message = {
             state: state,
-            user: scope.user._id,
+            creator: scope.user._id,
             channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };
@@ -155,7 +155,7 @@ angular.module('linagora.esn.chat')
           return {
             type: 'text',
             text: chatHumanizeEntitiesLabel.replaceHumanPresentationByRealData(scope.text),
-            user: scope.user._id,
+            creator: scope.user._id,
             channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };

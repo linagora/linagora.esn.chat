@@ -55,14 +55,14 @@ describe('The linagora.esn.chat lib listener module', function() {
     it('should save the message when message.type is not user_typing', function(done) {
       var type = 'text';
       var text = 'yolo';
-      var user = '1';
+      var creator = '1';
       var channel = 'general';
       var attachments = [1, 2, 3];
       var data = {
         message: {
           type: type,
           text: text,
-          user: user,
+          creator: creator,
           channel: channel,
           attachments: attachments
         }
@@ -73,7 +73,7 @@ describe('The linagora.esn.chat lib listener module', function() {
           expect(msg).to.deep.equals({
             type: type,
             text: text,
-            creator: user,
+            creator: creator,
             channel: channel,
             attachments: attachments
           });

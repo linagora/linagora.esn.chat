@@ -13,7 +13,7 @@ module.exports = function(dependencies) {
       var chatMessage = {
         type: data.message.type,
         text: data.message.text,
-        creator: data.message.user,
+        creator: data.message.creator,
         channel: data.message.channel
       };
 
