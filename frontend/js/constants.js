@@ -30,6 +30,7 @@ angular.module('linagora.esn.chat')
       isNotRead: false
     }
   })
+  .constant('MENTION_CHOOSER_MAX_RESULT', 15)
   .constant('MESSAGE_TYPE', {
     TYPING: 'user_typing',
     TEXT: 'text'
