@@ -48,6 +48,10 @@ angular.module('linagora.esn.chat')
         $scope.parsed = {
           text: parsedText
         };
+        $scope.displayFile = true;
+        $scope.toggleFile = function() {
+          $scope.displayFile = !$scope.displayFile;
+        };
       }
     };
   })

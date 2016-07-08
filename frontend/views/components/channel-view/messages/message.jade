@@ -8,5 +8,12 @@
       .chat-message-text(ng-bind-html="parsed.text")
       .oembeds
         oembeds(message="message.text")
-      .lv-footer.attachments(ng-if="message.attachments.length > 0")
-        message-attachment(ng-repeat="attachment in message.attachments", attachment="::attachment")
+      .attachment-container(ng-if="message.attachments.length > 0")
+        .chat-message-text(ng-repeat="attachment in message.attachments track by $index")
+          span(ng-click='toggleFile()')
+            | #{__('Uploaded an Image')} : 
+          a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
+          span(ng-click='toggleFile()')
+            i(ng-class="displayFile ? 'fa fa-caret-down' : 'fa fa-caret-right'")
+          .attachment
+            file-preview(file="attachment", ng-show="displayFile")

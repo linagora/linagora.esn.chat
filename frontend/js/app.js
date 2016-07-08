@@ -22,5 +22,6 @@ angular.module('linagora.esn.chat', [
   'linagora.esn.emoticon',
   'xeditable',
   'angularMoment',
-  'ngSanitize'
+  'ngSanitize',
+  'esn.file-preview'
 ]);
