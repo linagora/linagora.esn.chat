@@ -1,17 +1,20 @@
 'use strict';
 
 var expect = require('chai').expect;
+var sinon = require('sinon');
+var CONSTANTS = require('../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib listener module', function() {
 
   describe('The start function', function() {
 
-    var deps, listener;
+    var deps, listener, globalPublish;
     var dependencies = function(name) {
       return deps[name];
     };
 
     beforeEach(function() {
+      globalPublish = sinon.spy();
       deps = {
         logger: {
           error: console.log,
@@ -27,6 +30,13 @@ describe('The linagora.esn.chat lib listener module', function() {
                 }
               };
             }
+          },
+          global: {
+            topic: sinon.spy(function() {
+              return {
+                publish: globalPublish
+              };
+            })
           }
         }
       };
@@ -52,7 +62,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       done();
     });
 
-    it('should save the message when message.type is not user_typing', function(done) {
+    it('should save the message when message.type is not user_typing and broadcast to globalpubsub to saved message', function(done) {
       var type = 'text';
       var text = 'yolo';
       var creator = '1';
@@ -65,24 +75,34 @@ describe('The linagora.esn.chat lib listener module', function() {
           creator: creator,
           channel: channel,
           attachments: attachments
-        }
+        },
+        room: 'room'
       };
 
+      var createMessageResult = 'createMessageResult';
+
       var channelMock = {
-        createMessage: function(msg) {
-          expect(msg).to.deep.equals({
-            type: type,
-            text: text,
-            creator: creator,
-            channel: channel,
-            attachments: attachments
-          });
-          done();
-        }
+        createMessage: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        })
       };
 
       var module = require('../../../backend/lib/listener')(dependencies);
       module.start(channelMock);
+
+      globalPublish = function(data) {
+        expect(channelMock.createMessage).to.have.been.calledWith({
+          type: type,
+          text: text,
+          creator: creator,
+          channel: channel,
+          attachments: attachments
+        });
+
+        expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
+        expect(data).to.be.deep.equals({room: data.room, message: createMessageResult});
+        done();
+      };
 
       listener(data);
     });

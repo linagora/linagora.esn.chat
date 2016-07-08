@@ -4,6 +4,7 @@ var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
+var _ = require('lodash');
 
 module.exports = function(dependencies) {
 
@@ -72,9 +73,26 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
+  function parseMention(message) {
+    message.user_mentions = _.uniq(message.text.match(/@[a-fA-F0-9]{24}/g)).map(function(mention) {
+      return new ObjectId(mention.replace(/^@/, ''));
+    });
+  }
+
   function createMessage(message, callback) {
+    parseMention(message);
     var chatMessage = new ChatMessage(message);
-    return chatMessage.save(callback);
+    async.waterfall([
+        function(callback) {
+          chatMessage.save(callback);
+        },
+        function(message, _num, callback) {
+          ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
+        },
+        function(message, callback) {
+          callback(null, message.toObject());
+        }
+    ], callback);
   }
 
   function addMemberToChannel(channelId, userId, callback) {
@@ -95,6 +113,7 @@ module.exports = function(dependencies) {
     var q = {channel: channelId};
     var mq = ChatMessage.find(q);
     mq.populate('creator');
+    mq.populate('user_mentions');
     mq.limit(query.limit || 20);
     mq.skip(query.offset || 0);
     mq.sort('-timestamps.creation');

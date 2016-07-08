@@ -64,7 +64,6 @@ function init(dependencies, lib) {
         data.date = Date.now();
         data.room = room;
         localPubsub.topic(MESSAGE_RECEIVED).publish({room: room, message: data});
-        globalPubsub.topic(MESSAGE_RECEIVED).publish({room: room, message: data});
       });
     });
 

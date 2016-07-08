@@ -18,6 +18,7 @@ module.exports = function(dependencies) {
     creator: {type: ObjectId, ref: 'User'},
     channel: {type: ObjectId, ref: 'Channel'},
     attachments: {type: [AttachmentSchema], required: false},
+    user_mentions: [{type: ObjectId, ref: 'User'}],
     timestamps: {
       creation: {type: Date, default: Date.now}
     },

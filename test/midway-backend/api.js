@@ -136,13 +136,13 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            var expected = JSON.parse(JSON.stringify(mongoResult[0]));
+            var expected = JSON.parse(JSON.stringify(mongoResult));
             expected.creator = {
               username: user.username,
               _id: user._id + '',
               __v: 0
             };
-            expected.timestamps.creation = mongoResult[0].timestamps.creation.getTime();
+            expected.timestamps.creation = mongoResult.timestamps.creation.getTime();
             expect(res.body).to.deep.equal([expected]);
             done();
           });
