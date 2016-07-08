@@ -37,6 +37,11 @@ module.exports = function(dependencies) {
         logger.debug('Chat Message saved', message);
 
         globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
+
+        message.user_mentions && message.user_mentions.forEach(function(mention) {
+          globalPubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({room: data.room, message: message, for: mention});
+        });
+
       });
     });
   }

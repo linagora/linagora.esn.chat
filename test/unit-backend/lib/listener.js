@@ -62,7 +62,35 @@ describe('The linagora.esn.chat lib listener module', function() {
       done();
     });
 
-    it('should save the message when message.type is not user_typing and broadcast to globalpubsub to saved message', function(done) {
+    it('should broadcast users_mention', function(done) {
+      var data = {
+        message: {
+          type: 'text',
+          text: 'yolo',
+          creator: '1',
+          channel: 'general',
+        },
+        room: 'room'
+      };
+
+      var createMessageResult = {user_mentions: ['user']};
+
+      var channelMock = {
+        createMessage: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+          expect(globalPublish).to.have.been.calledWith({room: data.room, message: createMessageResult, for: 'user'});
+          expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.USERS_MENTION);
+          done();
+        })
+      };
+
+      var module = require('../../../backend/lib/listener')(dependencies);
+      module.start(channelMock);
+
+      listener(data);
+    });
+
+    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message', function(done) {
       var type = 'text';
       var text = 'yolo';
       var creator = '1';
