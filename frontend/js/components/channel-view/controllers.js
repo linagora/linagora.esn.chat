@@ -46,11 +46,8 @@ angular.module('linagora.esn.chat')
     }
 
     $scope.newMessage = function(message) {
-
-      ChatMessageAdapter.fromAPI(message).then(function(message) {
-        insertMessage($scope.messages, message);
-        ChatScroll.scrollDown();
-      });
+      insertMessage($scope.messages, message);
+      ChatScroll.scrollDown();
     };
 
     $scope.updateTopic = function($data) {
