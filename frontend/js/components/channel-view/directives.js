@@ -54,11 +54,10 @@ angular.module('linagora.esn.chat')
       controller: function($scope, $filter, chatParseMention) {
         var parsedText = $filter('linky')($scope.message.text, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
-        chatParseMention(parsedText).then(function(parsedText) {
-          $scope.parsed = {
-            text: parsedText
-          };
-        });
+        parsedText = chatParseMention(parsedText, $scope.message.user_mentions);
+        $scope.parsed = {
+          text: parsedText
+        };
       }
     };
   })
