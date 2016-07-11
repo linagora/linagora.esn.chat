@@ -1,6 +1,7 @@
 'use strict';
 
 var uuid = require('node-uuid');
+var cleanUser = require('./utils').cleanUser;
 
 module.exports = function(dependencies) {
 
@@ -34,6 +35,18 @@ module.exports = function(dependencies) {
     },
     schemaVersion: {type: Number, default: 1}
   });
+
+  function cleanChannel(original, object) {
+    object.members && object.members.map(cleanUser);
+
+    return object;
+  }
+
+  ChannelSchema.options.toObject = ChannelSchema.options.toObject || {};
+  ChannelSchema.options.toObject.transform = cleanChannel;
+
+  ChannelSchema.options.toJSON = ChannelSchema.options.toJSON || {};
+  ChannelSchema.options.toJSON.transform = cleanChannel;
 
   return mongoose.model('ChatChannel', ChannelSchema);
 };

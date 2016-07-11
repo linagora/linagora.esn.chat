@@ -142,7 +142,6 @@ describe('The chat API', function() {
               _id: user._id + '',
               __v: 0
             };
-            expected.timestamps.creation = mongoResult.timestamps.creation.getTime();
             expect(res.body).to.deep.equal([expected]);
             done();
           });

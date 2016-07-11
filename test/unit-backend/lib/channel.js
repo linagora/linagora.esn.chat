@@ -290,7 +290,7 @@ describe('The linagora.esn.chat channel lib', function() {
         expect(msg).to.deep.equal(message);
       }
       ChannelMessage.prototype.save = function(cb) {
-        message.toObject = _.constant(message);
+        message.toJSON = _.constant(message);
         cb(null, message, 0);
       };
 

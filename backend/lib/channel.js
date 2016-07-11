@@ -90,7 +90,7 @@ module.exports = function(dependencies) {
           ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
         },
         function(message, callback) {
-          callback(null, message.toObject());
+          callback(null, message.toJSON());
         }
     ], callback);
   }
