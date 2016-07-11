@@ -2,36 +2,26 @@
 
 angular.module('linagora.esn.chat')
 
-  .directive('chatUserTyping', function(_, $q, ChatMessageAdapter) {
+  .directive('chatUserTyping', function(_, $q, session, userUtils) {
     return {
       restrict: 'E',
       scope: true,
       templateUrl: '/chat/views/components/channel-view/user-typing.html',
       link: function(scope) {
 
-        scope.typing = {};
-        scope.$on('chat:message:user_typing', function(evt, message) {
-          scope.typing[message.creator] = message.state;
-          var areTyping = _.map(scope.typing, function(value, key) {
-            if (value && scope.chatLocalStateService.activeRoom._id === message.channel) {
-              return key;
-            }
-          }).filter(function(element) {
-            return element !== undefined;
-          });
+        session.ready.then(function(session) {
+          scope.typing = {};
+          scope.$on('chat:message:user_typing', function(evt, message) {
+            scope.typing[message.creator._id] = message;
 
-          $q.all(areTyping.map(function(element) {
-            return ChatMessageAdapter.getUser(element);
-          })).then(function(results) {
-            scope.usersTyping = results.map(function(result) {
-              if (result.firstname || result.lastname) {
-                return (result.firstname || '') + ' ' + (result.lastname || '');
-              } else {
-                return result.emails[0];
-              }
-            });
+            scope.usersTyping = _.chain(scope.typing)
+              .filter(function(message, key) {
+                return message.state && scope.chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
+              })
+              .map('creator')
+              .map(userUtils.displayNameOf)
+              .value();
           });
-
         });
       }
     };

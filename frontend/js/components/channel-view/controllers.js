@@ -10,7 +10,6 @@ angular.module('linagora.esn.chat')
         session,
         ChatConversationService,
         channelsService,
-        ChatMessageAdapter,
         CHAT,
         CHAT_EVENTS,
         ChatScroll,

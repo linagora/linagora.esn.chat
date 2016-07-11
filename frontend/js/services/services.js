@@ -9,38 +9,6 @@ angular.module('linagora.esn.chat')
     });
   })
 
-  .factory('ChatMessageAdapter', function($q, userAPI) {
-
-    var cache = {};
-
-    function getUser(id) {
-      if (cache[id]) {
-        return $q.when(cache[id]);
-      }
-
-      return userAPI.user(id).then(function(response) {
-        cache[id] = response.data;
-        return response.data;
-      });
-    }
-
-    function fromAPI(message) {
-      if (message.creator && !message.creator._id) {
-        return getUser(message.creator).then(function(user) {
-          message.creator = user;
-          return message;
-        });
-      }
-
-      return $q.when(message);
-    }
-
-    return {
-      fromAPI: fromAPI,
-      getUser: getUser
-    };
-  })
-
   .factory('chatUserState', function($q, $rootScope, _, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
     var cache = {};
 
