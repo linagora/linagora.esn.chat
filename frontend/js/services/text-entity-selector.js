@@ -33,7 +33,10 @@
       this.entityStart = '';
     };
 
-    ChatTextEntitySelector.prototype.select = function(entity) {
+    ChatTextEntitySelector.prototype.select = function(entity, event) {
+      if (event) {
+        event.preventDefault();
+      }
       this._insertEntityTag(entity);
       this._resetState();
     };

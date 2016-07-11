@@ -2,7 +2,7 @@
   header Members matching "#[strong {{ctlr.entitySelector.entityStart}}]"
   section
     .emoticon-info(ng-repeat="member in ctlr.entitySelector.entityList",
-      ng-click='ctlr.entitySelector.select(member)',
+      ng-click='ctlr.entitySelector.select(member, $event)',
       ng-mouseover='ctlr.focusIndex = $index',
       ng-class='{selected: ctlr.entitySelector.focusIndex === $index}')
         member-display(member='member')
