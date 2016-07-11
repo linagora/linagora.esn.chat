@@ -72,7 +72,6 @@ angular.module('linagora.esn.chat')
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
         var data = ChatRestangular.stripRestangular(response.data);
         return data.map(function(message) {
-          message.date = message.timestamps.creation;
           return message;
         })
         .sort(function(msgA, msgB) {

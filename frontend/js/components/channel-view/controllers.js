@@ -23,7 +23,7 @@ angular.module('linagora.esn.chat')
     $scope.messages = [];
 
     function addUniqId(message) {
-      message._uniqId = message.creator._id + ':' + message.date  + '' + message.text;
+      message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
     }
 
     ChatConversationService.fetchMessages($scope.chatLocalStateService.activeRoom._id, {}).then(function(result) {
@@ -37,7 +37,7 @@ angular.module('linagora.esn.chat')
       // chances are, the new message is the most recent
       // So we traverse the array starting by the end
       for (var i = messages.length - 1; i > -1; i--) {
-        if (messages[i].date < message.date) {
+        if (messages[i].timestamps.creation < message.timestamps.creation) {
           messages.splice(i + 1, 0, message);
           return;
         }

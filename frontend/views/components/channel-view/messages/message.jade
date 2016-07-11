@@ -4,7 +4,7 @@
     .media-body
       .chat-message-title
         user-profile-link.displayname(user="message.creator")
-        small.date {{::message.date | amDateFormat:'h:mm A'}}
+        small.date {{::message.timestamps.creation | amDateFormat:'h:mm A'}}
       .chat-message-text(ng-bind-html="parsed.text")
       .oembeds
         oembeds(message="message.text")
