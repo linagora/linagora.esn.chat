@@ -2,24 +2,42 @@
 
 var expect = require('chai').expect;
 var sinon = require('sinon');
+var _ = require('lodash');
 var CONSTANTS = require('../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib listener module', function() {
 
   describe('The start function', function() {
-
-    var deps, listener, globalPublish;
-    var dependencies = function(name) {
-      return deps[name];
-    };
+    var deps, listener, globalPublish, ChatMessageMock, dependencies;
 
     beforeEach(function() {
+      dependencies = function(name) {
+        return deps[name];
+      };
+
+      ChatMessageMock = sinon.spy(function() {
+        this.populate = ChatMessageMock.populate;
+      });
+
+      ChatMessageMock.populate = sinon.spy(_.identity);
+
       globalPublish = sinon.spy();
       deps = {
         logger: {
           error: console.log,
           info: console.log,
           debug: console.log
+        },
+        db: {
+          mongo: {
+            mongoose: {
+              model: sinon.spy(function(name) {
+                if (name === 'ChatMessage') {
+                  return ChatMessageMock;
+                }
+              })
+            }
+          }
         },
         pubsub: {
           local: {
@@ -42,11 +60,13 @@ describe('The linagora.esn.chat lib listener module', function() {
       };
     });
 
-    it('should not save the message when message.type is user_typing', function(done) {
+    it('should not save, populate and keep state when message.type is user_typing', function(done) {
       var data = {
         message: {
+          state: 'state',
           type: 'user_typing'
-        }
+        },
+        room: 'room'
       };
 
       var channel = {
@@ -58,8 +78,14 @@ describe('The linagora.esn.chat lib listener module', function() {
       var module = require('../../../backend/lib/listener')(dependencies);
       module.start(channel);
 
+      ChatMessageMock.populate = function(field, callback) {
+        expect(field).to.equals('creator');
+        expect(ChatMessageMock).to.have.been.calledWith(data.message);
+        callback(null, {toJSON: _.constant({})});
+        expect(globalPublish).to.have.been.calledWith({room: data.room, message: {state: data.message.state}});
+        done();
+      };
       listener(data);
-      done();
     });
 
     it('should broadcast users_mention', function(done) {

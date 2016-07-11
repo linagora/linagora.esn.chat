@@ -8,6 +8,9 @@ module.exports = function(dependencies) {
   var globalPubsub = dependencies('pubsub').global;
   var logger = dependencies('logger');
 
+  var mongoose = dependencies('db').mongo.mongoose;
+  var ChatMessage = mongoose.model('ChatMessage');
+
   function start(channel) {
 
     function saveAsChatMessage(data, callback) {
@@ -25,24 +28,43 @@ module.exports = function(dependencies) {
       channel.createMessage(chatMessage, callback);
     }
 
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
-      if (data.message.type === 'user_typing') {
-        return;
-      }
-      saveAsChatMessage(data, function(err, message) {
+    function populateTypingMessage(data, callback) {
+      (new ChatMessage(data)).populate('creator', function(err, message) {
         if (err) {
-          logger.error('Can not save ChatMessage', err);
+          callback(err);
           return;
         }
-        logger.debug('Chat Message saved', message);
+        var result = message.toJSON();
 
-        globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
-
-        message.user_mentions && message.user_mentions.forEach(function(mention) {
-          globalPubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({room: data.room, message: message, for: mention});
-        });
-
+        result.state = data.state;
+        callback(null, result);
       });
+    }
+
+    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
+      if (data.message.type === 'user_typing') {
+        populateTypingMessage(data.message, function(err, message) {
+          if (err) {
+            logger.error('Can not populate user typing message', err);
+            return;
+          }
+          globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
+        });
+      } else {
+        saveAsChatMessage(data, function(err, message) {
+          if (err) {
+            logger.error('Can not save ChatMessage', err);
+            return;
+          }
+          logger.debug('Chat Message saved', message);
+
+          globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
+
+          message.user_mentions && message.user_mentions.forEach(function(mention) {
+            globalPubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({room: data.room, message: message, for: mention});
+          });
+        });
+      }
     });
   }
 
