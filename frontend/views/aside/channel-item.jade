@@ -1,11 +1,13 @@
 .lv-item.clickable(title="{{::item.name}}", ui-sref='chat.channels-views({id: item._id})', ui-sref-active="selected", ng-class="{notread: item.isNotRead}")
-  .badge-container
-    i.item-icon.mdi(ng-class="{'mdi-pound': item.type === 'channel', 'mdi-checkbox-blank-circle': item.type !== 'channel', 'connected': allUsersConnected}")
-  .item-name
-    span.item-name-inner
-      bdi {{::item.name}}
-    span(ng-if="item.unreadMessageCount > 0")
-      i.fa.fa-circle.fa-stack-2x
-      i.fa.fa-inverse.fa-stack-1x
-        {{item.unreadMessageCount}}
-    span.item-name-after
+  .row
+    .col-xs-2.badge-container
+      i.item-icon.mdi(ng-class="{'mdi-pound': item.type === 'channel', 'mdi-checkbox-blank-circle': item.type !== 'channel', 'connected': allUsersConnected}")
+    .col-xs-8.item-name
+      span.item-name-inner.ellipsis
+        bdi {{::item.name}}
+    .col-xs-2
+      span(ng-if="item.unreadMessageCount > 0")
+        i.fa.fa-circle.fa-stack-2x
+        i.fa.fa-inverse.fa-stack-1x
+          {{item.unreadMessageCount}}
+      span.item-name-after
