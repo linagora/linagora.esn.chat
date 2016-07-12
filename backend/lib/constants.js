@@ -24,6 +24,9 @@ module.exports = {
     topic: 'default',
     purpose: 'default',
     isNotRead: false
+  },
+  CHANNEL_TYPE: {
+    GROUP: 'group',
+    CHANNEL: 'channel'
   }
-
 };

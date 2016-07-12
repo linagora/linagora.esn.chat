@@ -4,6 +4,7 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var _ = require('lodash');
 
@@ -115,7 +116,7 @@ describe('The linagora.esn.chat channel lib', function() {
         cb(null, {});
       };
       require('../../../backend/lib/channel')(dependencies).getChannels({}, function() {
-        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: 'channel'});
+        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: CHANNEL_TYPE.CHANNEL});
         expect(mq.populate).to.have.been.calledWith('members');
         done();
       });
@@ -124,7 +125,7 @@ describe('The linagora.esn.chat channel lib', function() {
     it('should return the default channel', function(done) {
       var module = require('../../../backend/lib/channel')(dependencies);
       module.getChannels({}, function(err, channels) {
-        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: 'channel'});
+        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: CHANNEL_TYPE.CHANNEL});
         expect(mq.populate).to.have.been.calledWith('members');
         expect(err).to.be.equal(null);
         expect(channels).not.to.be.empty;
@@ -210,7 +211,7 @@ describe('The linagora.esn.chat channel lib', function() {
         });
 
         expect(modelsMock.ChatChannel.find).to.have.been.calledWith({
-          type:  'group',
+          type:  CHANNEL_TYPE.GROUP,
           members: {
             $all: [anObjectId],
             $size: 1
@@ -233,7 +234,7 @@ describe('The linagora.esn.chat channel lib', function() {
         });
 
         expect(modelsMock.ChatChannel.find).to.have.been.calledWith({
-          type:  'group',
+          type:  CHANNEL_TYPE.GROUP,
           members: {
             $all: [anObjectId]
           }

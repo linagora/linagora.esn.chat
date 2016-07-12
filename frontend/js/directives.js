@@ -29,7 +29,7 @@ angular.module('linagora.esn.chat')
       scope: {
         item: '='
       },
-      controller: function($scope, $rootScope, $q, _, CHAT_EVENTS, chatUserState, session) {
+      controller: function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CHANNEL_TYPE, chatUserState, session) {
         $scope.allUsersConnected = true;
         var userToConnected = {};
 
@@ -56,6 +56,7 @@ angular.module('linagora.esn.chat')
           });
 
           $scope.$on('$destroy', unbind);
+          $scope.CHAT_CHANNEL_TYPE = CHAT_CHANNEL_TYPE;
         });
       },
       templateUrl: '/chat/views/aside/channel-item.html'

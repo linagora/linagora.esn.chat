@@ -5,6 +5,7 @@ var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
 var _ = require('lodash');
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 
 module.exports = function(dependencies) {
 
@@ -18,7 +19,7 @@ module.exports = function(dependencies) {
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
 
   function getChannels(options, callback) {
-    Channel.find({type: 'channel'}).populate('members').exec(function(err, channels) {
+    Channel.find({type: CHANNEL_TYPE.CHANNEL}).populate('members').exec(function(err, channels) {
       channels = channels || [];
       if (channels.length === 0) {
         return createChannel(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
@@ -42,7 +43,7 @@ module.exports = function(dependencies) {
 
   function findGroupByMembers(exactMatch, members, callback) {
     var request = {
-      type:  'group',
+      type:  CHANNEL_TYPE.GROUP,
       members: {
         $all: members.map(function(participant) {
           return new ObjectId(participant);

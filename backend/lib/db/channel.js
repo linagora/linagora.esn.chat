@@ -2,6 +2,8 @@
 
 var uuid = require('node-uuid');
 var cleanUser = require('./utils').cleanUser;
+var CONSTANTS = require('../constants');
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 
 module.exports = function(dependencies) {
 
@@ -10,7 +12,7 @@ module.exports = function(dependencies) {
 
   var ChannelSchema = new mongoose.Schema({
     name: {type: String},
-    type: {type: String, enum: ['channel', 'group'], required: true},
+    type: {type: String, enum: [CHANNEL_TYPE.CHANNEL, CHANNEL_TYPE.GROUP], required: true},
     creator: {type: ObjectId, ref: 'User'},
     isNotRead: {type: Boolean},
     members: [{type: ObjectId, ref: 'User'}],

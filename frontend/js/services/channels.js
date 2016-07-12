@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('linagora.esn.chat')
-  .factory('channelsService', function($rootScope, $q, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
+  .factory('channelsService', function($rootScope, $q, CHAT_CHANNEL_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
     var groups = [];
     var channels = [];
 
@@ -10,7 +10,7 @@ angular.module('linagora.esn.chat')
       sio.on(CHAT_EVENTS.NEW_CHANNEL, function(channel) {
         var room = _.find((channels || []).concat(groups || []), {_id: channel._id});
         if (!room) {
-          if (channel.type === 'group') {
+          if (channel.type === CHAT_CHANNEL_TYPE.GROUP) {
             channel.name = computeGroupName(session.user._id, channel);
             groups.push(channel);
           } else {
@@ -69,7 +69,7 @@ angular.module('linagora.esn.chat')
 
       return ChatRestangular.one('channels', channelId).get().then(function(response) {
         var channel =  response.data;
-        if (!channel || channel.type !== 'group') {
+        if (!channel || channel.type !== CHAT_CHANNEL_TYPE.GROUP) {
           return channel;
         }
 
@@ -85,13 +85,13 @@ angular.module('linagora.esn.chat')
     }
 
     function addGroups(group) {
-      group.type = 'group';
+      group.type = CHAT_CHANNEL_TYPE.GROUP;
       group.name = computeGroupName(session.user._id, group);
       return postChannels(group);
     }
 
     function addChannels(channel) {
-      channel.type = 'channel';
+      channel.type = CHAT_CHANNEL_TYPE.CHANNEL;
       return postChannels(channel);
     }
 

@@ -13,11 +13,11 @@ angular.module('linagora.esn.chat')
     }
   })
 
-  .controller('chatAddChannelController', function($scope, $state, channelsService, chatLocalStateService) {
+  .controller('chatAddChannelController', function($scope, CHAT_CHANNEL_TYPE, $state, channelsService, chatLocalStateService) {
     $scope.addChannel = function() {
       var channel = {
         name: $scope.channel.name,
-        type: 'channel',
+        type: CHAT_CHANNEL_TYPE.CHANNEL,
         topic: $scope.channel.topic || '',
         purpose: $scope.channel.purpose || ''
       };

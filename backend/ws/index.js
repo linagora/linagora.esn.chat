@@ -8,6 +8,7 @@ var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 
 function init(dependencies, lib) {
   var logger = dependencies('logger');
@@ -18,7 +19,7 @@ function init(dependencies, lib) {
   var helper = dependencies('wsserver').ioHelper;
 
   function sendDataToChannel(channel, type, data) {
-    if (channel.type === 'group') {
+    if (channel.type === CHANNEL_TYPE.GROUP) {
       channel.members.forEach(function(user) {
         var sockets = helper.getUserSocketsFromNamespace(user._id, chatNamespace.sockets) || [];
         sockets.forEach(function(socket) {

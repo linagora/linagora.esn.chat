@@ -19,6 +19,7 @@ describe('The linagora.esn.chat services', function() {
     $httpBackend,
     chatNotification,
     chatLocalStateService,
+    CHAT_CHANNEL_TYPE,
     channelsServiceMock,
     groups,
     channels,
@@ -44,9 +45,6 @@ describe('The linagora.esn.chat services', function() {
         }
       }
     };
-
-    groups = [{_id: 'group1', type: 'group'}, {_id: 'group2', type: 'group'}];
-    channels = [{_id: 'channel1', type: 'channel'}, {_id: 'channel2', type: 'channel'}];
 
     channelsServiceMock = {
       getChannels: function() {
@@ -92,7 +90,7 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CHANNEL_TYPE_) {
     $q = _$q_;
     ChatConversationService = _ChatConversationService_;
     chatNotification = _chatNotification_;
@@ -103,6 +101,9 @@ describe('The linagora.esn.chat services', function() {
     chatUserState = _chatUserState_;
     $httpBackend =  _$httpBackend_;
     chatLocalStateService = _chatLocalStateService_;
+    CHAT_CHANNEL_TYPE = _CHAT_CHANNEL_TYPE_;
+    groups = [{_id: 'group1', type: CHAT_CHANNEL_TYPE.GROUP}, {_id: 'group2', type: CHAT_CHANNEL_TYPE.GROUP}];
+    channels = [{_id: 'channel1', type: CHAT_CHANNEL_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CHANNEL_TYPE.CHANNEL}];
   }));
 
   describe('chatUserState service', function() {
@@ -237,19 +238,19 @@ describe('The linagora.esn.chat services', function() {
     describe('add channel & group', function() {
 
       it('should add a channel', function() {
-        var channel = {_id: 'channel3', type: 'channel'};
+        var channel = {_id: 'channel3', type: CHAT_CHANNEL_TYPE.CHANNEL};
         chatLocalStateService.addChannel(channel);
         expect(channels).to.include(channel);
       });
 
       it('should add a group', function() {
-        var group = {_id: 'group3', type: 'group'};
+        var group = {_id: 'group3', type: CHAT_CHANNEL_TYPE.GROUP};
         chatLocalStateService.addGroup(group);
         expect(groups).to.include(group);
       });
 
       it('should do nothing if group existed', function() {
-        var group = {_id: 'group1', type: 'group'};
+        var group = {_id: 'group1', type: CHAT_CHANNEL_TYPE.GROUP};
         var oldGroups = groups;
         chatLocalStateService.addGroup(group);
         expect(groups).to.be.deep.equal(oldGroups);

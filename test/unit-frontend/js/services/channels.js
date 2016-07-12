@@ -8,6 +8,7 @@ describe('The linagora.esn.chat channelsServices', function() {
   var $q,
   channelsService,
   CHAT_NAMESPACE,
+  CHAT_CHANNEL_TYPE,
   CHAT_EVENTS,
   sessionMock,
   user,
@@ -39,9 +40,6 @@ describe('The linagora.esn.chat channelsServices', function() {
       }
     };
 
-    groups = [{_id: 'group1', type: 'group'}, {_id: 'group2', type: 'group'}];
-    channels = [{_id: 'channel1', type: 'channel'}, {_id: 'channel2', type: 'channel'}];
-
     channelsServiceMock = {
       getChannels: function() {
         return $q.when(channels);
@@ -69,7 +67,7 @@ describe('The linagora.esn.chat channelsServices', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _channelsService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _$httpBackend_) {
+  beforeEach(angular.mock.inject(function(_$q_, _channelsService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _$httpBackend_, _CHAT_CHANNEL_TYPE_) {
     $q = _$q_;
     channelsService = _channelsService_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
@@ -77,6 +75,10 @@ describe('The linagora.esn.chat channelsServices', function() {
     $httpBackend =  _$httpBackend_;
     $rootScope = _$rootScope_;
     sessionMock.ready = $q.when({user: user});
+    CHAT_CHANNEL_TYPE = _CHAT_CHANNEL_TYPE_;
+    groups = [{_id: 'group1', type: CHAT_CHANNEL_TYPE.GROUP}, {_id: 'group2', type: CHAT_CHANNEL_TYPE.GROUP}];
+    channels = [{_id: 'channel1', type: CHAT_CHANNEL_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CHANNEL_TYPE.CHANNEL}];
+
   }));
 
   describe('computeGroupName', function() {
@@ -236,7 +238,7 @@ describe('The linagora.esn.chat channelsServices', function() {
       var id =  'justAdded';
       var data = {
         _id: id,
-        type: 'group',
+        type: CHAT_CHANNEL_TYPE.GROUP,
         members: [user, {firstname: 'Eric', lastname: 'Cartman'}]
       };
       callback(data);
@@ -247,7 +249,7 @@ describe('The linagora.esn.chat channelsServices', function() {
       callback(data);
       expect(thenCallback).to.have.been.calledWith({
         _id: id,
-        type: 'group',
+        type: CHAT_CHANNEL_TYPE.GROUP,
         members: [user, {firstname: 'Eric', lastname: 'Cartman'}],
         name: 'Eric Cartman'
       });
