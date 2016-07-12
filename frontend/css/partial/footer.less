@@ -35,8 +35,11 @@
         .emoticon-info {
           cursor: pointer;
           display: block;
-          margin: 10px;
-          border-radius: 10px;
+          padding: 10px;
+
+          &.selected {
+            background-color: darken(@body-bg, 10%);
+          }
 
           img {
             width: 3em;
@@ -113,6 +116,7 @@
         display: inline-block;
         padding: 3px 8px;
         margin: 2px;
+        border-radius: 10px;
 
         &.selected {
           background-color: darken(@body-bg, 10%);
