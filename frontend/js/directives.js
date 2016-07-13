@@ -23,42 +23,39 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('chatConversationGroupList', function() {
+    return {
+      restrict: 'E',
+      templateUrl: '/chat/views/conversation-group-list.html',
+      scope: {
+        channelState: '@'
+      },
+      controller: function($scope, $state, chatLocalStateService) {
+        $scope.groups = chatLocalStateService.groups;
+      }
+    };
+  })
+
+  .directive('chatGroupOverview', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        item: '=',
+        channelState: '=?'
+      },
+      controller: 'chatChannelItemController',
+      templateUrl: '/chat/views/group-overview.html'
+    };
+  })
+
   .directive('chatChannelItem', function() {
     return {
       restrict: 'E',
       scope: {
-        item: '='
+        item: '=',
+        channelState: '=?'
       },
-      controller: function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CHANNEL_TYPE, chatUserState, session) {
-        $scope.allUsersConnected = true;
-        var userToConnected = {};
-
-        function computeIsConnected() {
-          $scope.allUsersConnected = _(userToConnected).values().every();
-        }
-
-        session.ready.then(function(session) {
-          var statesPromises = _.chain($scope.item.members)
-            .reject({_id: session.user._id})
-            .map(function(member) {
-              return chatUserState.get(member._id).then(function(state) {
-                userToConnected[member._id] = state !== 'disconnected';
-              });
-            });
-
-          $q.all(statesPromises).then(computeIsConnected);
-
-          var unbind = $rootScope.$on(CHAT_EVENTS.USER_CHANGE_STATE, function(event, data) {
-            if (angular.isDefined(userToConnected[data.userId])) {
-              userToConnected[data.userId] = data.state !== 'disconnected';
-              computeIsConnected();
-            }
-          });
-
-          $scope.$on('$destroy', unbind);
-          $scope.CHAT_CHANNEL_TYPE = CHAT_CHANNEL_TYPE;
-        });
-      },
+      controller: 'chatChannelItemController',
       templateUrl: '/chat/views/aside/channel-item.html'
     };
   })

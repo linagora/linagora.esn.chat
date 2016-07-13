@@ -1,0 +1,6 @@
+.row.group-item(ui-sref='{{channelState}}({id: item._id})')
+  .col-xs-2
+    a(href='#', title='{{otherUsers[0].name}} <{{otherUsers[0].address}}>')
+      img.group-badge(src='/images/user.png', ng-src="/api/avatars?objectType=image&id={{otherUsers[0].currentAvatar}}")
+  .col-xs-8
+    span.group-name {{::item.name}}
