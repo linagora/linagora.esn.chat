@@ -4,7 +4,6 @@
   "description": "OpenPaaS Chat module",
   "main": "index.js",
   "devDependencies": {
-    "async": "^2.0.0-rc.2",
     "body-parser": "^1.15.0",
     "chai": "3.4.0",
     "chai-as-promised": "^5.3.0",
@@ -39,8 +38,8 @@
     "karma-spec-reporter": "0.0.22",
     "mocha": "2.3.3",
     "mockery": "1.4.0",
-    "mongodb": "^2.1.14",
-    "mongoose": "^4.4.11",
+    "mongodb": "2.1.14",
+    "mongoose": "4.4.11",
     "phantomjs": "1.9.18",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
@@ -60,6 +59,7 @@
   "author": "Linagora R&D",
   "license": "AGPLv3",
   "dependencies": {
+    "async": "^2.0.0-rc.2",
     "lodash": "4.7.0",
     "awesome-module": "1.0.0",
     "bower": "1.7.0",
