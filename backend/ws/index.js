@@ -64,6 +64,7 @@ function init(dependencies, lib) {
       socket.on('message', function(data) {
         data.date = Date.now();
         data.room = room;
+        data.creator = helper.getUserId(socket);
         localPubsub.topic(MESSAGE_RECEIVED).publish({room: room, message: data});
       });
     });
