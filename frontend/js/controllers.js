@@ -43,5 +43,6 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatChannelSubheaderController', function() {
+  .controller('chatChannelSubheaderController', function($scope, chatLocalStateService) {
+    $scope.chatLocalStateService = chatLocalStateService;
   });
