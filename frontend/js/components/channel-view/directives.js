@@ -84,7 +84,6 @@ angular.module('linagora.esn.chat')
         function sendUserTyping(state) {
           var message = {
             state: state,
-            creator: scope.user._id,
             channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };
