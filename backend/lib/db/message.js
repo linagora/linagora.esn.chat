@@ -1,5 +1,7 @@
 'use strict';
 
+var cleanUser = require('./utils').cleanUser;
+
 module.exports = function(dependencies) {
 
   var mongoose = dependencies('db').mongo.mongoose;
@@ -18,11 +20,29 @@ module.exports = function(dependencies) {
     creator: {type: ObjectId, ref: 'User'},
     channel: {type: ObjectId, ref: 'Channel'},
     attachments: {type: [AttachmentSchema], required: false},
+    user_mentions: [{type: ObjectId, ref: 'User'}],
     timestamps: {
       creation: {type: Date, default: Date.now}
     },
     schemaVersion: {type: Number, default: 1}
   });
+
+  function cleanMessage(original, object) {
+    object.creator && cleanUser(object.creator);
+    object.user_mentions && object.user_mentions.map(cleanUser);
+
+    if (object.timestamps) {
+      object.timestamps.creation = object.timestamps.creation.getTime();
+    }
+
+    return object;
+  }
+
+  ChatMessageSchema.options.toObject = ChatMessageSchema.options.toObject || {};
+  ChatMessageSchema.options.toObject.transform = cleanMessage;
+
+  ChatMessageSchema.options.toJSON = ChatMessageSchema.options.toJSON || {};
+  ChatMessageSchema.options.toJSON.transform = cleanMessage;
 
   return mongoose.model('ChatMessage', ChatMessageSchema);
 };

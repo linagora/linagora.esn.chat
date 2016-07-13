@@ -85,7 +85,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       var channelId = 1;
       var msg1 = createMessage({text: 'foo'}, 156789);
       var msg2 = createMessage({text: 'bar'}, 2345677);
-      result = [msg1.source, msg2.source];
+      result = [msg1.dest, msg2.dest];
       var req = {params: {channel: channelId}};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.getMessages(req, {

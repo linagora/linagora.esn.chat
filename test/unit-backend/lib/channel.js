@@ -4,7 +4,9 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+var _ = require('lodash');
 
 describe('The linagora.esn.chat channel lib', function() {
 
@@ -114,7 +116,7 @@ describe('The linagora.esn.chat channel lib', function() {
         cb(null, {});
       };
       require('../../../backend/lib/channel')(dependencies).getChannels({}, function() {
-        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: 'channel'});
+        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: CHANNEL_TYPE.CHANNEL});
         expect(mq.populate).to.have.been.calledWith('members');
         done();
       });
@@ -123,7 +125,7 @@ describe('The linagora.esn.chat channel lib', function() {
     it('should return the default channel', function(done) {
       var module = require('../../../backend/lib/channel')(dependencies);
       module.getChannels({}, function(err, channels) {
-        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: 'channel'});
+        expect(modelsMock.ChatChannel.find).to.have.been.calledWith({type: CHANNEL_TYPE.CHANNEL});
         expect(mq.populate).to.have.been.calledWith('members');
         expect(err).to.be.equal(null);
         expect(channels).not.to.be.empty;
@@ -209,7 +211,7 @@ describe('The linagora.esn.chat channel lib', function() {
         });
 
         expect(modelsMock.ChatChannel.find).to.have.been.calledWith({
-          type:  'group',
+          type:  CHANNEL_TYPE.GROUP,
           members: {
             $all: [anObjectId],
             $size: 1
@@ -232,7 +234,7 @@ describe('The linagora.esn.chat channel lib', function() {
         });
 
         expect(modelsMock.ChatChannel.find).to.have.been.calledWith({
-          type:  'group',
+          type:  CHANNEL_TYPE.GROUP,
           members: {
             $all: [anObjectId]
           }
@@ -283,17 +285,51 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The createMessage function', function() {
 
-    it('should call ChatMessage.save', function(done) {
-      var message = {id: 1};
+    it('should call ChatMessage.save and populate correctly the creator and user_mentions', function(done) {
+      var message = {id: 1, text: ''};
       function ChannelMessage(msg) {
         expect(msg).to.deep.equal(message);
       }
       ChannelMessage.prototype.save = function(cb) {
-        cb();
+        message.toJSON = _.constant(message);
+        cb(null, message, 0);
+      };
+
+      ChannelMessage.populate = sinon.spy(function(_message, data, cb) {
+        expect(_message).to.equals(message);
+        expect(data).to.deep.equals([{path: 'user_mentions'}, {path: 'creator'}]);
+        cb(null, message);
+      });
+
+      modelsMock.ChatMessage = ChannelMessage;
+      require('../../../backend/lib/channel')(dependencies).createMessage(message, function(err, _message) {
+        expect(err).to.be.null;
+        expect(_message).to.equal(message);
+        done();
+      });
+    });
+
+    it('should parse user_mentions', function(done) {
+      var id1 = '577d20f2d4afe0b119d4fd19';
+      var id2 = '577d2106d4afe0b119d4fd1a';
+
+      ObjectIdMock = sinon.spy(function(data) {
+        this.id = data;
+      });
+
+      var message = {id: 1, text: 'This is a message with @' + id1 + ' and @' + id2};
+      function ChannelMessage(msg) {
+        expect(message.user_mentions).to.deep.equals([{id: id1}, {id: id2}]);
+        expect(ObjectIdMock).to.have.been.calledWith(id1);
+        expect(ObjectIdMock).to.have.been.calledWith(id2);
+      }
+
+      ChannelMessage.prototype.save = function(cb) {
+        done();
       };
 
       modelsMock.ChatMessage = ChannelMessage;
-      require('../../../backend/lib/channel')(dependencies).createMessage(message, done);
+      require('../../../backend/lib/channel')(dependencies).createMessage(message);
     });
   });
 
@@ -321,6 +357,7 @@ describe('The linagora.esn.chat channel lib', function() {
             sort: sortMock,
             exec: function(callback) {
               expect(populateMock).to.have.been.calledWith('creator');
+              expect(populateMock).to.have.been.calledWith('user_mentions');
               expect(limitMock).to.have.been.calledWith(limit);
               expect(skipMock).to.have.been.calledWith(offset);
               expect(sortMock).to.have.been.calledWith('-timestamps.creation');

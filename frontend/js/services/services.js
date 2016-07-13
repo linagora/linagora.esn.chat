@@ -9,38 +9,6 @@ angular.module('linagora.esn.chat')
     });
   })
 
-  .factory('ChatMessageAdapter', function($q, userAPI) {
-
-    var cache = {};
-
-    function getUser(id) {
-      if (cache[id]) {
-        return $q.when(cache[id]);
-      }
-
-      return userAPI.user(id).then(function(response) {
-        cache[id] = response.data;
-        return response.data;
-      });
-    }
-
-    function fromAPI(message) {
-      if (message.user) {
-        return getUser(message.user).then(function(user) {
-          message.user = user;
-          return message;
-        });
-      }
-
-      return $q.when(message);
-    }
-
-    return {
-      fromAPI: fromAPI,
-      getUser: getUser
-    };
-  })
-
   .factory('chatUserState', function($q, $rootScope, _, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
     var cache = {};
 
@@ -72,8 +40,6 @@ angular.module('linagora.esn.chat')
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
         var data = ChatRestangular.stripRestangular(response.data);
         return data.map(function(message) {
-          message.user = message.creator;
-          message.date = message.timestamps.creation;
           return message;
         })
         .sort(function(msgA, msgB) {
@@ -114,7 +80,7 @@ angular.module('linagora.esn.chat')
     };
 
     var canSendNotification = function(message) {
-      return !$window.document.hasFocus() && enable && message.user !== session.user._id;
+      return !$window.document.hasFocus() && enable && message.creator !== session.user._id;
     };
 
     return {
@@ -126,7 +92,7 @@ angular.module('linagora.esn.chat')
               var channelName = channel.name || 'OpenPaas Chat';
               webNotification.showNotification('New message in ' + channelName, {
                 body: message.text,
-                icon: '/api/users/' + message.user + '/profile/avatar',
+                icon: '/api/users/' + message.creator + '/profile/avatar',
                 autoClose: CHAT_NOTIF.CHAT_AUTO_CLOSE
               }, function onShow(err) {
                 if (err) {

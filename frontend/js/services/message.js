@@ -23,7 +23,7 @@ angular.module('linagora.esn.chat')
       });
 
       function isMeTyping(message) {
-        return message.user && message.user === userId && message.type === MESSAGE_TYPE.TYPING;
+        return message.creator && message.creator === userId && message.type === MESSAGE_TYPE.TYPING;
       }
 
       function receiveMessage(message) {

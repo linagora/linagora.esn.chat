@@ -8,6 +8,8 @@ var Q = require('q');
 var redis = require('redis');
 var async = require('async');
 var pubsub = require('linagora-rse/backend/core/pubsub');
+var CONSTANTS = require('../../backend/lib/constants');
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 
 describe('The chat API', function() {
 
@@ -84,7 +86,7 @@ describe('The chat API', function() {
       }
 
       app.lib.channel.createChannel({
-        type: 'channel'
+        type: CHANNEL_TYPE.CHANNEL
       }, execTest);
 
     });
@@ -93,7 +95,7 @@ describe('The chat API', function() {
   describe('GET /api/channels/:id', function() {
     it('should the given channel', function(done) {
       app.lib.channel.createChannel({
-        type: 'channel'
+        type: CHANNEL_TYPE.CHANNEL
       }, function(err, channel) {
         err && done(err);
         request(app.express)
@@ -117,7 +119,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'channel'
+        type: CHANNEL_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
         return Q.denodeify(app.lib.channel.createMessage)({
@@ -136,13 +138,12 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            var expected = JSON.parse(JSON.stringify(mongoResult[0]));
+            var expected = JSON.parse(JSON.stringify(mongoResult));
             expected.creator = {
               username: user.username,
               _id: user._id + '',
               __v: 0
             };
-            expected.timestamps.creation = mongoResult[0].timestamps.creation.getTime();
             expect(res.body).to.deep.equal([expected]);
             done();
           });
@@ -156,7 +157,7 @@ describe('The chat API', function() {
         .post('/api/channels')
         .type('json')
         .send({
-          type: 'channel',
+          type: CHANNEL_TYPE.CHANNEL,
           name: 'name',
           topic: 'topic',
           purpose: 'purpose'
@@ -170,7 +171,7 @@ describe('The chat API', function() {
 
           expect(res.body).to.shallowDeepEqual({
             name: 'name',
-            type: 'channel',
+            type: CHANNEL_TYPE.CHANNEL,
             creator: userId.toString(),
             topic: {
               value: 'topic',
@@ -194,7 +195,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'channel'
+        type: CHANNEL_TYPE.CHANNEL
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
         return Q.denodeify(function(callback) {
@@ -221,7 +222,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'channel',
+        type: CHANNEL_TYPE.CHANNEL,
         members: [userId]
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
@@ -248,7 +249,7 @@ describe('The chat API', function() {
 
       var channel;
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'group',
+        type: CHANNEL_TYPE.GROUP,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         channel = mongoResponse;
@@ -270,7 +271,7 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'group',
+        type: CHANNEL_TYPE.GROUP,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         request(app.express)
@@ -291,7 +292,7 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'group',
+        type: CHANNEL_TYPE.GROUP,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         request(app.express)
@@ -305,7 +306,7 @@ describe('The chat API', function() {
 
       var channel;
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'group',
+        type: CHANNEL_TYPE.GROUP,
         members: [otherMember]
       }).then(function(mongoResponse) {
         channel = mongoResponse[0];
@@ -330,11 +331,11 @@ describe('The chat API', function() {
 
       var channel;
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'group',
+        type: CHANNEL_TYPE.GROUP,
         members: [otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         return Q.denodeify(app.lib.channel.createChannel)({
-          type: 'group',
+          type: CHANNEL_TYPE.GROUP,
           members: [userId, otherMember1, otherMember2]
         }).then(function(mongoResponse) {
           channel = mongoResponse;
@@ -358,7 +359,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.channel.createChannel)({
-        type: 'channel'
+        type: CHANNEL_TYPE.CHANNEL
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
         return Q.denodeify(function(callback) {

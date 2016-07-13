@@ -213,7 +213,7 @@ describe('The Chat WS server', function() {
         expect(socket.join).to.have.been.calledWith(room);
       });
 
-      it('should listen on message and publish same on local pubsub and global pubsub for received message', function() {
+      it('should listen on message and publish same on local pubsub for received message', function() {
         onSubscribeHandler(room);
         expect(socket.on).to.have.been.calledWith('message', sinon.match.func.and(sinon.match(function(handler) {
           var data = {};
@@ -223,10 +223,6 @@ describe('The Chat WS server', function() {
             message: data
           });
 
-          expect(globalMessageReceivedTopic.publish).to.have.been.calledWith({
-            room: room,
-            message: data
-          });
           return true;
         })));
       });

@@ -4,6 +4,8 @@ var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
+var _ = require('lodash');
+var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
 
 module.exports = function(dependencies) {
 
@@ -17,7 +19,7 @@ module.exports = function(dependencies) {
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
 
   function getChannels(options, callback) {
-    Channel.find({type: 'channel'}).populate('members').exec(function(err, channels) {
+    Channel.find({type: CHANNEL_TYPE.CHANNEL}).populate('members').exec(function(err, channels) {
       channels = channels || [];
       if (channels.length === 0) {
         return createChannel(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
@@ -41,7 +43,7 @@ module.exports = function(dependencies) {
 
   function findGroupByMembers(exactMatch, members, callback) {
     var request = {
-      type:  'group',
+      type:  CHANNEL_TYPE.GROUP,
       members: {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
@@ -72,9 +74,26 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
+  function parseMention(message) {
+    message.user_mentions = _.uniq(message.text.match(/@[a-fA-F0-9]{24}/g)).map(function(mention) {
+      return new ObjectId(mention.replace(/^@/, ''));
+    });
+  }
+
   function createMessage(message, callback) {
+    parseMention(message);
     var chatMessage = new ChatMessage(message);
-    return chatMessage.save(callback);
+    async.waterfall([
+        function(callback) {
+          chatMessage.save(callback);
+        },
+        function(message, _num, callback) {
+          ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
+        },
+        function(message, callback) {
+          callback(null, message.toJSON());
+        }
+    ], callback);
   }
 
   function addMemberToChannel(channelId, userId, callback) {
@@ -95,6 +114,7 @@ module.exports = function(dependencies) {
     var q = {channel: channelId};
     var mq = ChatMessage.find(q);
     mq.populate('creator');
+    mq.populate('user_mentions');
     mq.limit(query.limit || 20);
     mq.skip(query.offset || 0);
     mq.sort('-timestamps.creation');

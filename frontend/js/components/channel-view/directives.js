@@ -2,36 +2,26 @@
 
 angular.module('linagora.esn.chat')
 
-  .directive('chatUserTyping', function(_, $q, ChatMessageAdapter) {
+  .directive('chatUserTyping', function(_, $q, session, userUtils) {
     return {
       restrict: 'E',
       scope: true,
       templateUrl: '/chat/views/components/channel-view/user-typing.html',
       link: function(scope) {
 
-        scope.typing = {};
-        scope.$on('chat:message:user_typing', function(evt, message) {
-          scope.typing[message.user] = message.state;
-          var areTyping = _.map(scope.typing, function(value, key) {
-            if (value && scope.chatLocalStateService.activeRoom._id === message.channel) {
-              return key;
-            }
-          }).filter(function(element) {
-            return element !== undefined;
-          });
+        session.ready.then(function(session) {
+          scope.typing = {};
+          scope.$on('chat:message:user_typing', function(evt, message) {
+            scope.typing[message.creator._id] = message;
 
-          $q.all(areTyping.map(function(element) {
-            return ChatMessageAdapter.getUser(element);
-          })).then(function(results) {
-            scope.usersTyping = results.map(function(result) {
-              if (result.firstname || result.lastname) {
-                return (result.firstname || '') + ' ' + (result.lastname || '');
-              } else {
-                return result.emails[0];
-              }
-            });
+            scope.usersTyping = _.chain(scope.typing)
+              .filter(function(message, key) {
+                return message.state && scope.chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
+              })
+              .map('creator')
+              .map(userUtils.displayNameOf)
+              .value();
           });
-
         });
       }
     };
@@ -54,11 +44,10 @@ angular.module('linagora.esn.chat')
       controller: function($scope, $filter, chatParseMention) {
         var parsedText = $filter('linky')($scope.message.text, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
-        chatParseMention(parsedText).then(function(parsedText) {
-          $scope.parsed = {
-            text: parsedText
-          };
-        });
+        parsedText = chatParseMention(parsedText, $scope.message.user_mentions);
+        $scope.parsed = {
+          text: parsedText
+        };
       }
     };
   })
@@ -95,7 +84,7 @@ angular.module('linagora.esn.chat')
         function sendUserTyping(state) {
           var message = {
             state: state,
-            user: scope.user._id,
+            creator: scope.user._id,
             channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };
@@ -155,7 +144,7 @@ angular.module('linagora.esn.chat')
           return {
             type: 'text',
             text: chatHumanizeEntitiesLabel.replaceHumanPresentationByRealData(scope.text),
-            user: scope.user._id,
+            creator: scope.user._id,
             channel: scope.chatLocalStateService.activeRoom._id,
             date: Date.now()
           };

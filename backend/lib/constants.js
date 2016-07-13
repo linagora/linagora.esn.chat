@@ -15,7 +15,8 @@ module.exports = {
     USER_CONNECTION: 'user:connection',
     USER_DISCONNECTION: 'user:disconnection',
     CHANNEL_CREATION: 'chat:channel:creation',
-    TOPIC_UPDATED: 'chat:message:text:channel:topic'
+    TOPIC_UPDATED: 'chat:message:text:channel:topic',
+    USERS_MENTION: 'chat:users_mention'
   },
   DEFAULT_CHANNEL: {
     name: 'general',
@@ -23,6 +24,9 @@ module.exports = {
     topic: 'default',
     purpose: 'default',
     isNotRead: false
+  },
+  CHANNEL_TYPE: {
+    GROUP: 'group',
+    CHANNEL: 'channel'
   }
-
 };

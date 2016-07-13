@@ -16,13 +16,6 @@ module.exports = function(dependencies, lib) {
         });
       }
 
-      results = results.map(function(message) {
-        var jsonMsg = message.toJSON();
-        jsonMsg.timestamps.creation = message.timestamps.creation.getTime();
-        delete jsonMsg.creator.password;
-        return jsonMsg;
-      });
-
       return res.status(200).json(results);
     });
   }
