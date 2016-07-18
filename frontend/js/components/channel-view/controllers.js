@@ -18,6 +18,7 @@ angular.module('linagora.esn.chat')
         chatLocalStateService,
         $stateParams) {
 
+    $scope.chatLocalStateService = chatLocalStateService;
     $scope.user = session.user;
     $scope.messages = [];
 
@@ -25,7 +26,7 @@ angular.module('linagora.esn.chat')
       message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
     }
 
-    ChatConversationService.fetchMessages($scope.chatLocalStateService.activeRoom._id, {}).then(function(result) {
+    ChatConversationService.fetchMessages(chatLocalStateService.activeRoom._id, {}).then(function(result) {
       result.forEach(addUniqId);
       $scope.messages = result || [];
       ChatScroll.scrollDown();

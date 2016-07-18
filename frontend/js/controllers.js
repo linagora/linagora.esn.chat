@@ -29,6 +29,37 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .controller('chatChannelItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CHANNEL_TYPE, chatUserState, session) {
+    $scope.channelState = $scope.channelState || 'chat.channels-views';
+    $scope.allUsersConnected = true;
+    var userToConnected = {};
+
+    function computeIsConnected() {
+      $scope.allUsersConnected = _(userToConnected).values().every();
+    }
+
+    session.ready.then(function(session) {
+      $scope.otherUsers = _.reject($scope.item.members, {_id: session.user._id});
+      var statesPromises = $scope.otherUsers.map(function(member) {
+          return chatUserState.get(member._id).then(function(state) {
+            userToConnected[member._id] = state !== 'disconnected';
+          });
+        });
+
+      $q.all(statesPromises).then(computeIsConnected);
+
+      var unbind = $rootScope.$on(CHAT_EVENTS.USER_CHANGE_STATE, function(event, data) {
+        if (angular.isDefined(userToConnected[data.userId])) {
+          userToConnected[data.userId] = data.state !== 'disconnected';
+          computeIsConnected();
+        }
+      });
+
+      $scope.$on('$destroy', unbind);
+      $scope.CHAT_CHANNEL_TYPE = CHAT_CHANNEL_TYPE;
+    });
+  })
+
   .controller('chatAddGroupController', function($scope, $state, channelsService, _, chatLocalStateService) {
     $scope.members = [];
     $scope.addGroup = function() {
@@ -43,5 +74,6 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatChannelSubheaderController', function() {
+  .controller('chatChannelSubheaderController', function($scope, chatLocalStateService) {
+    $scope.chatLocalStateService = chatLocalStateService;
   });
