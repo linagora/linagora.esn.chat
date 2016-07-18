@@ -38,13 +38,7 @@ angular.module('linagora.esn.chat')
   .factory('ChatConversationService', function($q, session, ChatRestangular, _) {
     function fetchMessages(channel, options) {
       return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
-        var data = ChatRestangular.stripRestangular(response.data);
-        return data.map(function(message) {
-          return message;
-        })
-        .sort(function(msgA, msgB) {
-          return msgA.date > msgB.date;
-        });
+        return ChatRestangular.stripRestangular(response.data);
       });
     }
 

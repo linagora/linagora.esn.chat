@@ -335,7 +335,7 @@ describe('The linagora.esn.chat channel lib', function() {
 
   describe('The getMessages function', function() {
 
-    it('should call ChatMessage.find', function(done) {
+    it('should call ChatMessage.find with the correct param and reverse the result', function(done) {
       var id = 1;
       var options = {_id: id};
       var limit = 2;
@@ -346,6 +346,7 @@ describe('The linagora.esn.chat channel lib', function() {
       var limitMock = sinon.spy();
       var skipMock = sinon.spy();
       var sortMock = sinon.spy();
+      var result = [1, 2];
 
       modelsMock.ChatMessage = {
         find: function(q) {
@@ -361,13 +362,17 @@ describe('The linagora.esn.chat channel lib', function() {
               expect(limitMock).to.have.been.calledWith(limit);
               expect(skipMock).to.have.been.calledWith(offset);
               expect(sortMock).to.have.been.calledWith('-timestamps.creation');
-              callback();
+              callback(null, result.slice(0).reverse());
             }
           };
         }
       };
 
-      require('../../../backend/lib/channel')(dependencies).getMessages(options, query, done);
+      require('../../../backend/lib/channel')(dependencies).getMessages(options, query, function(err, _result) {
+        expect(err).to.be.null;
+        expect(_result).to.be.deep.equal(result);
+        done();
+      });
     });
   });
 
