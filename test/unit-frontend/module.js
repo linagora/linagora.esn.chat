@@ -30,3 +30,4 @@ angular.module('esn.core', [])
   }
 });
 angular.module('linagora.esn.emoticon', []);
+angular.module('esn.file-preview', []);
