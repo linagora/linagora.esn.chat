@@ -118,7 +118,13 @@ module.exports = function(dependencies) {
     mq.limit(query.limit || 20);
     mq.skip(query.offset || 0);
     mq.sort('-timestamps.creation');
-    mq.exec(callback);
+    mq.exec(function(err, result) {
+      if (!err) {
+        result.reverse();
+      }
+
+      callback(err, result);
+    });
   }
 
   function updateTopic(channelId, topic, callback) {
