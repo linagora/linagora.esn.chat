@@ -36,8 +36,8 @@ angular.module('linagora.esn.chat')
   })
 
   .factory('ChatConversationService', function($q, session, ChatRestangular, _) {
-    function fetchMessages(channel, options) {
-      return ChatRestangular.one(channel).all('messages').getList(options).then(function(response) {
+    function fetchMessages(conversation, options) {
+      return ChatRestangular.one(conversation).all('messages').getList(options).then(function(response) {
         return ChatRestangular.stripRestangular(response.data);
       });
     }
@@ -58,7 +58,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, channelsService, chatLocalStateService) {
+  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, conversationsService, chatLocalStateService) {
     var enable;
     var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
 
@@ -81,7 +81,7 @@ angular.module('linagora.esn.chat')
       start: function() {
         initLocalPermission();
         $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-          channelsService.getChannel(message.channel).then(function(channel) {
+          conversationsService.getConversation(message.channel).then(function(channel) {
             if (canSendNotification(message)) {
               var channelName = channel.name || 'OpenPaas Chat';
               webNotification.showNotification('New message in ' + channelName, {
@@ -108,20 +108,20 @@ angular.module('linagora.esn.chat')
 
   })
 
-  .factory('chatLocalStateService', function($rootScope, $q, _, channelsService, CHAT_CHANNEL_TYPE, CHAT_EVENTS) {
+  .factory('chatLocalStateService', function($rootScope, $q, _, conversationsService, CHAT_CONVERSATION_TYPE, CHAT_EVENTS) {
 
     var service;
 
     function initLocalState() {
-      $q.all([channelsService.getChannels(), channelsService.getGroups()]).then(function(result) {
+      $q.all([conversationsService.getChannels(), conversationsService.getPrivateConversations()]).then(function(result) {
         service.channels = result[0];
-        service.groups = result[1];
+        service.privateConversations = result[1];
       });
       service.activeRoom = {};
     }
 
-    function findChannel(channelId) {
-      return _.find((service.channels || []).concat(service.groups || []), {_id: channelId});
+    function findConversation(channelId) {
+      return _.find((service.channels || []).concat(service.privateConversations || []), {_id: channelId});
     }
 
     function isActiveRoom(channelId) {
@@ -133,7 +133,7 @@ angular.module('linagora.esn.chat')
       if (isActiveRoom(channelId)) {
         return true;
       }
-      channel = findChannel(channelId);
+      channel = findConversation(channelId);
       if (!channel) {
         return false;
       }
@@ -146,7 +146,7 @@ angular.module('linagora.esn.chat')
     }
 
     function unreadMessage(message) {
-      var channel = findChannel(message.channel);
+      var channel = findConversation(message.channel);
       if (channel && !isActiveRoom(channel._id)) {
         channel.unreadMessageCount = (channel.unreadMessageCount || 0) + 1;
       }
@@ -156,9 +156,9 @@ angular.module('linagora.esn.chat')
       service.channels.push(channel);
     }
 
-    function addGroup(group) {
-      if (!findChannel(group._id)) {
-        service.groups.push(group);
+    function addPrivateConversation(privateConversation) {
+      if (!findConversation(privateConversation._id)) {
+        service.privateConversations.push(privateConversation);
       }
     }
 
@@ -166,12 +166,12 @@ angular.module('linagora.esn.chat')
       setActive: setActive,
       unreadMessage: unreadMessage,
       initLocalState: initLocalState,
-      findChannel: findChannel,
+      findConversation: findConversation,
       isActiveRoom: isActiveRoom,
       addChannel: addChannel,
-      addGroup: addGroup,
+      addPrivateConversation: addPrivateConversation,
       channels: [],
-      groups: [],
+      privateConversations: [],
       activeRoom: {}
     };
 

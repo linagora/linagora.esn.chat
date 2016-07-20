@@ -5,13 +5,13 @@ var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
 var _ = require('lodash');
-var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
+var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies) {
 
   var mongoose = dependencies('db').mongo.mongoose;
   var ObjectId = mongoose.Types.ObjectId;
-  var Channel = mongoose.model('ChatChannel');
+  var Conversation = mongoose.model('ChatConversation');
   var ChatMessage = mongoose.model('ChatMessage');
 
   var pubsubGlobal = dependencies('pubsub').global;
@@ -19,10 +19,10 @@ module.exports = function(dependencies) {
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
 
   function getChannels(options, callback) {
-    Channel.find({type: CHANNEL_TYPE.CHANNEL}).populate('members').exec(function(err, channels) {
+    Conversation.find({type: CONVERSATION_TYPE.CHANNEL}).populate('members').exec(function(err, channels) {
       channels = channels || [];
       if (channels.length === 0) {
-        return createChannel(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
+        return createConversation(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
           if (err) {
             return callback(new Error('Can not create the default channel'));
           }
@@ -33,17 +33,17 @@ module.exports = function(dependencies) {
     });
   }
 
-  function getChannel(channel, callback) {
-    Channel.findById(channel).populate('members').exec(callback);
+  function getConversation(channel, callback) {
+    Conversation.findById(channel).populate('members').exec(callback);
   }
 
-  function deleteChannel(channel, callback) {
-    Channel.findByIdAndRemove(channel, callback);
+  function deleteConversation(channel, callback) {
+    Conversation.findByIdAndRemove(channel, callback);
   }
 
-  function findGroupByMembers(exactMatch, members, callback) {
+  function findPrivateByMembers(exactMatch, members, callback) {
     var request = {
-      type:  CHANNEL_TYPE.GROUP,
+      type:  CONVERSATION_TYPE.PRIVATE,
       members: {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
@@ -55,17 +55,17 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Channel.find(request).populate('members').exec(callback);
+    Conversation.find(request).populate('members').exec(callback);
   }
 
-  function createChannel(options, callback) {
+  function createConversation(options, callback) {
     async.waterfall([
         function(callback) {
-          var channel = new Channel(options);
+          var channel = new Conversation(options);
           channel.save(callback);
         },
         function(channel, _num, callback) {
-          Channel.populate(channel, 'members', callback);
+          Conversation.populate(channel, 'members', callback);
         },
         function(channel, callback) {
           channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
@@ -96,14 +96,14 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
-  function addMemberToChannel(channelId, userId, callback) {
-    Channel.update({_id: channelId}, {
+  function addMemberToConversation(channelId, userId, callback) {
+    Conversation.update({_id: channelId}, {
       $addToSet: {members: new ObjectId(userId)}
     }, callback);
   }
 
-  function removeMemberFromChannel(channelId, userId, callback) {
-    Channel.update({_id: channelId}, {
+  function removeMemberFromConversation(channelId, userId, callback) {
+    Conversation.update({_id: channelId}, {
       $pull: {members: new ObjectId(userId)}
     }, callback);
   }
@@ -128,7 +128,7 @@ module.exports = function(dependencies) {
   }
 
   function updateTopic(channelId, topic, callback) {
-    Channel.findByIdAndUpdate({_id: channelId}, {
+    Conversation.findByIdAndUpdate({_id: channelId}, {
       $set: {
         topic: {
           value: topic.value,
@@ -157,14 +157,14 @@ module.exports = function(dependencies) {
 
   return {
     getMessages: getMessages,
-    addMemberToChannel: addMemberToChannel,
-    removeMemberFromChannel: removeMemberFromChannel,
-    findGroupByMembers: findGroupByMembers,
+    addMemberToConversation: addMemberToConversation,
+    removeMemberFromConversation: removeMemberFromConversation,
+    findPrivateByMembers: findPrivateByMembers,
     createMessage: createMessage,
-    createChannel: createChannel,
-    getChannel: getChannel,
+    createConversation: createConversation,
+    getConversation: getConversation,
     getChannels: getChannels,
-    deleteChannel: deleteChannel,
+    deleteConversation: deleteConversation,
     updateTopic: updateTopic
   };
 };

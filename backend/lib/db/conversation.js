@@ -3,16 +3,16 @@
 var uuid = require('node-uuid');
 var cleanUser = require('./utils').cleanUser;
 var CONSTANTS = require('../constants');
-var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
+var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies) {
 
   var mongoose = dependencies('db').mongo.mongoose;
   var ObjectId = mongoose.Schema.ObjectId;
 
-  var ChannelSchema = new mongoose.Schema({
+  var ConversationSchema = new mongoose.Schema({
     name: {type: String},
-    type: {type: String, enum: [CHANNEL_TYPE.CHANNEL, CHANNEL_TYPE.GROUP], required: true},
+    type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE], required: true},
     creator: {type: ObjectId, ref: 'User'},
     isNotRead: {type: Boolean},
     members: [{type: ObjectId, ref: 'User'}],
@@ -38,17 +38,17 @@ module.exports = function(dependencies) {
     schemaVersion: {type: Number, default: 1}
   });
 
-  function cleanChannel(original, object) {
+  function cleanConversation(original, object) {
     object.members && object.members.map(cleanUser);
 
     return object;
   }
 
-  ChannelSchema.options.toObject = ChannelSchema.options.toObject || {};
-  ChannelSchema.options.toObject.transform = cleanChannel;
+  ConversationSchema.options.toObject = ConversationSchema.options.toObject || {};
+  ConversationSchema.options.toObject.transform = cleanConversation;
 
-  ChannelSchema.options.toJSON = ChannelSchema.options.toJSON || {};
-  ChannelSchema.options.toJSON.transform = cleanChannel;
+  ConversationSchema.options.toJSON = ConversationSchema.options.toJSON || {};
+  ConversationSchema.options.toJSON.transform = cleanConversation;
 
-  return mongoose.model('ChatChannel', ChannelSchema);
+  return mongoose.model('ChatConversation', ConversationSchema);
 };

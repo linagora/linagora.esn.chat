@@ -1,18 +1,18 @@
 'use strict';
 
 angular.module('linagora.esn.chat')
-  .factory('channelsService', function($rootScope, $q, CHAT_CHANNEL_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
-    var groups = [];
+  .factory('conversationsService', function($rootScope, $q, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
+    var privates = [];
     var channels = [];
 
     session.ready.then(function(session) {
       var sio = livenotification(CHAT_NAMESPACE);
       sio.on(CHAT_EVENTS.NEW_CHANNEL, function(channel) {
-        var room = _.find((channels || []).concat(groups || []), {_id: channel._id});
+        var room = _.find((channels || []).concat(privates || []), {_id: channel._id});
         if (!room) {
-          if (channel.type === CHAT_CHANNEL_TYPE.GROUP) {
+          if (channel.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
             channel.name = computeGroupName(session.user._id, channel);
-            groups.push(channel);
+            privates.push(channel);
           } else {
             channels.push(channel);
           }
@@ -34,20 +34,20 @@ angular.module('linagora.esn.chat')
         .join(', ');
     }
 
-    function getGroups(options) {
-      if (groups.length) {
-        return $q.when(groups);
+    function getPrivateConversations(options) {
+      if (privates.length) {
+        return $q.when(privates);
       }
 
       return $q.all({
         session: session.ready,
-        groups: ChatRestangular.one('me').all('groups').getList(options)
+        privates: ChatRestangular.one('me').all('private').getList(options)
       }).then(function(resolved) {
-        groups = resolved.groups.data.map(function(group) {
-          group.name = computeGroupName(resolved.session.user._id, group);
-          return group;
+        privates = resolved.privates.data.map(function(privateConversation) {
+          privateConversation.name = computeGroupName(resolved.session.user._id, privateConversation);
+          return privateConversation;
         });
-        return groups;
+        return privates;
       });
     }
 
@@ -61,15 +61,15 @@ angular.module('linagora.esn.chat')
       });
     }
 
-    function getChannel(channelId) {
-      var channel = _.find((channels || []).concat(groups || []), {_id: channelId});
+    function getConversation(channelId) {
+      var channel = _.find((channels || []).concat(privates || []), {_id: channelId});
       if (channel) {
         return $q.when(channel);
       }
 
-      return ChatRestangular.one('channels', channelId).get().then(function(response) {
+      return ChatRestangular.one('conversations', channelId).get().then(function(response) {
         var channel =  response.data;
-        if (!channel || channel.type !== CHAT_CHANNEL_TYPE.GROUP) {
+        if (!channel || channel.type !== CHAT_CONVERSATION_TYPE.PRIVATE) {
           return channel;
         }
 
@@ -80,29 +80,29 @@ angular.module('linagora.esn.chat')
       });
     }
 
-    function postChannels(channel) {
-      return ChatRestangular.one('channels').customPOST(channel);
+    function postConversations(channel) {
+      return ChatRestangular.one('conversations').customPOST(channel);
     }
 
-    function addGroups(group) {
-      group.type = CHAT_CHANNEL_TYPE.GROUP;
-      group.name = computeGroupName(session.user._id, group);
-      return postChannels(group);
+    function addPrivateConversation(privateConversatin) {
+      privateConversatin.type = CHAT_CONVERSATION_TYPE.PRIVATE;
+      privateConversatin.name = computeGroupName(session.user._id, privateConversatin);
+      return postConversations(privateConversatin);
     }
 
     function addChannels(channel) {
-      channel.type = CHAT_CHANNEL_TYPE.CHANNEL;
-      return postChannels(channel);
+      channel.type = CHAT_CONVERSATION_TYPE.CHANNEL;
+      return postConversations(channel);
     }
 
-    function updateChannelTopic(topicValue, channelId) {
-      return ChatRestangular.one('channels', channelId).one('topic').customPUT({
+    function updateConversationTopic(topicValue, channelId) {
+      return ChatRestangular.one('conversations', channelId).one('topic').customPUT({
         value: topicValue
       });
     }
 
     function setTopicChannel(topic) {
-      return getChannel(topic.channel).then(function(channel) {
+      return getConversation(topic.channel).then(function(channel) {
         channel.topic = topic.topic;
         return true;
       }, function() {
@@ -113,11 +113,11 @@ angular.module('linagora.esn.chat')
     return {
       computeGroupName: computeGroupName,
       getChannels: getChannels,
-      getChannel: getChannel,
-      getGroups: getGroups,
-      addGroups: addGroups,
+      getConversation: getConversation,
+      getPrivateConversations: getPrivateConversations,
+      addPrivateConversation: addPrivateConversation,
       addChannels: addChannels,
-      updateChannelTopic: updateChannelTopic,
+      updateConversationTopic: updateConversationTopic,
       setTopicChannel: setTopicChannel
     };
   });

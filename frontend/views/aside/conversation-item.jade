@@ -1,7 +1,7 @@
 .lv-item.clickable(title="{{::item.name}}", ui-sref='{{channelState}}({id: item._id})', ui-sref-active="selected", ng-class="{notread: item.isNotRead}")
   .row
     .col-xs-2.badge-container
-      i.item-icon.mdi(ng-class="{'mdi-pound': item.type === CHAT_CHANNEL_TYPE.CHANNEL, 'mdi-checkbox-blank-circle': item.type !== CHAT_CHANNEL_TYPE.CHANNEL, 'connected': allUsersConnected}")
+      i.item-icon.mdi(ng-class="{'mdi-pound': item.type === CHAT_CONVERSATION_TYPE.CHANNEL, 'mdi-checkbox-blank-circle': item.type !== CHAT_CONVERSATION_TYPE.CHANNEL, 'connected': allUsersConnected}")
     .col-xs-8.item-name
       span.item-name-inner.ellipsis
         bdi {{::item.name}}

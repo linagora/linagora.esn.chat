@@ -6,7 +6,7 @@ angular.module('linagora.esn.chat')
     return {
       restrict: 'E',
       scope: true,
-      templateUrl: '/chat/views/components/channel-view/user-typing.html',
+      templateUrl: '/chat/views/components/conversation-view/user-typing.html',
       link: function(scope) {
 
         session.ready.then(function(session) {
@@ -16,7 +16,7 @@ angular.module('linagora.esn.chat')
 
             scope.usersTyping = _.chain(scope.typing)
               .filter(function(message, key) {
-                return message.state && scope.chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
+                return message.state && scope.chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id; //TODO rename message.channel to message.conversation
               })
               .map('creator')
               .map(userUtils.displayNameOf)
@@ -30,7 +30,7 @@ angular.module('linagora.esn.chat')
   .directive('chatFooter', function() {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/components/channel-view/channel-footer.html'
+      templateUrl: '/chat/views/components/conversation-view/channel-footer.html'
     };
   })
 
@@ -40,7 +40,7 @@ angular.module('linagora.esn.chat')
       scope: {
         message: '='
       },
-      templateUrl: '/chat/views/components/channel-view/messages/message.html',
+      templateUrl: '/chat/views/components/conversation-view/messages/message.html',
       controller: function($scope, $filter, chatParseMention) {
         var parsedText = $filter('linky')($scope.message.text, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
@@ -56,11 +56,11 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatChannelView', function() {
+  .directive('chatConversationView', function() {
     return {
       restrict: 'E',
-      controller: 'channelViewController',
-      templateUrl: '/chat/views/components/channel-view/channel-view.html'
+      controller: 'conversationViewController',
+      templateUrl: '/chat/views/components/conversation-view/conversation-view.html'
     };
   })
 
@@ -76,7 +76,7 @@ angular.module('linagora.esn.chat')
 
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/components/channel-view/messages/message-compose.html',
+      templateUrl: '/chat/views/components/conversation-view/messages/message-compose.html',
       link: function(scope, element, attrs) {
         chatMessageService.connect();
         var textarea = element.find('textarea').get(0);
@@ -195,7 +195,7 @@ angular.module('linagora.esn.chat')
         prevMessage: '=?',
         currentMessage: '='
       },
-      templateUrl: '/chat/views/components/channel-view/messages/message-separation.html',
+      templateUrl: '/chat/views/components/conversation-view/messages/message-separation.html',
       controller: function($scope, moment) {
         $scope.sameDay = function(timestampDate1, timestampDate2) {
           return moment(timestampDate1, 'x').isSame(moment(timestampDate2, 'x'), 'day');

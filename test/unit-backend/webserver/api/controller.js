@@ -14,23 +14,23 @@ describe('The linagora.esn.chat webserver controller', function() {
     user = {_id: 1};
 
     lib = {
-      channel: {
+      conversation: {
         getMessages: sinon.spy(function(channel, options, callback) {
           return callback(err, result);
         }),
         getChannels: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        createChannel: sinon.spy(function(options, callback) {
+        createConversation: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        findGroupByMembers: sinon.spy(function(exact, members, callback) {
+        findPrivateByMembers: sinon.spy(function(exact, members, callback) {
           return callback(err, result);
         }),
-        removeMemberFromChannel: sinon.spy(function(channelId, userId, callback) {
+        removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
         }),
-        addMemberToChannel: sinon.spy(function(channelId, userId, callback) {
+        addMemberToConversation: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
         }),
         updateTopic: sinon.spy(function(channelId, topic, callback) {
@@ -73,7 +73,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.channel.getMessages).to.have.been.calledWith(channelId);
+              expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
               done();
             }
           };
@@ -94,7 +94,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
-              expect(lib.channel.getMessages).to.have.been.calledWith(channelId);
+              expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
               done();
             }
           };
@@ -112,7 +112,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.channel.getChannels).to.have.been.calledWith({});
+              expect(lib.conversation.getChannels).to.have.been.calledWith({});
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -129,7 +129,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.channel.getChannels).to.have.been.calledWith({});
+              expect(lib.conversation.getChannels).to.have.been.calledWith({});
               expect(json).to.deep.equal(result);
               done();
             }
@@ -148,7 +148,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.called;
+              expect(lib.conversation.findPrivateByMembers).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -157,7 +157,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
 
-    it('should send back HTTP 200 with the lib.findGroupByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
+    it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.findMyUsersGroups({query: {members: [1, 2]}, user: {_id: 'id'}}, {
@@ -165,7 +165,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.calledWith(false, ['id']);
+              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(false, ['id']);
               expect(json).to.equal(result);
               done();
             }
@@ -175,16 +175,16 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
-  describe('leaveChannel', function() {
+  describe('leaveConversation', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.leaveChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.channel.removeMemberFromChannel).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.removeMemberFromConversation).to.have.been.calledWith('channelId', 'id');
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -193,14 +193,14 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
 
-    it('shoud send back HTTP 204 when lib.leaveChannel success', function(done) {
+    it('shoud send back HTTP 204 when lib.leaveConversation success', function(done) {
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.leaveChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
           return {
             end: function() {
-              expect(lib.channel.removeMemberFromChannel).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.removeMemberFromConversation).to.have.been.calledWith('channelId', 'id');
               done();
             }
           };
@@ -209,16 +209,16 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
-  describe('joinChannel', function() {
+  describe('joinConversation', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.joinChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.channel.addMemberToChannel).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.addMemberToConversation).to.have.been.calledWith('channelId', 'id');
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -227,14 +227,14 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
 
-    it('shoud send back HTTP 204 when lib.joinChannel success', function(done) {
+    it('shoud send back HTTP 204 when lib.joinConversation success', function(done) {
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.joinChannel({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
           return {
             end: function() {
-              expect(lib.channel.addMemberToChannel).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.addMemberToConversation).to.have.been.calledWith('channelId', 'id');
               done();
             }
           };
@@ -243,16 +243,16 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
-  describe('The findGroupByMembers', function() {
+  describe('The findPrivateByMembers', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
+      controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.called;
+              expect(lib.conversation.findPrivateByMembers).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -261,15 +261,15 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
 
-    it('should send back HTTP 200 with the lib.findGroupByMembers result calledWith exactMatch === true', function(done) {
+    it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === true', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.calledWith(true);
+              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true);
               expect(json).to.equal(result);
               done();
             }
@@ -281,12 +281,12 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should handle query with more than one member and add auth user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
+      controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.calledWith(true, ['1', '2', 'id']);
+              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true, ['1', '2', 'id']);
               done();
             }
           };
@@ -297,12 +297,12 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+      controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.calledWith(true, ['1', 'id']);
+              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true, ['1', 'id']);
               done();
             }
           };
@@ -313,12 +313,12 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should not add auth user if already passed as membres arguments', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findGroupByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
+      controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.channel.findGroupByMembers).to.have.been.calledWith(true, ['1', 'id']);
+              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true, ['1', 'id']);
               done();
             }
           };
@@ -327,14 +327,14 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
-  describe('The createChannel function', function() {
+  describe('The createConversation function', function() {
 
     it('should call the api with right parameters', function(done) {
       var name = 'MyChannel';
       var topic = 'MyTopic';
       var purpose = 'MyPurpose';
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.createChannel({
+      controller.createConversation({
         user: user,
         query: {},
         body: {
@@ -345,7 +345,7 @@ describe('The linagora.esn.chat webserver controller', function() {
         }
       }, {
         status: _.constant({json: function() {
-            expect(lib.channel.createChannel).to.have.been.calledWith({
+            expect(lib.conversation.createConversation).to.have.been.calledWith({
               name: name,
               type: 'type',
               creator: user,
@@ -369,7 +369,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       var topic = 'MyTopic';
       var purpose = 'MyPurpose';
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.createChannel({
+      controller.createConversation({
         user: user,
         body: {
           name: name,
@@ -380,7 +380,7 @@ describe('The linagora.esn.chat webserver controller', function() {
         }
       }, {
         status: _.constant({json: function() {
-            expect(lib.channel.createChannel).to.have.been.calledWith(sinon.match({
+            expect(lib.conversation.createConversation).to.have.been.calledWith(sinon.match({
               members: ['2', '3', '1']
             }));
             done();
@@ -392,7 +392,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       err = new Error('failed');
       var req = {body: {}, query: {}, user: user};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.createChannel(req, {
+      controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
@@ -410,7 +410,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       result = channel;
       var req = {body: {}, query: {}, user: user};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.createChannel(req, {
+      controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(201);
           return {
@@ -433,7 +433,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       };
       var req = {body: {}, query: query, user: user};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.createChannel(req, {
+      controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(201);
           return {

@@ -17,23 +17,23 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.getChannels);
 
-  router.get('/channels/:id',
+  router.get('/conversations/:id',
     authorizationMW.requiresAPILogin,
-    controller.getChannel);
+    controller.getConversation);
 
-  router.post('/channels',
+  router.post('/conversations',
     authorizationMW.requiresAPILogin,
-    controller.createChannel);
+    controller.createConversation);
 
-  router.put('/channels/:id/members',
+  router.put('/conversations/:id/members',
     authorizationMW.requiresAPILogin,
-    controller.joinChannel);
+    controller.joinConversation);
 
-  router.get('/groups',
+  router.get('/private',
     authorizationMW.requiresAPILogin,
-    controller.findGroupByMembers);
+    controller.findPrivateByMembers);
 
-  router.get('/me/groups',
+  router.get('/me/private',
     authorizationMW.requiresAPILogin,
     controller.findMyUsersGroups);
 
@@ -46,15 +46,15 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.setMyState);
 
-  router.delete('/channels/:id/members',
+  router.delete('/conversations/:id/members',
     authorizationMW.requiresAPILogin,
-    controller.leaveChannel);
+    controller.leaveConversation);
 
-  router.delete('/channels/:id',
+  router.delete('/conversations/:id',
     authorizationMW.requiresAPILogin,
-    controller.deleteChannel);
+    controller.deleteConversation);
 
-  router.put('/channels/:id/topic',
+  router.put('/conversations/:id/topic',
     authorizationMW.requiresAPILogin,
     controller.updateTopic);
 

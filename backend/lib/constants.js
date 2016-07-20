@@ -25,8 +25,8 @@ module.exports = {
     purpose: 'default',
     isNotRead: false
   },
-  CHANNEL_TYPE: {
-    GROUP: 'group',
+  CONVERSATION_TYPE: {
+    PRIVATE: 'private',
     CHANNEL: 'channel'
   }
 };

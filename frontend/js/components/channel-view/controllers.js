@@ -2,14 +2,14 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('channelViewController', function(
+  .controller('conversationViewController', function(
         $scope,
         $window,
         $log,
         $rootScope,
         session,
         ChatConversationService,
-        channelsService,
+        conversationsService,
         CHAT,
         CHAT_EVENTS,
         ChatScroll,
@@ -51,7 +51,7 @@ angular.module('linagora.esn.chat')
     };
 
     $scope.updateTopic = function($data) {
-      channelsService.updateChannelTopic($data, chatLocalStateService.activeRoom._id);
+      conversationsService.updateConversationTopic($data, chatLocalStateService.activeRoom._id);
     };
 
     $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {

@@ -13,23 +13,23 @@ angular.module('linagora.esn.chat')
     }
   })
 
-  .controller('chatAddChannelController', function($scope, CHAT_CHANNEL_TYPE, $state, channelsService, chatLocalStateService) {
+  .controller('chatAddChannelController', function($scope, CHAT_CONVERSATION_TYPE, $state, conversationsService, chatLocalStateService) {
     $scope.addChannel = function() {
       var channel = {
         name: $scope.channel.name,
-        type: CHAT_CHANNEL_TYPE.CHANNEL,
+        type: CHAT_CONVERSATION_TYPE.CHANNEL,
         topic: $scope.channel.topic || '',
         purpose: $scope.channel.purpose || ''
       };
 
-      channelsService.addChannels(channel).then(function(response) {
+      conversationsService.addChannels(channel).then(function(response) {
         chatLocalStateService.addChannel(response.data);
         $state.go('chat.channels-views', {id: response.data._id});
       });
     };
   })
 
-  .controller('chatChannelItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CHANNEL_TYPE, chatUserState, session) {
+  .controller('chatConversationItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatUserState, session) {
     $scope.channelState = $scope.channelState || 'chat.channels-views';
     $scope.allUsersConnected = true;
     var userToConnected = {};
@@ -56,24 +56,24 @@ angular.module('linagora.esn.chat')
       });
 
       $scope.$on('$destroy', unbind);
-      $scope.CHAT_CHANNEL_TYPE = CHAT_CHANNEL_TYPE;
+      $scope.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     });
   })
 
-  .controller('chatAddGroupController', function($scope, $state, channelsService, _, chatLocalStateService) {
+  .controller('chatAddGroupController', function($scope, $state, conversationsService, _, chatLocalStateService) {
     $scope.members = [];
     $scope.addGroup = function() {
       var group = {
         members: $scope.members
       };
 
-      channelsService.addGroups(group).then(function(response) {
-        chatLocalStateService.addGroup(response.data);
+      conversationsService.addPrivateConversation(group).then(function(response) {
+        chatLocalStateService.addPrivateConversation(response.data);
         $state.go('chat.channels-views', { id: response.data._id});
       });
     };
   })
 
-  .controller('chatChannelSubheaderController', function($scope, chatLocalStateService) {
+  .controller('chatConversationSubheaderController', function($scope, chatLocalStateService) {
     $scope.chatLocalStateService = chatLocalStateService;
   });

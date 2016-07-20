@@ -8,7 +8,7 @@ var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
-var CHANNEL_TYPE = CONSTANTS.CHANNEL_TYPE;
+var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 function init(dependencies, lib) {
   var logger = dependencies('logger');
@@ -18,9 +18,9 @@ function init(dependencies, lib) {
   var io = dependencies('wsserver').io;
   var helper = dependencies('wsserver').ioHelper;
 
-  function sendDataToChannel(channel, type, data) {
-    if (channel.type === CHANNEL_TYPE.GROUP) {
-      channel.members.forEach(function(user) {
+  function sendDataToConversation(conversation, type, data) {
+    if (conversation.type === CONVERSATION_TYPE.PRIVATE) {
+      conversation.members.forEach(function(user) {
         var sockets = helper.getUserSocketsFromNamespace(user._id, chatNamespace.sockets) || [];
         sockets.forEach(function(socket) {
           socket.emit(type, data);
@@ -32,12 +32,12 @@ function init(dependencies, lib) {
   }
 
   function sendMessage(room, message) {
-    lib.channel.getChannel(message.channel, function(err, channel) {
+    lib.conversation.getConversation(message.channel, function(err, channel) {
       if (err) {
         logger.warn('Message sended to inexisting channel', message);
         return;
       }
-      sendDataToChannel(channel, 'message', {room: room, data: message});
+      sendDataToConversation(channel, 'message', {room: room, data: message});
     });
   }
 
@@ -77,7 +77,7 @@ function init(dependencies, lib) {
   });
 
   globalPubsub.topic(CHANNEL_CREATION).subscribe(function(data) {
-    sendDataToChannel(data, CHANNEL_CREATION, data);
+    sendDataToConversation(data, CHANNEL_CREATION, data);
   });
 
   globalPubsub.topic(TOPIC_UPDATED).subscribe(function(data) {
