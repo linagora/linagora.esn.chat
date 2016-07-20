@@ -7,9 +7,9 @@
     controller: ChatEmoticonChooserController
   });
 
-  function ChatEmoticonChooserController($scope, esnEmoticonList, KEY_CODE, ChatTextEntitySelector) {
+  function ChatEmoticonChooserController($scope, esnEmoticonRegistry, KEY_CODE, ChatTextEntitySelector) {
     var self = this;
-    var emoticonListResolver = ChatTextEntitySelector.entityListResolverFromList(esnEmoticonList.split(','));
+    var emoticonListResolver = ChatTextEntitySelector.entityListResolverFromList(esnEmoticonRegistry.getShortNames());
     self.entitySelector = new ChatTextEntitySelector(emoticonListResolver, ':', ':');
 
     $scope.$on('chat:message:compose:keydown', function(angularEvent, event) {
