@@ -29,47 +29,54 @@ describe('The linagora.esn.chat channel-view directive', function() {
     var $scope,
         currentMessage,
         prevMessage,
-        first,
         element;
 
     function initDirective() {
       $scope = $rootScope.$new();
       $scope.currentMessage = currentMessage;
       $scope.prevMessage = prevMessage;
-      $scope.$first = first;
 
       element = $compile('<div><chat-message-separator prev-message="prevMessage", current-message="currentMessage"/></div>')($scope);
       $scope.$digest();
     }
 
-    it('should create a message separation with value Today for the first message', function() {
+    it('should create a message separation with value Today', function() {
       currentMessage = {
-        date: moment()
+        timestamps: {
+          creation:  moment().format('x')
+        }
       };
-      prevMessage = null;
       initDirective();
       expect(angular.element(element.find('.day-divider')).length).to.be.equal(1);
       expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal('Today');
     });
 
-    it('should create a message separation with value a date for a message', function() {
+    it('should create a message separation with value a date', function() {
       currentMessage = {
-        date: moment().subtract(2, 'days')
+        timestamps: {
+          creation: moment().subtract(2, 'days').format('x')
+        }
       };
       prevMessage = {
-        date: moment()
+        timestamps: {
+          creation: moment().subtract(5, 'days').format('x')
+        }
       };
       initDirective();
       expect(angular.element(element.find('.day-divider')).length).to.be.equal(1);
-      expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal(currentMessage.date.format('MMMM Do'));
+      expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal(moment(currentMessage.timestamps.creation, 'x').format('MMMM Do'));
     });
 
-    it('should create a message separation with value Yesterday for a message', function() {
+    it('should create a message separation with value Yesterday', function() {
       currentMessage = {
-        date: moment().subtract(1, 'days')
+        timestamps: {
+          creation: moment().subtract(1, 'days').format('x')
+        }
       };
       prevMessage = {
-        date: moment()
+        timestamps: {
+          creation: moment().subtract(2, 'days').format('x')
+        }
       };
       initDirective();
       expect(angular.element(element.find('.day-divider')).length).to.be.equal(1);
@@ -78,10 +85,14 @@ describe('The linagora.esn.chat channel-view directive', function() {
 
     it('should not create a message separation for the two messages with the same date and not first', function() {
       currentMessage = {
-        date: moment()
+        timestamps: {
+          creation: moment().format('x')
+        }
       };
       prevMessage = {
-        date: moment()
+        timestamps: {
+          creation: moment().format('x')
+        }
       };
       initDirective();
       expect(angular.element(element.find('.day-divider')).length).to.be.equal(0);
