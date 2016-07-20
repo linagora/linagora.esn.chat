@@ -197,16 +197,16 @@ angular.module('linagora.esn.chat')
       },
       templateUrl: '/chat/views/components/channel-view/messages/message-separation.html',
       controller: function($scope, moment) {
-        $scope.sameDay = function(date1, date2) {
-          return moment(date1).isSame(date2, 'day');
+        $scope.sameDay = function(timestampDate1, timestampDate2) {
+          return moment(timestampDate1, 'x').isSame(moment(timestampDate2, 'x'), 'day');
         };
 
-        $scope.diffDate = function(date) {
-          return moment().diff(date, 'day');
+        $scope.diffDate = function(timestamp) {
+          return moment().diff(moment(timestamp, 'x'), 'day');
         };
 
-        $scope.formatDate = function(date) {
-          return moment(date).format('MMMM Do');
+        $scope.formatDate = function(timestamp) {
+          return moment(timestamp, 'x').format('MMMM Do');
         };
       }
     };
