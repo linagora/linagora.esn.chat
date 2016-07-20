@@ -286,7 +286,7 @@ describe('The linagora.esn.chat channel lib', function() {
   describe('The createMessage function', function() {
 
     it('should call ChatMessage.save and populate correctly the creator and user_mentions', function(done) {
-      var message = {id: 1, text: ''};
+      var message = {id: 1, text: '', timestamps: {creation: '0405'}};
       function ChannelMessage(msg) {
         expect(msg).to.deep.equal(message);
       }
@@ -300,6 +300,10 @@ describe('The linagora.esn.chat channel lib', function() {
         expect(data).to.deep.equals([{path: 'user_mentions'}, {path: 'creator'}]);
         cb(null, message);
       });
+
+      modelsMock.ChatChannel.update = function(query, options, cb) {
+        cb(null, message);
+      };
 
       modelsMock.ChatMessage = ChannelMessage;
       require('../../../backend/lib/channel')(dependencies).createMessage(message, function(err, _message) {
@@ -330,6 +334,34 @@ describe('The linagora.esn.chat channel lib', function() {
 
       modelsMock.ChatMessage = ChannelMessage;
       require('../../../backend/lib/channel')(dependencies).createMessage(message);
+    });
+
+    it('should add the last message in the channel document', function(done) {
+      var channelId = 'channelId';
+      var message = {id: 1, channel: channelId, text: '', timestamps: {creation: '0405'}};
+
+      modelsMock.ChatMessage = function(msg) {
+        expect(msg).to.be.deep.equal(message);
+      };
+
+      modelsMock.ChatMessage.prototype.save = function(cb) {
+        message.toJSON = _.constant(message);
+        cb(null, message, 0);
+      };
+
+      modelsMock.ChatMessage.populate = function(msg, _fields, cb) {
+        cb(null, message);
+      };
+
+      modelsMock.ChatChannel.update = function(query, options, cb) {
+        expect(query).to.deep.equals({_id: channelId});
+        expect(options).to.deep.equals({$set: {last_message: {text: message.text, date: message.timestamps.creation}}});
+        cb(null, message);
+      };
+
+      require('../../../backend/lib/channel')(dependencies).createMessage(message, function() {
+        done();
+      });
     });
   });
 

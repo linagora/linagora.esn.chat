@@ -119,6 +119,7 @@ describe('The linagora.esn.chat lib listener module', function() {
     it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message', function(done) {
       var type = 'text';
       var text = 'yolo';
+      var date = '0405';
       var creator = '1';
       var channel = 'general';
       var attachments = [1, 2, 3];
@@ -126,6 +127,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         message: {
           type: type,
           text: text,
+          date: date,
           creator: creator,
           channel: channel,
           attachments: attachments
@@ -148,6 +150,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         expect(channelMock.createMessage).to.have.been.calledWith({
           type: type,
           text: text,
+          date: date,
           creator: creator,
           channel: channel,
           attachments: attachments

@@ -17,6 +17,7 @@ module.exports = function(dependencies) {
       var chatMessage = {
         type: data.message.type,
         text: data.message.text,
+        date: data.message.date,
         creator: data.message.creator,
         channel: data.message.channel
       };
