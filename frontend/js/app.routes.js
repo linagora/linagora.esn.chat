@@ -22,7 +22,7 @@ angular.module('linagora.esn.chat')
       url: '/channels/view/:id',
       views: {
         'main@chat': {
-          template: '<sub-header><chat-channel-subheader/></sub-header><chat-channel-view/>'
+          template: '<sub-header><chat-conversation-subheader/></sub-header><chat-conversation-view/>'
         }
       },
       onEnter: function($stateParams, chatLocalStateService) {

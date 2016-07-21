@@ -22,7 +22,7 @@ describe('The channel schema', function() {
       return constructor;
     };
 
-    Channel = require('../../../backend/lib/db/channel')(dependencies);
+    Channel = require('../../../backend/lib/db/conversation')(dependencies);
   });
 
   describe('channel.options.toJSON.transform', function() {

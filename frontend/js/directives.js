@@ -31,7 +31,7 @@ angular.module('linagora.esn.chat')
         channelState: '@'
       },
       controller: function($scope, $state, chatLocalStateService) {
-        $scope.groups = chatLocalStateService.groups;
+        $scope.groups = chatLocalStateService.privateConversations;
       }
     };
   })
@@ -43,28 +43,28 @@ angular.module('linagora.esn.chat')
         item: '=',
         channelState: '=?'
       },
-      controller: 'chatChannelItemController',
+      controller: 'chatConversationItemController',
       templateUrl: '/chat/views/group-overview.html'
     };
   })
 
-  .directive('chatChannelItem', function() {
+  .directive('chatConversationItem', function() {
     return {
       restrict: 'E',
       scope: {
         item: '=',
         channelState: '=?'
       },
-      controller: 'chatChannelItemController',
-      templateUrl: '/chat/views/aside/channel-item.html'
+      controller: 'chatConversationItemController',
+      templateUrl: '/chat/views/aside/conversation-item.html'
     };
   })
 
-  .directive('chatChannelSubheader', function() {
+  .directive('chatConversationSubheader', function() {
     return {
       restrict: 'E',
       scope: true,
       templateUrl: '/chat/views/subheaders/channel.html',
-      controller: 'chatChannelSubheaderController'
+      controller: 'chatConversationSubheaderController'
     };
   });

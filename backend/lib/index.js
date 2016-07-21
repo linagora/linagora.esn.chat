@@ -3,15 +3,15 @@
 module.exports = function(dependencies) {
 
   var models = {
-    channel: require('./db/channel')(dependencies),
+    conversation: require('./db/conversation')(dependencies),
     message: require('./db/message')(dependencies)
   };
   var listener = require('./listener')(dependencies);
-  var channel = require('./channel')(dependencies);
+  var conversation = require('./conversation')(dependencies);
   var userState = require('./userState')(dependencies);
 
   function start(callback) {
-    listener.start(channel);
+    listener.start(conversation);
     userState.init();
     callback();
   }
@@ -19,7 +19,7 @@ module.exports = function(dependencies) {
   return {
     start: start,
     constants: require('./constants'),
-    channel: channel,
+    conversation: conversation,
     userState: userState,
     models: models
   };

@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat channel-view directive', function() {
+describe('The linagora.esn.chat conversation-view directive', function() {
   var $compile,
       $rootScope,
       $timeout,

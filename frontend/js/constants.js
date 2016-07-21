@@ -17,9 +17,9 @@ angular.module('linagora.esn.chat')
     CHAT_AUTO_CLOSE: 4000,
     CHAT_DEFAULT_ICON: '/images/default_avatar.png'
   })
-  .constant('CHAT_CHANNEL_TYPE', {
+  .constant('CHAT_CONVERSATION_TYPE', {
     CHANNEL: 'channel',
-    GROUP: 'group'
+    PRIVATE: 'private'
   })
   .constant('CHAT_DEFAULT_CHANNEL', {
     CHANNEL: {

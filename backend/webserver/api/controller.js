@@ -5,7 +5,7 @@ var _ = require('lodash');
 module.exports = function(dependencies, lib) {
 
   function getMessages(req, res) {
-    lib.channel.getMessages(req.params.channel, {}, function(err, results) {
+    lib.conversation.getMessages(req.params.channel, {}, function(err, results) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -21,7 +21,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function getChannels(req, res) {
-    lib.channel.getChannels({}, function(err, result) {
+    lib.conversation.getChannels({}, function(err, result) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -35,8 +35,8 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function getChannel(req, res) {
-    lib.channel.getChannel(req.params.id, function(err, result) {
+  function getConversation(req, res) {
+    lib.conversation.getConversation(req.params.id, function(err, result) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -50,8 +50,8 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function deleteChannel(req, res) {
-    lib.channel.deleteChannel(req.params.id, function(err, result) {
+  function deleteConversation(req, res) {
+    lib.conversation.deleteConversation(req.params.id, function(err, result) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -65,7 +65,7 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function createChannel(req, res) {
+  function createConversation(req, res) {
     var members = [];
 
     if (req.body.members) {
@@ -78,7 +78,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.channel.findGroupByMembers(true, members, function(err, groups) {
+    lib.conversation.findPrivateByMembers(true, members, function(err, groups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -92,7 +92,7 @@ module.exports = function(dependencies, lib) {
       if (groups && groups.length > 0) {
         res.status(201).json(groups[0]);
       } else {
-        var channel = {
+        var conversation = {
           name: req.body.name,
           type: req.body.type,
           creator: req.user,
@@ -107,7 +107,7 @@ module.exports = function(dependencies, lib) {
           }
         };
 
-        lib.channel.createChannel(channel, function(err, result) {
+        lib.conversation.createConversation(conversation, function(err, result) {
           if (err) {
             return res.status(500).json({
               error: {
@@ -123,8 +123,8 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function joinChannel(req, res) {
-    lib.channel.addMemberToChannel(req.params.id, req.user._id, function(err) {
+  function joinConversation(req, res) {
+    lib.conversation.addMemberToConversation(req.params.id, req.user._id, function(err) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -138,8 +138,8 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function leaveChannel(req, res) {
-    lib.channel.removeMemberFromChannel(req.params.id, req.user._id, function(err) {
+  function leaveConversation(req, res) {
+    lib.conversation.removeMemberFromConversation(req.params.id, req.user._id, function(err) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -153,7 +153,7 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function findGroupByMembers(req, res) {
+  function findPrivateByMembers(req, res) {
     if (!req.query.members) {
       return res.status(400).json({
         error: {
@@ -170,7 +170,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.channel.findGroupByMembers(true, members, function(err, userGroups) {
+    lib.conversation.findPrivateByMembers(true, members, function(err, userGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -185,7 +185,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function findMyUsersGroups(req, res) {
-    lib.channel.findGroupByMembers(false, [String(req.user._id)], function(err, usersGroups) {
+    lib.conversation.findPrivateByMembers(false, [String(req.user._id)], function(err, usersGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -245,7 +245,7 @@ module.exports = function(dependencies, lib) {
       creator: req.user._id,
       last_set: new Date()
     };
-    lib.channel.updateTopic(req.params.id, topic, function(err, channel) {
+    lib.conversation.updateTopic(req.params.id, topic, function(err, channel) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -262,15 +262,15 @@ module.exports = function(dependencies, lib) {
   return {
     getMessages: getMessages,
     getChannels: getChannels,
-    getChannel: getChannel,
-    findGroupByMembers: findGroupByMembers,
+    getConversation: getConversation,
+    findPrivateByMembers: findPrivateByMembers,
     findMyUsersGroups: findMyUsersGroups,
     getUserState: getUserState,
     setMyState: setMyState,
-    joinChannel: joinChannel,
-    leaveChannel: leaveChannel,
-    deleteChannel: deleteChannel,
-    createChannel: createChannel,
+    joinConversation: joinConversation,
+    leaveConversation: leaveConversation,
+    deleteConversation: deleteConversation,
+    createConversation: createConversation,
     updateTopic: updateTopic
   };
 };

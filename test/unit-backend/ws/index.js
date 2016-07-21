@@ -11,7 +11,7 @@ var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var globalMessageReceivedTopic, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelTopicUptated, lib, channelMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
+  var globalMessageReceivedTopic, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies, lib);
@@ -56,12 +56,12 @@ describe('The Chat WS server', function() {
       emit: sinon.spy()
     };
 
-    channelMock = {
-      getChannel: sinon.spy()
+    conversationMock = {
+      getConversation: sinon.spy()
     };
 
     lib = {
-      channel: channelMock
+      conversation: conversationMock
     };
 
     getUserSocketsFromNamespaceMock = sinon.spy(function() {
@@ -151,7 +151,7 @@ describe('The Chat WS server', function() {
       return _.isFunction(callback);
     }));
 
-    var data = {type: 'group', members: [{_id: 'membersId'}]};
+    var data = {type: 'private', members: [{_id: 'membersId'}]};
     callbackOnCreationChannelPubsub(data);
 
     expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CHANNEL_CREATION, data);
@@ -239,7 +239,7 @@ describe('The Chat WS server', function() {
         var channel = {type: 'channel'};
         messageReceptorHandler({room: room, message: data});
 
-        expect(channelMock.getChannel).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
+        expect(conversationMock.getConversation).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
           callback(null, channel);
           return true;
         })));
@@ -256,11 +256,11 @@ describe('The Chat WS server', function() {
         })));
 
         var data = {channel: 'channelId'};
-        var channel = {type: 'group', members: [{_id:'memberId'}]};
+        var channel = {type: 'private', members: [{_id:'memberId'}]};
         getUserSocketsFromNamespaceResponse = [{emit: sinon.spy()}];
         messageReceptorHandler({room: room, message: data});
 
-        expect(channelMock.getChannel).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
+        expect(conversationMock.getConversation).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
           callback(null, channel);
           return true;
         })));

@@ -2,7 +2,7 @@
   'use strict';
 
   angular.module('linagora.esn.chat').component('chatMentionChooser', {
-    templateUrl: '/chat/views/components/channel-view/messages/mention-chooser.html',
+    templateUrl: '/chat/views/components/conversation-view/messages/mention-chooser.html',
     controllerAs: 'ctlr',
     controller: ChatMentionsChooser
   });

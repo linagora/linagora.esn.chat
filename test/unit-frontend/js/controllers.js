@@ -19,7 +19,7 @@ describe('The linagora.esn.chat module controllers', function() {
     sessionMock,
     user,
     livenotificationMock,
-    CHAT_CHANNEL_TYPE,
+    CHAT_CONVERSATION_TYPE,
     ChatMessageAdapter,
     chatNotification,
     ChatScroll,
@@ -28,7 +28,7 @@ describe('The linagora.esn.chat module controllers', function() {
     getItem,
     setItem,
     localStorageService,
-    channelsService,
+    conversationsService,
     chatLocalStateService,
     chatLocalStateServiceMock;
 
@@ -53,11 +53,11 @@ describe('The linagora.esn.chat module controllers', function() {
       })
     };
 
-    channelsService = {
+    conversationsService = {
       getChannels: sinon.spy(function() {
         return $q.when(channels);
       }),
-      getGroups: sinon.spy(function() {
+      getPrivateConversations: sinon.spy(function() {
         return $q.when(groups);
       })
     };
@@ -93,7 +93,7 @@ describe('The linagora.esn.chat module controllers', function() {
       });
       $provide.value('$stateParams', $stateParams);
       $provide.value('$stateProvider', $stateProvider);
-      $provide.value('channelsService', channelsService);
+      $provide.value('conversationsService', conversationsService);
       $provide.value('localStorageService', localStorageService);
       $provide.value('session', sessionMock);
       $provide.value('$state', $state);
@@ -104,7 +104,7 @@ describe('The linagora.esn.chat module controllers', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotification_, _chatLocalStateService_, _CHAT_CHANNEL_TYPE_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotification_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
@@ -112,11 +112,11 @@ describe('The linagora.esn.chat module controllers', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
     chatNotification = _chatNotification_;
     chatLocalStateService = _chatLocalStateService_;
-    CHAT_CHANNEL_TYPE = _CHAT_CHANNEL_TYPE_;
-    groups = [{_id: 'group1', type: CHAT_CHANNEL_TYPE.GROUP}, {_id: 'group2', type: CHAT_CHANNEL_TYPE.GROUP}];
-    channels = [{_id: 'channel1', type: CHAT_CHANNEL_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CHANNEL_TYPE.CHANNEL}];
+    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
+    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
+    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
     chatLocalStateService.channels = channels;
-    chatLocalStateService.groups = groups;
+    chatLocalStateService.privateConversations = groups;
   }));
 
   function initController(ctrl) {
@@ -220,9 +220,9 @@ describe('The linagora.esn.chat module controllers', function() {
     });
   });
 
-  describe('chatChannelSubheaderController', function() {
+  describe('chatConversationSubheaderController', function() {
     function initCtrl() {
-      return initController('chatChannelSubheaderController');
+      return initController('chatConversationSubheaderController');
     }
 
     beforeEach(function() {

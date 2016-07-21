@@ -45,13 +45,13 @@ describe('The linagora.esn.chat module directive', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
   }));
 
-  describe('The chatChannelItem directive', function() {
+  describe('The chatConversationItem directive', function() {
     var item, $scope, eleScope;
 
     function initDirective() {
       $scope = $rootScope.$new();
       $scope.item = item;
-      var element = $compile('<chat-channel-item item="item"/>')($scope);
+      var element = $compile('<chat-conversation-item item="item"/>')($scope);
       $scope.$digest();
       eleScope = element.isolateScope();
     }

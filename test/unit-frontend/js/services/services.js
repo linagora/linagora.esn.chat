@@ -19,8 +19,8 @@ describe('The linagora.esn.chat services', function() {
     $httpBackend,
     chatNotification,
     chatLocalStateService,
-    CHAT_CHANNEL_TYPE,
-    channelsServiceMock,
+    CHAT_CONVERSATION_TYPE,
+    conversationsServiceMock,
     groups,
     channels,
     localStorageService,
@@ -46,11 +46,11 @@ describe('The linagora.esn.chat services', function() {
       }
     };
 
-    channelsServiceMock = {
+    conversationsServiceMock = {
       getChannels: function() {
         return $q.when(channels);
       },
-      getGroups: function() {
+      getPrivateConversations: function() {
         return $q.when(groups);
       }
     };
@@ -85,12 +85,12 @@ describe('The linagora.esn.chat services', function() {
     angular.mock.module(function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
-      $provide.value('channelsService', channelsServiceMock);
+      $provide.value('conversationsService', conversationsServiceMock);
       $provide.value('localStorageService', localStorageService);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CHANNEL_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
     ChatConversationService = _ChatConversationService_;
     chatNotification = _chatNotification_;
@@ -101,9 +101,9 @@ describe('The linagora.esn.chat services', function() {
     chatUserState = _chatUserState_;
     $httpBackend =  _$httpBackend_;
     chatLocalStateService = _chatLocalStateService_;
-    CHAT_CHANNEL_TYPE = _CHAT_CHANNEL_TYPE_;
-    groups = [{_id: 'group1', type: CHAT_CHANNEL_TYPE.GROUP}, {_id: 'group2', type: CHAT_CHANNEL_TYPE.GROUP}];
-    channels = [{_id: 'channel1', type: CHAT_CHANNEL_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CHANNEL_TYPE.CHANNEL}];
+    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
+    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
+    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
   }));
 
   describe('chatUserState service', function() {
@@ -164,11 +164,11 @@ describe('The linagora.esn.chat services', function() {
   });
 
   describe('chatLocalState service', function() {
-    var chatLocalStateService, CHAT_CHANNEL_TYPE, CHAT_DEFAULT_CHANNEL;
+    var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL;
 
-    beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CHANNEL_TYPE_, _CHAT_DEFAULT_CHANNEL_) {
+    beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CONVERSATION_TYPE_, _CHAT_DEFAULT_CHANNEL_) {
       chatLocalStateService = _chatLocalStateService_;
-      CHAT_CHANNEL_TYPE = _CHAT_CHANNEL_TYPE_;
+      CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
       CHAT_DEFAULT_CHANNEL = _CHAT_DEFAULT_CHANNEL_;
     }));
 
@@ -238,21 +238,21 @@ describe('The linagora.esn.chat services', function() {
     describe('add channel & group', function() {
 
       it('should add a channel', function() {
-        var channel = {_id: 'channel3', type: CHAT_CHANNEL_TYPE.CHANNEL};
+        var channel = {_id: 'channel3', type: CHAT_CONVERSATION_TYPE.CHANNEL};
         chatLocalStateService.addChannel(channel);
         expect(channels).to.include(channel);
       });
 
       it('should add a group', function() {
-        var group = {_id: 'group3', type: CHAT_CHANNEL_TYPE.GROUP};
-        chatLocalStateService.addGroup(group);
+        var group = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE};
+        chatLocalStateService.addPrivateConversation(group);
         expect(groups).to.include(group);
       });
 
       it('should do nothing if group existed', function() {
-        var group = {_id: 'group1', type: CHAT_CHANNEL_TYPE.GROUP};
+        var group = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE};
         var oldGroups = groups;
-        chatLocalStateService.addGroup(group);
+        chatLocalStateService.addPrivateConversation(group);
         expect(groups).to.be.deep.equal(oldGroups);
       });
     });
