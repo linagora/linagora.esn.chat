@@ -14,6 +14,7 @@ angular.module('linagora.esn.chat', [
   'angularMoment',
   'esn.lodash-wrapper',
   'esn.oembed',
+  'esn.oembed.image',
   'angular-web-notification',
   'esn.localstorage',
   'esn.file',

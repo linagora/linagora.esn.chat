@@ -10,6 +10,7 @@ angular.module('esn.header', []);
 angular.module('esn.sidebar', []);
 angular.module('esn.url', []);
 angular.module('esn.oembed', []);
+angular.module('esn.oembed.image', []);
 angular.module('esn.localstorage', []);
 angular.module('esn.file', []);
 angular.module('esn.lodash-wrapper', []);
