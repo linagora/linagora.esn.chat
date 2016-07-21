@@ -3,6 +3,8 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var _ = require('lodash');
+var CONSTANTS = require('../../../../backend/lib/constants');
+var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The linagora.esn.chat webserver controller', function() {
 
@@ -27,7 +29,7 @@ describe('The linagora.esn.chat webserver controller', function() {
         createConversation: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        findPrivateByMembers: sinon.spy(function(exact, members, callback) {
+        findConversationByTypeAndByMembers: sinon.spy(function(type, exact, members, callback) {
           return callback(err, result);
         }),
         removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
@@ -204,16 +206,16 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
-  describe('The findMyUsersGroups', function() {
+  describe('The findMyPrivateConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findMyUsersGroups({user: {_id: 'id'}}, {
+      controller.findMyPrivateConversations({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.called;
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -225,12 +227,48 @@ describe('The linagora.esn.chat webserver controller', function() {
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findMyUsersGroups({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.findMyPrivateConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(false, ['id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, false, ['id']);
+              expect(json).to.equal(result);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
+
+  describe('The findMyCommunityConversations', function() {
+    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
+      err = new Error('failed');
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findMyCommunityConversations({user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(500);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
+      result = {};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findMyCommunityConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.COMMUNITY, false, ['id']);
               expect(json).to.equal(result);
               done();
             }
@@ -317,7 +355,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.called;
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -334,7 +372,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true);
               expect(json).to.equal(result);
               done();
             }
@@ -351,7 +389,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true, ['1', '2', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', '2', 'id']);
               done();
             }
           };
@@ -367,7 +405,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true, ['1', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
               done();
             }
           };
@@ -383,7 +421,91 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findPrivateByMembers).to.have.been.calledWith(true, ['1', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
+
+  describe('The findPrivateByMembers', function() {
+    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
+      err = new Error('failed');
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(500);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === true', function(done) {
+      result = {};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true);
+              expect(json).to.equal(result);
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should handle query with more than one member and add auth user as a member', function(done) {
+      result = {};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', '2', 'id']);
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should handle query with just one member and add auth user as a member', function(done) {
+      result = {};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should not add auth user if already passed as membres arguments', function(done) {
+      result = {};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
               done();
             }
           };
@@ -463,6 +585,23 @@ describe('The linagora.esn.chat webserver controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 403 if request try to create a commnity conversation', function(done) {
+      err = new Error('failed');
+      var req = {body: {type: CONVERSATION_TYPE.COMMUNITY}, query: {}, user: user};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.createConversation(req, {
+        status: function(code) {
+          expect(code).to.equal(403);
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual({error: {code: 403}});
               done();
             }
           };

@@ -1,6 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
+var CONSTANTS = require('../../lib/constants');
+var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies, lib) {
 
@@ -94,7 +96,17 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.findPrivateByMembers(true, members, function(err, groups) {
+    if (req.body.type === CONVERSATION_TYPE.COMMUNITY) {
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: 'You can not create a community conversation'
+        }
+      });
+    }
+
+    lib.conversation.findConversationByTypeAndByMembers(CONSTANTS.PRIVATE, true, members, function(err, conversations) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -105,8 +117,8 @@ module.exports = function(dependencies, lib) {
         });
       }
 
-      if (groups && groups.length > 0) {
-        res.status(201).json(groups[0]);
+      if (conversations && conversations.length > 0) {
+        res.status(201).json(conversations[0]);
       } else {
         var conversation = {
           name: req.body.name,
@@ -169,7 +181,7 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function findPrivateByMembers(req, res) {
+  function findConversationByTypeAndByMembers(type, req, res) {
     if (!req.query.members) {
       return res.status(400).json({
         error: {
@@ -186,7 +198,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.findPrivateByMembers(true, members, function(err, userGroups) {
+    lib.conversation.findConversationByTypeAndByMembers(type, true, members, function(err, userGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -200,8 +212,8 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function findMyUsersGroups(req, res) {
-    lib.conversation.findPrivateByMembers(false, [String(req.user._id)], function(err, usersGroups) {
+  function findMyConversationByType(type, req, res) {
+    lib.conversation.findConversationByTypeAndByMembers(type, false, [String(req.user._id)], function(err, usersGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -280,8 +292,10 @@ module.exports = function(dependencies, lib) {
     getMessages: getMessages,
     getChannels: getChannels,
     getConversation: getConversation,
-    findPrivateByMembers: findPrivateByMembers,
-    findMyUsersGroups: findMyUsersGroups,
+    findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
+    findCommunityByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.COMMUNITY),
+    findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
+    findMyCommunityConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
     getUserState: getUserState,
     setMyState: setMyState,
     joinConversation: joinConversation,

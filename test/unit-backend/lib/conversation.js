@@ -91,6 +91,30 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
   });
 
+  describe('The getCommunityConversationByCommunityId', function(done) {
+    it('should call ChatConversation.find with the correct param', function() {
+      var id = 'id';
+      var callback = 'callback';
+      var exec = function(_callback_) {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          type: CONVERSATION_TYPE.COMMUNITY,
+          community: id
+        });
+
+        expect(populateMock).to.have.been.calledWith('members');
+
+        expect(_callback_).to.be.equals(callback);
+        done();
+      };
+      var populateMock = sinon.stub().returns({exex: exec});
+
+      modelsMock.ChatConversation.find = sinon.stub().returns({populate: populateMock});
+
+      require('../../../backend/lib/conversation')(dependencies).getCommunityConversationByCommunityId(id, callback);
+
+    });
+  });
+
   describe('The getChannels function', function() {
 
     beforeEach(function() {
@@ -198,20 +222,25 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
   });
 
-  describe('The findPrivateByMembers function', function() {
+  describe('The findConversationByTypeAndByMembers function', function() {
+    var type;
+
+    beforeEach(function() {
+      type = 'type';
+    });
 
     it('should call Channel.findwith correct parameters when exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      require('../../../backend/lib/conversation')(dependencies).findPrivateByMembers(true, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, true, members, function() {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  CONVERSATION_TYPE.PRIVATE,
+          type:  type,
           members: {
             $all: [anObjectId],
             $size: 1
@@ -228,13 +257,13 @@ describe('The linagora.esn.chat conversation lib', function() {
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      require('../../../backend/lib/conversation')(dependencies).findPrivateByMembers(false, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, false, members, function() {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  CONVERSATION_TYPE.PRIVATE,
+          type:  type,
           members: {
             $all: [anObjectId]
           }
@@ -244,7 +273,6 @@ describe('The linagora.esn.chat conversation lib', function() {
         done();
       });
     });
-
   });
 
   describe('The addMembersToChannel function', function() {

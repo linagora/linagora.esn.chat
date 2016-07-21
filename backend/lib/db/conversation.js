@@ -12,7 +12,7 @@ module.exports = function(dependencies) {
 
   var ConversationSchema = new mongoose.Schema({
     name: {type: String},
-    type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE], required: true},
+    type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COMMUNITY], required: true},
     creator: {type: ObjectId, ref: 'User'},
     isNotRead: {type: Boolean},
     members: [{type: ObjectId, ref: 'User'}],

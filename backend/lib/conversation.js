@@ -38,13 +38,17 @@ module.exports = function(dependencies) {
     Conversation.findById(channel).populate('members').exec(callback);
   }
 
+  function getCommunityConversationByCommunityId(communityId, callback) {
+    Conversation.find({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members').exec(callback);
+  }
+
   function deleteConversation(channel, callback) {
     Conversation.findByIdAndRemove(channel, callback);
   }
 
-  function findPrivateByMembers(exactMatch, members, callback) {
+  function findConversationByTypeAndByMembers(type, exactMatch, members, callback) {
     var request = {
-      type:  CONVERSATION_TYPE.PRIVATE,
+      type:  type,
       members: {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
@@ -178,9 +182,10 @@ module.exports = function(dependencies) {
   return {
     getMessage: getMessage,
     getMessages: getMessages,
+    getCommunityConversationByCommunityId: getCommunityConversationByCommunityId,
     addMemberToConversation: addMemberToConversation,
     removeMemberFromConversation: removeMemberFromConversation,
-    findPrivateByMembers: findPrivateByMembers,
+    findConversationByTypeAndByMembers: findConversationByTypeAndByMembers,
     createMessage: createMessage,
     createConversation: createConversation,
     getConversation: getConversation,

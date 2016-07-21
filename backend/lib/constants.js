@@ -28,6 +28,7 @@ module.exports = {
   },
   CONVERSATION_TYPE: {
     PRIVATE: 'private',
-    CHANNEL: 'channel'
+    CHANNEL: 'channel',
+    COMMUNITY: 'community'
   }
 };
