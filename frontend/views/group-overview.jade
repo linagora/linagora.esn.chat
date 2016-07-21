@@ -1,6 +1,14 @@
 .row.group-item(ui-sref='{{channelState}}({id: item._id})')
-  .col-xs-2
+  .col-xs-2.group-badge
     a(href='#', title='{{otherUsers[0].name}} <{{otherUsers[0].address}}>')
-      img.group-badge(src='/images/user.png', ng-src="/api/avatars?objectType=image&id={{otherUsers[0].currentAvatar}}")
-  .col-xs-8
-    span.group-name {{::item.name}}
+      img(src='/images/user.png', ng-src="/api/avatars?objectType=image&id={{otherUsers[0].currentAvatar}}")
+  .col-xs-8.group-body
+    .row
+      .col-xs-12.group-name.ellipsis
+        span {{::item.name}}
+    .row
+      .col-xs-12.group-text.ellipsis
+        span {{::item.last_message.text}}
+
+  .col-xs-2.group-date
+    span {{::item.last_message.date | amDateFormat:'HH:mm'}}

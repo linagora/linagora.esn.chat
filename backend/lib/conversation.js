@@ -17,6 +17,7 @@ module.exports = function(dependencies) {
   var pubsubGlobal = dependencies('pubsub').global;
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  var logger = dependencies('logger');
 
   function getChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.CHANNEL}).populate('members').exec(function(err, channels) {
@@ -88,6 +89,17 @@ module.exports = function(dependencies) {
           chatMessage.save(callback);
         },
         function(message, _num, callback) {
+          Channel.update({_id: message.channel}, {$set: {last_message: {
+            text: message.text,
+            date: message.timestamps.creation
+          }}}, function(err) {
+            if (err) {
+              logger.error('Can not update channel with last_update', err);
+            }
+            callback(null, message);
+          });
+        },
+        function(message, callback) {
           ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
         },
         function(message, callback) {

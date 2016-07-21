@@ -35,6 +35,10 @@ module.exports = function(dependencies) {
         creation: {type: Date, default: Date.now}
       }
     },
+    last_message: {
+      text: {type: String},
+      date: {type: Date}
+    },
     schemaVersion: {type: Number, default: 1}
   });
 
