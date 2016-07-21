@@ -89,7 +89,7 @@ module.exports = function(dependencies) {
           chatMessage.save(callback);
         },
         function(message, _num, callback) {
-          Channel.update({_id: message.channel}, {$set: {last_message: {
+          Conversation.update({_id: message.channel}, {$set: {last_message: {
             text: message.text,
             date: message.timestamps.creation
           }}}, function(err) {

@@ -301,7 +301,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         cb(null, message);
       });
 
-      modelsMock.ChatChannel.update = function(query, options, cb) {
+      modelsMock.ChatConversation.update = function(query, options, cb) {
         cb(null, message);
       };
 
@@ -353,13 +353,13 @@ describe('The linagora.esn.chat conversation lib', function() {
         cb(null, message);
       };
 
-      modelsMock.ChatChannel.update = function(query, options, cb) {
+      modelsMock.ChatConversation.update = function(query, options, cb) {
         expect(query).to.deep.equals({_id: channelId});
         expect(options).to.deep.equals({$set: {last_message: {text: message.text, date: message.timestamps.creation}}});
         cb(null, message);
       };
 
-      require('../../../backend/lib/channel')(dependencies).createMessage(message, function() {
+      require('../../../backend/lib/conversation')(dependencies).createMessage(message, function() {
         done();
       });
     });
