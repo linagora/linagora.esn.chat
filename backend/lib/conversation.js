@@ -120,6 +120,10 @@ module.exports = function(dependencies) {
     }, callback);
   }
 
+  function getMessage(messageId, callback) {
+    ChatMessage.findById(messageId).populate('creator').exec(callback);
+  }
+
   function getMessages(channel, query, callback) {
     query = query || {};
     var channelId = channel._id || channel;
@@ -160,7 +164,7 @@ module.exports = function(dependencies) {
           creator: String(channel.topic.creator),
           last_set: channel.topic.last_set
         },
-        text: 'set the channel topic: ' + topic.value,
+        text: 'set the channel topic: ' + topic.value
       };
       updateChannelTopic.publish(message);
       callback(err, channel);
@@ -168,6 +172,7 @@ module.exports = function(dependencies) {
   }
 
   return {
+    getMessage: getMessage,
     getMessages: getMessages,
     addMemberToConversation: addMemberToConversation,
     removeMemberFromConversation: removeMemberFromConversation,

@@ -151,6 +151,36 @@ describe('The chat API', function() {
     });
   });
 
+  describe('GET /api/messages/:id', function() {
+    it('should return the message', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.CHANNEL
+      }).then(function(channels) {
+        channelId = channels._id;
+        return Q.denodeify(app.lib.conversation.createMessage)({
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function(mongoResult) {
+        request(app.express)
+          .get('/api/messages/' + mongoResult._id)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(JSON.parse(JSON.stringify(mongoResult)));
+            done();
+          });
+      }).catch(done);
+    });
+  });
+
   describe('POST /api/conversations', function(done) {
     it('should create a conversation and return it\' json', function(done) {
       request(app.express)

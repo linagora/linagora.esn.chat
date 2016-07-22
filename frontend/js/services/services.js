@@ -42,7 +42,14 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function getMessage(id) {
+      return ChatRestangular.all('messages').one(id).get().then(function(response) {
+        return ChatRestangular.stripRestangular(response.data);
+      });
+    }
+
     return {
+      getMessage: getMessage,
       fetchMessages: fetchMessages
     };
   })

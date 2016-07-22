@@ -15,6 +15,9 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     lib = {
       conversation: {
+        getMessage: sinon.spy(function(id, callback) {
+          return callback(err, result);
+        }),
         getMessages: sinon.spy(function(channel, options, callback) {
           return callback(err, result);
         }),
@@ -95,6 +98,68 @@ describe('The linagora.esn.chat webserver controller', function() {
             json: function(json) {
               expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
               expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
+
+  describe('The getMessage function', function() {
+
+    function createMessage(base, timestamp) {
+      var msg = _.cloneDeep(base);
+      var jsonMsg = _.cloneDeep(base);
+      msg.creator = {
+        password: 'yolo'
+      };
+      jsonMsg.creator = {};
+      msg.timestamps = {
+        creation: new Date(timestamp)
+      };
+      jsonMsg.timestamps = {
+        creation: timestamp
+      };
+      msg.toJSON = function() {
+        return msg;
+      };
+
+      return {source: msg, dest: jsonMsg};
+    }
+
+    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
+      var messageId = 1;
+      err = new Error('failed');
+      var req = {params: {id: messageId}};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.getMessage(req, {
+        status: function(code) {
+          expect(code).to.equal(500);
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              expect(lib.conversation.getMessage).to.have.been.calledWith(messageId);
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the lib.getMessage result', function(done) {
+      var messageId = 1;
+      var msg1 = createMessage({text: 'foo'}, 156789);
+      result = msg1.dest;
+      var req = {params: {id: messageId}};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.getMessage(req, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual(msg1.dest);
+              expect(lib.conversation.getMessage).to.have.been.calledWith(messageId);
               done();
             }
           };
