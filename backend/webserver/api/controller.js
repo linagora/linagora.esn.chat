@@ -20,6 +20,22 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function getMessage(req, res) {
+    lib.conversation.getMessage(req.params.id, function(err, message) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting message'
+          }
+        });
+      }
+
+      return res.status(200).json(message);
+    });
+  }
+
   function getChannels(req, res) {
     lib.conversation.getChannels({}, function(err, result) {
       if (err) {
@@ -260,6 +276,7 @@ module.exports = function(dependencies, lib) {
   }
 
   return {
+    getMessage: getMessage,
     getMessages: getMessages,
     getChannels: getChannels,
     getConversation: getConversation,

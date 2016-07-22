@@ -9,6 +9,10 @@ module.exports = function(dependencies, lib) {
 
   var router = express.Router();
 
+  router.get('/messages/:id',
+    authorizationMW.requiresAPILogin,
+    controller.getMessage);
+
   router.get('/:channel/messages',
     authorizationMW.requiresAPILogin,
     controller.getMessages);
