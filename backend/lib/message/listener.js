@@ -1,6 +1,7 @@
 'use strict';
 
-var CONSTANTS = require('./constants');
+var CONSTANTS = require('../constants');
+var q = require('q');
 
 module.exports = function(dependencies) {
 
@@ -11,7 +12,20 @@ module.exports = function(dependencies) {
   var mongoose = dependencies('db').mongo.mongoose;
   var ChatMessage = mongoose.model('ChatMessage');
 
+  var messageHandlers = [];
+
   function start(channel) {
+
+    messageHandlers.push(require('./handlers/first')(dependencies));
+    messageHandlers.push(require('./handlers/mentions')(dependencies));
+
+    function handleMessage(data) {
+      return q.allSettled(messageHandlers.forEach(function(handler) {
+        return handler(data);
+      })).then(function() {
+        logger.debug('Message has been processed by handlers');
+      });
+    }
 
     function saveAsChatMessage(data, callback) {
       var chatMessage = {
@@ -58,12 +72,9 @@ module.exports = function(dependencies) {
             return;
           }
           logger.debug('Chat Message saved', message);
-
           globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
 
-          message.user_mentions && message.user_mentions.forEach(function(mention) {
-            globalPubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({room: data.room, message: message, for: mention});
-          });
+          handleMessage({message: message, room: data.room});
         });
       }
     });

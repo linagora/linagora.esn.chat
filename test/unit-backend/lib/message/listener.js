@@ -3,7 +3,7 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var _ = require('lodash');
-var CONSTANTS = require('../../../backend/lib/constants');
+var CONSTANTS = require('../../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib listener module', function() {
 
@@ -75,7 +75,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         }
       };
 
-      var module = require('../../../backend/lib/listener')(dependencies);
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
       module.start(channel);
 
       ChatMessageMock.populate = function(field, callback) {
@@ -110,7 +110,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         })
       };
 
-      var module = require('../../../backend/lib/listener')(dependencies);
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
       module.start(channelMock);
 
       listener(data);
@@ -143,7 +143,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         })
       };
 
-      var module = require('../../../backend/lib/listener')(dependencies);
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
       module.start(channelMock);
 
       globalPublish = function(data) {
