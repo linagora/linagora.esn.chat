@@ -114,7 +114,7 @@ module.exports = function(dependencies) {
 
   function addMemberToConversation(channelId, userId, callback) {
     Conversation.update({_id: channelId}, {
-      $addToSet: {members: new ObjectId(userId)}
+      $addToSet: {members: userId.constructor === ObjectId ? userId : new ObjectId(userId)}
     }, callback);
   }
 
