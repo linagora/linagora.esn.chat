@@ -2,6 +2,7 @@
 
 var expect = require('chai').expect;
 var sinon = require('sinon');
+var mockery = require('mockery');
 var _ = require('lodash');
 var CONSTANTS = require('../../../../backend/lib/constants');
 
@@ -11,6 +12,13 @@ describe('The linagora.esn.chat lib listener module', function() {
     var deps, listener, globalPublish, ChatMessageMock, dependencies;
 
     beforeEach(function() {
+      mockery.registerMock('./handlers/first', function() {
+        return function() {};
+      });
+      mockery.registerMock('./handlers/mentions', function() {
+        return function() {};
+      });
+
       dependencies = function(name) {
         return deps[name];
       };
@@ -85,34 +93,6 @@ describe('The linagora.esn.chat lib listener module', function() {
         expect(globalPublish).to.have.been.calledWith({room: data.room, message: {state: data.message.state}});
         done();
       };
-      listener(data);
-    });
-
-    it('should broadcast users_mention', function(done) {
-      var data = {
-        message: {
-          type: 'text',
-          text: 'yolo',
-          creator: '1',
-          channel: 'general',
-        },
-        room: 'room'
-      };
-
-      var createMessageResult = {user_mentions: ['user']};
-
-      var channelMock = {
-        createMessage: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-          expect(globalPublish).to.have.been.calledWith({room: data.room, message: createMessageResult, for: 'user'});
-          expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.USERS_MENTION);
-          done();
-        })
-      };
-
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
-      module.start(channelMock);
-
       listener(data);
     });
 

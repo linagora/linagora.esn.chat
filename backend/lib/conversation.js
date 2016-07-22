@@ -171,6 +171,10 @@ module.exports = function(dependencies) {
     });
   }
 
+  function countMessages(channel, callback) {
+    ChatMessage.count({channel: channel}, callback);
+  }
+
   return {
     getMessage: getMessage,
     getMessages: getMessages,
@@ -182,6 +186,7 @@ module.exports = function(dependencies) {
     getConversation: getConversation,
     getChannels: getChannels,
     deleteConversation: deleteConversation,
-    updateTopic: updateTopic
+    updateTopic: updateTopic,
+    countMessages: countMessages
   };
 };
