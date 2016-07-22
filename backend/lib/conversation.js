@@ -39,7 +39,7 @@ module.exports = function(dependencies) {
   }
 
   function getCommunityConversationByCommunityId(communityId, callback) {
-    Conversation.find({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members').exec(callback);
+    Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members').exec(callback);
   }
 
   function deleteConversation(channel, callback) {

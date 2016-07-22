@@ -91,12 +91,12 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
   });
 
-  describe('The getCommunityConversationByCommunityId', function(done) {
-    it('should call ChatConversation.find with the correct param', function() {
+  describe('The getCommunityConversationByCommunityId', function() {
+    it('should call ChatConversation.find with the correct param', function(done) {
       var id = 'id';
       var callback = 'callback';
       var exec = function(_callback_) {
-        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+        expect(modelsMock.ChatConversation.findOne).to.have.been.calledWith({
           type: CONVERSATION_TYPE.COMMUNITY,
           community: id
         });
@@ -106,9 +106,10 @@ describe('The linagora.esn.chat conversation lib', function() {
         expect(_callback_).to.be.equals(callback);
         done();
       };
-      var populateMock = sinon.stub().returns({exex: exec});
 
-      modelsMock.ChatConversation.find = sinon.stub().returns({populate: populateMock});
+      var populateMock = sinon.stub().returns({exec: exec});
+
+      modelsMock.ChatConversation.findOne = sinon.stub().returns({populate: populateMock});
 
       require('../../../backend/lib/conversation')(dependencies).getCommunityConversationByCommunityId(id, callback);
 
