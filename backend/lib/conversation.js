@@ -121,7 +121,7 @@ module.exports = function(dependencies) {
   }
 
   function getMessage(messageId, callback) {
-    ChatMessage.findById(messageId).populate('creator').exec(callback);
+    ChatMessage.findById(messageId).populate('creator user_mentions').exec(callback);
   }
 
   function getMessages(channel, query, callback) {
