@@ -8,7 +8,7 @@ describe('The first channel message handler', function() {
 
   var deps, listener, globalPublish, dependencies, data;
   var channelId = '1234';
-  var creator = '5678';
+  var creator = {_id: '5678'};
 
   beforeEach(function() {
     data = {
@@ -145,7 +145,7 @@ describe('The first channel message handler', function() {
         },
         getConversation: function(channel, callback) {
           getSpy(channel);
-          callback(null, {members: [{_id: creator}]});
+          callback(null, {members: [{_id: creator._id}]});
         }
       };
     });
@@ -174,7 +174,7 @@ describe('The first channel message handler', function() {
         },
         getConversation: function(channel, callback) {
           getSpy(channel);
-          callback(null, {members: [{_id: creator}, {_id: 1}, {_id: 2}]});
+          callback(null, {members: [{_id: creator._id}, {_id: 1}, {_id: 2}]});
         }
       };
     });
