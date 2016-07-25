@@ -8,9 +8,62 @@ var CONSTANTS = require('../../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib listener module', function() {
 
-  describe('The start function', function() {
-    var deps, listener, globalPublish, ChatMessageMock, dependencies;
+  var deps, listener, globalPublish, ChatMessageMock, dependencies, logger;
 
+  beforeEach(function() {
+    dependencies = function(name) {
+      return deps[name];
+    };
+
+    ChatMessageMock = sinon.spy(function() {
+      this.populate = ChatMessageMock.populate;
+    });
+
+    logger = {
+      error: console.log,
+      info: console.log,
+      debug: console.log,
+      warn: console.log
+    };
+
+    ChatMessageMock.populate = sinon.spy(_.identity);
+
+    globalPublish = sinon.spy();
+    deps = {
+      logger: logger,
+      db: {
+        mongo: {
+          mongoose: {
+            model: sinon.spy(function(name) {
+              if (name === 'ChatMessage') {
+                return ChatMessageMock;
+              }
+            })
+          }
+        }
+      },
+      pubsub: {
+        local: {
+          topic: function() {
+            return {
+              subscribe: function(cb) {
+                listener = cb;
+              }
+            };
+          }
+        },
+        global: {
+          topic: sinon.spy(function() {
+            return {
+              publish: globalPublish
+            };
+          })
+        }
+      }
+    };
+  });
+
+  describe('The start function', function() {
     beforeEach(function() {
       mockery.registerMock('./handlers/first', function() {
         return function() {};
@@ -18,54 +71,6 @@ describe('The linagora.esn.chat lib listener module', function() {
       mockery.registerMock('./handlers/mentions', function() {
         return function() {};
       });
-
-      dependencies = function(name) {
-        return deps[name];
-      };
-
-      ChatMessageMock = sinon.spy(function() {
-        this.populate = ChatMessageMock.populate;
-      });
-
-      ChatMessageMock.populate = sinon.spy(_.identity);
-
-      globalPublish = sinon.spy();
-      deps = {
-        logger: {
-          error: console.log,
-          info: console.log,
-          debug: console.log
-        },
-        db: {
-          mongo: {
-            mongoose: {
-              model: sinon.spy(function(name) {
-                if (name === 'ChatMessage') {
-                  return ChatMessageMock;
-                }
-              })
-            }
-          }
-        },
-        pubsub: {
-          local: {
-            topic: function() {
-              return {
-                subscribe: function(cb) {
-                  listener = cb;
-                }
-              };
-            }
-          },
-          global: {
-            topic: sinon.spy(function() {
-              return {
-                publish: globalPublish
-              };
-            })
-          }
-        }
-      };
     });
 
     it('should not save, populate and keep state when message.type is user_typing', function(done) {
@@ -144,4 +149,50 @@ describe('The linagora.esn.chat lib listener module', function() {
       listener(data);
     });
   });
+
+  describe('The handleMessage function', function() {
+
+    var module;
+
+    beforeEach(function() {
+      module = require('../../../../backend/lib/message/listener')(dependencies);
+    });
+
+    it('should call all the handlers', function() {
+      var data = {foo: 'bar'};
+      var handler1 = sinon.spy();
+      var handler2 = sinon.spy();
+      var handler3 = sinon.spy();
+
+      module.addHandler(handler1);
+      module.addHandler(handler2);
+      module.addHandler(handler3);
+
+      module.handleMessage(data);
+
+      expect(handler1).to.have.been.calledWith(data);
+      expect(handler2).to.have.been.calledWith(data);
+      expect(handler3).to.have.been.calledWith(data);
+    });
+
+    it('should call all the handlers even if some fails', function() {
+      var data = {foo: 'bar'};
+      logger.warn = sinon.stub();
+      var handler1 = sinon.spy();
+      var handler2 = sinon.stub().throws(new Error('You failed'));
+      var handler3 = sinon.spy();
+
+      module.addHandler(handler1);
+      module.addHandler(handler2);
+      module.addHandler(handler3);
+
+      module.handleMessage(data);
+
+      expect(handler1).to.have.been.calledWith(data);
+      expect(handler2).to.have.been.calledWith(data);
+      expect(handler3).to.have.been.calledWith(data);
+      expect(logger.warn).to.have.been.called;
+    });
+  });
+
 });

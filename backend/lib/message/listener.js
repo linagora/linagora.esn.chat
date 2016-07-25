@@ -1,7 +1,6 @@
 'use strict';
 
 var CONSTANTS = require('../constants');
-var q = require('q');
 
 module.exports = function(dependencies) {
 
@@ -14,18 +13,24 @@ module.exports = function(dependencies) {
 
   var messageHandlers = [];
 
+  function addHandler(handler) {
+    handler && messageHandlers.push(handler);
+  }
+
+  function handleMessage(data) {
+    messageHandlers.map(function(handler) {
+      try {
+        handler(data);
+      } catch (err) {
+        logger.warn('Error while handling message', err);
+      }
+    });
+  }
+
   function start(channel) {
 
-    messageHandlers.push(require('./handlers/first')(dependencies));
-    messageHandlers.push(require('./handlers/mentions')(dependencies));
-
-    function handleMessage(data) {
-      return q.allSettled(messageHandlers.forEach(function(handler) {
-        return handler(data);
-      })).then(function() {
-        logger.debug('Message has been processed by handlers');
-      });
-    }
+    addHandler(require('./handlers/first')(dependencies));
+    addHandler(require('./handlers/mentions')(dependencies));
 
     function saveAsChatMessage(data, callback) {
       var chatMessage = {
@@ -81,6 +86,8 @@ module.exports = function(dependencies) {
   }
 
   return {
-    start: start
+    start: start,
+    addHandler: addHandler,
+    handleMessage: handleMessage
   };
 };
