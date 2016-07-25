@@ -1,6 +1,6 @@
 'use strict';
 
-var CONSTANTS = require('./constants');
+var CONSTANTS = require('../constants');
 
 module.exports = function(dependencies) {
 
@@ -11,7 +11,26 @@ module.exports = function(dependencies) {
   var mongoose = dependencies('db').mongo.mongoose;
   var ChatMessage = mongoose.model('ChatMessage');
 
+  var messageHandlers = [];
+
+  function addHandler(handler) {
+    handler && messageHandlers.push(handler);
+  }
+
+  function handleMessage(data) {
+    messageHandlers.map(function(handler) {
+      try {
+        handler(data);
+      } catch (err) {
+        logger.warn('Error while handling message', err);
+      }
+    });
+  }
+
   function start(channel) {
+
+    addHandler(require('./handlers/first')(dependencies));
+    addHandler(require('./handlers/mentions')(dependencies));
 
     function saveAsChatMessage(data, callback) {
       var chatMessage = {
@@ -58,18 +77,17 @@ module.exports = function(dependencies) {
             return;
           }
           logger.debug('Chat Message saved', message);
-
           globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
 
-          message.user_mentions && message.user_mentions.forEach(function(mention) {
-            globalPubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({room: data.room, message: message, for: mention});
-          });
+          handleMessage({message: message, room: data.room});
         });
       }
     });
   }
 
   return {
-    start: start
+    start: start,
+    addHandler: addHandler,
+    handleMessage: handleMessage
   };
 };

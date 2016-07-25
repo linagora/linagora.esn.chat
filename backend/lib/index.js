@@ -6,12 +6,12 @@ module.exports = function(dependencies) {
     conversation: require('./db/conversation')(dependencies),
     message: require('./db/message')(dependencies)
   };
-  var listener = require('./listener')(dependencies);
+  var message = require('./message')(dependencies);
   var conversation = require('./conversation')(dependencies);
   var userState = require('./userState')(dependencies);
 
   function start(callback) {
-    listener.start(conversation);
+    message.listener.start(conversation);
     userState.init();
     callback();
   }
@@ -20,6 +20,7 @@ module.exports = function(dependencies) {
     start: start,
     constants: require('./constants'),
     conversation: conversation,
+    message: message,
     userState: userState,
     models: models
   };
