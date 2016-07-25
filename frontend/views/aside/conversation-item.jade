@@ -1,4 +1,4 @@
-.lv-item.clickable(title="{{::item.name}}", ui-sref='{{channelState}}({id: item._id})', ui-sref-active="selected", ng-class="{notread: item.isNotRead}")
+.lv-item.clickable(title="{{::item.name}}", ui-sref='{{channelState}}({id: item._id})', ui-sref-active="selected", ng-class="{notread: item.unreadMessageCount > 0}")
   .row
     .col-xs-2.badge-container
       i.item-icon.mdi(ng-class="{'mdi-pound': item.type === CHAT_CONVERSATION_TYPE.CHANNEL, 'mdi-checkbox-blank-circle': item.type !== CHAT_CONVERSATION_TYPE.CHANNEL, 'connected': allUsersConnected}")
@@ -6,8 +6,8 @@
       span.item-name-inner.ellipsis
         bdi {{::item.name}}
     .col-xs-2
-      span(ng-if="item.unreadMessageCount > 0")
+      span(ng-if="item.mentionCount > 0")
         i.fa.fa-circle.fa-stack-2x
         i.fa.fa-inverse.fa-stack-1x
-          {{item.unreadMessageCount}}
+          {{item.mentionCount}}
       span.item-name-after
