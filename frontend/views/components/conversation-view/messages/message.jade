@@ -1,17 +1,18 @@
 .lv-item.media.chat-message
     .lv-avatar.pull-left
-      img(ng-src='/api/users/{{::message.creator._id}}/profile/avatar', alt='')
+      img(ng-src='/api/users/{{::message.creator._id}}/profile/avatar', alt='', ng-if='user._id !== message.creator._id')
     .media-body
       .chat-message-title
-        user-profile-link.displayname(user="message.creator")
-        small.date {{::message.timestamps.creation | amDateFormat:'h:mm A'}}
-      .chat-message-text(ng-bind-html="parsed.text")
+        div(ng-if='user._id !== message.creator._id')
+          user-profile-link.displayname(user="message.creator")
+          small.date {{::message.timestamps.creation | amDateFormat:'h:mm A'}}
+      .chat-message-text(ng-bind-html="parsed.text", ng-class='(user._id === message.creator._id ? "owner-message-display" : "not-owner-message-display")')
       .oembeds.attachment-container
         oembeds(message="message.text")
       .attachment-container(ng-if="message.attachments.length > 0")
         .chat-message-text(ng-repeat="attachment in message.attachments track by $index")
           span(ng-click='toggleFile()')
-            | #{__('Uploaded an Image')} : 
+            | #{__('Uploaded an Image')} :
           a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
           span(ng-click='toggleFile()')
             i(ng-class="displayFile ? 'fa fa-caret-down' : 'fa fa-caret-right'")

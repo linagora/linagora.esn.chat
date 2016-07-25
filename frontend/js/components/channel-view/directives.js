@@ -34,7 +34,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessage', function() {
+  .directive('chatMessage', function(session) {
     return {
       restrict: 'E',
       scope: {
@@ -54,6 +54,9 @@ angular.module('linagora.esn.chat')
         $scope.toggleFile = function() {
           $scope.displayFile = !$scope.displayFile;
         };
+        session.ready.then(function(session) {
+         $scope.user = session.user;
+       });
       }
     };
   })
