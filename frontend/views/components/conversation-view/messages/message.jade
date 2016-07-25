@@ -6,7 +6,7 @@
         user-profile-link.displayname(user="message.creator")
         small.date {{::message.timestamps.creation | amDateFormat:'h:mm A'}}
       .chat-message-text(ng-bind-html="parsed.text")
-      .oembeds
+      .oembeds.attachment-container
         oembeds(message="message.text")
       .attachment-container(ng-if="message.attachments.length > 0")
         .chat-message-text(ng-repeat="attachment in message.attachments track by $index")

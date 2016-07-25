@@ -42,7 +42,9 @@ angular.module('linagora.esn.chat')
       },
       templateUrl: '/chat/views/components/conversation-view/messages/message.html',
       controller: function($scope, $filter, chatParseMention) {
-        var parsedText = $filter('linky')($scope.message.text, '_blank');
+
+        var parsedText = $filter('oembedImageFilter')($scope.message.text);
+        parsedText = $filter('linky')(parsedText, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
         parsedText = chatParseMention(parsedText, $scope.message.user_mentions);
         $scope.parsed = {
