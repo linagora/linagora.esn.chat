@@ -23,7 +23,7 @@ module.exports = function(dependencies) {
           }
 
           conversation.members && conversation.members.filter(function(member) {
-            return String(member._id) !== String(data.message.creator);
+            return String(member._id) !== String(data.message.creator._id);
           }).forEach(function(member) {
             pubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_INITIALIZED).publish({room: data.room, message: data.message, conversation: conversation, target: member});
           });
