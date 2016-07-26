@@ -174,7 +174,12 @@ describe('The first channel message handler', function() {
         },
         getConversation: function(channel, callback) {
           getSpy(channel);
-          callback(null, {members: [{_id: creator._id}, {_id: 1}, {_id: 2}]});
+          callback(null, {
+            members: [{_id: creator._id}, {_id: 1}, {_id: 2}],
+            toObject: function() {
+              return this;
+            }
+          });
         }
       };
     });
