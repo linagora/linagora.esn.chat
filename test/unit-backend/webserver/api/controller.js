@@ -209,6 +209,42 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
+  describe('The findMyConversations', function() {
+    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
+      err = new Error('failed');
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findMyPrivateConversations({user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(500);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the lib.findConversationByTypeAndByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
+      result = {};
+      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      controller.findMyConversations({query: {type: 'type'}, user: {_id: 'id'}}, {
+        status: function(code) {
+          expect(code).to.equal(200);
+          return {
+            json: function(json) {
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith('type', false, ['id']);
+              expect(json).to.equal(result);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
+
   describe('The findMyPrivateConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');

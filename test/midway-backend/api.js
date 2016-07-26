@@ -524,6 +524,110 @@ describe('The chat API', function() {
     });
   });
 
+  describe('GET /api/me/conversation', function() {
+    it('should return all conversation with me inside', function(done) {
+      var otherMember1 = new mongoose.Types.ObjectId();
+      var otherMember2 = new mongoose.Types.ObjectId();
+
+      var channel1, channel2;
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.COMMUNITY,
+        members: [userId, otherMember1, otherMember2]
+      }).then(function(mongoResponse) {
+        channel1 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [userId, otherMember1, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        channel2 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [otherMember1, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        request(app.express)
+          .get('/api/me/conversation')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(jsonnify([channel1, channel2]));
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should return only conversation of this type if type provided ', function(done) {
+      var otherMember1 = new mongoose.Types.ObjectId();
+      var otherMember2 = new mongoose.Types.ObjectId();
+
+      var channel1, channel2;
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.COMMUNITY,
+        members: [userId, otherMember1, otherMember2]
+      }).then(function(mongoResponse) {
+        channel1 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [userId, otherMember1, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        channel2 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [otherMember1, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        request(app.express)
+          .get('/api/me/conversation?type=private')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(jsonnify([channel2]));
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should return only conversation of one of the given type if more than one type is given', function(done) {
+      var otherMember1 = new mongoose.Types.ObjectId();
+      var otherMember2 = new mongoose.Types.ObjectId();
+
+      var channel1, channel2;
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [userId, otherMember1, otherMember2]
+      }).then(function(mongoResponse) {
+        channel1 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [userId, otherMember1, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        channel2 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.COMMUNITY,
+          members: [userId, otherMember1, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        request(app.express)
+          .get('/api/me/conversation?type=private&type=channel')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(jsonnify([channel1, channel2]));
+            done();
+          });
+      }).catch(done);
+    });
+  });
+
   describe('GET /api/me/community', function() {
     it('should return all community conversations with me inside', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();

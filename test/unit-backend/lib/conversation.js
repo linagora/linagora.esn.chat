@@ -241,7 +241,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  type,
+          type:  {$in: [type]},
           members: {
             $all: [anObjectId],
             $size: 1
@@ -264,13 +264,45 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  type,
+          type:  {$in: [type]},
           members: {
             $all: [anObjectId]
           }
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
+        done();
+      });
+    });
+
+    it('should also handle more than one type', function(done) {
+      var members = ['one'];
+      var anObjectId = {};
+      var type2 = 'type2';
+
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers([type, type2], false, members, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          type:  {$in: [type, type2]},
+          members: {
+            $all: [anObjectId]
+          }
+        });
+
+        done();
+      });
+    });
+
+    it('should handle no type', function(done) {
+      var members = ['one'];
+      var anObjectId = {};
+
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(null, false, members, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          members: {
+            $all: [anObjectId]
+          }
+        });
+
         done();
       });
     });

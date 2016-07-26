@@ -276,6 +276,21 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function findMyConversations(req, res)  {
+    lib.conversation.findConversationByTypeAndByMembers(req.query.type, false, [String(req.user._id)], function(err, usersGroups) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while finding groups of user ' + req.user._id
+          }
+        });
+      }
+      res.status(200).json(usersGroups);
+    });
+  }
+
   function getUserState(req, res) {
     lib.userState.get(req.params.id).then(function(state) {
       return res.status(200).json({
@@ -345,6 +360,7 @@ module.exports = function(dependencies, lib) {
     findCommunity: findCommunity,
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyCommunityConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
+    findMyConversations: findMyConversations,
     getUserState: getUserState,
     setMyState: setMyState,
     joinConversation: joinConversation,

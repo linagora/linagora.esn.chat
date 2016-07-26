@@ -48,13 +48,16 @@ module.exports = function(dependencies) {
 
   function findConversationByTypeAndByMembers(type, exactMatch, members, callback) {
     var request = {
-      type:  type,
       members: {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
         })
       }
     };
+
+    if (type) {
+      request.type = { $in:  _.isArray(type) ? type : [type]};
+    }
 
     if (exactMatch) {
       request.members.$size = members.length;
