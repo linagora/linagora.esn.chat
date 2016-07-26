@@ -6,6 +6,7 @@ module.exports = function(dependencies) {
     conversation: require('./db/conversation')(dependencies),
     message: require('./db/message')(dependencies)
   };
+
   var message = require('./message')(dependencies);
   var conversation = require('./conversation')(dependencies);
   var userState = require('./userState')(dependencies);

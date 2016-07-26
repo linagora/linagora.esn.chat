@@ -18,7 +18,7 @@ module.exports = function(dependencies) {
     text: {type: String},
     type: {type: String, required: true},
     creator: {type: ObjectId, ref: 'User'},
-    channel: {type: ObjectId, ref: 'Channel'},
+    channel: {type: ObjectId, ref: 'ChatConversation', index: true},
     attachments: {type: [AttachmentSchema], required: false},
     user_mentions: [{type: ObjectId, ref: 'User'}],
     timestamps: {
