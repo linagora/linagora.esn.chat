@@ -20,6 +20,9 @@ describe('The linagora.esn.chat webserver controller', function() {
         getMessage: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
+        getCommunityConversationByCommunityId: sinon.spy(function(id, callback) {
+          return callback(err, result);
+        }),
         getMessages: sinon.spy(function(channel, options, callback) {
           return callback(err, result);
         }),
