@@ -39,6 +39,7 @@ describe('The linagora.esn.chat services', function() {
     chatNamespace = {on: sinon.spy()};
 
     sessionMock = {
+      user: user,
       ready: {
         then: function(callback) {
           return callback({user: user});
@@ -228,6 +229,29 @@ describe('The linagora.esn.chat services', function() {
         chatLocalStateService.setActive('channel1');
         chatLocalStateService.unreadMessage({channel: 'channel1'});
         expect(channels[0].unreadMessageCount).to.equal(0);
+      });
+
+      it('should upgrade mentionCount of channel', function() {
+        chatLocalStateService.unreadMessage({channel: 'channel1', text: '@userId salut'});
+        chatLocalStateService.unreadMessage({channel: 'channel1'});
+        expect(channels[0].unreadMessageCount).to.equal(2);
+        expect(channels[0].mentionCount).to.be.equal(1);
+      });
+
+      it('should upgrade mentionCount of group', function() {
+        chatLocalStateService.unreadMessage({channel: 'group2', text: '@userId salut'});
+        chatLocalStateService.unreadMessage({channel: 'group2'});
+        expect(groups[1].unreadMessageCount).to.equal(2);
+        expect(groups[1].mentionCount).to.be.equal(1);
+      });
+
+      it('should not upgrade mentionCount of active group or channel', function() {
+        channels[0].unreadMessageCount = 1;
+        channels[0].mentionCount = 1;
+        chatLocalStateService.setActive('channel1');
+        chatLocalStateService.unreadMessage({channel: 'channel1', text: '@userId salut'});
+        expect(channels[0].unreadMessageCount).to.equal(0);
+        expect(channels[0].mentionCount).to.be.equal(0);
       });
 
       it('should not fail if channel does not exist', function() {

@@ -115,7 +115,7 @@ angular.module('linagora.esn.chat')
 
   })
 
-  .factory('chatLocalStateService', function($rootScope, $q, _, conversationsService, CHAT_CONVERSATION_TYPE, CHAT_EVENTS) {
+  .factory('chatLocalStateService', function($rootScope, $q, _, session, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS) {
 
     var service;
 
@@ -145,6 +145,7 @@ angular.module('linagora.esn.chat')
         return false;
       }
       channel.unreadMessageCount = 0;
+      channel.mentionCount = 0;
       service.activeRoom = channel;
 
       $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channel);
@@ -156,6 +157,9 @@ angular.module('linagora.esn.chat')
       var channel = findConversation(message.channel);
       if (channel && !isActiveRoom(channel._id)) {
         channel.unreadMessageCount = (channel.unreadMessageCount || 0) + 1;
+        if (chatParseMention.userIsMentioned(message.text, session.user)) {
+          channel.mentionCount = (channel.mentionCount || 0) + 1;
+        }
       }
     }
 
