@@ -80,14 +80,17 @@ angular.module('linagora.esn.chat')
       });
     }
 
-    function postConversations(channel) {
-      return ChatRestangular.one('conversations').customPOST(channel);
+    function postConversations(conversation) {
+      return ChatRestangular.one('conversations').customPOST(conversation).then(function(c) {
+        $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, c.data);
+        return c;
+      });
     }
 
-    function addPrivateConversation(privateConversatin) {
-      privateConversatin.type = CHAT_CONVERSATION_TYPE.PRIVATE;
-      privateConversatin.name = computeGroupName(session.user._id, privateConversatin);
-      return postConversations(privateConversatin);
+    function addPrivateConversation(privateConversation) {
+      privateConversation.type = CHAT_CONVERSATION_TYPE.PRIVATE;
+      privateConversation.name = computeGroupName(session.user._id, privateConversation);
+      return postConversations(privateConversation);
     }
 
     function addChannels(channel) {

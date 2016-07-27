@@ -151,9 +151,6 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  describe('ChatConversationService service', function() {
-  });
-
   describe('chatNotification service', function() {
     describe('start() method', function() {
       it('should listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
@@ -165,12 +162,13 @@ describe('The linagora.esn.chat services', function() {
   });
 
   describe('chatLocalState service', function() {
-    var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL;
+    var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, CHAT_EVENTS;
 
-    beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CONVERSATION_TYPE_, _CHAT_DEFAULT_CHANNEL_) {
+    beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CONVERSATION_TYPE_, _CHAT_DEFAULT_CHANNEL_, _CHAT_EVENTS_) {
       chatLocalStateService = _chatLocalStateService_;
       CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
       CHAT_DEFAULT_CHANNEL = _CHAT_DEFAULT_CHANNEL_;
+      CHAT_EVENTS = _CHAT_EVENTS_;
     }));
 
     beforeEach(function() {
@@ -293,6 +291,38 @@ describe('The linagora.esn.chat services', function() {
         chatLocalStateService.setActive(channels[0]._id);
         var isActive = chatLocalStateService.isActiveRoom(channels[1]._id);
         expect(isActive).to.be.equal(false);
+      });
+    });
+
+    describe('the listener on CHAT_EVENTS.CONVERSATIONS.NEW', function() {
+      it('should save a private conversation', function() {
+        var conversation = {
+          type: CHAT_CONVERSATION_TYPE.PRIVATE,
+          _id: 'anId'
+        };
+        $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, conversation);
+        $rootScope.$digest();
+        expect(chatLocalStateService.findConversation(conversation._id)).to.deep.equal(conversation);
+      });
+
+      it('should save a channel conversation', function() {
+        var conversation = {
+          type: CHAT_CONVERSATION_TYPE.CHANNEL,
+          _id: 'anId'
+        };
+        $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, conversation);
+        $rootScope.$digest();
+        expect(chatLocalStateService.findConversation(conversation._id)).to.deep.equal(conversation);
+      });
+
+      it('should not save a conversation with an unknown type', function() {
+        var conversation = {
+          type: 'unknownType',
+          _id: 'anId'
+        };
+        $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, conversation);
+        $rootScope.$digest();
+        expect(chatLocalStateService.findConversation(conversation._id)).to.not.exist;
       });
     });
   });
