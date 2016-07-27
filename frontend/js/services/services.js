@@ -116,7 +116,7 @@ angular.module('linagora.esn.chat')
 
   })
 
-  .factory('chatLocalStateService', function($rootScope, $q, _, session, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS) {
+  .factory('chatLocalStateService', function($rootScope, $q, $log, _, session, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS) {
 
     var service;
 
@@ -173,6 +173,16 @@ angular.module('linagora.esn.chat')
         service.privateConversations.push(privateConversation);
       }
     }
+
+    $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
+      if (data.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+        addPrivateConversation(data);
+      } else if (data.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+        addChannel(data);
+      } else {
+        $log.error('Unsupported conversation type', data.type);
+      }
+    });
 
     service = {
       setActive: setActive,
