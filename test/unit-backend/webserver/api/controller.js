@@ -32,7 +32,7 @@ describe('The linagora.esn.chat webserver controller', function() {
         createConversation: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        findConversationByTypeAndByMembers: sinon.spy(function(type, exact, members, callback) {
+        findConversationByTypeAndByMembers: sinon.spy(function(type, ignoreMemberForChannel, exact, members, callback) {
           return callback(err, result);
         }),
         removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
@@ -235,7 +235,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith('type', false, ['id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith('type', true, false, ['id']);
               expect(json).to.equal(result);
               done();
             }
@@ -271,7 +271,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, false, ['id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, false, ['id']);
               expect(json).to.equal(result);
               done();
             }
@@ -307,7 +307,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.COMMUNITY, false, ['id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.COMMUNITY, true, false, ['id']);
               expect(json).to.equal(result);
               done();
             }
@@ -428,7 +428,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', '2', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', '2', 'id']);
               done();
             }
           };
@@ -444,7 +444,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
               done();
             }
           };
@@ -460,7 +460,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
               done();
             }
           };
@@ -512,7 +512,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', '2', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', '2', 'id']);
               done();
             }
           };
@@ -528,7 +528,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
               done();
             }
           };
@@ -536,7 +536,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       });
     });
 
-    it('should not add auth user if already passed as membres arguments', function(done) {
+    it('should not add auth user if already passed as members arguments', function(done) {
       result = {};
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
@@ -544,7 +544,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, ['1', 'id']);
+              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
               done();
             }
           };

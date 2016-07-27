@@ -559,6 +559,24 @@ describe('The chat API', function() {
       }).catch(done);
     });
 
+    it('should return channel even if I am not a member of them yet', function(done) {
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: []
+      }).then(function(mongoResponse) {
+        request(app.express)
+          .get('/api/me/conversation')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(jsonnify([mongoResponse]));
+            done();
+          });
+      }).catch(done);
+    });
+
     it('should put conversation with the most recent last message first', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
