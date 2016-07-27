@@ -39,6 +39,9 @@ describe('The linagora.esn.chat conversation lib', function() {
       }),
       exec: sinon.spy(function(cb) {
         cb();
+      }),
+      sort: sinon.spy(function(type, cb) {
+        return mq;
       })
     };
 

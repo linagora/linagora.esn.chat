@@ -63,7 +63,7 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Conversation.find(request).populate('members').exec(callback);
+    Conversation.find(request).populate('members').sort('-last_message.date').exec(callback);
   }
 
   function createConversation(options, callback) {

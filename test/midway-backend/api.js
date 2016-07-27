@@ -559,6 +559,37 @@ describe('The chat API', function() {
       }).catch(done);
     });
 
+    it('should put conversation with the most recent last message first', function(done) {
+      var otherMember1 = new mongoose.Types.ObjectId();
+      var otherMember2 = new mongoose.Types.ObjectId();
+
+      var channel1, channel2;
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.COMMUNITY,
+        members: [userId, otherMember1, otherMember2],
+        last_message: {date: new Date(1469605336000)}
+      }).then(function(mongoResponse) {
+        channel1 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [userId, otherMember1, otherMember2],
+          last_message: {date: new Date(1469605337000)}
+        });
+      }).then(function(mongoResponse) {
+        channel2 = mongoResponse;
+        request(app.express)
+          .get('/api/me/conversation')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(jsonnify([channel2, channel1]));
+            done();
+          });
+      }).catch(done);
+    });
+
     it('should return only conversation of this type if type provided ', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
