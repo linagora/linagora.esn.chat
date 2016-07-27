@@ -204,7 +204,9 @@ angular.module('linagora.esn.chat')
         };
 
         $scope.diffDate = function(timestamp) {
-          return moment().diff(moment(timestamp, 'x'), 'day');
+          var messageDate = moment(timestamp, 'x');
+          var formatDate = [messageDate.year(), messageDate.month(), messageDate.date()];
+          return moment().diff(formatDate, 'day');
         };
 
         $scope.formatDate = function(timestamp) {
