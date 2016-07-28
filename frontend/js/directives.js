@@ -23,20 +23,25 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatConversationGroupList', function() {
+  .directive('chatConversationList', function() {
     return {
       restrict: 'E',
-      templateUrl: '/chat/views/conversation-group-list.html',
+      templateUrl: '/chat/views/conversation-list.html',
       scope: {
-        channelState: '@'
+        channelState: '@',
+        types: '='
       },
       controller: function($scope, $state, chatLocalStateService) {
-        $scope.groups = chatLocalStateService.privateConversations;
+        $scope.wanted = function(conversation) {
+          return $scope.types.indexOf(conversation.type) > -1;
+        };
+
+        $scope.groups = chatLocalStateService.conversations;
       }
     };
   })
 
-  .directive('chatGroupOverview', function() {
+  .directive('chatConversationOverview', function() {
     return {
       restrict: 'E',
       scope: {

@@ -40,7 +40,7 @@ angular.module('linagora.esn.chat')
 
     session.ready.then(function(session) {
       $scope.otherUsers = _.reject($scope.item.members, {_id: session.user._id});
-      if ($scope.otherUsers.length > 1) {
+      if ($scope.item.type === CHAT_CONVERSATION_TYPE.PRIVATE && $scope.otherUsers.length > 1) {
         $scope.item.name = _.map($scope.otherUsers, 'firstname').join(', ');
       }
       var statesPromises = $scope.otherUsers.map(function(member) {
