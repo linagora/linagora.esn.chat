@@ -22,7 +22,8 @@ angular.module('linagora.esn.chat')
   })
   .constant('CHAT_CONVERSATION_TYPE', {
     CHANNEL: 'channel',
-    PRIVATE: 'private'
+    PRIVATE: 'private',
+    COMMUNITY: 'community'
   })
   .constant('CHAT_DEFAULT_CHANNEL', {
     CHANNEL: {

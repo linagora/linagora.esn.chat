@@ -23,7 +23,7 @@ angular.module('linagora.esn.chat')
       };
 
       conversationsService.addChannels(channel).then(function(response) {
-        chatLocalStateService.addChannel(response.data);
+        chatLocalStateService.addConversation(response.data);
         $state.go('chat.channels-views', {id: response.data._id});
       });
     };
@@ -71,7 +71,7 @@ angular.module('linagora.esn.chat')
       };
 
       conversationsService.addPrivateConversation(group).then(function(response) {
-        chatLocalStateService.addPrivateConversation(response.data);
+        chatLocalStateService.addConversation(response.data);
         $state.go('chat.channels-views', { id: response.data._id});
       });
     };

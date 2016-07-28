@@ -51,6 +51,7 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
         'directives.js',
         'services/channels.js',
         'services/services.js',
+        'services/chat-local-state-service.js',
         'services/humanize-entities-label.js',
         'services/message.js',
         'services/parse-mention.js',
