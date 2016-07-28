@@ -237,13 +237,23 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.getCommunityConversationByCommunityId(req.params.id, function(err, conversation) {
+    lib.conversation.getCommunityConversationByCommunityId(req.query.id, function(err, conversation) {
       if (err) {
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while fetching conversation of group:' + req.params.id
+            details: err.message || 'Error while fetching conversation of group:' + req.query.id
+          }
+        });
+      }
+
+      if (!conversation) {
+        return res.status(404).json({
+          error: {
+            code: 404,
+            message: 'Not Found',
+            details: 'Community conversation not found'
           }
         });
       }
