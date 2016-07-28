@@ -37,17 +37,21 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.findPrivateByMembers);
 
+  router.get('/community',
+    authorizationMW.requiresAPILogin,
+    controller.findCommunity);
+
   router.get('/me/private',
     authorizationMW.requiresAPILogin,
     controller.findMyPrivateConversations);
 
-  router.get('/community',
-    authorizationMW.requiresAPILogin,
-    controller.findCommunityByMembers);
-
   router.get('/me/community',
     authorizationMW.requiresAPILogin,
     controller.findMyCommunityConversations);
+
+  router.get('/me/conversation',
+    authorizationMW.requiresAPILogin,
+    controller.findMyConversations);
 
   router.get('/state/:id',
     authorizationMW.requiresAPILogin,

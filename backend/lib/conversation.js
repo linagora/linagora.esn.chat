@@ -46,9 +46,16 @@ module.exports = function(dependencies) {
     Conversation.findByIdAndRemove(channel, callback);
   }
 
-  function findConversationByTypeAndByMembers(type, exactMatch, members, callback) {
+  /**
+   * @param {string|[string]} type - allowed types if none provided all type are accepted
+   * @param {boolean} ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
+   *    This makes sense because everybody can access channels even if there are not member of it.
+   * @param {boolean} exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
+   * @param {[string]} list of members' id
+   * @return {[Conversation]}
+   */
+  function findConversationByTypeAndByMembers(type, ignoreMemberFilterForChannel, exactMembersMatch, members, callback) {
     var request = {
-      type:  type,
       members: {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
@@ -56,11 +63,23 @@ module.exports = function(dependencies) {
       }
     };
 
-    if (exactMatch) {
+    if (type) {
+      request.type = {$in:  _.isArray(type) ? type : [type]};
+    }
+
+    if (ignoreMemberFilterForChannel && (!type || type.indexOf(CONVERSATION_TYPE.CHANNEL) > -1)) {
+      request = {
+        $or: [request, {
+          type: CONVERSATION_TYPE.CHANNEL
+        }]
+      };
+    }
+
+    if (exactMembersMatch) {
       request.members.$size = members.length;
     }
 
-    Conversation.find(request).populate('members').exec(callback);
+    Conversation.find(request).populate('members').sort('-last_message.date').exec(callback);
   }
 
   function createConversation(options, callback) {

@@ -106,7 +106,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.findConversationByTypeAndByMembers(CONSTANTS.PRIVATE, true, members, function(err, conversations) {
+    lib.conversation.findConversationByTypeAndByMembers(CONSTANTS.PRIVATE, false, true, members, function(err, conversations) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -198,7 +198,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.findConversationByTypeAndByMembers(type, true, members, function(err, userGroups) {
+    lib.conversation.findConversationByTypeAndByMembers(type, true, true, members, function(err, userGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -212,8 +212,72 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function findCommunity(req, res) {
+    if (req.query.members && req.query.id) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'can not use members and id attribute at the same time'
+        }
+      });
+    }
+
+    if (req.query.members) {
+      return findConversationByTypeAndByMembers(CONVERSATION_TYPE.COMMUNITY, req, res);
+    }
+
+    if (!req.query.id) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'should provide members or id attribute'
+        }
+      });
+    }
+
+    lib.conversation.getCommunityConversationByCommunityId(req.params.id, function(err, conversation) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while fetching conversation of group:' + req.params.id
+          }
+        });
+      }
+
+      if (!_.find(conversation.members, {_id: req.user._id})) {
+        return res.status(404).json({
+          error: {
+            code: 404,
+            message: 'Community conversation not found'
+          }
+        });
+      }
+
+      res.status(200).json(conversation);
+    });
+  }
+
   function findMyConversationByType(type, req, res) {
-    lib.conversation.findConversationByTypeAndByMembers(type, false, [String(req.user._id)], function(err, usersGroups) {
+    lib.conversation.findConversationByTypeAndByMembers(type, true, false, [String(req.user._id)], function(err, usersGroups) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while finding groups of user ' + req.user._id
+          }
+        });
+      }
+      res.status(200).json(usersGroups);
+    });
+  }
+
+  function findMyConversations(req, res)  {
+    lib.conversation.findConversationByTypeAndByMembers(req.query.type, true, false, [String(req.user._id)], function(err, usersGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -273,7 +337,7 @@ module.exports = function(dependencies, lib) {
       creator: req.user._id,
       last_set: new Date()
     };
-    lib.conversation.updateTopic(req.params.id, topic, function(err, channel) {
+    lib.conversation.updateTopic(req.params.id, topic, function(err, conversation) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -283,7 +347,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-      res.status(200).json(channel);
+      res.status(200).json(conversation);
     });
   }
 
@@ -293,9 +357,10 @@ module.exports = function(dependencies, lib) {
     getChannels: getChannels,
     getConversation: getConversation,
     findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
-    findCommunityByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.COMMUNITY),
+    findCommunity: findCommunity,
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyCommunityConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
+    findMyConversations: findMyConversations,
     getUserState: getUserState,
     setMyState: setMyState,
     joinConversation: joinConversation,

@@ -39,6 +39,9 @@ describe('The linagora.esn.chat conversation lib', function() {
       }),
       exec: sinon.spy(function(cb) {
         cb();
+      }),
+      sort: sinon.spy(function(type, cb) {
+        return mq;
       })
     };
 
@@ -235,13 +238,13 @@ describe('The linagora.esn.chat conversation lib', function() {
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, true, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, false, true, members, function() {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  type,
+          type:  {$in: [type]},
           members: {
             $all: [anObjectId],
             $size: 1
@@ -258,19 +261,70 @@ describe('The linagora.esn.chat conversation lib', function() {
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, false, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, false, false, members, function() {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  type,
+          type:  {$in: [type]},
           members: {
             $all: [anObjectId]
           }
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
+        done();
+      });
+    });
+
+    it('should also handle more than one type', function(done) {
+      var members = ['one'];
+      var anObjectId = {};
+      var type2 = 'type2';
+
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers([type, type2], false, false, members, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          type:  {$in: [type, type2]},
+          members: {
+            $all: [anObjectId]
+          }
+        });
+
+        done();
+      });
+    });
+
+    it('should handle no type', function(done) {
+      var members = ['one'];
+      var anObjectId = {};
+
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(null, false, false, members, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          members: {
+            $all: [anObjectId]
+          }
+        });
+
+        done();
+      });
+    });
+
+    it('should do not considere member when ignoreMemberFilterForChannel is true', function(done) {
+      var members = ['one'];
+      var anObjectId = {};
+
+      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(null, true, false, members, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          $or: [{
+            members: {
+              $all: [anObjectId]
+            }
+          }, {
+            type: CONVERSATION_TYPE.CHANNEL
+          }]
+        });
+
         done();
       });
     });
