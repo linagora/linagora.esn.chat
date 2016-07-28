@@ -49,7 +49,7 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
         'constants.js',
         'controllers.js',
         'directives.js',
-        'services/channels.js',
+        'services/conversations.js',
         'services/services.js',
         'services/chat-local-state-service.js',
         'services/humanize-entities-label.js',
