@@ -238,58 +238,6 @@ describe('The linagora.esn.chat conversationsServices', function() {
     });
   });
 
-  describe.skip('websocketListener', function() {
-
-    var callback;
-
-    function initCache() {
-      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([]);
-      conversationsService.getConversations();
-      $rootScope.$digest();
-      $httpBackend.flush();
-    }
-
-    beforeEach(function() {
-      initCache();
-
-      expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.NEW_CHANNEL, sinon.match.func.and(function(_callback_) {
-        callback = _callback_;
-        return true;
-      }));
-    });
-
-    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CHANNEL and add regular channel in channel cache', function() {
-      var id =  'justAdded';
-      var data = {_id: id};
-      callback(data);
-      var thenCallback = sinon.spy();
-      conversationsService.getConversation(id).then(thenCallback);
-      $rootScope.$digest();
-      expect(thenCallback).to.have.been.calledWith(data);
-    });
-
-    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CHANNEL and broadcast channel which are group after having computing her name as it on $rootScope', function() {
-      var id =  'justAdded';
-      var data = {
-        _id: id,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE,
-        members: [user, {firstname: 'Eric', lastname: 'Cartman'}]
-      };
-      callback(data);
-      var thenCallback = sinon.spy();
-      conversationsService.getConversation(id).then(thenCallback);
-      $rootScope.$digest();
-      expect(thenCallback).to.have.been.calledWith(data);
-      callback(data);
-      expect(thenCallback).to.have.been.calledWith({
-        _id: id,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE,
-        members: [user, {firstname: 'Eric', lastname: 'Cartman'}],
-        name: 'Eric Cartman'
-      });
-    });
-  });
-
   describe('updateConversationTopic', function() {
     beforeEach(function() {
       sessionMock.user = $q.when({user: user});
