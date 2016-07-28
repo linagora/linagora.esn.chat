@@ -313,11 +313,12 @@ describe('The chat API', function() {
       var channel;
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.COMMUNITY,
-        members: [userId]
+        members: [userId],
+        community: new mongoose.Types.ObjectId()
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/community?id=' + channel._id)
+          .get('/api/community?id=' + channel.community)
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -352,6 +353,12 @@ describe('The chat API', function() {
           .get('/api/community?id=' + channel._id)
           .expect(404, done);
       }).catch(done);
+    });
+
+    it('should 404 if the community does not exist', function() {
+      request(app.express)
+        .get('/api/community?id=idonotexist')
+        .expect(404);
     });
 
     it('not return community conversations with more than given participants parameters', function(done) {
