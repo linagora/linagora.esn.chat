@@ -100,6 +100,10 @@ angular.module('linagora.esn.chat')
       return conversationsPromise;
     }
 
+    function getConversationByCommunityId(communityId) {
+      return ChatRestangular.one('community').get({id: communityId});
+    }
+
     return {
       computeGroupName: computeGroupName,
       getConversations: getConversations,
@@ -109,6 +113,7 @@ angular.module('linagora.esn.chat')
       addPrivateConversation: addPrivateConversation,
       addChannels: addChannels,
       updateConversationTopic: updateConversationTopic,
-      setTopicChannel: setTopicChannel
+      setTopicChannel: setTopicChannel,
+      getConversationByCommunityId: getConversationByCommunityId
     };
   });
