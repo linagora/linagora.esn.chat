@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('chatLocalState service', function() {
-  var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
+  var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q, $httpBackend;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat')
@@ -58,13 +58,15 @@ describe('chatLocalState service', function() {
 
   });
 
-  beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CONVERSATION_TYPE_, _CHAT_DEFAULT_CHANNEL_, _$rootScope_, _CHAT_EVENTS_, _$q_) {
+  beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CONVERSATION_TYPE_, _CHAT_DEFAULT_CHANNEL_, _$rootScope_, _CHAT_EVENTS_, _$q_, _$httpBackend_) {
     chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     CHAT_DEFAULT_CHANNEL = _CHAT_DEFAULT_CHANNEL_;
     $rootScope = _$rootScope_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $q = _$q_;
+    $httpBackend = _$httpBackend_;
+    $rootScope = _$rootScope_;
   }));
 
   beforeEach(function() {
@@ -80,6 +82,7 @@ describe('chatLocalState service', function() {
     it('should set activeRoom the channel and broadcast it on $rootScope', function() {
       $rootScope.$broadcast = sinon.spy();
       var isSet = chatLocalStateService.setActive(channels[0]._id);
+
       expect(chatLocalStateService.activeRoom).to.be.deep.equal(channels[0]);
       expect(isSet).to.be.equal(true);
       expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channels[0]);
@@ -88,6 +91,7 @@ describe('chatLocalState service', function() {
     it('should set activeRoom the group channel and broadcast it on $rootScope', function() {
       $rootScope.$broadcast = sinon.spy();
       var isSet = chatLocalStateService.setActive(groups[1]._id);
+
       expect(chatLocalStateService.activeRoom).to.be.deep.equal(groups[1]);
       expect(isSet).to.be.equal(true);
       expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, groups[1]);
@@ -96,6 +100,7 @@ describe('chatLocalState service', function() {
     it('should not set activeRoom a channel who don\'t exist', function() {
       $rootScope.$broadcast = sinon.spy();
       var isSet = chatLocalStateService.setActive('channel3');
+
       expect(chatLocalStateService.activeRoom).to.not.be.deep.equal({_id: 'channel3'});
       expect(isSet).to.be.equal(false);
     });
@@ -200,6 +205,33 @@ describe('chatLocalState service', function() {
       chatLocalStateService.setActive(channels[0]._id);
       var isActive = chatLocalStateService.isActiveRoom(channels[1]._id);
       expect(isActive).to.be.equal(false);
+    });
+  });
+
+  describe('websocketListener', function() {
+
+    var callback;
+
+    function initCache() {
+      chatLocalStateService.initLocalState();
+    }
+
+    beforeEach(function() {
+      initCache();
+
+      expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.NEW_CONVERSATION, sinon.match.func.and(function(_callback_) {
+        callback = _callback_;
+        return true;
+      }));
+    });
+
+    it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CONVERSATION and add regular channel in channel cache', function() {
+      var id =  'justAdded';
+      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.CHANNEL};
+      callback(data);
+      expect(chatLocalStateService.channels[chatLocalStateService.channels.length - 1]).to.deep.equals(data);
+
+      expect(chatLocalStateService.conversations[chatLocalStateService.conversations.length - 1]).to.deep.equals(data);
     });
   });
 });
