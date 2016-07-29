@@ -15,6 +15,29 @@ angular.module('linagora.esn.chat')
 
       var sio = livenotification(CHAT_NAMESPACE);
       sio.on(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
+
+      $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
+        addConversation(data);
+      });
+
+      $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
+        var conversation = findConversation(message.channel);
+
+        conversation.last_message = {
+          text: message.text,
+          date: message.timestamps.creation
+        };
+        conversation.last_message.date = message.timestamps.creation;
+        replaceConversationInSortedArray(service.conversations, conversation);
+
+        if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+          replaceConversationInSortedArray(service.channels, conversation);
+        } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+          replaceConversationInSortedArray(service.privateConversations, conversation);
+        } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
+          replaceConversationInSortedArray(service.communityConversations, conversation);
+        }
+      });
     }
 
     function findConversation(channelId) {
@@ -58,7 +81,7 @@ angular.module('linagora.esn.chat')
         if (!conversation.last_message || !conversation.last_message.date) {
           return -(new Date());
         }
-        return -conversation.last_message.date;
+        return -(new Date(conversation.last_message.date));
       });
 
       array.splice(index, 0, conversation);
@@ -78,9 +101,10 @@ angular.module('linagora.esn.chat')
       }
     }
 
-    $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
-      addConversation(data);
-    });
+    function replaceConversationInSortedArray(array, conv) {
+      _.remove(array, {_id: conv._id});
+      insertConversationInSortedArray(array, conv);
+    }
 
     service = {
       setActive: setActive,
