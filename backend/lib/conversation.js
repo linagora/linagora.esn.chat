@@ -86,6 +86,9 @@ module.exports = function(dependencies) {
     async.waterfall([
         function(callback) {
           var channel = new Conversation(options);
+          channel.last_message = {
+            date: channel.timestamps && channel.timestamps.creation || new Date()
+          };
           channel.save(callback);
         },
         function(channel, _num, callback) {
