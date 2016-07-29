@@ -53,16 +53,27 @@ angular.module('linagora.esn.chat')
       }
     }
 
+    function insertConversationInSortedArray(array, conversation) {
+      var index = _.sortedIndex(array, conversation, function(conversation) {
+        if (!conversation.last_message || !conversation.last_message.date) {
+          return -(new Date());
+        }
+        return -conversation.last_message.date;
+      });
+
+      array.splice(index, 0, conversation);
+    }
+
     function addConversation(conversation) {
       if (!findConversation(conversation._id)) {
-        service.conversations.push(conversation);
+        insertConversationInSortedArray(service.conversations, conversation);
 
         if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
-          service.channels.push(conversation);
+          insertConversationInSortedArray(service.channels, conversation);
         } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
-          service.privateConversations.push(conversation);
+          insertConversationInSortedArray(service.privateConversations, conversation);
         } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
-          service.communityConversations.push(conversation);
+          insertConversationInSortedArray(service.communityConversations, conversation);
         }
       }
     }

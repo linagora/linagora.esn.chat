@@ -172,24 +172,37 @@ describe('chatLocalState service', function() {
     });
 
     it('should add a private conversation', function() {
-      var group = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE};
-      chatLocalStateService.addConversation(group);
-      expect(chatLocalStateService.privateConversations).to.include(group);
-      expect(chatLocalStateService.conversations).to.include(group);
+      var privateConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE};
+      chatLocalStateService.addConversation(privateConversation);
+      expect(chatLocalStateService.privateConversations).to.include(privateConversation);
+      expect(chatLocalStateService.conversations).to.include(privateConversation);
     });
 
     it('should add a community', function() {
-      var group = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.COMMUNITY};
-      chatLocalStateService.addConversation(group);
-      expect(chatLocalStateService.communityConversations).to.include(group);
-      expect(chatLocalStateService.conversations).to.include(group);
+      var communityConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.COMMUNITY};
+      chatLocalStateService.addConversation(communityConversation);
+      expect(chatLocalStateService.communityConversations).to.include(communityConversation);
+      expect(chatLocalStateService.conversations).to.include(communityConversation);
     });
 
-    it('should do nothing if group existed', function() {
-      var group = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE};
+    it('should do nothing if conversation existed', function() {
+      var conversation = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE};
       var oldGroups = groups.slice(0);
-      chatLocalStateService.addConversation(group);
+      chatLocalStateService.addConversation(conversation);
       expect(groups).to.be.deep.equal(oldGroups);
+    });
+
+    it('should insert in the correct order', function() {
+      chatLocalStateService.conversations = [];
+      var conv1 = {_id: '1', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 9e9}};
+
+      var conv2 = {_id: '2', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 6e9}};
+
+      var conv3 = {_id: '3', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 3e9}};
+
+      [conv1, conv2, conv3].forEach(chatLocalStateService.addConversation);
+
+      expect(chatLocalStateService.conversations).to.deep.equals([conv3, conv2, conv1]);
     });
   });
 
@@ -227,11 +240,10 @@ describe('chatLocalState service', function() {
 
     it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CONVERSATION and add regular channel in channel cache', function() {
       var id =  'justAdded';
-      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.CHANNEL};
+      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.CHANNEL, last_message: {date: new Date() + 10e9}};
       callback(data);
-      expect(chatLocalStateService.channels[chatLocalStateService.channels.length - 1]).to.deep.equals(data);
-
-      expect(chatLocalStateService.conversations[chatLocalStateService.conversations.length - 1]).to.deep.equals(data);
+      expect(chatLocalStateService.channels[0]).to.equals(data);
+      expect(chatLocalStateService.conversations[0]).to.deep.equals(data);
     });
   });
 });
