@@ -2,7 +2,7 @@
 
 angular.module('linagora.esn.chat')
 
-  .factory('chatLocalStateService', function($rootScope, $q, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
+  .factory('chatLocalStateService', function($rootScope, $q, $log, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
     var service;
 
     function initLocalState() {
@@ -10,6 +10,8 @@ angular.module('linagora.esn.chat')
         conversations.forEach(function(conversation) {
           addConversation(conversation);
         });
+      }, function(err) {
+        $log.error('Error while getting conversations', err);
       });
       service.activeRoom = {};
 

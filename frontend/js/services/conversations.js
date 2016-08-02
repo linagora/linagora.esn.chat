@@ -1,8 +1,13 @@
 'use strict';
 
 angular.module('linagora.esn.chat')
-  .factory('conversationsService', function($rootScope, $q, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
-    var conversationsPromise = fetchAllConversation();
+  .factory('conversationsService', function($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
+
+    var defer = $q.defer();
+    var conversationsPromise = defer.promise;
+    session.ready.then(function() {
+      fetchAllConversation();
+    });
 
     function fetchAllConversation() {
       return $q.all({
@@ -14,7 +19,10 @@ angular.module('linagora.esn.chat')
           privateConversation.name = computeGroupName(resolved.session.user._id, privateConversation);
         });
 
-        return conversations;
+        defer.resolve(conversations);
+      }, function(err) {
+        $log.error('Can not fetch the user conversations', err);
+        defer.reject(err);
       });
     }
 
