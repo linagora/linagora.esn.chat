@@ -5,7 +5,7 @@ angular.module('linagora.esn.chat')
   $stateProvider
     .state('chat', {
       url: '/chat',
-      templateUrl: '/chat/views/index',
+      templateUrl: '/chat/views/index.html',
       controller: 'chatRootController',
       resolve: {
         domain: routeResolver.session('domain'),
