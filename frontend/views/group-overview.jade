@@ -8,7 +8,7 @@
         span {{::item.name}}
     .row
       .col-xs-12.group-text.ellipsis
-        span {{::item.last_message.text}}
+        span {{item.last_message.text}}
 
   .col-xs-2.group-date
-    span {{::item.last_message.date | amDateFormat:'HH:mm'}}
+    span {{item.last_message.date | amDateFormat:'HH:mm'}}

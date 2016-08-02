@@ -539,18 +539,21 @@ describe('The chat API', function() {
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.COMMUNITY,
-        members: [userId, otherMember1, otherMember2]
+        members: [userId, otherMember1, otherMember2],
+        timestamps: {creation: new Date(2e6)}
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.PRIVATE,
-          members: [userId, otherMember1, otherMember2]
+          members: [userId, otherMember1, otherMember2],
+          timestamps: {creation: new Date(1e6)}
         });
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.PRIVATE,
-          members: [otherMember1, otherMember2]
+          members: [otherMember1, otherMember2],
+          timestamps: {creation: new Date(0)}
         });
       }).then(function(mongoResponse) {
         request(app.express)
@@ -656,18 +659,21 @@ describe('The chat API', function() {
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.CHANNEL,
-        members: [userId, otherMember1, otherMember2]
+        members: [userId, otherMember1, otherMember2],
+        timestamps: {creation: new Date(1e6)}
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.PRIVATE,
-          members: [userId, otherMember1, otherMember2]
+          members: [userId, otherMember1, otherMember2],
+          timestamps: {creation: new Date(2e6)}
         });
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.COMMUNITY,
-          members: [userId, otherMember1, otherMember2]
+          members: [userId, otherMember1, otherMember2],
+          timestamps: {creation: new Date(3e6)}
         });
       }).then(function(mongoResponse) {
         request(app.express)
@@ -677,7 +683,7 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
-            expect(res.body).to.deep.equal(jsonnify([channel1, channel2]));
+            expect(res.body).to.deep.equal(jsonnify([channel2, channel1]));
             done();
           });
       }).catch(done);
