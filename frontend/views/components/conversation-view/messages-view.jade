@@ -1,0 +1,35 @@
+.block-header.visible-md
+  h2 \#{{::chatLocalStateService.activeRoom.name}}
+  ul.actions
+    li
+      a(href='')
+        i.mdi.mdi-account-multiple-plus
+    li
+      a(href='')
+        i.mdi.mdi-message-outline
+    li
+      a(href='')
+        i.mdi.mdi-dots-vertical
+.card.m-b-0
+  .ms-body
+    .listview.lv-message
+      .lv-header.message-header
+        .lvh-label
+          a(href='') {{(chatLocalStateService.activeRoom.members || []).length}} #{__('members')}
+          span.divider |
+          span(ng-if="!chatLocalStateService.activeRoom.topic.value" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
+            a(href="#" )
+              | Add a topic
+              i.mdi.mdi-plus
+          span(ng-if="chatLocalStateService.activeRoom.topic.value" ng-bind-html="chatLocalStateService.activeRoom.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
+            a(href="#")
+              | Edit
+              i.mdi.mdi-pencil
+        ul.lv-actions.actions
+          li
+            a(href='')
+              i.mdi.mdi-information-outline
+      .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true")
+        div(ng-repeat="message in messages track by message._uniqId")
+          chat-message-separator(prev-message="$first ? null : messages[$index - 1]", current-message="message")
+          chat-message(message="message")
