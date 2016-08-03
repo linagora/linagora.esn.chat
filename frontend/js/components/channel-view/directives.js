@@ -61,6 +61,13 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('chatMessagesView', function() {
+    return {
+      restrict: 'E',
+      templateUrl: '/chat/views/components/conversation-view/messages-view.html'
+    };
+  })
+
   .directive('chatConversationView', function() {
     return {
       restrict: 'E',
