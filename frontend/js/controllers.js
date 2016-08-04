@@ -29,10 +29,16 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatConversationItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatUserState, session) {
+  .controller('chatConversationItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatUserState, session, moment) {
     $scope.channelState = $scope.channelState || 'chat.channels-views';
     $scope.allUsersConnected = true;
     var userToConnected = {};
+    if ($scope.item.last_message) {
+      var d1 = moment().startOf('day');
+      var d2 = moment($scope.item.last_message.date);
+      var numberDay = moment.duration(d1.diff(d2)).asDays() + 1;
+      $scope.numberOfDays = parseInt(numberDay);
+    }
 
     function computeIsConnected() {
       $scope.allUsersConnected = _(userToConnected).values().every();

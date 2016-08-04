@@ -11,4 +11,6 @@
         span {{item.last_message.text}}
 
   .col-xs-2.group-date
-    span {{item.last_message.date | amDateFormat:'HH:mm'}}
+    span(ng-if="numberOfDays === 0") {{item.last_message.date | amDateFormat:"HH:mm"}}
+    span(ng-if="numberOfDays === 1") #{__('Yesterday')} {{item.last_message.date | amDateFormat:"HH:mm"}}
+    span(ng-if="numberOfDays > 1") {{item.last_message.date | amDateFormat:"DD MMM YYYY HH:mm"}}
