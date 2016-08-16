@@ -233,6 +233,33 @@ describe('The chat API', function() {
     });
   });
 
+  describe('POST /api/conversations/:id/readed', function() {
+    it('should mark all message of the conversation readed', function(done) {
+      var channelId;
+      var numOfMessage = 42;
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.CHANNEL,
+        numOfMessage: numOfMessage
+      }).then(function(mongoResponse) {
+        channelId = mongoResponse._id;
+        return Q.denodeify(function(callback) {
+          request(app.express)
+            .post('/api/conversations/' + channelId + '/readed')
+            .expect(204)
+            .end(callback);
+        })();
+      }).then(function(res) {
+        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+      }).then(function(channel) {
+        var wanted = {};
+        wanted[String(userId)] = numOfMessage;
+        expect(channel.numOfReadedMessage).to.deep.equal(wanted);
+        done();
+      }).catch(done);
+    });
+  });
+
   describe('PUT /api/conversations/:id/members', function() {
     it('should add the user in members of the conversation', function(done) {
       var channelId;

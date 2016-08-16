@@ -58,6 +58,13 @@ describe('The linagora.esn.chat conversation lib', function() {
         findByIdAndRemove: sinon.spy(function(channel, cb) {
           cb();
         }),
+        findByIdAndUpdate: sinon.spy(function(id, action, cb) {
+          cb && cb(null, mq);
+          return mq;
+        }),
+        update: sinon.spy(function(query, action, cb) {
+          cb && cb(null, mq);
+        })
       }
     };
 
@@ -337,10 +344,32 @@ describe('The linagora.esn.chat conversation lib', function() {
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      modelsMock.ChatConversation.update = function(query, options, cb) {
-        expect(query).to.deep.equals({_id: channelId});
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+        expect(id).to.equals(channelId);
         expect(ObjectIdMock).to.have.been.calledWith(userId);
         expect(options).to.deep.equals({$addToSet: {members: anObjectId}});
+        cb(null, {numOfMessage: 42});
+      };
+
+      require('../../../backend/lib/conversation')(dependencies).addMemberToConversation(channelId, userId, done);
+    });
+
+    it('should set the number of readed message of the current user correctly', function(done) {
+      var channelId = 'channelId';
+      var userId = 'userId';
+      var anObjectId = {};
+      var numOfMessage = 42;
+      ObjectIdMock = sinon.stub().returns(anObjectId);
+
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+        cb(null, {numOfMessage: numOfMessage, _id: channelId});
+      };
+
+      modelsMock.ChatConversation.update = function(query, options, cb) {
+        expect(query).to.deep.equals({_id: channelId});
+        expect(options).to.deep.equals({
+          $max: {'numOfReadedMessage.userId': numOfMessage}
+        });
         cb();
       };
 
@@ -358,7 +387,12 @@ describe('The linagora.esn.chat conversation lib', function() {
       modelsMock.ChatConversation.update = function(query, options, cb) {
         expect(query).to.deep.equals({_id: channelId});
         expect(ObjectIdMock).to.have.been.calledWith(userId);
-        expect(options).to.deep.equals({$pull: {members: anObjectId}});
+        expect(options).to.deep.equals({
+          $pull: {members: anObjectId},
+          $unset: {
+            'numOfReadedMessage.userId': ''
+          }
+        });
         cb();
       };
 
@@ -384,7 +418,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         cb(null, message);
       });
 
-      modelsMock.ChatConversation.update = function(query, options, cb) {
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
         cb(null, message);
       };
 
@@ -419,9 +453,10 @@ describe('The linagora.esn.chat conversation lib', function() {
       require('../../../backend/lib/conversation')(dependencies).createMessage(message);
     });
 
-    it('should add the last message in the channel document', function(done) {
+    it('should add the last message in the channel document and inc num of message and readed num of message for the author', function(done) {
       var channelId = 'channelId';
-      var message = {id: 1, channel: channelId, text: '', timestamps: {creation: '0405'}};
+      var conversation = {_id: channelId, numOfMessage: 42};
+      var message = {id: 1, creator: 'userId', channel: channelId, text: '', timestamps: {creation: '0405'}};
 
       modelsMock.ChatMessage = function(msg) {
         expect(msg).to.be.deep.equal(message);
@@ -437,9 +472,20 @@ describe('The linagora.esn.chat conversation lib', function() {
       };
 
       modelsMock.ChatConversation.update = function(query, options, cb) {
-        expect(query).to.deep.equals({_id: channelId});
-        expect(options).to.deep.equals({$set: {last_message: {text: message.text, date: message.timestamps.creation}}});
-        cb(null, message);
+        expect(query).to.deep.equal({_id: channelId});
+        expect(options).to.deep.equal({
+          $max: {'numOfReadedMessage.userId': conversation.numOfMessage}
+        });
+        cb(null, conversation);
+      };
+
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+        expect(id).to.deep.equals(channelId);
+        expect(options).to.deep.equals({
+          $set: {last_message: {text: message.text, date: message.timestamps.creation}},
+          $inc: {numOfMessage: 1}
+        });
+        cb(null, conversation);
       };
 
       require('../../../backend/lib/conversation')(dependencies).createMessage(message, function() {
@@ -523,6 +569,31 @@ describe('The linagora.esn.chat conversation lib', function() {
       };
 
       require('../../../backend/lib/conversation')(dependencies).updateTopic(channelId, topic, done);
+    });
+  });
+
+  describe('The markAllMessageOfAConversationReaded function', function() {
+    it('should set correctly the number of readed message by an user', function(done) {
+      var channelId = 'channelId';
+      var userId = 'userId';
+      var numOfMessage = 42;
+
+      modelsMock.ChatConversation.findOne = function(query, callback) {
+        expect(query).to.deep.equals({_id: channelId});
+        callback(null, {_id: channelId, numOfMessage: numOfMessage});
+      };
+
+      modelsMock.ChatConversation.update = function(query, options, callback) {
+        expect(query).to.deep.equals({_id: channelId});
+        expect(options).to.deep.equals({
+          $max: {
+            'numOfReadedMessage.userId': 42
+          }
+        });
+        callback();
+      };
+
+      require('../../../backend/lib/conversation')(dependencies).makeAllMessageReadedForAnUser(userId, channelId, done);
     });
   });
 });
