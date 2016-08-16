@@ -42,20 +42,20 @@ angular.module('linagora.esn.chat')
       });
     }
 
-    function findConversation(channelId) {
-      return _.find(service.conversations, {_id: channelId});
+    function findConversation(conversationId) {
+      return _.find(service.conversations, {_id: conversationId});
     }
 
-    function isActiveRoom(channelId) {
-      return channelId === service.activeRoom._id;
+    function isActiveRoom(conversationId) {
+      return conversationId === service.activeRoom._id;
     }
 
-    function setActive(channelId) {
+    function setActive(conversationId) {
       var channel;
-      if (isActiveRoom(channelId)) {
+      if (isActiveRoom(conversationId)) {
         return true;
       }
-      channel = findConversation(channelId);
+      channel = findConversation(conversationId);
       if (!channel) {
         return false;
       }
@@ -69,11 +69,11 @@ angular.module('linagora.esn.chat')
     }
 
     function unreadMessage(message) {
-      var channel = findConversation(message.channel);
-      if (channel && !isActiveRoom(channel._id)) {
-        channel.unreadMessageCount = (channel.unreadMessageCount || 0) + 1;
+      var conversation = findConversation(message.channel);
+      if (conversation && !isActiveRoom(conversation._id)) {
+        conversation.unreadMessageCount = (conversation.unreadMessageCount || 0) + 1;
         if (chatParseMention.userIsMentioned(message.text, session.user)) {
-          channel.mentionCount = (channel.mentionCount || 0) + 1;
+          conversation.mentionCount = (conversation.mentionCount || 0) + 1;
         }
       }
     }
