@@ -95,6 +95,10 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function markAllMessageReaded(conversationId) {
+      return ChatRestangular.one('conversations', conversationId).one('readed').doPOST();
+    }
+
     function setTopicChannel(topic) {
       return getConversation(topic.channel).then(function(channel) {
         channel.topic = topic.topic;
@@ -122,6 +126,7 @@ angular.module('linagora.esn.chat')
       addChannels: addChannels,
       updateConversationTopic: updateConversationTopic,
       setTopicChannel: setTopicChannel,
+      markAllMessageReaded: markAllMessageReaded,
       getConversationByCommunityId: getConversationByCommunityId
     };
   });

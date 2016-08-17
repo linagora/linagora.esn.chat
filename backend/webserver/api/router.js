@@ -74,5 +74,9 @@ module.exports = function(dependencies, lib) {
     authorizationMW.requiresAPILogin,
     controller.updateTopic);
 
+  router.post('/conversations/:id/readed',
+      authorizationMW.requiresAPILogin,
+      controller.markAllMessageOfAConversationReaded);
+
   return router;
 };

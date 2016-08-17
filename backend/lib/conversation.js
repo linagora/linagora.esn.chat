@@ -89,6 +89,8 @@ module.exports = function(dependencies) {
           channel.last_message = {
             date: channel.timestamps && channel.timestamps.creation || new Date()
           };
+          channel.numOfMessage = channel.numOfMessage || 0;
+          channel.numOfReadedMessage = channel.numOfReadedMessage || {};
           channel.save(callback);
         },
         function(channel, _num, callback) {
@@ -107,6 +109,24 @@ module.exports = function(dependencies) {
     });
   }
 
+  function makeAllMessageReadedForAnUserHelper(userId, conversation, callback) {
+    var updateMaxOperation = {};
+    updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;
+    Conversation.update({_id: conversation._id}, {
+      $max: updateMaxOperation
+    }, callback);
+  }
+
+  function makeAllMessageReadedForAnUser(userId, conversationId, callback) {
+    Conversation.findOne({_id: conversationId}, function(err, conversation) {
+      if (err) {
+        return callback(err);
+      }
+
+      makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
+    });
+  }
+
   function createMessage(message, callback) {
     parseMention(message);
     var chatMessage = new ChatMessage(message);
@@ -115,14 +135,26 @@ module.exports = function(dependencies) {
           chatMessage.save(callback);
         },
         function(message, _num, callback) {
-          Conversation.update({_id: message.channel}, {$set: {last_message: {
-            text: message.text,
-            date: message.timestamps.creation
-          }}}, function(err) {
+          Conversation.findByIdAndUpdate(message.channel, {
+            $set: {
+              last_message: {
+                text: message.text,
+                date: message.timestamps.creation
+              }
+            },
+            $inc: {
+              numOfMessage: 1
+            }
+          }, function(err, conversation) {
             if (err) {
               logger.error('Can not update channel with last_update', err);
             }
-            callback(null, message);
+            callback(null, message, conversation);
+          });
+        },
+        function(message, conversation, callback) {
+          makeAllMessageReadedForAnUserHelper(message.creator, conversation, function(err) {
+            callback(err, message);
           });
         },
         function(message, callback) {
@@ -135,14 +167,24 @@ module.exports = function(dependencies) {
   }
 
   function addMemberToConversation(channelId, userId, callback) {
-    Conversation.update({_id: channelId}, {
-      $addToSet: {members: userId.constructor === ObjectId ? userId : new ObjectId(userId)}
-    }, callback);
+    var userObjectId = userId.constructor === ObjectId ? userId : new ObjectId(userId);
+    Conversation.findByIdAndUpdate(channelId, {
+      $addToSet: {members: userObjectId}
+    }, function(err, conversation) {
+      if (err) {
+        return callback(err);
+      }
+
+      makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
+    });
   }
 
   function removeMemberFromConversation(channelId, userId, callback) {
+    var unsetOperation = {};
+    unsetOperation['numOfReadedMessage.' + userId] = '';
     Conversation.update({_id: channelId}, {
-      $pull: {members: new ObjectId(userId)}
+      $pull: {members: new ObjectId(userId)},
+      $unset: unsetOperation
     }, callback);
   }
 
@@ -214,6 +256,7 @@ module.exports = function(dependencies) {
     getChannels: getChannels,
     deleteConversation: deleteConversation,
     updateTopic: updateTopic,
+    makeAllMessageReadedForAnUser: makeAllMessageReadedForAnUser,
     countMessages: countMessages
   };
 };

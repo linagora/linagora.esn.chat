@@ -57,8 +57,8 @@ angular.module('linagora.esn.chat')
     $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
       if (message.channel === $scope.chatLocalStateService.activeRoom._id) {
         $scope.newMessage(message);
-      } else {
-        chatLocalStateService.unreadMessage(message);
       }
     });
+
+    $scope.$on('$destroy', chatLocalStateService.unsetActive);
   });

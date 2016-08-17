@@ -40,7 +40,9 @@ module.exports = function(dependencies) {
       text: {type: String},
       date: {type: Date}
     },
-    schemaVersion: {type: Number, default: 1}
+    schemaVersion: {type: Number, default: 1},
+    numOfReadedMessage: mongoose.Schema.Types.Mixed, // this will be a map that associate a num of unread message to a userId (ie: { 'userId1': 0, 'userId2': 2, 'userId3': 3})
+    numOfMessage: {type: Number, default: 0}
   });
 
   function cleanConversation(original, object) {

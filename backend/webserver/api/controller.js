@@ -151,6 +151,22 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function markAllMessageOfAConversationReaded(req, res) {
+    lib.conversation.makeAllMessageReadedForAnUser(req.user._id, req.params.id, function(err) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while marking all messages of channel readed'
+          }
+        });
+      }
+
+      res.status(204).end();
+    });
+  }
+
   function joinConversation(req, res) {
     lib.conversation.addMemberToConversation(req.params.id, req.user._id, function(err) {
       if (err) {
@@ -366,6 +382,7 @@ module.exports = function(dependencies, lib) {
     getMessages: getMessages,
     getChannels: getChannels,
     getConversation: getConversation,
+    markAllMessageOfAConversationReaded: markAllMessageOfAConversationReaded,
     findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
     findCommunity: findCommunity,
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
