@@ -116,8 +116,22 @@ angular.module('linagora.esn.chat')
       return ChatRestangular.one('community').get({id: communityId});
     }
 
+    function deleteConversation(conversationId) {
+      return ChatRestangular.one('conversations', conversationId).doDELETE().then(function() {
+        return conversationsPromise.then(function(conversations) {
+          for (var i = 0, len = conversations.length; i < len; i++) {
+            if (conversations[i]._id === conversationId) {
+              conversations.splice(i, 1);
+              return;
+            }
+          }
+        });
+      });
+    }
+
     return {
       computeGroupName: computeGroupName,
+      deleteConversation: deleteConversation,
       getConversations: getConversations,
       getChannels: getChannels,
       getConversation: getConversation,

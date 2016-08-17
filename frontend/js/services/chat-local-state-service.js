@@ -115,6 +115,22 @@ angular.module('linagora.esn.chat')
       }
     }
 
+    function deleteConversation(conversation) {
+      return conversationsService.deleteConversation(conversation._id).then(function() {
+        var array = [];
+        if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+          array = service.channels;
+        } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+          array = service.privateConversations;
+        } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
+          array = service.communityConversations;
+        }
+
+        _.remove(array, {_id: conversation._id});
+        _.remove(service.conversations, {_id: conversation._id});
+      });
+    }
+
     function replaceConversationInSortedArray(array, conv) {
       _.remove(array, {_id: conv._id});
       insertConversationInSortedArray(array, conv);
@@ -131,6 +147,7 @@ angular.module('linagora.esn.chat')
       findConversation: findConversation,
       isActiveRoom: isActiveRoom,
       addConversation: addConversation,
+      deleteConversation: deleteConversation,
       channels: [],
       privateConversations: [],
       communityConversations: [],

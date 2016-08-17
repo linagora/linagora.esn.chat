@@ -78,7 +78,6 @@ describe('The linagora.esn.chat conversationsServices', function() {
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
-
   }));
 
   describe('computeGroupName', function() {
@@ -98,6 +97,22 @@ describe('The linagora.esn.chat conversationsServices', function() {
       expect(conversationsService.computeGroupName('userId', {
         members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
       })).to.equal('Eric Cartman, Stan Marsh, Kenny McCormick');
+    });
+  });
+
+  describe('the deleteConversation', function() {
+    it('should perform the correct rest request and delete conversation from cache', function() {
+      var thenSpyForDelete = sinon.spy();
+      var thenSpyForGet = sinon.spy();
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
+      $httpBackend.flush();
+      $httpBackend.expectDELETE('/chat/api/chat/conversations/channel1').respond(204, null);
+      conversationsService.deleteConversation('channel1').then(thenSpyForDelete);
+      $httpBackend.flush();
+      conversationsService.getChannels().then(thenSpyForGet);
+      $rootScope.$digest();
+      expect(thenSpyForDelete).to.have.been.calledOnce;
+      expect(thenSpyForGet).to.have.been.calledWith(sinon.match({length:1, 0: {_id: 'channel2'}}));
     });
   });
 
@@ -177,7 +192,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       }));
     });
 
-    it('should not fetch data from the rest API when data has been cached from the first retieve', function() {
+    it('should not fetch data from the rest API when data has been cached from the first retrieve', function() {
       var conversations = [{
         _id: 1,
         type: CHAT_CONVERSATION_TYPE.CHANNEL

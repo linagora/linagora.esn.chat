@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('chatLocalState service', function() {
+describe.only('chatLocalState service', function() {
   var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q, $httpBackend;
 
   beforeEach(
@@ -43,9 +43,12 @@ describe('chatLocalState service', function() {
 
       conversationsServiceMock = {
         getConversations: function() {
-          return $q.when(conversations);
+          return $q.when(conversations.slice(0));
         },
-        markAllMessageReaded: sinon.spy()
+        markAllMessageReaded: sinon.spy(),
+        deleteConversation: sinon.spy(function() {
+          return $q.when(null);
+        })
       };
 
       return conversationsServiceMock;
@@ -73,9 +76,10 @@ describe('chatLocalState service', function() {
   beforeEach(function() {
     chatLocalStateService.initLocalState();
     $rootScope.$digest();
-    chatLocalStateService.conversations = conversations;
-    chatLocalStateService.channels = channels;
-    chatLocalStateService.communityConversations = communitys;
+    chatLocalStateService.conversations = conversations.slice(0);
+    chatLocalStateService.channels = channels.slice(0);
+    chatLocalStateService.communityConversations = communitys.slice(0);
+    chatLocalStateService.privateConversations = groups.slice(0);
   });
 
   describe('setActive', function() {
@@ -205,6 +209,39 @@ describe('chatLocalState service', function() {
       [conv1, conv2, conv3].forEach(chatLocalStateService.addConversation);
 
       expect(chatLocalStateService.conversations).to.deep.equals([conv3, conv2, conv1]);
+    });
+  });
+
+  describe('delete conversation', function() {
+    it('should correctly delete channel', function() {
+      chatLocalStateService.deleteConversation(channels[0]);
+      $rootScope.$digest();
+      expect(chatLocalStateService.conversations).to.deep.equals(conversations.slice(1));
+      expect(chatLocalStateService.channels).to.deep.equals(channels.slice(1));
+    });
+
+    it('should correctly delete private conversation', function() {
+      chatLocalStateService.deleteConversation(groups[0]);
+      $rootScope.$digest();
+      conversations.splice(2, 1);
+      expect(chatLocalStateService.conversations).to.deep.equals(conversations);
+      expect(chatLocalStateService.privateConversations).to.deep.equals(groups.slice(1));
+    });
+
+    it('should correctly delete communityConversation conversation', function() {
+      chatLocalStateService.deleteConversation(communitys[0]);
+      $rootScope.$digest();
+      conversations.splice(4, 1);
+      expect(chatLocalStateService.conversations).to.deep.equals(conversations);
+      expect(chatLocalStateService.communityConversations).to.deep.equals(communitys.slice(1));
+    });
+
+    it('should correctly call conversationsService.deleteConversation', function() {
+      var thenSpy = sinon.spy();
+      chatLocalStateService.deleteConversation(channels[1]).then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy).to.have.been.calledOnce;
+      expect(conversationsServiceMock.deleteConversation).to.have.been.calledWith(channels[1]._id);
     });
   });
 
