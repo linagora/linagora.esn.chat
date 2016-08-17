@@ -1,4 +1,4 @@
-.row.group-item(ui-sref='{{channelState}}({id: item._id})')
+.row.group-item(ui-sref='{{channelState}}({id: item._id})', ng-class="{'chat-unread-conversation': item.unreadMessageCount > 0}")
   .col-xs-2.group-badge
     a(href='#', title='{{otherUsers[0].name}} <{{otherUsers[0].address}}>')
       img(src='images/user.png', ng-src="/api/users/{{::otherUsers[0]._id}}/profile/avatar")

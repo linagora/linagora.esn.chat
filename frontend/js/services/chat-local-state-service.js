@@ -24,6 +24,15 @@ angular.module('linagora.esn.chat')
 
       $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         var conversation = findConversation(message.channel);
+        if (!conversation) {
+          return;
+        }
+
+        unreadMessage(message);
+
+        if (isActiveRoom(conversation._id)) {
+          conversationsService.markAllMessageReaded(conversation._id);
+        }
 
         conversation.last_message = {
           text: message.text,
@@ -51,19 +60,20 @@ angular.module('linagora.esn.chat')
     }
 
     function setActive(conversationId) {
-      var channel;
+      var conversation;
       if (isActiveRoom(conversationId)) {
         return true;
       }
-      channel = findConversation(conversationId);
-      if (!channel) {
+      conversation = findConversation(conversationId);
+      if (!conversation) {
         return false;
       }
-      channel.unreadMessageCount = 0;
-      channel.mentionCount = 0;
-      service.activeRoom = channel;
+      conversation.unreadMessageCount = 0;
+      conversation.mentionCount = 0;
+      service.activeRoom = conversation;
 
-      $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channel);
+      conversationsService.markAllMessageReaded(conversation._id);
+      $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, conversation);
 
       return true;
     }
@@ -92,7 +102,9 @@ angular.module('linagora.esn.chat')
     function addConversation(conversation) {
       if (!findConversation(conversation._id)) {
         insertConversationInSortedArray(service.conversations, conversation);
-
+        session.ready.then(function(session) {
+          conversation.unreadMessageCount = (conversation.numOfMessage  || 0) - (conversation.numOfReadedMessage[session.user._id] || 0);
+        });
         if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
           insertConversationInSortedArray(service.channels, conversation);
         } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
@@ -108,9 +120,13 @@ angular.module('linagora.esn.chat')
       insertConversationInSortedArray(array, conv);
     }
 
+    function unsetActive() {
+      service.activeRoom = {};
+    }
+
     service = {
       setActive: setActive,
-      unreadMessage: unreadMessage,
+      unsetActive: unsetActive,
       initLocalState: initLocalState,
       findConversation: findConversation,
       isActiveRoom: isActiveRoom,

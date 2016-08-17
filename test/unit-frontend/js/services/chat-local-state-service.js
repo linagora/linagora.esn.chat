@@ -36,15 +36,16 @@ describe('chatLocalState service', function() {
     }
 
     function conversationsServiceFactory(CHAT_CONVERSATION_TYPE) {
-      channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
-      groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
-      communitys = [{_id: 'community1', type: CHAT_CONVERSATION_TYPE.COMMUNITY}, {_id: 'community2', type: CHAT_CONVERSATION_TYPE.COMMUNITY}];
+      channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL, numOfReadedMessage: {}}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL, numOfReadedMessage: {}}];
+      groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}}];
+      communitys = [{_id: 'community1', type: CHAT_CONVERSATION_TYPE.COMMUNITY, numOfReadedMessage: {}}, {_id: 'community2', type: CHAT_CONVERSATION_TYPE.COMMUNITY, numOfReadedMessage: {}}];
       conversations = channels.concat(groups).concat(communitys);
 
       conversationsServiceMock = {
         getConversations: function() {
           return $q.when(conversations);
-        }
+        },
+        markAllMessageReaded: sinon.spy()
       };
 
       return conversationsServiceMock;
@@ -113,37 +114,38 @@ describe('chatLocalState service', function() {
     });
   });
 
-  describe('unreadMessage', function() {
+  describe('should count unread message when receiving a message that is not on the current channel', function() {
 
     it('should upgrade messageCount of channel', function() {
-      chatLocalStateService.unreadMessage({channel: 'channel1'});
-      chatLocalStateService.unreadMessage({channel: 'channel1'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(2);
     });
 
     it('should upgrade messageCount of group', function() {
-      chatLocalStateService.unreadMessage({channel: 'group2'});
-      chatLocalStateService.unreadMessage({channel: 'group2'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', timestamps: {creation: new Date()}});
       expect(groups[1].unreadMessageCount).to.equal(2);
     });
 
     it('should not upgrade messageCount of active group or channel', function() {
       channels[0].unreadMessageCount = 1;
       chatLocalStateService.setActive('channel1');
-      chatLocalStateService.unreadMessage({channel: 'channel1'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(0);
     });
 
     it('should upgrade mentionCount of channel', function() {
-      chatLocalStateService.unreadMessage({channel: 'channel1', text: '@userId salut'});
-      chatLocalStateService.unreadMessage({channel: 'channel1'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'channel1', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(2);
       expect(channels[0].mentionCount).to.be.equal(1);
     });
 
     it('should upgrade mentionCount of group', function() {
-      chatLocalStateService.unreadMessage({channel: 'group2', text: '@userId salut'});
-      chatLocalStateService.unreadMessage({channel: 'group2'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'group2', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', timestamps: {creation: new Date()}});
+      $rootScope.$digest();
       expect(groups[1].unreadMessageCount).to.equal(2);
       expect(groups[1].mentionCount).to.be.equal(1);
     });
@@ -152,41 +154,41 @@ describe('chatLocalState service', function() {
       channels[0].unreadMessageCount = 1;
       channels[0].mentionCount = 1;
       chatLocalStateService.setActive('channel1');
-      chatLocalStateService.unreadMessage({channel: 'channel1', text: '@userId salut'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'channel1', timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(0);
       expect(channels[0].mentionCount).to.be.equal(0);
     });
 
     it('should not fail if channel does not exist', function() {
-      chatLocalStateService.unreadMessage({_id: 'channel42'});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel42', timestamps: {creation: new Date()}});
     });
   });
 
   describe('add conversation', function() {
 
     it('should add a channel', function() {
-      var channel = {_id: 'channel3', type: CHAT_CONVERSATION_TYPE.CHANNEL};
+      var channel = {_id: 'channel3', type: CHAT_CONVERSATION_TYPE.CHANNEL, numOfReadedMessage: {}};
       chatLocalStateService.addConversation(channel);
       expect(chatLocalStateService.channels).to.include(channel);
       expect(chatLocalStateService.conversations).to.include(channel);
     });
 
     it('should add a private conversation', function() {
-      var privateConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE};
+      var privateConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}};
       chatLocalStateService.addConversation(privateConversation);
       expect(chatLocalStateService.privateConversations).to.include(privateConversation);
       expect(chatLocalStateService.conversations).to.include(privateConversation);
     });
 
     it('should add a community', function() {
-      var communityConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.COMMUNITY};
+      var communityConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.COMMUNITY, numOfReadedMessage: {}};
       chatLocalStateService.addConversation(communityConversation);
       expect(chatLocalStateService.communityConversations).to.include(communityConversation);
       expect(chatLocalStateService.conversations).to.include(communityConversation);
     });
 
     it('should do nothing if conversation existed', function() {
-      var conversation = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE};
+      var conversation = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}};
       var oldGroups = groups.slice(0);
       chatLocalStateService.addConversation(conversation);
       expect(groups).to.be.deep.equal(oldGroups);
@@ -194,11 +196,11 @@ describe('chatLocalState service', function() {
 
     it('should insert in the correct order', function() {
       chatLocalStateService.conversations = [];
-      var conv1 = {_id: '1', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 9e9}};
+      var conv1 = {_id: '1', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 9e9}, numOfReadedMessage: {}};
 
-      var conv2 = {_id: '2', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 6e9}};
+      var conv2 = {_id: '2', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 6e9}, numOfReadedMessage: {}};
 
-      var conv3 = {_id: '3', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 3e9}};
+      var conv3 = {_id: '3', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 3e9}, numOfReadedMessage: {}};
 
       [conv1, conv2, conv3].forEach(chatLocalStateService.addConversation);
 
@@ -240,7 +242,7 @@ describe('chatLocalState service', function() {
 
     it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CONVERSATION and add regular channel in channel cache', function() {
       var id =  'justAdded';
-      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.CHANNEL, last_message: {date: new Date() + 10e9}};
+      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.CHANNEL, last_message: {date: new Date() + 10e9}, numOfReadedMessage: {}};
       callback(data);
       expect(chatLocalStateService.channels[0]).to.equals(data);
       expect(chatLocalStateService.conversations[0]).to.deep.equals(data);
