@@ -10,6 +10,7 @@ angular.module('linagora.esn.chat')
     NEW_CONVERSATION: 'chat:channel:creation',
     SWITCH_CURRENT_CHANNEL: 'chat:channel:switch_current_channel',
     TEXT_MESSAGE: 'chat:message:text',
+    FILE_MESSAGE: 'chat:message:file',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
     CONVERSATIONS: {
       NEW: 'chat:conversations:new'

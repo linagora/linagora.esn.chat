@@ -54,10 +54,12 @@ angular.module('linagora.esn.chat')
       conversationsService.updateConversationTopic($data, chatLocalStateService.activeRoom._id);
     };
 
-    $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-      if (message.channel === $scope.chatLocalStateService.activeRoom._id) {
-        $scope.newMessage(message);
-      }
+    [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
+      $scope.$on(eventReceived, function(event, message) {
+        if (message.channel === $scope.chatLocalStateService.activeRoom._id) {
+          $scope.newMessage(message);
+        }
+      });
     });
 
     $scope.$on('$destroy', chatLocalStateService.unsetActive);
