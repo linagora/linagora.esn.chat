@@ -6,6 +6,7 @@ var NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
 var chatNamespace;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
@@ -78,6 +79,10 @@ function init(dependencies, lib) {
 
   globalPubsub.topic(CHANNEL_CREATION).subscribe(function(data) {
     sendDataToConversation(data, CHANNEL_CREATION, data);
+  });
+
+  globalPubsub.topic(CHANNEL_DELETION).subscribe(function(data) {
+    sendDataToConversation(data, CHANNEL_DELETION, data);
   });
 
   globalPubsub.topic(TOPIC_UPDATED).subscribe(function(data) {

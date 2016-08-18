@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
@@ -11,7 +12,7 @@ var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var globalMessageReceivedTopic, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
+  var globalMessageReceivedTopic, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelDeletionTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies, lib);
@@ -36,6 +37,11 @@ describe('The Chat WS server', function() {
     };
 
     channelCreationTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelDeletionTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -84,6 +90,9 @@ describe('The Chat WS server', function() {
             }
             if (name === CHANNEL_CREATION) {
               return channelCreationTopic;
+            }
+            if (name === CHANNEL_DELETION) {
+              return channelDeletionTopic;
             }
             if (name === TOPIC_UPDATED) {
               return channelTopicUptated;
@@ -155,6 +164,22 @@ describe('The Chat WS server', function() {
     callbackOnCreationChannelPubsub(data);
 
     expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CHANNEL_CREATION, data);
+  });
+
+  it('should listen DELETION_CHANNEL pubsub and emit it only on his members if it is a group', function() {
+    initWs();
+    var callbackOnDeletionChannelPubsub;
+
+    getUserSocketsFromNamespaceResponse = [{emit: sinon.spy()}];
+    expect(channelDeletionTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+      callbackOnDeletionChannelPubsub = callback;
+      return _.isFunction(callback);
+    }));
+
+    var data = {type: 'private', members: [{_id: 'membersId'}]};
+    callbackOnDeletionChannelPubsub(data);
+
+    expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CHANNEL_DELETION, data);
   });
 
   it('should listen TOPIC_UPDATED pubsub and emit it on ws', function() {

@@ -42,7 +42,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
 
     conversationsServiceMock = {
       getChannels: function() {
-        return $q.when(channels);
+        return $q.when(channels.slice(0));
       },
       getPrivateConversations: function() {
         return $q.when(groups);
@@ -79,6 +79,22 @@ describe('The linagora.esn.chat conversationsServices', function() {
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
   }));
+
+  it('it should listen for comversation deletion and update cache correctly', function() {
+    $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
+    $rootScope.$digest();
+    $httpBackend.flush();
+    expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.CONVERSATION_DELETION, sinon.match.func.and(sinon.match(function(callback) {
+      callback('channel1');
+      var thenSpy = sinon.spy();
+
+      conversationsService.getChannels().then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy).to.have.been.calledWith(sinon.match({length: 1, 0: channels[1]}));
+
+      return true;
+    })));
+  });
 
   describe('computeGroupName', function() {
     it('should use firstname and lastname', function() {

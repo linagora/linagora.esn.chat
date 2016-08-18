@@ -9,6 +9,9 @@ angular.module('linagora.esn.chat')
       fetchAllConversation();
     });
 
+    var sio = livenotification(CHAT_NAMESPACE);
+    sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
+
     function fetchAllConversation() {
       return $q.all({
         conversations: ChatRestangular.one('me').all('conversation').getList(),
@@ -78,6 +81,12 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function leaveConversation(conversationId) {
+      return ChatRestangular.one('conversations', conversationId).one('members').doDELETE().then(function() {
+        return deleteConversationInCache(conversationId);
+      });
+    }
+
     function addPrivateConversation(privateConversation) {
       privateConversation.type = CHAT_CONVERSATION_TYPE.PRIVATE;
       privateConversation.name = computeGroupName(session.user._id, privateConversation);
@@ -116,22 +125,29 @@ angular.module('linagora.esn.chat')
       return ChatRestangular.one('community').get({id: communityId});
     }
 
+    function deleteConversationInCache(conversationId) {
+      return conversationsPromise.then(function(conversations) {
+        for (var i = 0, len = conversations.length; i < len; i++) {
+          if (conversations[i]._id === conversationId) {
+            conversations.splice(i, 1);
+            return;
+          }
+        }
+      });
+    }
+
     function deleteConversation(conversationId) {
       return ChatRestangular.one('conversations', conversationId).doDELETE().then(function() {
-        return conversationsPromise.then(function(conversations) {
-          for (var i = 0, len = conversations.length; i < len; i++) {
-            if (conversations[i]._id === conversationId) {
-              conversations.splice(i, 1);
-              return;
-            }
-          }
-        });
+        return deleteConversationInCache(conversationId);
+      }, function(err) {
+        $log.error('Could not delete conversation', err);
       });
     }
 
     return {
       computeGroupName: computeGroupName,
       deleteConversation: deleteConversation,
+      leaveConversation: leaveConversation,
       getConversations: getConversations,
       getChannels: getChannels,
       getConversation: getConversation,
