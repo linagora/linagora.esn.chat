@@ -37,9 +37,10 @@ angular.module('linagora.esn.chat')
 
         conversation.last_message = {
           text: message.text,
-          date: message.timestamps.creation
+          date: message.timestamps.creation,
+          creator: message.creator
         };
-        conversation.last_message.date = message.timestamps.creation;
+
         replaceConversationInSortedArray(service.conversations, conversation);
 
         if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {

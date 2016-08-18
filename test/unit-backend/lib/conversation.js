@@ -259,6 +259,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
+        expect(mq.populate).to.have.been.calledWith('last_message.creator');
         done();
       });
     });
@@ -281,6 +282,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
+        expect(mq.populate).to.have.been.calledWith('last_message.creator');
         done();
       });
     });
@@ -482,7 +484,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
         expect(id).to.deep.equals(channelId);
         expect(options).to.deep.equals({
-          $set: {last_message: {text: message.text, date: message.timestamps.creation}},
+          $set: {last_message: {text: message.text, creator: message.creator, date: message.timestamps.creation}},
           $inc: {numOfMessage: 1}
         });
         cb(null, conversation);

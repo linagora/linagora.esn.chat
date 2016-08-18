@@ -38,7 +38,8 @@ module.exports = function(dependencies) {
     },
     last_message: {
       text: {type: String},
-      date: {type: Date}
+      date: {type: Date},
+      creator: {type: ObjectId, ref: 'User'},
     },
     schemaVersion: {type: Number, default: 1},
     numOfReadedMessage: mongoose.Schema.Types.Mixed, // this will be a map that associate a num of unread message to a userId (ie: { 'userId1': 0, 'userId2': 2, 'userId3': 3})
