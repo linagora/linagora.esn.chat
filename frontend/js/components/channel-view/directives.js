@@ -190,7 +190,6 @@ angular.module('linagora.esn.chat')
         scope.onFileSelect = function(files) {
           $log.debug('Sending message with attachments', files);
           chatMessageService.sendMessageWithAttachments(buildCurrentMessage(), files).then(function(response) {
-            scope.newMessage(response);
             scope.text = '';
           }, function(err) {
             $log.error('Error while uploading message', err);
