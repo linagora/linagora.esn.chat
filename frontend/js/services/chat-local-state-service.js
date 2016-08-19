@@ -139,6 +139,12 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function leaveConversation(conversation) {
+      return conversationsService.leaveConversation(conversation._id).then(function() {
+        deleteConversationInCache(conversation);
+      });
+    }
+
     function replaceConversationInSortedArray(array, conv) {
       _.remove(array, {_id: conv._id});
       insertConversationInSortedArray(array, conv);
@@ -156,6 +162,7 @@ angular.module('linagora.esn.chat')
       isActiveRoom: isActiveRoom,
       addConversation: addConversation,
       deleteConversation: deleteConversation,
+      leaveConversation: leaveConversation,
       channels: [],
       privateConversations: [],
       communityConversations: [],

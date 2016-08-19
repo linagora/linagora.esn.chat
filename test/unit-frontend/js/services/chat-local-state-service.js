@@ -48,6 +48,9 @@ describe('chatLocalState service', function() {
         markAllMessageReaded: sinon.spy(),
         deleteConversation: sinon.spy(function() {
           return $q.when(null);
+        }),
+        leaveConversation: sinon.spy(function() {
+          return $q.when(null);
         })
       };
 
@@ -242,6 +245,39 @@ describe('chatLocalState service', function() {
       $rootScope.$digest();
       expect(thenSpy).to.have.been.calledOnce;
       expect(conversationsServiceMock.deleteConversation).to.have.been.calledWith(channels[1]._id);
+    });
+  });
+
+  describe('leave conversation', function() {
+    it('should correctly leave channel', function() {
+      chatLocalStateService.leaveConversation(channels[0]);
+      $rootScope.$digest();
+      expect(chatLocalStateService.conversations).to.deep.equals(conversations.slice(1));
+      expect(chatLocalStateService.channels).to.deep.equals(channels.slice(1));
+    });
+
+    it('should correctly leave private conversation', function() {
+      chatLocalStateService.leaveConversation(groups[0]);
+      $rootScope.$digest();
+      conversations.splice(2, 1);
+      expect(chatLocalStateService.conversations).to.deep.equals(conversations);
+      expect(chatLocalStateService.privateConversations).to.deep.equals(groups.slice(1));
+    });
+
+    it('should correctly leave communityConversation conversation', function() {
+      chatLocalStateService.leaveConversation(communitys[0]);
+      $rootScope.$digest();
+      conversations.splice(4, 1);
+      expect(chatLocalStateService.conversations).to.deep.equals(conversations);
+      expect(chatLocalStateService.communityConversations).to.deep.equals(communitys.slice(1));
+    });
+
+    it('should correctly call conversationsService.leaveConversation', function() {
+      var thenSpy = sinon.spy();
+      chatLocalStateService.leaveConversation(channels[1]).then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy).to.have.been.calledOnce;
+      expect(conversationsServiceMock.leaveConversation).to.have.been.calledWith(channels[1]._id);
     });
   });
 

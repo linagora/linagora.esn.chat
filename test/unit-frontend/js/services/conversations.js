@@ -132,6 +132,22 @@ describe('The linagora.esn.chat conversationsServices', function() {
     });
   });
 
+  describe('the leaveConversation', function() {
+    it('should perform the correct rest request and delete conversation from cache', function() {
+      var thenSpyForDelete = sinon.spy();
+      var thenSpyForGet = sinon.spy();
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
+      $httpBackend.flush();
+      $httpBackend.expectDELETE('/chat/api/chat/conversations/channel1/members').respond(204, null);
+      conversationsService.leaveConversation('channel1').then(thenSpyForDelete);
+      $httpBackend.flush();
+      conversationsService.getChannels().then(thenSpyForGet);
+      $rootScope.$digest();
+      expect(thenSpyForDelete).to.have.been.calledOnce;
+      expect(thenSpyForGet).to.have.been.calledWith(sinon.match({length:1, 0: {_id: 'channel2'}}));
+    });
+  });
+
   describe('getConversation', function() {
     it('should fetch data from the rest API if not in cached data', function() {
       var channel = {_id: 'channelId'};

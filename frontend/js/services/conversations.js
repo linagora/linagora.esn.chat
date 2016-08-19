@@ -84,6 +84,8 @@ angular.module('linagora.esn.chat')
     function leaveConversation(conversationId) {
       return ChatRestangular.one('conversations', conversationId).one('members').doDELETE().then(function() {
         return deleteConversationInCache(conversationId);
+      }, function(err) {
+        $log.error('Could not leave conversation', err);
       });
     }
 
