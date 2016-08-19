@@ -164,6 +164,27 @@ describe('chatLocalState service', function() {
     });
   });
 
+  describe('getNumberOfUnreadedMessages function', function() {
+    it('should send a function that sends the number of unreaded messages on all conversation', function() {
+      channels[0].numOfReadedMessage.numOfMessage = 2;
+      channels[0].unreadMessageCount = 1;
+      channels[1].numOfReadedMessage.numOfMessage = 2;
+      channels[1].unreadMessageCount = 1;
+      expect(chatLocalStateService.getNumberOfUnreadedMessages()).to.equal(2);
+    });
+
+    it('should send a function that sends the number of unreaded messages after activating the chat', function() {
+      channels[0].numOfReadedMessage.numOfMessage = 2;
+      channels[0].unreadMessageCount = 1;
+      channels[1].numOfReadedMessage.numOfMessage = 2;
+      channels[1].unreadMessageCount = 1;
+      expect(chatLocalStateService.getNumberOfUnreadedMessages()).to.equal(2);
+
+      chatLocalStateService.setActive('channel1');
+      expect(chatLocalStateService.getNumberOfUnreadedMessages()).to.equal(1);
+    });
+  });
+
   describe('add conversation', function() {
 
     it('should add a channel', function() {

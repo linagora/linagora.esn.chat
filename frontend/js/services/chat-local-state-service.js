@@ -88,6 +88,15 @@ angular.module('linagora.esn.chat')
       }
     }
 
+    function getNumberOfUnreadedMessages() {
+      var unreadedMessages = 0;
+      service.conversations.forEach(function(conversation) {
+        unreadedMessages = unreadedMessages + conversation.unreadMessageCount;
+      });
+
+      return unreadedMessages;
+    }
+
     function insertConversationInSortedArray(array, conversation) {
       var index = _.sortedIndex(array, conversation, function(conversation) {
         if (!conversation.last_message || !conversation.last_message.date) {
@@ -130,6 +139,7 @@ angular.module('linagora.esn.chat')
       initLocalState: initLocalState,
       findConversation: findConversation,
       isActiveRoom: isActiveRoom,
+      getNumberOfUnreadedMessages: getNumberOfUnreadedMessages,
       addConversation: addConversation,
       channels: [],
       privateConversations: [],
