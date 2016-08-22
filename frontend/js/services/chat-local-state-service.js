@@ -17,6 +17,7 @@ angular.module('linagora.esn.chat')
 
       var sio = livenotification(CHAT_NAMESPACE);
       sio.on(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
+      sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
 
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
         addConversation(data);
@@ -115,6 +116,35 @@ angular.module('linagora.esn.chat')
       }
     }
 
+    function deleteConversationInCache(conversation) {
+      var array = [];
+      if (!conversation._id) {
+        conversation = _.find(service.conversations, {_id: conversation});
+      }
+      if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+        array = service.channels;
+      } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+        array = service.privateConversations;
+      } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
+        array = service.communityConversations;
+      }
+
+      _.remove(array, {_id: conversation._id});
+      _.remove(service.conversations, {_id: conversation._id});
+    }
+
+    function deleteConversation(conversation) {
+      return conversationsService.deleteConversation(conversation._id).then(function() {
+        deleteConversationInCache(conversation);
+      });
+    }
+
+    function leaveConversation(conversation) {
+      return conversationsService.leaveConversation(conversation._id).then(function() {
+        deleteConversationInCache(conversation);
+      });
+    }
+
     function replaceConversationInSortedArray(array, conv) {
       _.remove(array, {_id: conv._id});
       insertConversationInSortedArray(array, conv);
@@ -131,6 +161,8 @@ angular.module('linagora.esn.chat')
       findConversation: findConversation,
       isActiveRoom: isActiveRoom,
       addConversation: addConversation,
+      deleteConversation: deleteConversation,
+      leaveConversation: leaveConversation,
       channels: [],
       privateConversations: [],
       communityConversations: [],

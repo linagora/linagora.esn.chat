@@ -15,6 +15,7 @@ module.exports = {
     USER_CONNECTION: 'user:connection',
     USER_DISCONNECTION: 'user:disconnection',
     CHANNEL_CREATION: 'chat:channel:creation',
+    CHANNEL_DELETION: 'chat:channel:deletion',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
     COMMUNITY_CREATED: 'communities:community:add',
     MEMBER_ADDED_IN_COMMUNITY: 'community:member:add',

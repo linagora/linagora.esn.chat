@@ -2,6 +2,7 @@
 
 var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
 var _ = require('lodash');
@@ -16,6 +17,7 @@ module.exports = function(dependencies) {
 
   var pubsubGlobal = dependencies('pubsub').global;
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  var channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   var logger = dependencies('logger');
 
@@ -43,7 +45,12 @@ module.exports = function(dependencies) {
   }
 
   function deleteConversation(channel, callback) {
-    Conversation.findByIdAndRemove(channel, callback);
+    Conversation.findByIdAndRemove(channel, function(err) {
+      if (!err) {
+        channelDeletionTopic.publish(channel);
+      }
+      callback.apply(null, arguments);
+    });
   }
 
   /**

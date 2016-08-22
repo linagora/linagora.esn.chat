@@ -8,6 +8,7 @@ angular.module('linagora.esn.chat')
     MESSAGE_RECEIVED: 'chat:message:received',
     USER_CHANGE_STATE: 'user:state',
     NEW_CONVERSATION: 'chat:channel:creation',
+    CONVERSATION_DELETION: 'chat:channel:deletion',
     SWITCH_CURRENT_CHANNEL: 'chat:channel:switch_current_channel',
     TEXT_MESSAGE: 'chat:message:text',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
