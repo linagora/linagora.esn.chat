@@ -89,6 +89,7 @@ angular.module('linagora.esn.chat')
       }
 
       function sendMessageWithAttachments(message, files) {
+        message.type = 'file';
         var uploadService = fileUploadService.get();
         var attachments = [];
 

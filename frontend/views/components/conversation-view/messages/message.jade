@@ -6,7 +6,7 @@
         div(ng-if='user._id !== message.creator._id')
           user-profile-link.displayname(user="message.creator")
           small.date {{::message.timestamps.creation | amDateFormat:'h:mm A'}}
-      .chat-message-text(ng-bind-html="parsed.text", ng-class='(user._id === message.creator._id ? "owner-message-display" : "not-owner-message-display")')
+      .chat-message-text(ng-if='message.type === "text"', ng-bind-html="parsed.text", ng-class='(user._id === message.creator._id ? "owner-message-display" : "not-owner-message-display")')
       .oembeds.attachment-container
         oembeds(message="message.text")
       .attachment-container(ng-if="message.attachments.length > 0")
