@@ -123,35 +123,41 @@ describe('chatLocalState service', function() {
 
   describe('should count unread message when receiving a message that is not on the current channel', function() {
 
+    var user = {
+      _id: 'userId',
+      firstname: 'user',
+      lastname: 'user'
+    };
+
     it('should upgrade messageCount of channel', function() {
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', creator: user, timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', creator: user, timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(2);
     });
 
     it('should upgrade messageCount of group', function() {
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', timestamps: {creation: new Date()}});
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', creator: user, timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', creator: user, timestamps: {creation: new Date()}});
       expect(groups[1].unreadMessageCount).to.equal(2);
     });
 
     it('should not upgrade messageCount of active group or channel', function() {
       channels[0].unreadMessageCount = 1;
       chatLocalStateService.setActive('channel1');
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', creator: user, timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(0);
     });
 
     it('should upgrade mentionCount of channel', function() {
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'channel1', timestamps: {creation: new Date()}});
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'channel1', creator: user, timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'channel1', creator: user, timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(2);
       expect(channels[0].mentionCount).to.be.equal(1);
     });
 
     it('should upgrade mentionCount of group', function() {
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'group2', timestamps: {creation: new Date()}});
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'group2', creator: user, timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {channel: 'group2', creator: user, timestamps: {creation: new Date()}});
       $rootScope.$digest();
       expect(groups[1].unreadMessageCount).to.equal(2);
       expect(groups[1].mentionCount).to.be.equal(1);
@@ -161,7 +167,7 @@ describe('chatLocalState service', function() {
       channels[0].unreadMessageCount = 1;
       channels[0].mentionCount = 1;
       chatLocalStateService.setActive('channel1');
-      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'channel1', timestamps: {creation: new Date()}});
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, {text: '@userId salut', channel: 'channel1', creator: user, timestamps: {creation: new Date()}});
       expect(channels[0].unreadMessageCount).to.equal(0);
       expect(channels[0].mentionCount).to.be.equal(0);
     });
@@ -189,6 +195,22 @@ describe('chatLocalState service', function() {
 
       chatLocalStateService.setActive('channel1');
       expect(chatLocalStateService.getNumberOfUnreadedMessages()).to.equal(1);
+    });
+  });
+
+  describe('should set the last_message when receiving a message', function() {
+
+    var user = {
+      _id: 'userId',
+      firstname: 'user',
+      lastname: 'user'
+    };
+
+    it('set last_message of the channel', function() {
+      var message = {channel: 'group2', text: 'text', creator: user, timestamps: {creation: new Date()}};
+      $rootScope.$broadcast(CHAT_EVENTS.TEXT_MESSAGE, message);
+      expect(groups[1].last_message.creator).to.be.deep.equal(user);
+      expect(groups[1].last_message.text).to.be.equal(message.text);
     });
   });
 

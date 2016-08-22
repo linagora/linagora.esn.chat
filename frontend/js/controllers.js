@@ -29,7 +29,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatConversationItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatUserState, session, moment) {
+  .controller('chatConversationItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatUserState, session, moment, userUtils) {
     $scope.channelState = $scope.channelState || 'chat.channels-views';
     $scope.allUsersConnected = true;
     var userToConnected = {};
@@ -44,11 +44,23 @@ angular.module('linagora.esn.chat')
       $scope.allUsersConnected = _(userToConnected).values().every();
     }
 
+    function setLastMessageIsMe(message) {
+      $scope.lastMessageIsMe = message.creator._id === session.user._id;
+      if (!$scope.lastMessageIsMe) {
+        $scope.lastMessageDisplayName = userUtils.displayNameOf(message.creator);
+      }
+    }
+
     session.ready.then(function(session) {
       $scope.otherUsers = _.reject($scope.item.members, {_id: session.user._id});
       if ($scope.item.type === CHAT_CONVERSATION_TYPE.PRIVATE && $scope.otherUsers.length > 1) {
         $scope.item.name = _.map($scope.otherUsers, 'firstname').join(', ');
       }
+
+      if ($scope.item.last_message.creator) {
+        setLastMessageIsMe($scope.item.last_message);
+      }
+
       var statesPromises = $scope.otherUsers.map(function(member) {
           return chatUserState.get(member._id).then(function(state) {
             userToConnected[member._id] = state !== 'disconnected';
@@ -62,6 +74,10 @@ angular.module('linagora.esn.chat')
           userToConnected[data.userId] = data.state !== 'disconnected';
           computeIsConnected();
         }
+      });
+
+      $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
+        setLastMessageIsMe(message);
       });
 
       $scope.$on('$destroy', unbind);

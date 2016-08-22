@@ -86,7 +86,7 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Conversation.find(request).populate('members').sort('-last_message.date').exec(callback);
+    Conversation.find(request).populate('members').populate('last_message.creator').sort('-last_message.date').exec(callback);
   }
 
   function createConversation(options, callback) {
@@ -146,7 +146,8 @@ module.exports = function(dependencies) {
             $set: {
               last_message: {
                 text: message.text,
-                date: message.timestamps.creation
+                date: message.timestamps.creation,
+                creator: message.creator
               }
             },
             $inc: {

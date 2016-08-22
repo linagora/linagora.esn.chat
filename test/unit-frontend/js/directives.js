@@ -13,7 +13,8 @@ describe('The linagora.esn.chat module directive', function() {
   session,
   chatNamespace,
   user,
-  CHAT_EVENTS;
+  CHAT_EVENTS,
+  userUtils;
 
   beforeEach(function() {
     chatUserState = {
@@ -24,11 +25,22 @@ describe('The linagora.esn.chat module directive', function() {
 
     chatNamespace = {on: sinon.spy()};
 
-    session = {};
+    userUtils = {
+      displayNameOf: sinon.spy(function(user) {
+        return user.firstname + ' ' + user.lastname;
+      })
+    };
+
+    session = {
+      user: {
+        _id: 'userId'
+      }
+    };
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('chatUserState', chatUserState);
       $provide.value('session', session);
+      $provide.value('userUtils', userUtils);
     });
 
     user = {
@@ -58,7 +70,10 @@ describe('The linagora.esn.chat module directive', function() {
 
     beforeEach(function() {
       item = {
-        members: [user, {_id: 2}, {_id: 3}]
+        members: [user, {_id: 2}, {_id: 3}],
+        last_message: {
+          creator: user
+        }
       };
     });
 
@@ -82,6 +97,48 @@ describe('The linagora.esn.chat module directive', function() {
       expect(chatUserState.get).to.have.been.calledWith(2);
       expect(chatUserState.get).to.have.been.calledWith(3);
       expect(eleScope.allUsersConnected).to.be.false;
+    });
+
+    it('should set lastMessageIsMe to true if the last message is from me ', function() {
+      initDirective();
+      expect(eleScope.lastMessageIsMe).to.be.equal(true);
+    });
+
+    it('should set lastMessageIsMe to false if the last message is from me ', function() {
+      item.last_message.creator._id = 'userId2';
+      initDirective();
+      expect(eleScope.lastMessageIsMe).to.be.equal(false);
+    });
+
+    describe('listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
+      var callback, destroy;
+      beforeEach(function() {
+        destroy = sinon.spy();
+        $rootScope.$on = sinon.stub().returns(destroy);
+        initDirective();
+        expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE, sinon.match.func.and(function(_callback) {
+          callback = _callback;
+          return true;
+        }));
+      });
+
+      it('should set lastMessageIsMe to true if the new message is from me', function() {
+        callback(null, {
+          creator: {
+            _id: 'userId'
+          }
+        });
+        expect(eleScope.lastMessageIsMe).to.be.equal(true);
+      });
+
+      it('should set lastMessageIsMe to false if the new message is not from me', function() {
+        callback(null, {
+          creator: {
+            _id: 'userId2'
+          }
+        });
+        expect(eleScope.lastMessageIsMe).to.be.equal(false);
+      });
     });
 
     describe('listen to CHAT_EVENTS.USER_CHANGE_STATE', function() {
