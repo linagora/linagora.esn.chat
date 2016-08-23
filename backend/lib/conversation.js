@@ -3,6 +3,7 @@
 var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
+var MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
 var _ = require('lodash');
@@ -18,6 +19,7 @@ module.exports = function(dependencies) {
   var pubsubGlobal = dependencies('pubsub').global;
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
   var channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
+  var channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   var logger = dependencies('logger');
 
@@ -184,6 +186,7 @@ module.exports = function(dependencies) {
       }
 
       makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
+      channelAddMember.publish(conversation);
     });
   }
 

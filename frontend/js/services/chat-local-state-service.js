@@ -18,6 +18,10 @@ angular.module('linagora.esn.chat')
       var sio = livenotification(CHAT_NAMESPACE);
       sio.on(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
+      sio.on(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, function(conversation) {
+        var conv = findConversation(conversation._id);
+        conv.members = conversation.members;
+      });
 
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
         addConversation(data);

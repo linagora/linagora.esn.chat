@@ -10,6 +10,7 @@ var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 
 function init(dependencies, lib) {
   var logger = dependencies('logger');
@@ -91,6 +92,10 @@ function init(dependencies, lib) {
 
   globalPubsub.topic(MESSAGE_RECEIVED).subscribe(function(data) {
     sendMessage(data.room, data.message);
+  });
+
+  globalPubsub.topic(ADD_MEMBERS_TO_CHANNEL).subscribe(function(data) {
+    sendDataToConversation(data, ADD_MEMBERS_TO_CHANNEL, data);
   });
 }
 
