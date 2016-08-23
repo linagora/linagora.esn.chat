@@ -9,7 +9,7 @@ var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The linagora.esn.chat lib listener module', function() {
 
-  var deps, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, createConversationMock, communityResult, getCommunityConversationByCommunityIdMock, addMemberToConversationMock, communityCreatedListener, memberAddedListener;
+  var deps, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, createConversationMock, communityResult, getCommunityConversationByCommunityIdMock, addMemberToConversationMock, communityCreatedListener, memberAddedListener, comunityUpdateListener;
 
   beforeEach(function() {
     dependencies = function(name) {
@@ -68,6 +68,8 @@ describe('The linagora.esn.chat lib listener module', function() {
                   communityCreatedListener = cb;
                 } else if (topic === CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_COMMUNITY) {
                   memberAddedListener = cb;
+                } else if (topic === CONSTANTS.NOTIFICATIONS.COMMUNITY_UPDATE) {
+                  comunityUpdateListener = cb;
                 }
               }
             };
@@ -117,6 +119,28 @@ describe('The linagora.esn.chat lib listener module', function() {
         community: data._id,
         members: [memberId]
       });
+    });
+
+    it('should listen for update on community and update the conversation associated to it', function(done) {
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
+      var data = {
+        community: {_id: 'targetId'},
+        modifications: {}
+      };
+      var conversation = {_id: 'conversationId'};
+      var conversationMock = {
+        updateCommunityConversation: function(id, modifications, callback) {
+          expect(id).to.equal(data.community._id);
+          expect(modifications).to.equal(data.modifications);
+          callback(null, conversation);
+          expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE);
+          expect(globalPublish).to.have.been.calledWith(conversation);
+          done();
+        }
+      };
+
+      module.start(conversationMock);
+      comunityUpdateListener(data);
     });
 
     it('should listen for new member on community and add them to the corresponding chat', function(done) {

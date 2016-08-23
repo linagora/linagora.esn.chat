@@ -9,11 +9,12 @@ var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var globalMessageReceivedTopic, channelAddMember, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelDeletionTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
+  var globalMessageReceivedTopic, channelAddMember, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelDeletionTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse, conversationUpdateProfile;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies, lib);
@@ -53,6 +54,11 @@ describe('The Chat WS server', function() {
     };
 
     channelAddMember = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    conversationUpdateProfile = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -109,6 +115,9 @@ describe('The Chat WS server', function() {
             if (name === ADD_MEMBERS_TO_CHANNEL) {
               return channelAddMember;
             }
+            if (name === CONVERSATION_UPDATE) {
+              return conversationUpdateProfile;
+            }
           }
         }
       },
@@ -159,7 +168,23 @@ describe('The Chat WS server', function() {
     expect(chatNamespace.emit).to.have.been.calledWith(CHANNEL_CREATION, data);
   });
 
-  it('should listen CREATION_CHANNEL pubsub and emit it only on his members if it is a group', function() {
+  it('should listen to CONVERSATION_UPDATE pubsub and emit the conversation to other member', function() {
+    initWs();
+    var callbackOnConversationUpdateTopic;
+
+    getUserSocketsFromNamespaceResponse = [{emit: sinon.spy()}];
+    expect(conversationUpdateProfile.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+      callbackOnConversationUpdateTopic = callback;
+      return _.isFunction(callback);
+    }));
+
+    var data = {type: 'community', members: [{_id: 'membersId'}]};
+    callbackOnConversationUpdateTopic(data);
+
+    expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CONVERSATION_UPDATE, data);
+  });
+
+  it('should listen CHANNEL_CREATION pubsub and emit it only on his members if it is a group', function() {
     initWs();
     var callbackOnCreationChannelPubsub;
 

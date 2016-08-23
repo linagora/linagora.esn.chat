@@ -11,6 +11,7 @@ var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 
 function init(dependencies, lib) {
   var logger = dependencies('logger');
@@ -21,9 +22,9 @@ function init(dependencies, lib) {
   var helper = dependencies('wsserver').ioHelper;
 
   function sendDataToConversation(conversation, type, data) {
-    if (conversation.type === CONVERSATION_TYPE.PRIVATE) {
+    if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COMMUNITY) {
       conversation.members.forEach(function(user) {
-        var sockets = helper.getUserSocketsFromNamespace(user._id, chatNamespace.sockets) || [];
+        var sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
         sockets.forEach(function(socket) {
           socket.emit(type, data);
         });
@@ -96,6 +97,10 @@ function init(dependencies, lib) {
 
   globalPubsub.topic(ADD_MEMBERS_TO_CHANNEL).subscribe(function(data) {
     sendDataToConversation(data, ADD_MEMBERS_TO_CHANNEL, data);
+  });
+
+  globalPubsub.topic(CONVERSATION_UPDATE).subscribe(function(data) {
+    sendDataToConversation(data, CONVERSATION_UPDATE, data);
   });
 }
 
