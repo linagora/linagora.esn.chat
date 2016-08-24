@@ -24,5 +24,6 @@ angular.module('linagora.esn.chat', [
   'xeditable',
   'angularMoment',
   'ngSanitize',
-  'esn.file-preview'
+  'esn.file-preview',
+  'luegg.directives'
 ]);

@@ -41,7 +41,7 @@ angular.module('linagora.esn.chat')
         message: '='
       },
       templateUrl: '/chat/views/components/conversation-view/messages/message.html',
-      controller: function($scope, $filter, chatParseMention) {
+      controller: function($scope, $filter, $timeout, chatParseMention, ChatScroll) {
 
         var parsedText = $filter('oembedImageFilter')($scope.message.text);
         parsedText = $filter('linky')(parsedText, '_blank');
@@ -55,8 +55,11 @@ angular.module('linagora.esn.chat')
           $scope.displayFile = !$scope.displayFile;
         };
         session.ready.then(function(session) {
-         $scope.user = session.user;
-       });
+          $scope.user = session.user;
+          $timeout(function() {
+            ChatScroll.scrollDown();
+          });
+        });
       }
     };
   })

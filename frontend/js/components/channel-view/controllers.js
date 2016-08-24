@@ -21,6 +21,7 @@ angular.module('linagora.esn.chat')
     $scope.chatLocalStateService = chatLocalStateService;
     $scope.user = session.user;
     $scope.messages = [];
+    $scope.glued = true;
 
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;

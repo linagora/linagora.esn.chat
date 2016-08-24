@@ -29,7 +29,7 @@
           li
             a(href='')
               i.mdi.mdi-information-outline
-      .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true")
+      .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true", scroll-glue="glued")
         div(ng-repeat="message in messages track by message._uniqId")
           chat-message-separator(prev-message="$first ? null : messages[$index - 1]", current-message="message")
           chat-message(message="message")
