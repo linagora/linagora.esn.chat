@@ -6,11 +6,12 @@ var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var _ = require('lodash');
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  var deps, logger, channelCreationTopic, modelsMock, ObjectIdMock, mq, channelTopicUptated;
+  var deps, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUptated;
 
   function dependencies(name) {
     return deps[name];
@@ -19,6 +20,11 @@ describe('The linagora.esn.chat conversation lib', function() {
   beforeEach(function() {
 
     channelCreationTopic = {
+      publish: sinon.spy()
+    };
+
+    channelAddMember = {
+      subscribe: sinon.spy(),
       publish: sinon.spy()
     };
 
@@ -94,6 +100,9 @@ describe('The linagora.esn.chat conversation lib', function() {
             }
             if (name === TOPIC_UPDATED) {
               return channelTopicUptated;
+            }
+            if (name === ADD_MEMBERS_TO_CHANNEL) {
+              return channelAddMember;
             }
           }
         }

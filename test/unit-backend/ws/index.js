@@ -8,11 +8,12 @@ var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
+var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var _ = require('lodash');
 
 describe('The Chat WS server', function() {
 
-  var globalMessageReceivedTopic, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelDeletionTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
+  var globalMessageReceivedTopic, channelAddMember, localMessageReceivedTopic, userStateTopic, logger, getUserId, getUserIdResult, chatNamespace, self, channelCreationTopic, channelDeletionTopic, channelTopicUptated, lib, conversationMock, getUserSocketsFromNamespaceMock, getUserSocketsFromNamespaceResponse;
 
   function initWs() {
     return require('../../../backend/ws').init(self.moduleHelpers.dependencies, lib);
@@ -47,6 +48,11 @@ describe('The Chat WS server', function() {
     };
 
     channelTopicUptated = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelAddMember = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -99,6 +105,9 @@ describe('The Chat WS server', function() {
             }
             if (name === MESSAGE_RECEIVED) {
               return globalMessageReceivedTopic;
+            }
+            if (name === ADD_MEMBERS_TO_CHANNEL) {
+              return channelAddMember;
             }
           }
         }
@@ -194,6 +203,19 @@ describe('The Chat WS server', function() {
     callbackOnTopicUpdatePubsub(data);
 
     expect(chatNamespace.emit).to.have.been.calledWith(TOPIC_UPDATED, data);
+  });
+
+  it('should listen ADD_MEMBERS_TO_CHANNEL pubsub and emit it on ws', function() {
+    initWs();
+    var memberAddedToChannelPubsub;
+    expect(channelAddMember.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+      memberAddedToChannelPubsub = callback;
+      return _.isFunction(callback);
+    }));
+    var data = {};
+    memberAddedToChannelPubsub(data);
+
+    expect(chatNamespace.emit).to.have.been.calledWith(ADD_MEMBERS_TO_CHANNEL, data);
   });
 
   describe('The connexion handler', function() {

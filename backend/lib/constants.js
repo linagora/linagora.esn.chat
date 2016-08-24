@@ -20,7 +20,8 @@ module.exports = {
     COMMUNITY_CREATED: 'communities:community:add',
     MEMBER_ADDED_IN_COMMUNITY: 'community:member:add',
     USERS_MENTION: 'chat:users_mention',
-    CONVERSATION_INITIALIZED: 'chat:conversation:initialized'
+    CONVERSATION_INITIALIZED: 'chat:conversation:initialized',
+    MEMBER_ADDED_IN_CONVERSATION: 'chat:conversation:members:add'
   },
   DEFAULT_CHANNEL: {
     name: 'general',

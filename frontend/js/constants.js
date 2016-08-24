@@ -14,7 +14,8 @@ angular.module('linagora.esn.chat')
     FILE_MESSAGE: 'chat:message:file',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
     CONVERSATIONS: {
-      NEW: 'chat:conversations:new'
+      NEW: 'chat:conversations:new',
+      ADD_NEW_MEMBERS: 'chat:conversation:members:add'
     }
   })
   .constant('CHAT_NAMESPACE', '/chat')
