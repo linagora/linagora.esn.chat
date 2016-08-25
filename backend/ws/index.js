@@ -21,14 +21,18 @@ function init(dependencies, lib) {
   var io = dependencies('wsserver').io;
   var helper = dependencies('wsserver').ioHelper;
 
+  function sendDataToUsers(users, type, data) {
+    users.forEach(function(user) {
+      var sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
+      sockets.forEach(function(socket) {
+        socket.emit(type, data);
+      });
+    });
+  }
+
   function sendDataToConversation(conversation, type, data) {
     if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COMMUNITY) {
-      conversation.members.forEach(function(user) {
-        var sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
-        sockets.forEach(function(socket) {
-          socket.emit(type, data);
-        });
-      });
+      sendDataToUsers(conversation.members, type, data);
     } else {
       chatNamespace.emit(type, data);
     }
@@ -100,7 +104,13 @@ function init(dependencies, lib) {
   });
 
   globalPubsub.topic(CONVERSATION_UPDATE).subscribe(function(data) {
-    sendDataToConversation(data, CONVERSATION_UPDATE, data);
+    var conversation = data.conversation;
+
+    sendDataToConversation(conversation, CONVERSATION_UPDATE, conversation);
+    if (data.deleteMembers) {
+      sendDataToUsers(data.deleteMembers, CHANNEL_DELETION, conversation);
+    }
+
   });
 }
 

@@ -5,11 +5,15 @@ angular.module('linagora.esn.chat')
   .factory('chatLocalStateService', function($rootScope, $q, $log, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
     var service;
 
+    var deferred = $q.defer();
+
     function initLocalState() {
       conversationsService.getConversations().then(function(conversations) {
         conversations.forEach(function(conversation) {
           addConversation(conversation);
         });
+
+        deferred.resolve();
       }, function(err) {
         $log.error('Error while getting conversations', err);
       });
@@ -20,11 +24,19 @@ angular.module('linagora.esn.chat')
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
       sio.on(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, function(conversation) {
         var conv = findConversation(conversation._id);
+        if (!conv) {
+          addConversation(conversation);
+          return;
+        }
         conv.members = conversation.members;
       });
 
       sio.on(CHAT_EVENTS.CONVERSATIONS.UPDATE, function(conversation) {
         var conv = findConversation(conversation._id);
+        if (!conv) {
+          addConversation(conversation);
+          return;
+        }
 
         conv.name = conversation.name;
         conv.members = conversation.members;
@@ -137,10 +149,12 @@ angular.module('linagora.esn.chat')
       }
     }
 
-    function deleteConversationInCache(conversation) {
+    function deleteConversationInCache(conv) {
       var array = [];
-      if (!conversation._id) {
-        conversation = _.find(service.conversations, {_id: conversation});
+      var conversation = !conv._id ? _.find(service.conversations, {_id: conv}) : conv;
+      if (!conversation) {
+        $log.warn('Trying to delete a conversation that does not exist', conv);
+        return;
       }
       if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
         array = service.channels;
@@ -177,6 +191,7 @@ angular.module('linagora.esn.chat')
 
     service = {
       setActive: setActive,
+      ready: deferred.promise,
       unsetActive: unsetActive,
       initLocalState: initLocalState,
       findConversation: findConversation,

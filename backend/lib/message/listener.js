@@ -102,7 +102,10 @@ module.exports = function(dependencies) {
           logger.error('Could not update community conversation', err);
         }
 
-        globalPubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE).publish(conversation);
+        globalPubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE).publish({
+          conversation: conversation,
+          deleteMembers: data.modifications.deleteMembers
+        });
       });
     });
 
