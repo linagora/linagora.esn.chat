@@ -118,10 +118,14 @@ module.exports = function(dependencies) {
     });
   }
 
-  function makeAllMessageReadedForAnUserHelper(userId, conversation, callback) {
+  function makeAllMessageReadedForAnUserHelper(userIds, conversation, callback) {
+    userIds = _.isArray(userIds) ? userIds : [userIds];
     var updateMaxOperation = {};
-    updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;
-    Conversation.update({_id: conversation._id}, {
+    userIds.forEach(function(userId) {
+      updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;
+    });
+
+    Conversation.findByIdAndUpdate(conversation._id, {
       $max: updateMaxOperation
     }, callback);
   }
@@ -176,9 +180,13 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
-  function addMemberToConversation(channelId, userId, callback) {
-    var userObjectId = userId.constructor === ObjectId ? userId : new ObjectId(userId);
-    Conversation.findByIdAndUpdate(channelId, {
+  function ensureObjectId(id) {
+    return id.constructor === ObjectId ? id : new ObjectId(id);
+  }
+
+  function addMemberToConversation(conversationId, userId, callback) {
+    var userObjectId = ensureObjectId(userId);
+    Conversation.findByIdAndUpdate(conversationId, {
       $addToSet: {members: userObjectId}
     }, function(err, conversation) {
       if (err) {
@@ -187,6 +195,41 @@ module.exports = function(dependencies) {
 
       makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
       channelAddMember.publish(conversation);
+    });
+  }
+
+  function updateCommunityConversation(communityId, modifications, callback) {
+
+    var mongoModifications = {};
+
+    if (modifications.newMembers) {
+      mongoModifications.$addToSet = {
+        members: {
+          $each: modifications.newMembers.map(ensureObjectId)
+        }
+      };
+    }
+
+    if (modifications.deleteMembers) {
+      mongoModifications.$pullAll = {
+        members: modifications.deleteMembers.map(ensureObjectId)
+      };
+    }
+
+    if (modifications.title) {
+      mongoModifications.$set = {name: modifications.title};
+    }
+
+    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}, mongoModifications, function(err, conversation) {
+      if (err) {
+        return callback(err);
+      }
+
+      if (mongoModifications.$addToSet) {
+        makeAllMessageReadedForAnUserHelper(mongoModifications.$addToSet.$each, conversation, callback);
+      } else {
+        callback(err, conversation);
+      }
     });
   }
 
@@ -259,6 +302,7 @@ module.exports = function(dependencies) {
     getMessages: getMessages,
     getCommunityConversationByCommunityId: getCommunityConversationByCommunityId,
     addMemberToConversation: addMemberToConversation,
+    updateCommunityConversation: updateCommunityConversation,
     removeMemberFromConversation: removeMemberFromConversation,
     findConversationByTypeAndByMembers: findConversationByTypeAndByMembers,
     createMessage: createMessage,

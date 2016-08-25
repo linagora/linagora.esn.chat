@@ -68,6 +68,10 @@ describe('The linagora.esn.chat conversation lib', function() {
           cb && cb(null, mq);
           return mq;
         }),
+        findOneAndUpdate: sinon.spy(function(query, action, cb) {
+          cb && cb(null, mq);
+          return mq;
+        }),
         update: sinon.spy(function(query, action, cb) {
           cb && cb(null, mq);
         })
@@ -348,21 +352,26 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
   });
 
-  describe('The addMembersToChannel function', function() {
-    it('should call Chanell.update with the correct parameter', function(done) {
-      var channelId = 'channelId';
+  describe('The addMembersToConversation function', function() {
+    it('should call ChatConversation.findByIdAndUpdate with the correct parameter', function(done) {
+      var conversationId = 'channelId';
       var userId = 'userId';
       var anObjectId = {};
-      ObjectIdMock = sinon.stub().returns(anObjectId);
+      ObjectIdMock = sinon.spy(function(id) {
+        this.id;
+      });
 
       modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
-        expect(id).to.equals(channelId);
+        expect(id).to.equals(conversationId);
         expect(ObjectIdMock).to.have.been.calledWith(userId);
         expect(options).to.deep.equals({$addToSet: {members: anObjectId}});
+        modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+          cb();
+        };
         cb(null, {numOfMessage: 42});
       };
 
-      require('../../../backend/lib/conversation')(dependencies).addMemberToConversation(channelId, userId, done);
+      require('../../../backend/lib/conversation')(dependencies).addMemberToConversation(conversationId, userId, done);
     });
 
     it('should set the number of readed message of the current user correctly', function(done) {
@@ -496,6 +505,9 @@ describe('The linagora.esn.chat conversation lib', function() {
           $set: {last_message: {text: message.text, creator: message.creator, date: message.timestamps.creation}},
           $inc: {numOfMessage: 1}
         });
+        modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+          cb();
+        };
         cb(null, conversation);
       };
 
@@ -580,6 +592,43 @@ describe('The linagora.esn.chat conversation lib', function() {
       };
 
       require('../../../backend/lib/conversation')(dependencies).updateTopic(channelId, topic, done);
+    });
+  });
+
+  describe('The updateCommunityConversation function', function() {
+    it('should update correctly the conversation', function(done) {
+      var newConversation = {};
+      var communityId = 'communityId';
+      var modification = {newMembers: [1], deleteMembers: [2], title: 'title'};
+
+      ObjectIdMock = sinon.spy(function(id) {
+        this.id = id;
+      });
+
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, modification, callback) {
+        callback(null, newConversation);
+      };
+
+      modelsMock.ChatConversation.findOneAndUpdate = function(id, modification, cb) {
+        cb(null, newConversation);
+        expect(modification).to.deep.equals({
+          $addToSet: {
+            members: {
+              $each: [{id: 1}]
+            }
+          },
+          $pullAll: {
+            members: [{id: 2}]
+          },
+          $set: {name: 'title'}
+        });
+      };
+
+      require('../../../backend/lib/conversation')(dependencies).updateCommunityConversation(communityId, modification, function(err, conv) {
+        expect(conv).to.equal(newConversation);
+        expect(err).to.be.null;
+        done();
+      });
     });
   });
 

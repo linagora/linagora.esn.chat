@@ -23,6 +23,13 @@ angular.module('linagora.esn.chat')
         conv.members = conversation.members;
       });
 
+      sio.on(CHAT_EVENTS.CONVERSATIONS.UPDATE, function(conversation) {
+        var conv = findConversation(conversation._id);
+
+        conv.name = conversation.name;
+        conv.members = conversation.members;
+      });
+
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
         addConversation(data);
       });

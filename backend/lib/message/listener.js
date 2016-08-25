@@ -96,6 +96,16 @@ module.exports = function(dependencies) {
       });
     });
 
+    localPubsub.topic(CONSTANTS.NOTIFICATIONS.COMMUNITY_UPDATE).subscribe(function(data) {
+      conversationLib.updateCommunityConversation(data.community._id, data.modifications, function(err, conversation) {
+        if (err) {
+          logger.error('Could not update community conversation', err);
+        }
+
+        globalPubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE).publish(conversation);
+      });
+    });
+
     localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
       if (data.message.type === 'user_typing') {
         populateTypingMessage(data.message, function(err, message) {
