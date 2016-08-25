@@ -125,7 +125,9 @@ describe('The Chat WS server', function() {
       wsserver: {
         ioHelper: {
           getUserId: getUserId,
-          getUserSocketsFromNamespace: getUserSocketsFromNamespaceMock
+          getUserSocketsFromNamespace: function() {
+            return getUserSocketsFromNamespaceMock.apply(this, arguments);
+          }
         },
         io: {
           of: function(name) {
@@ -171,6 +173,18 @@ describe('The Chat WS server', function() {
   it('should listen to CONVERSATION_UPDATE pubsub and emit the conversation to other member', function() {
     initWs();
     var callbackOnConversationUpdateTopic;
+    var socketOne = {emit: sinon.spy()};
+    var socketTwo = {emit: sinon.spy()};
+
+    getUserSocketsFromNamespaceMock = function(data) {
+      if (data === 'memberId') {
+        return [socketOne];
+      } else if (data === 'deleteId') {
+        return [socketTwo];
+      } else {
+        throw new Error('Unexpected id');
+      }
+    };
 
     getUserSocketsFromNamespaceResponse = [{emit: sinon.spy()}];
     expect(conversationUpdateProfile.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -178,10 +192,11 @@ describe('The Chat WS server', function() {
       return _.isFunction(callback);
     }));
 
-    var data = {type: 'community', members: [{_id: 'membersId'}]};
+    var data = {conversation: {type: 'community', members: [{_id: 'memberId'}]}, deleteMembers: [{_id: 'deleteId'}]};
     callbackOnConversationUpdateTopic(data);
 
-    expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CONVERSATION_UPDATE, data);
+    expect(socketOne.emit).to.have.been.calledWith(CONVERSATION_UPDATE, data.conversation);
+    expect(socketTwo.emit).to.have.been.calledWith(CHANNEL_DELETION, data.conversation);
   });
 
   it('should listen CHANNEL_CREATION pubsub and emit it only on his members if it is a group', function() {

@@ -125,7 +125,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       var module = require('../../../../backend/lib/message/listener')(dependencies);
       var data = {
         community: {_id: 'targetId'},
-        modifications: {}
+        modifications: {deleteMembers: 'deleteMembers'}
       };
       var conversation = {_id: 'conversationId'};
       var conversationMock = {
@@ -134,7 +134,7 @@ describe('The linagora.esn.chat lib listener module', function() {
           expect(modifications).to.equal(data.modifications);
           callback(null, conversation);
           expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE);
-          expect(globalPublish).to.have.been.calledWith(conversation);
+          expect(globalPublish).to.have.been.calledWith({conversation: conversation, deleteMembers: modifications.deleteMembers});
           done();
         }
       };

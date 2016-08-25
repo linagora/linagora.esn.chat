@@ -24,11 +24,19 @@ angular.module('linagora.esn.chat')
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
       sio.on(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, function(conversation) {
         var conv = findConversation(conversation._id);
+        if (!conv) {
+          addConversation(conversation);
+          return;
+        }
         conv.members = conversation.members;
       });
 
       sio.on(CHAT_EVENTS.CONVERSATIONS.UPDATE, function(conversation) {
         var conv = findConversation(conversation._id);
+        if (!conv) {
+          addConversation(conversation);
+          return;
+        }
 
         conv.name = conversation.name;
         conv.members = conversation.members;
@@ -141,10 +149,12 @@ angular.module('linagora.esn.chat')
       }
     }
 
-    function deleteConversationInCache(conversation) {
+    function deleteConversationInCache(conv) {
       var array = [];
-      if (!conversation._id) {
-        conversation = _.find(service.conversations, {_id: conversation});
+      var conversation = !conv._id ? _.find(service.conversations, {_id: conv}) : conv;
+      if (!conversation) {
+        $log.warn('Trying to delete a conversation that does not exist', conv);
+        return;
       }
       if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
         array = service.channels;
