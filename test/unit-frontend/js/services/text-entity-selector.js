@@ -97,6 +97,24 @@ describe('the ChatTextEntitySelector constructor', function() {
       $rootScope.$digest();
       expect(entitySelector.visible).to.be.false;
     });
+
+    it('should update the message correctly if it sent with a space at the end', function() {
+      var adapter = getTextAreaAdapter(5, 5, 'toto');
+      entitySelector.textChanged(adapter);
+      $rootScope.$digest();
+
+      entitySelector.select('smile_c');
+      expect(adapter.replaceText).to.have.been.calledWith('toto :smile_c#', 14, 14);
+    });
+
+    it('should update the message by adding the spaces if the message is empty', function() {
+      var adapter = getTextAreaAdapter(5, 5, '');
+      entitySelector.textChanged(adapter);
+      $rootScope.$digest();
+
+      entitySelector.select('smile_c');
+      expect(adapter.replaceText).to.have.been.calledWith('     :smile_c#', 14, 14);
+    });
   });
 
   describe('keyDown method', function() {
@@ -235,6 +253,60 @@ describe('the ChatTextEntitySelector constructor', function() {
       expect(toHumanLabel).to.have.been.calledWith('smile_c');
       expect(chatHumanizeEntitiesLabelMock.addHumanRepresentation).to.have.been.calledWith(':' + toHumanLabelResult + '#', ':' + toRealValueResult + '#');
       expect(adapter.replaceText).to.have.been.calledWith(addHumanRepresentationResult, size, size);
+    });
+  });
+
+  describe('hide() method', function() {
+    it('should change the visible state to false', function() {
+      entitySelector.show(getTextAreaAdapter(6, 6, 'toto i'));
+      $rootScope.$digest();
+      expect(entitySelector.visible).to.equal(true);
+      entitySelector.hide();
+      expect(entitySelector.visible).to.equal(false);
+    });
+  });
+
+  describe('show() method', function() {
+    it('should set visible to true', function() {
+      entitySelector.show(getTextAreaAdapter(6, 6, 'toto i'));
+      $rootScope.$digest();
+      expect(entitySelector.visible).to.equal(true);
+    });
+
+    it('should set the entityListDisplayed to the list of entityList', function() {
+      entitySelector.show(getTextAreaAdapter(6, 6, 'toto i'));
+      $rootScope.$digest();
+      expect(entitySelector.entityListDisplayed.length).to.equal(entityList.length);
+    });
+  });
+
+  describe('setEntityList() method', function() {
+    it('should entityListDisplayed to max length NUMBER_ENTITY_DISPLAYED and entityList to the all the methods', function() {
+      entityList = [];
+      for (var i = 0; i < 30; i++) {
+        entityList.push('smile_' + i.toString());
+      }
+
+      entitySelector = new ChatTextEntitySelector(ChatTextEntitySelector.entityListResolverFromList(entityList), ':', ':');
+
+      entitySelector.setEntityList(entityList);
+      expect(entitySelector.entityListDisplayed.length).to.equal(entitySelector.NUMBER_ENTITY_DISPLAYED);
+      expect(entitySelector.entityList.length).to.equal(entityList.length);
+    });
+  });
+
+  describe('loadMoreElements() method', function() {
+    it('should add the next NUMBER_ENTITY_DISPLAYED elements', function() {
+      entityList = [];
+      for (var i = 0; i < 50; i++) {
+        entityList.push('smile_' + i.toString());
+      }
+
+      entitySelector = new ChatTextEntitySelector(ChatTextEntitySelector.entityListResolverFromList(entityList), ':', ':');
+
+      entitySelector.setEntityList(entityList);
+      entitySelector.loadMoreElements();
+      expect(entitySelector.entityListDisplayed.length).to.equal(entitySelector.NUMBER_ENTITY_DISPLAYED * 2);
     });
   });
 });

@@ -158,6 +158,10 @@ angular.module('linagora.esn.chat')
           $rootScope.$broadcast('chat:message:compose:textChanged', textareaAdapter());
         };
 
+        scope.clickableEmoticon = function() {
+          $rootScope.$broadcast('chat:message:emoticon', textareaAdapter());
+        };
+
         function buildCurrentMessage() {
           return {
             type: 'text',

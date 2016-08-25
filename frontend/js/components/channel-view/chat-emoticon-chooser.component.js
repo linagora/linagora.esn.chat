@@ -20,6 +20,14 @@
     $scope.$on('chat:message:compose:textChanged', function(angularEvent, textareaAdapter) {
       self.entitySelector.textChanged(textareaAdapter);
     });
+
+    $scope.$on('chat:message:emoticon', function(angularEvent, textareaAdapter) {
+      if (!self.entitySelector.visible) {
+        self.entitySelector.show(textareaAdapter);
+      } else {
+        self.entitySelector.hide();
+      }
+    });
   }
 
 })();
