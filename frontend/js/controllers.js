@@ -34,10 +34,14 @@ angular.module('linagora.esn.chat')
     $scope.allUsersConnected = true;
     var userToConnected = {};
     if ($scope.item.last_message) {
+      $scope.numberOfDays = calcNumberOfDays($scope.item.last_message);
+    }
+
+    function calcNumberOfDays(last_message) {
       var d1 = moment().startOf('day');
-      var d2 = moment($scope.item.last_message.date);
+      var d2 = moment(last_message.date);
       var numberDay = moment.duration(d1.diff(d2)).asDays() + 1;
-      $scope.numberOfDays = parseInt(numberDay);
+      return parseInt(numberDay);
     }
 
     function computeIsConnected() {
@@ -78,6 +82,7 @@ angular.module('linagora.esn.chat')
 
       $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         setLastMessageIsMe(message);
+        $scope.numberOfDays = calcNumberOfDays(message);
       });
 
       $scope.$on('$destroy', unbind);
