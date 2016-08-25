@@ -5,11 +5,15 @@ angular.module('linagora.esn.chat')
   .factory('chatLocalStateService', function($rootScope, $q, $log, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
     var service;
 
+    var deferred = $q.defer();
+
     function initLocalState() {
       conversationsService.getConversations().then(function(conversations) {
         conversations.forEach(function(conversation) {
           addConversation(conversation);
         });
+
+        deferred.resolve();
       }, function(err) {
         $log.error('Error while getting conversations', err);
       });
@@ -177,6 +181,7 @@ angular.module('linagora.esn.chat')
 
     service = {
       setActive: setActive,
+      ready: deferred.promise,
       unsetActive: unsetActive,
       initLocalState: initLocalState,
       findConversation: findConversation,
