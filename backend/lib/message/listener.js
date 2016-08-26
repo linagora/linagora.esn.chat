@@ -33,19 +33,31 @@ module.exports = function(dependencies) {
     addHandler(require('./handlers/mentions')(dependencies));
 
     function saveAsChatMessage(data, callback) {
-      var chatMessage = {
-        type: data.message.type,
-        text: data.message.text,
-        date: data.message.date,
-        creator: data.message.creator,
-        channel: data.message.channel
-      };
+      conversationLib.getConversation(data.message.channel._id || data.message.channel, function(err, conversation) {
+        if (err) {
+          return callback(err);
+        }
 
-      if (data.message.attachments) {
-        chatMessage.attachments = data.message.attachments;
-      }
+        if (!_.find(conversation.members, function(member) {
+          return String(member._id) === String(data.message.creator._id || data.message.creator);
+        })) {
+          return callback('The user is not into the conversation');
+        }
 
-      conversationLib.createMessage(chatMessage, callback);
+        var chatMessage = {
+          type: data.message.type,
+          text: data.message.text,
+          date: data.message.date,
+          creator: data.message.creator,
+          channel: data.message.channel
+        };
+
+        if (data.message.attachments) {
+          chatMessage.attachments = data.message.attachments;
+        }
+
+        conversationLib.createMessage(chatMessage, callback);
+      });
     }
 
     function populateTypingMessage(data, callback) {
