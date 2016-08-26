@@ -41,6 +41,7 @@ describe('The linagora.esn.chat module directive', function() {
       $provide.value('chatUserState', chatUserState);
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
+      $provide.value('esnEmoticonifyFilter', sinon.spy());
     });
 
     user = {
