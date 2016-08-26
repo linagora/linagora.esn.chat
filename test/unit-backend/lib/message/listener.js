@@ -194,12 +194,12 @@ describe('The linagora.esn.chat lib listener module', function() {
       messageReceivedListener(data);
     });
 
-    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message', function(done) {
+    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is from someone in the channel', function(done) {
       var type = 'text';
       var text = 'yolo';
       var date = '0405';
       var creator = '1';
-      var channel = 'general';
+      var conversation = 'general';
       var attachments = [1, 2, 3];
       var data = {
         message: {
@@ -207,7 +207,7 @@ describe('The linagora.esn.chat lib listener module', function() {
           text: text,
           date: date,
           creator: creator,
-          channel: channel,
+          channel: conversation,
           attachments: attachments
         },
         room: 'room'
@@ -218,6 +218,9 @@ describe('The linagora.esn.chat lib listener module', function() {
       var conversationMock = {
         createMessage: sinon.spy(function(_m, callback) {
           callback(null, createMessageResult);
+        }),
+        getConversation: sinon.spy(function(id, callback) {
+          return callback(null, {members: [{_id: creator}]});
         })
       };
 
@@ -230,16 +233,59 @@ describe('The linagora.esn.chat lib listener module', function() {
           text: text,
           date: date,
           creator: creator,
-          channel: channel,
+          channel: conversation,
           attachments: attachments
         });
 
         expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
         expect(data).to.be.deep.equals({room: data.room, message: createMessageResult});
+        expect(conversationMock.getConversation).to.have.been.calledWith(conversation);
         done();
       };
 
       messageReceivedListener(data);
+    });
+
+    it('should not save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is not from someone in the channel', function() {
+      var type = 'text';
+      var text = 'yolo';
+      var date = '0405';
+      var creator = '1';
+      var conversation = 'general';
+      var attachments = [1, 2, 3];
+      var data = {
+        message: {
+          type: type,
+          text: text,
+          date: date,
+          creator: creator,
+          channel: conversation,
+          attachments: attachments
+        },
+        room: 'room'
+      };
+
+      var createMessageResult = 'createMessageResult';
+
+      var conversationMock = {
+        createMessage: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        }),
+        getConversation: sinon.spy(function(id, callback) {
+          return callback(null, {members: [{_id: 'id'}]});
+        })
+      };
+
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
+      module.start(conversationMock);
+
+      globalPublish = sinon.spy();
+      messageReceivedListener(data);
+      process.nextTick(function() {
+        expect(globalPublish).to.not.have.been.called;
+        expect(conversationMock.createMessage).to.not.have.been.called;
+        expect(conversationMock.getConversation).to.have.been.calledWith(creator);
+      });
     });
   });
 
