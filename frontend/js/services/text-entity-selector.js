@@ -62,9 +62,11 @@
       this._resetState();
     };
 
-    ChatTextEntitySelector.prototype.textChanged = function(textareaAdapter) {
+    ChatTextEntitySelector.prototype.textChanged = function(textareaAdapter, lengthEdition, hideForNoResults) {
       var self = this;
       this.textarea = textareaAdapter;
+      this.lengthEdition = _.isNumber(lengthEdition) ? lengthEdition : 2;
+      this.hideForNoResults = _.isBoolean(hideForNoResults) ? hideForNoResults : true;
 
       if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
         this._resetState();
@@ -73,7 +75,7 @@
 
       var inEdition = this._entityInEdition(this.textarea.value, this.textarea.selectionStart);
 
-      if (!inEdition || inEdition.length < 2) {
+      if (inEdition.length < this.lengthEdition) {
         this._resetState();
         return;
       }
@@ -84,7 +86,9 @@
           self.entityStart = inEdition;
           self.visible = true;
         } else {
-          self._resetState();
+          if (self.hideForNoResults) {
+            self._resetState();
+          }
         }
       });
     };
@@ -109,6 +113,7 @@
     };
 
     ChatTextEntitySelector.prototype._insertEntityTag = function(entity) {
+      this.textarea = this.textarea.textArea || this.textarea;
       var value = this.textarea.value,
       selectionStart = this.textarea.selectionStart;
 
@@ -141,9 +146,8 @@
     ChatTextEntitySelector.prototype._entityInEdition = function(text, cursorNextChar) {
       var textUntilCursorEnd = text.substring(0, cursorNextChar);
       var entityLast = textUntilCursorEnd.match(this.REGEXP_ENTITY_IN_EDITION);
-      if (entityLast) {
-        return entityLast[1];
-      }
+
+      return entityLast ? entityLast[1] : '';
     };
 
     ChatTextEntitySelector.prototype._updateFocusIndex = function(diff) {
