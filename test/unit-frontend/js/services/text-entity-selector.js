@@ -115,6 +115,47 @@ describe('the ChatTextEntitySelector constructor', function() {
       entitySelector.select('smile_c');
       expect(adapter.replaceText).to.have.been.calledWith('     :smile_c#', 14, 14);
     });
+
+    it('should update the message correctly if the message is sent from another input than the textarea', function() {
+      var adapter = {
+        textArea: getTextAreaAdapter(5, 5, 'toto'),
+        value: '',
+        selectionStart: 0,
+        selectionEnd: 0
+      };
+      entitySelector.textChanged(adapter);
+      $rootScope.$digest();
+
+      entitySelector.select('smile_c');
+      expect(adapter.textArea.replaceText).to.have.been.calledWith('toto :smile_c#', 14, 14);
+    });
+
+    it('should update the message event if the message is empty', function() {
+      var adapter = getTextAreaAdapter(0, 0, '');
+      ChatTextEntitySelector.prototype._resetState = sinon.spy();
+      entitySelector.textChanged(adapter, 2);
+      $rootScope.$digest();
+
+      expect(entitySelector._resetState).to.have.been.called;
+    });
+
+    it('should update the message by adding the spaces if the message is empty', function() {
+      var adapter = getTextAreaAdapter(0, 0, ':qsdf', false);
+      ChatTextEntitySelector.prototype._resetState = sinon.spy();
+      entitySelector.textChanged(adapter, 0);
+      $rootScope.$digest();
+
+      expect(entitySelector._resetState).to.not.have.been.called;
+    });
+
+    it('should update the message by adding the spaces if the message is empty', function() {
+      var adapter = getTextAreaAdapter(5, 5, ':qsdf', true);
+      entitySelector._resetState = sinon.spy();
+      entitySelector.textChanged(adapter, 0);
+      $rootScope.$digest();
+
+      expect(entitySelector._resetState).to.have.been.called;
+    });
   });
 
   describe('keyDown method', function() {
@@ -257,6 +298,12 @@ describe('the ChatTextEntitySelector constructor', function() {
   });
 
   describe('hide() method', function() {
+    it('should call the _resetState method', function() {
+      entitySelector._resetState = sinon.spy();
+      entitySelector.hide();
+      expect(entitySelector._resetState).to.have.been.called;
+    });
+
     it('should change the visible state to false', function() {
       entitySelector.show(getTextAreaAdapter(6, 6, 'toto i'));
       $rootScope.$digest();
