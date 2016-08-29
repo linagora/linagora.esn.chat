@@ -273,6 +273,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
         expect(mq.populate).to.have.been.calledWith('members');
         expect(mq.populate).to.have.been.calledWith('last_message.creator');
+        expect(mq.populate).to.have.been.calledWith('last_message.user_mentions');
         done();
       });
     });
@@ -296,6 +297,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
         expect(mq.populate).to.have.been.calledWith('members');
         expect(mq.populate).to.have.been.calledWith('last_message.creator');
+        expect(mq.populate).to.have.been.calledWith('last_message.user_mentions');
         done();
       });
     });
@@ -476,7 +478,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should add the last message in the channel document and inc num of message and readed num of message for the author', function(done) {
       var channelId = 'channelId';
       var conversation = {_id: channelId, numOfMessage: 42};
-      var message = {id: 1, creator: 'userId', channel: channelId, text: '', timestamps: {creation: '0405'}};
+      var message = {id: 1, creator: 'userId', channel: channelId, text: '', user_mentions: ['@userId'], timestamps: {creation: '0405'}};
 
       modelsMock.ChatMessage = function(msg) {
         expect(msg).to.be.deep.equal(message);
@@ -502,7 +504,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
         expect(id).to.deep.equals(channelId);
         expect(options).to.deep.equals({
-          $set: {last_message: {text: message.text, creator: message.creator, date: message.timestamps.creation}},
+          $set: {last_message: {text: message.text, creator: message.creator, user_mentions: message.user_mentions, date: message.timestamps.creation}},
           $inc: {numOfMessage: 1}
         });
         modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
