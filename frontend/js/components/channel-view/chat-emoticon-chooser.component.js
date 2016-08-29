@@ -38,7 +38,7 @@
     self.searchTextChange = function() {
       var adapter = {
         textArea: self.text,
-        value: ':' + self.textInput,
+        value: ':' + self.textInput.toLowerCase(),
         selectionStart: self.textInput.length + 1,
         selectionEnd: self.textInput.length + 1,
       };
