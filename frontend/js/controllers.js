@@ -29,13 +29,14 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatConversationItemController', function($scope, $rootScope, $q, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils) {
+  .controller('chatConversationItemController', function($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils) {
     $scope.channelState = $scope.channelState || 'chat.channels-views';
     $scope.allUsersConnected = true;
     var userToConnected = {};
     if ($scope.item.last_message) {
       $scope.numberOfDays = calcNumberOfDays($scope.item.last_message);
       $scope.item.last_message.text = chatParseMention.chatParseMention($scope.item.last_message.text, $scope.item.last_message.user_mentions, {skipLink: true});
+      $scope.item.last_message.text = $filter('esnEmoticonify')($scope.item.last_message.text, {class: 'chat-emoji'});
     }
 
     function calcNumberOfDays(last_message) {

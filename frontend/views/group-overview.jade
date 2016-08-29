@@ -9,13 +9,13 @@
     .row
       .col-xs-12.group-text.ellipsis
         span(ng-if="item.members.length <= 2")
-          {{item.last_message.text}}
+          span(ng-bind-html="item.last_message.text")
         span(ng-if="item.members.length > 2")
           span(ng-if="lastMessageIsMe")
             | #{__('You')} :
           span(ng-if="!lastMessageIsMe")
-            {{lastMessageDisplayName}} :
-          {{item.last_message.text}}
+            {{lastMessageDisplayName}} : 
+          span(ng-bind-html="item.last_message.text")
 
   .col-xs-2.group-date
     span(ng-if="numberOfDays === 0") {{item.last_message.date | amDateFormat:"HH:mm"}}
