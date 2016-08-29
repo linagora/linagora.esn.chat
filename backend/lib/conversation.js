@@ -96,7 +96,8 @@ module.exports = function(dependencies) {
         function(callback) {
           var channel = new Conversation(options);
           channel.last_message = {
-            date: channel.timestamps && channel.timestamps.creation || new Date()
+            date: channel.timestamps && channel.timestamps.creation || new Date(),
+            user_mentions: []
           };
           channel.numOfMessage = channel.numOfMessage || 0;
           channel.numOfReadedMessage = channel.numOfReadedMessage || {};
