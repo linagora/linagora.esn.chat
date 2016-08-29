@@ -12,12 +12,12 @@
           {{item.last_message.text}}
         span(ng-if="item.members.length > 2")
           span(ng-if="lastMessageIsMe")
-            | #{__('You')} : 
+            | #{__('You')} :
           span(ng-if="!lastMessageIsMe")
-            {{lastMessageDisplayName}} : 
+            {{lastMessageDisplayName}} :
           {{item.last_message.text}}
 
   .col-xs-2.group-date
     span(ng-if="numberOfDays === 0") {{item.last_message.date | amDateFormat:"HH:mm"}}
     span(ng-if="numberOfDays === 1") #{__('Yesterday')} {{item.last_message.date | amDateFormat:"HH:mm"}}
-    span(ng-if="numberOfDays > 1") {{item.last_message.date | amDateFormat:"DD MMM YYYY HH:mm"}}
+    span(ng-if="numberOfDays > 1") {{item.last_message.date | amDateFormat:"DD/MM/YY"}}
