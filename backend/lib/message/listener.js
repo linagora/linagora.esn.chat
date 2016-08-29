@@ -1,7 +1,6 @@
 'use strict';
 
 var CONSTANTS = require('../constants');
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 var _ = require('lodash');
 
 module.exports = function(dependencies) {
@@ -72,54 +71,6 @@ module.exports = function(dependencies) {
         callback(null, result);
       });
     }
-
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.COMMUNITY_CREATED).subscribe(function(community) {
-      var conversation = {
-        type: CONVERSATION_TYPE.COMMUNITY,
-        name: community.title,
-        creator: community.creator,
-        community: community._id,
-        members: _.chain(community.members).map('member').filter({objectType: 'user'}).map('id').value()
-      };
-
-      conversationLib.createConversation(conversation);
-    });
-
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_COMMUNITY).subscribe(function(data) {
-      var community = data.target;
-      var newMember = data.member;
-
-      if (newMember.objectType !== 'user') {
-        return;
-      }
-
-      conversationLib.getCommunityConversationByCommunityId(community.id, function(err, conversation) {
-        if (err) {
-          logger.error('Can not get associated conversation', err);
-
-          return;
-        }
-
-        conversationLib.addMemberToConversation(conversation._id, newMember.id, function(err) {
-          if (err) {
-            logger.error('Could not add member to the conversation', err);
-          }
-        });
-      });
-    });
-
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.COMMUNITY_UPDATE).subscribe(function(data) {
-      conversationLib.updateCommunityConversation(data.community._id, data.modifications, function(err, conversation) {
-        if (err) {
-          logger.error('Could not update community conversation', err);
-        }
-
-        globalPubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE).publish({
-          conversation: conversation,
-          deleteMembers: data.modifications.deleteMembers
-        });
-      });
-    });
 
     localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
       if (data.message.type === 'user_typing') {
