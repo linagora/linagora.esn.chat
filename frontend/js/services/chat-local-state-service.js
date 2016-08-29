@@ -58,10 +58,13 @@ angular.module('linagora.esn.chat')
           conversationsService.markAllMessageReaded(conversation._id);
         }
 
+        var parsedText = chatParseMention.chatParseMention(message.text, message.user_mentions, {skipLink: true});
+
         conversation.last_message = {
-          text: message.text,
+          text: parsedText,
           date: message.timestamps.creation,
-          creator: message.creator
+          creator: message.creator,
+          user_mentions: message.user_mentions
         };
 
         replaceConversationInSortedArray(service.conversations, conversation);
