@@ -5,7 +5,7 @@
   .col-xs-8.group-body(ui-sref='{{channelState}}({id: item._id})')
     .row
       .col-xs-12.group-name.ellipsis
-        span {{::item.name}}
+        span {{::getConversationName(item)}}
     .row
       .col-xs-12.group-text.ellipsis
         span(ng-if="lastMessageIsMe")

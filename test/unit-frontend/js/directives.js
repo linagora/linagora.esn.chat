@@ -14,7 +14,9 @@ describe('The linagora.esn.chat module directive', function() {
   chatNamespace,
   user,
   CHAT_EVENTS,
-  userUtils;
+  userUtils,
+  getConversationNameMock,
+  conversationNameResult;
 
   beforeEach(function() {
     chatUserState = {
@@ -31,6 +33,12 @@ describe('The linagora.esn.chat module directive', function() {
       })
     };
 
+    conversationNameResult = 'name';
+
+    getConversationNameMock = sinon.spy(function() {
+      return conversationNameResult;
+    });
+
     session = {
       user: {
         _id: 'userId'
@@ -42,6 +50,9 @@ describe('The linagora.esn.chat module directive', function() {
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
       $provide.value('esnEmoticonifyFilter', sinon.spy());
+      $provide.factory('conversationsService', function($q) {
+        return {getConversationNamePromise: $q.when(getConversationNameMock)};
+      });
     });
 
     user = {
@@ -76,6 +87,11 @@ describe('The linagora.esn.chat module directive', function() {
           creator: user
         }
       };
+    });
+
+    it('should put getConversationName in the scope', function() {
+      initDirective();
+      expect(eleScope.getConversationName).to.equal(getConversationNameMock);
     });
 
     it('should initialize allUsersConnected to true only if all user other than me are not disconnected', function() {

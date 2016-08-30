@@ -41,7 +41,7 @@ angular.module('linagora.esn.chat')
         message: '='
       },
       templateUrl: '/chat/views/components/conversation-view/messages/message.html',
-      controller: function($scope, $filter, $timeout, chatParseMention, ChatScroll) {
+      controller: function($scope, $filter, $timeout, chatParseMention, ChatScroll, conversationsService) {
 
         var parsedText = $filter('oembedImageFilter')($scope.message.text);
         parsedText = $filter('linky')(parsedText, '_blank');
@@ -54,6 +54,9 @@ angular.module('linagora.esn.chat')
         $scope.toggleFile = function() {
           $scope.displayFile = !$scope.displayFile;
         };
+        conversationsService.getConversationNamePromise.then(function(getConversationName) {
+          $scope.getConversationName = getConversationName;
+        });
         session.ready.then(function(session) {
           $scope.user = session.user;
           $timeout(function() {
