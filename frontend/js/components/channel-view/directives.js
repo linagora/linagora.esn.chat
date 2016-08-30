@@ -75,7 +75,10 @@ angular.module('linagora.esn.chat')
     return {
       restrict: 'E',
       controller: 'conversationViewController',
-      templateUrl: '/chat/views/components/conversation-view/conversation-view.html'
+      templateUrl: '/chat/views/components/conversation-view/conversation-view.html',
+      scope: {
+        displayTopic: '='
+      }
     };
   })
 
