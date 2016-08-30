@@ -146,6 +146,14 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function updateConversation(conversationId, modifications) {
+      var body = {
+        conversation: conversationId,
+        modifications: modifications
+      };
+      return ChatRestangular.one('conversations', conversationId).customPUT(body);
+    }
+
     return {
       computeGroupName: computeGroupName,
       deleteConversation: deleteConversation,
@@ -159,6 +167,7 @@ angular.module('linagora.esn.chat')
       updateConversationTopic: updateConversationTopic,
       setTopicChannel: setTopicChannel,
       markAllMessageReaded: markAllMessageReaded,
-      getConversationByCommunityId: getConversationByCommunityId
+      getConversationByCommunityId: getConversationByCommunityId,
+      updateConversation: updateConversation
     };
   });

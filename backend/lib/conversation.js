@@ -2,6 +2,7 @@
 
 var CONSTANTS = require('../lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
@@ -18,6 +19,7 @@ module.exports = function(dependencies) {
 
   var pubsubGlobal = dependencies('pubsub').global;
   var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  var channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
   var channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   var channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
   var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
@@ -235,6 +237,46 @@ module.exports = function(dependencies) {
     });
   }
 
+  function updateConversation(communityId, modifications, callback) {
+
+    var mongoModifications = {};
+
+    if (modifications.newMembers) {
+      mongoModifications.$addToSet = {
+        members: {
+          $each: modifications.newMembers.map(ensureObjectId)
+        }
+      };
+    }
+
+    if (modifications.deleteMembers) {
+      mongoModifications.$pullAll = {
+        members: modifications.deleteMembers.map(ensureObjectId)
+      };
+    }
+
+    if (modifications.name) {
+      mongoModifications.$set = {name: modifications.name};
+    }
+
+    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, function(err, conversation) {
+      if (err) {
+        return callback(err);
+      }
+
+      channelUpdateTopic.publish({
+        conversation: conversation,
+        deleteMembers: modifications.deleteMembers
+      });
+
+      if (mongoModifications.$addToSet) {
+        makeAllMessageReadedForAnUserHelper(mongoModifications.$addToSet.$each, conversation, callback);
+      } else {
+        callback(err, conversation);
+      }
+    });
+  }
+
   function removeMemberFromConversation(channelId, userId, callback) {
     var unsetOperation = {};
     unsetOperation['numOfReadedMessage.' + userId] = '';
@@ -305,6 +347,7 @@ module.exports = function(dependencies) {
     getCommunityConversationByCommunityId: getCommunityConversationByCommunityId,
     addMemberToConversation: addMemberToConversation,
     updateCommunityConversation: updateCommunityConversation,
+    updateConversation: updateConversation,
     removeMemberFromConversation: removeMemberFromConversation,
     findConversationByTypeAndByMembers: findConversationByTypeAndByMembers,
     createMessage: createMessage,
