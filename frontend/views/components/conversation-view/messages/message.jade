@@ -1,5 +1,5 @@
 .lv-item.media.chat-message
-    .lv-avatar.pull-left
+    a.lv-avatar.pull-left(ui-sref='cerise.base.profile({id: message.creator._id})')
       img(ng-src='/api/users/{{::message.creator._id}}/profile/avatar', alt='', ng-if='user._id !== message.creator._id')
     .media-body
       .chat-message-title
