@@ -22,7 +22,7 @@ module.exports = function(dependencies) {
   var channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
   var channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   var channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
-  var updateChannelTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  var channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   var logger = dependencies('logger');
 
   function getChannels(options, callback) {
@@ -280,10 +280,18 @@ module.exports = function(dependencies) {
   function removeMemberFromConversation(channelId, userId, callback) {
     var unsetOperation = {};
     unsetOperation['numOfReadedMessage.' + userId] = '';
-    Conversation.update({_id: channelId}, {
+    Conversation.findByIdAndUpdate(channelId, {
       $pull: {members: new ObjectId(userId)},
       $unset: unsetOperation
-    }, callback);
+    }, function(err, conversation) {
+      if (!err) {
+        channelUpdateTopic.publish({
+          conversation: conversation,
+          deleteMembers: [{_id: userId}]
+        });
+      }
+      callback(err, conversation);
+    });
   }
 
   function getMessage(messageId, callback) {
@@ -332,7 +340,7 @@ module.exports = function(dependencies) {
         },
         text: 'set the channel topic: ' + topic.value
       };
-      updateChannelTopic.publish(message);
+      channelTopicUpdateTopic.publish(message);
       callback(err, channel);
     });
   }
