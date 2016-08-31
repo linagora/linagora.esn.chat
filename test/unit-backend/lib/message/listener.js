@@ -5,7 +5,6 @@ var sinon = require('sinon');
 var mockery = require('mockery');
 var _ = require('lodash');
 var CONSTANTS = require('../../../../backend/lib/constants');
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The linagora.esn.chat lib listener module', function() {
 
@@ -94,76 +93,6 @@ describe('The linagora.esn.chat lib listener module', function() {
       mockery.registerMock('./handlers/mentions', function() {
         return function() {};
       });
-    });
-
-    it('should listen for new community and create chat for them', function() {
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
-      var conversationMock = {
-        createConversation: createConversationMock
-      };
-      var memberId = 'memberId';
-      var data = {
-        _id: 'id',
-        title: 'title',
-        creator: 'creator',
-        members: [{member: {objectType: 'none'}}, {member: {objectType: 'user', id: memberId}}]
-      };
-
-      module.start(conversationMock);
-      communityCreatedListener(data);
-
-      expect(createConversationMock).to.have.been.calledWith({
-        type: CONVERSATION_TYPE.COMMUNITY,
-        name: data.title,
-        creator: data.creator,
-        community: data._id,
-        members: [memberId]
-      });
-    });
-
-    it('should listen for update on community and update the conversation associated to it', function(done) {
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
-      var data = {
-        community: {_id: 'targetId'},
-        modifications: {deleteMembers: 'deleteMembers'}
-      };
-      var conversation = {_id: 'conversationId'};
-      var conversationMock = {
-        updateCommunityConversation: function(id, modifications, callback) {
-          expect(id).to.equal(data.community._id);
-          expect(modifications).to.equal(data.modifications);
-          callback(null, conversation);
-          expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE);
-          expect(globalPublish).to.have.been.calledWith({conversation: conversation, deleteMembers: modifications.deleteMembers});
-          done();
-        }
-      };
-
-      module.start(conversationMock);
-      comunityUpdateListener(data);
-    });
-
-    it('should listen for new member on community and add them to the corresponding chat', function(done) {
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
-      var data = {
-        target: {id: 'targetId'},
-        member: {objectType: 'user', id: 'memberId'}
-      };
-      var conversation = {_id: 'conversationId'};
-      var conversationMock = {
-        getCommunityConversationByCommunityId: function(id, callback) {
-          expect(id).to.equal(data.target.id);
-          callback(null, conversation);
-        },
-        addMemberToConversation: function(conv, id) {
-          expect(conv).to.equals(conversation._id);
-          expect(id).to.equals(data.member.id);
-          done();
-        }
-      };
-
-      module.start(conversationMock);
-      memberAddedListener(data);
     });
 
     it('should not save, populate and keep state when message.type is user_typing', function(done) {

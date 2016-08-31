@@ -5,13 +5,14 @@ var expect = require('chai').expect;
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var _ = require('lodash');
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  var deps, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUptated;
+  var deps, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -28,7 +29,12 @@ describe('The linagora.esn.chat conversation lib', function() {
       publish: sinon.spy()
     };
 
-    channelTopicUptated = {
+    channelTopicUpdateTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelUpdateTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -103,10 +109,13 @@ describe('The linagora.esn.chat conversation lib', function() {
               return channelCreationTopic;
             }
             if (name === TOPIC_UPDATED) {
-              return channelTopicUptated;
+              return channelTopicUpdateTopic;
             }
             if (name === ADD_MEMBERS_TO_CHANNEL) {
               return channelAddMember;
+            }
+            if (name === CONVERSATION_UPDATE) {
+              return channelUpdateTopic;
             }
           }
         }
@@ -400,7 +409,7 @@ describe('The linagora.esn.chat conversation lib', function() {
   });
 
   describe('The removeMembersFromChannel function', function() {
-    it('should call Chanell.update with the correct parameter', function(done) {
+    it('should call Channel.update with the correct parameter', function(done) {
       var channelId = 'channelId';
       var userId = 'userId';
       var anObjectId = {};
@@ -416,6 +425,24 @@ describe('The linagora.esn.chat conversation lib', function() {
           }
         });
         cb();
+      };
+
+      require('../../../backend/lib/conversation')(dependencies).removeMemberFromConversation(channelId, userId, done);
+    });
+
+    it('should publish the channel modification', function(done) {
+      var channelId = 'channelId';
+      var userId = 'userId';
+      var anObjectId = {};
+      ObjectIdMock = sinon.stub().returns(anObjectId);
+
+      modelsMock.ChatConversation.update = function(query, options, cb) {
+        var conversation = 'conversation';
+        cb(null, conversation);
+        expect(channelUpdateTopic).to.have.been.calledWith({
+          conversation: conversation,
+          deleteMembers: [{_id: userId}]
+        });
       };
 
       require('../../../backend/lib/conversation')(dependencies).removeMemberFromConversation(channelId, userId, done);

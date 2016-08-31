@@ -1,5 +1,5 @@
 .block-header.visible-md
-  h2 \#{{::chatLocalStateService.activeRoom.name}}
+  h2 \#{{::getConversationName(chatLocalStateService.activeRoom)}}
   ul.actions
     li
       a(href='')

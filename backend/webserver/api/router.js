@@ -78,5 +78,9 @@ module.exports = function(dependencies, lib) {
       authorizationMW.requiresAPILogin,
       controller.markAllMessageOfAConversationReaded);
 
+  router.put('/conversations/:id',
+    authorizationMW.requiresAPILogin,
+    controller.updateConversation);
+
   return router;
 };

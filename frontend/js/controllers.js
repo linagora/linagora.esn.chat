@@ -9,7 +9,7 @@ angular.module('linagora.esn.chat')
 
     $scope.chatLocalStateService = chatLocalStateService;
     if (!chatLocalStateService.activeRoom._id) {
-      chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
+      chatLocalStateService.channels[0] && chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
     }
   })
 
@@ -29,7 +29,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatConversationItemController', function($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils) {
+  .controller('chatConversationItemController', function($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, conversationsService) {
     $scope.channelState = $scope.channelState || 'chat.channels-views';
     $scope.allUsersConnected = true;
     var userToConnected = {};
@@ -38,6 +38,10 @@ angular.module('linagora.esn.chat')
       $scope.item.last_message.text = chatParseMention.chatParseMention($scope.item.last_message.text, $scope.item.last_message.user_mentions, {skipLink: true});
       $scope.item.last_message.text = $filter('esnEmoticonify')($scope.item.last_message.text, {class: 'chat-emoji'});
     }
+
+    conversationsService.getConversationNamePromise.then(function(getConversationName) {
+      $scope.getConversationName = getConversationName;
+    });
 
     function calcNumberOfDays(last_message) {
       var d1 = moment().startOf('day');
@@ -59,8 +63,8 @@ angular.module('linagora.esn.chat')
 
     session.ready.then(function(session) {
       $scope.otherUsers = _.reject($scope.item.members, {_id: session.user._id});
-      if ($scope.item.type === CHAT_CONVERSATION_TYPE.PRIVATE && $scope.otherUsers.length > 1) {
-        $scope.item.name = _.map($scope.otherUsers, 'firstname').join(', ');
+      if ($scope.otherUsers.length > 1) {
+        $scope.conversationName = $scope.item.name || _.map($scope.otherUsers, 'firstname').join(', ');
       }
 
       if ($scope.item.last_message.creator) {
@@ -106,6 +110,9 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .controller('chatConversationSubheaderController', function($scope, chatLocalStateService) {
+  .controller('chatConversationSubheaderController', function($scope, chatLocalStateService, conversationsService) {
     $scope.chatLocalStateService = chatLocalStateService;
+    conversationsService.getConversationNamePromise.then(function(getConversationName) {
+      $scope.getConversationName = getConversationName;
+    });
   });

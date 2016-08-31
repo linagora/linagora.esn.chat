@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon: false */
+/* global chai, sinon, _: false */
 
 var expect = chai.expect;
 
@@ -33,11 +33,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
     };
 
     sessionMock = {
-      ready: {
-        then: function(callback) {
-          return callback({user: user});
-        }
-      }
+      ready: null
     };
 
     conversationsServiceMock = {
@@ -62,7 +58,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
     }
 
     module('linagora.esn.chat', function($provide) {
-      $provide.value('session', sessionMock);
+      $provide.factory('session', function($q) {
+        sessionMock.ready = $q.when({user: user});
+        return sessionMock;
+      });
       $provide.factory('livenotification', livenotificationFactory);
     });
   });
@@ -96,23 +95,45 @@ describe('The linagora.esn.chat conversationsServices', function() {
     })));
   });
 
-  describe('computeGroupName', function() {
+  describe('getConversationNamePromise', function() {
+    var getConversationName;
+
+    beforeEach(function() {
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
+      conversationsService.getConversationNamePromise.then(function(gcn) {
+        getConversationName = gcn;
+      });
+      $rootScope.$digest();
+      $httpBackend.flush();
+      expect(getConversationName).to.be.a.function;
+    });
+
     it('should use firstname and lastname', function() {
-      expect(conversationsService.computeGroupName('userId', {
+      expect(getConversationName({
         members: [{_id: 'youId', firstname: 'you', lastname: 'YOU'}]
       })).to.equal('you YOU');
     });
 
     it('should remove remove user which has the given id', function() {
-      expect(conversationsService.computeGroupName('userId', {
+      expect(getConversationName({
         members: [{_id: 'userId', firstname: 'me', lastname: 'ME'}, {_id: 'youId', firstname: 'you', lastname: 'YOU'}]
       })).to.equal('you YOU');
     });
 
     it('should display all user if more than one', function() {
-      expect(conversationsService.computeGroupName('userId', {
+      expect(getConversationName({
         members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
       })).to.equal('Eric Cartman, Stan Marsh, Kenny McCormick');
+    });
+
+    it('should keep conversation name if it is defined no matter the type of the conversation', function() {
+      _.map(CHAT_CONVERSATION_TYPE, function(type) {
+        expect(getConversationName({
+          name: 'name',
+          type: type,
+          members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
+        })).to.equal('name');
+      });
     });
   });
 
@@ -260,7 +281,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledWith(sinon.match({
-        0: {_id: 1, name: '1 1'},
+        0: {_id: 1},
         length: 2
       }));
     });
@@ -279,17 +300,13 @@ describe('The linagora.esn.chat conversationsServices', function() {
       conversationsService.getPrivateConversations().then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match({
-        0: {_id: 1, name: '1 1'},
+        0: {_id: 1},
         length: 2
       }));
     });
   });
 
   describe('updateConversationTopic', function() {
-    beforeEach(function() {
-      sessionMock.user = $q.when({user: user});
-    });
-
     it('should return the channel affected', function() {
       var value = 'Default';
       var channel = {
@@ -297,11 +314,12 @@ describe('The linagora.esn.chat conversationsServices', function() {
       };
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([]);
+      $rootScope.$digest();
+      $httpBackend.flush();
       $httpBackend.expectPUT('/chat/api/chat/conversations/channelId/topic', {
         value: value,
       }).respond(channel);
       conversationsService.updateConversationTopic(value, 'channelId');
-      $rootScope.$digest();
       $httpBackend.flush();
     });
   });

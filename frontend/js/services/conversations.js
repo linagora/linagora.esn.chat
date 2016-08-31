@@ -18,10 +18,6 @@ angular.module('linagora.esn.chat')
         session: session.ready
       }).then(function(resolved) {
         var conversations = resolved.conversations.data;
-        _.chain(conversations).filter({type: CHAT_CONVERSATION_TYPE.PRIVATE}).each(function(privateConversation) {
-          privateConversation.name = computeGroupName(resolved.session.user._id, privateConversation);
-        });
-
         defer.resolve(conversations);
       }, function(err) {
         $log.error('Can not fetch the user conversations', err);
@@ -29,15 +25,18 @@ angular.module('linagora.esn.chat')
       });
     }
 
-    function computeGroupName(myId, group) {
-      return _.chain(group.members)
-        .reject({_id: myId})
-        .map(function(u) {
-          return u.firstname + ' ' + u.lastname;
-        })
+    var getConversationNamePromise = session.ready.then(function(session) {
+      var myId = session.user._id;
+      return function(group) {
+        return group.name || _.chain(group.members)
+          .reject({_id: myId})
+          .map(function(u) {
+            return u.firstname + ' ' + u.lastname;
+          })
         .value()
-        .join(', ');
-    }
+          .join(', ');
+      };
+    });
 
     function getConversationByType(type) {
       return conversationsPromise.then(_.partialRight(_.filter, {type: type}));
@@ -59,18 +58,7 @@ angular.module('linagora.esn.chat')
           return conversation;
         }
 
-        return ChatRestangular.one('conversations', conversationId).get().then(function(response) {
-          conversation =  response.data;
-
-          if (!conversation || conversation.type !== CHAT_CONVERSATION_TYPE.PRIVATE) {
-            return conversation;
-          }
-
-          return session.ready.then(function(session) {
-            conversation.name = computeGroupName(session.user._id, conversation);
-            return conversation;
-          });
-        });
+        return ChatRestangular.one('conversations', conversationId).get().then(_.property('data'));
       });
     }
 
@@ -91,7 +79,6 @@ angular.module('linagora.esn.chat')
 
     function addPrivateConversation(privateConversation) {
       privateConversation.type = CHAT_CONVERSATION_TYPE.PRIVATE;
-      privateConversation.name = computeGroupName(session.user._id, privateConversation);
       return postConversations(privateConversation);
     }
 
@@ -146,8 +133,16 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function updateConversation(conversationId, modifications) {
+      var body = {
+        conversation: conversationId,
+        modifications: modifications
+      };
+      return ChatRestangular.one('conversations', conversationId).customPUT(body);
+    }
+
     return {
-      computeGroupName: computeGroupName,
+      getConversationNamePromise: getConversationNamePromise,
       deleteConversation: deleteConversation,
       leaveConversation: leaveConversation,
       getConversations: getConversations,
@@ -159,6 +154,7 @@ angular.module('linagora.esn.chat')
       updateConversationTopic: updateConversationTopic,
       setTopicChannel: setTopicChannel,
       markAllMessageReaded: markAllMessageReaded,
-      getConversationByCommunityId: getConversationByCommunityId
+      getConversationByCommunityId: getConversationByCommunityId,
+      updateConversation: updateConversation
     };
   });

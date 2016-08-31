@@ -377,6 +377,42 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function updateConversation(req, res) {
+    if (!req.body.conversation) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'You should provide the conversation id'
+        }
+      });
+    }
+
+    if (!req.body.modifications) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'You should provide the modifications of the conversation'
+        }
+      });
+    }
+
+    lib.conversation.updateConversation(req.body.conversation, req.body.modifications, function(err, conversation) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while update the conversation ' + req.body.id
+          }
+        });
+      }
+
+      res.status(200).json(conversation);
+    });
+  }
+
   return {
     getMessage: getMessage,
     getMessages: getMessages,
@@ -394,6 +430,7 @@ module.exports = function(dependencies, lib) {
     leaveConversation: leaveConversation,
     deleteConversation: deleteConversation,
     createConversation: createConversation,
-    updateTopic: updateTopic
+    updateTopic: updateTopic,
+    updateConversation: updateConversation
   };
 };
