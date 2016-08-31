@@ -264,16 +264,22 @@ module.exports = function(dependencies) {
         return callback(err);
       }
 
-      channelUpdateTopic.publish({
-        conversation: conversation,
-        deleteMembers: modifications.deleteMembers
-      });
+      Conversation.populate(conversation.toObject(), 'members', function(err, conversation) {
+        if (err) {
+          return callback(err);
+        }
 
-      if (modifications.newMembers && modifications.newMembers.length) {
-        makeAllMessageReadedForAnUserHelper((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
-      } else {
-        callback(err, conversation);
-      }
+        channelUpdateTopic.publish({
+          conversation: conversation,
+          deleteMembers: modifications.deleteMembers
+        });
+
+        if (modifications.newMembers && modifications.newMembers.length) {
+          makeAllMessageReadedForAnUserHelper((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
+        } else {
+          callback(err, conversation);
+        }
+      });
     }
 
     var nextMongoModification = null;
