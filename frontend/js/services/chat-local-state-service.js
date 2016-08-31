@@ -83,6 +83,10 @@ angular.module('linagora.esn.chat')
       return _.find(service.conversations, {_id: conversationId});
     }
 
+    function find(filter) {
+      return _.find(service.conversations, filter);
+    }
+
     function isActiveRoom(conversationId) {
       return conversationId === service.activeRoom._id;
     }
@@ -197,6 +201,7 @@ angular.module('linagora.esn.chat')
       ready: deferred.promise,
       unsetActive: unsetActive,
       initLocalState: initLocalState,
+      find: find,
       findConversation: findConversation,
       isActiveRoom: isActiveRoom,
       getNumberOfUnreadedMessages: getNumberOfUnreadedMessages,
