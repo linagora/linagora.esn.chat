@@ -37,6 +37,12 @@ angular.module('linagora.esn.chat')
         };
 
         $scope.groups = chatLocalStateService.conversations;
+
+        $scope.hasWantedConversation = function() {
+          return $scope.groups.some(function(group) {
+            return $scope.wanted(group);
+          });
+        };
       }
     };
   })
