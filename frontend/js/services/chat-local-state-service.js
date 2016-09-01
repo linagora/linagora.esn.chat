@@ -149,6 +149,7 @@ angular.module('linagora.esn.chat')
         if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
           insertConversationInSortedArray(service.channels, conversation);
         } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+          conversation.name = conversationsService.computeGroupName(session.user._id, conversation);
           insertConversationInSortedArray(service.privateConversations, conversation);
         } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
           insertConversationInSortedArray(service.communityConversations, conversation);

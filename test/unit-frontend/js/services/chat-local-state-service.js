@@ -51,6 +51,9 @@ describe('chatLocalState service', function() {
         }),
         leaveConversation: sinon.spy(function() {
           return $q.when(null);
+        }),
+        computeGroupName: sinon.spy(function() {
+          return 'aNewName';
         })
       };
 
@@ -223,11 +226,12 @@ describe('chatLocalState service', function() {
       expect(chatLocalStateService.conversations).to.include(channel);
     });
 
-    it('should add a private conversation', function() {
+    it('should add a private conversation and compute its name', function() {
       var privateConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}};
       chatLocalStateService.addConversation(privateConversation);
       expect(chatLocalStateService.privateConversations).to.include(privateConversation);
       expect(chatLocalStateService.conversations).to.include(privateConversation);
+      expect(chatLocalStateService.findConversation('group3').name).to.equal('aNewName');
     });
 
     it('should add a community', function() {
