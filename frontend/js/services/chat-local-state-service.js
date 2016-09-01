@@ -42,6 +42,8 @@ angular.module('linagora.esn.chat')
 
         conv.name = conversation.name;
         conv.members = conversation.members;
+
+        $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.UPDATE, conv);
       });
 
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
