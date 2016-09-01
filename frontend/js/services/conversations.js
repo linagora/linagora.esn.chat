@@ -91,7 +91,6 @@ angular.module('linagora.esn.chat')
 
     function addPrivateConversation(privateConversation) {
       privateConversation.type = CHAT_CONVERSATION_TYPE.PRIVATE;
-      privateConversation.name = computeGroupName(session.user._id, privateConversation);
       return postConversations(privateConversation);
     }
 
