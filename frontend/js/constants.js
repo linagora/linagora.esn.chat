@@ -9,10 +9,11 @@ angular.module('linagora.esn.chat')
     USER_CHANGE_STATE: 'user:state',
     NEW_CONVERSATION: 'chat:channel:creation',
     CONVERSATION_DELETION: 'chat:channel:deletion',
-    SWITCH_CURRENT_CHANNEL: 'chat:channel:switch_current_channel',
     TEXT_MESSAGE: 'chat:message:text',
     FILE_MESSAGE: 'chat:message:file',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
+    SET_ACTIVE_ROOM: 'chat:message:set_active_room',
+    UNSET_ACTIVE_ROOM: 'chat:message:unset_active_room',
     CONVERSATIONS: {
       NEW: 'chat:conversations:new',
       ADD_NEW_MEMBERS: 'chat:conversation:members:add',

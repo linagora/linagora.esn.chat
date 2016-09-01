@@ -24,13 +24,6 @@ angular.module('linagora.esn.chat')
         'main@chat': {
           template: '<sub-header><chat-conversation-subheader/></sub-header><chat-conversation-view/>'
         }
-      },
-      onEnter: function($stateParams, chatLocalStateService) {
-        if (!$stateParams.id) {
-          chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
-        } else {
-          chatLocalStateService.setActive($stateParams.id);
-        }
       }
     })
     .state('chat.groups-add', {
