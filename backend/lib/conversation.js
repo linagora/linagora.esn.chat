@@ -241,7 +241,7 @@ module.exports = function(dependencies) {
 
     var mongoModifications = {};
 
-    if (modifications.newMembers) {
+    if (modifications.newMembers && modifications.newMembers.length) {
       mongoModifications.$addToSet = {
         members: {
           $each: modifications.newMembers.map(ensureObjectId)
@@ -249,7 +249,7 @@ module.exports = function(dependencies) {
       };
     }
 
-    if (modifications.deleteMembers) {
+    if (modifications.deleteMembers && modifications.deleteMembers.length) {
       mongoModifications.$pullAll = {
         members: modifications.deleteMembers.map(ensureObjectId)
       };
@@ -259,20 +259,41 @@ module.exports = function(dependencies) {
       mongoModifications.$set = {name: modifications.name};
     }
 
-    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, function(err, conversation) {
+    function done(callback, err, conversation) {
       if (err) {
         return callback(err);
       }
 
-      channelUpdateTopic.publish({
-        conversation: conversation,
-        deleteMembers: modifications.deleteMembers
-      });
+      Conversation.populate(conversation.toObject(), 'members', function(err, conversation) {
+        if (err) {
+          return callback(err);
+        }
 
-      if (mongoModifications.$addToSet) {
-        makeAllMessageReadedForAnUserHelper(mongoModifications.$addToSet.$each, conversation, callback);
+        channelUpdateTopic.publish({
+          conversation: conversation,
+          deleteMembers: modifications.deleteMembers
+        });
+
+        if (modifications.newMembers && modifications.newMembers.length) {
+          makeAllMessageReadedForAnUserHelper((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
+        } else {
+          callback(err, conversation);
+        }
+      });
+    }
+
+    var nextMongoModification = null;
+    if (mongoModifications.$addToSet && mongoModifications.$pullAll) {
+      //mongo does not allow to do those modification in one request
+      nextMongoModification = {$addToSet: mongoModifications.$addToSet};
+      delete mongoModifications.$addToSet;
+    }
+
+    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, function(err, conversation) {
+      if (nextMongoModification) {
+        Conversation.findOneAndUpdate({_id: communityId}, nextMongoModification, done.bind(null, callback));
       } else {
-        callback(err, conversation);
+        done(callback, err, conversation);
       }
     });
   }
