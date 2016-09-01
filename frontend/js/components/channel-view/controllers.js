@@ -18,6 +18,20 @@ angular.module('linagora.esn.chat')
         chatLocalStateService,
         $stateParams) {
 
+    chatLocalStateService.ready.then(function() {
+      if (!$stateParams.id) {
+        chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
+      } else {
+        chatLocalStateService.setActive($stateParams.id);
+      }
+
+      ChatConversationService.fetchMessages(chatLocalStateService.activeRoom._id, {}).then(function(result) {
+        result.forEach(addUniqId);
+        $scope.messages = result || [];
+        ChatScroll.scrollDown();
+      });
+    });
+
     $scope.chatLocalStateService = chatLocalStateService;
     $scope.user = session.user;
     $scope.messages = [];
@@ -26,12 +40,6 @@ angular.module('linagora.esn.chat')
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
     }
-
-    ChatConversationService.fetchMessages(chatLocalStateService.activeRoom._id, {}).then(function(result) {
-      result.forEach(addUniqId);
-      $scope.messages = result || [];
-      ChatScroll.scrollDown();
-    });
 
     function insertMessage(messages, message) {
       addUniqId(message);
