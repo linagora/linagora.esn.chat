@@ -93,7 +93,7 @@ describe('chatLocalState service', function() {
 
       expect(chatLocalStateService.activeRoom).to.be.deep.equal(channels[0]);
       expect(isSet).to.be.equal(true);
-      expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, channels[0]);
+      expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SET_ACTIVE_ROOM, channels[0]);
     });
 
     it('should set activeRoom the group channel and broadcast it on $rootScope', function() {
@@ -102,7 +102,7 @@ describe('chatLocalState service', function() {
 
       expect(chatLocalStateService.activeRoom).to.be.deep.equal(groups[1]);
       expect(isSet).to.be.equal(true);
-      expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, groups[1]);
+      expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.SET_ACTIVE_ROOM, groups[1]);
     });
 
     it('should not set activeRoom a channel who don\'t exist', function() {

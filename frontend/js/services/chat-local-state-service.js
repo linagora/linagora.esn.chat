@@ -7,6 +7,8 @@ angular.module('linagora.esn.chat')
 
     var deferred = $q.defer();
 
+    var activeRoom = {};
+
     function initLocalState() {
       conversationsService.getConversations().then(function(conversations) {
         conversations.forEach(function(conversation) {
@@ -17,7 +19,7 @@ angular.module('linagora.esn.chat')
       }, function(err) {
         $log.error('Error while getting conversations', err);
       });
-      service.activeRoom = {};
+      activeRoom = {};
 
       var sio = livenotification(CHAT_NAMESPACE);
       sio.on(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
@@ -88,7 +90,7 @@ angular.module('linagora.esn.chat')
     }
 
     function isActiveRoom(conversationId) {
-      return conversationId === service.activeRoom._id;
+      return conversationId === activeRoom._id;
     }
 
     function setActive(conversationId) {
@@ -102,10 +104,10 @@ angular.module('linagora.esn.chat')
       }
       conversation.unreadMessageCount = 0;
       conversation.mentionCount = 0;
-      service.activeRoom = conversation;
+      activeRoom = conversation;
 
       conversationsService.markAllMessageReaded(conversation._id);
-      $rootScope.$broadcast(CHAT_EVENTS.SWITCH_CURRENT_CHANNEL, conversation);
+      $rootScope.$broadcast(CHAT_EVENTS.SET_ACTIVE_ROOM, conversation);
 
       return true;
     }
@@ -193,7 +195,8 @@ angular.module('linagora.esn.chat')
     }
 
     function unsetActive() {
-      service.activeRoom = {};
+      activeRoom = {};
+      $rootScope.$broadcast(CHAT_EVENTS.UNSET_ACTIVE_ROOM);
     }
 
     service = {
@@ -212,7 +215,9 @@ angular.module('linagora.esn.chat')
       privateConversations: [],
       communityConversations: [],
       conversations: [],
-      activeRoom: {}
+      get activeRoom() {
+        return activeRoom;
+      }
     };
 
     return service;
