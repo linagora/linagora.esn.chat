@@ -25,6 +25,12 @@ angular.module('linagora.esn.chat')
       });
     }
 
+    function resetCache() {
+      defer = $q.defer();
+      conversationsPromise = defer.promise;
+      fetchAllConversation();
+    }
+
     var getConversationNamePromise = session.ready.then(function(session) {
       var myId = session.user._id;
       return function(group, onlyFirstName) {
@@ -153,6 +159,7 @@ angular.module('linagora.esn.chat')
 
     return {
       getConversationNamePromise: getConversationNamePromise,
+      resetCache: resetCache,
       deleteConversation: deleteConversation,
       leaveConversation: leaveConversation,
       getConversations: getConversations,
