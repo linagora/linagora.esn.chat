@@ -19,7 +19,7 @@
           i.mdi.mdi-magnify
         input(ng-model='ctlr.textInput',
               ng-change='ctlr.searchTextChange()',
-              placeholder='Search for an emoticon')
+              placeholder="#{__('Search for an emoticon')}")
       .all
         infinite-list(load-more-elements='ctlr.entitySelector.loadMoreElements()', scroll-inside-container='true')
           a.emoticon-info(ng-repeat="emoji in ctlr.entitySelector.entityListDisplayed",
