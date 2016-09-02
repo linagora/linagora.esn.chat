@@ -27,14 +27,24 @@ angular.module('linagora.esn.chat')
 
     var getConversationNamePromise = session.ready.then(function(session) {
       var myId = session.user._id;
-      return function(group) {
-        return group.name || _.chain(group.members)
-          .reject({_id: myId})
-          .map(function(u) {
-            return u.firstname + ' ' + u.lastname;
-          })
-        .value()
-          .join(', ');
+      return function(group, onlyFirstName) {
+        function userToString(u) {
+          return onlyFirstName ? u.firstname : (u.firstname + ' ' + u.lastname);
+        }
+
+        if (!group || (!group.name && !group.members)) {
+          return;
+        } else if (group.name) {
+          return group.name;
+        } else if (group.members.length === 1) {
+          return userToString(group.members[0]);
+        } else {
+          return _.chain(group.members)
+            .reject({_id: myId})
+            .map(userToString)
+            .value()
+            .join(', ');
+        }
       };
     });
 
