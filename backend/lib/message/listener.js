@@ -60,7 +60,7 @@ module.exports = function(dependencies) {
     }
 
     function populateTypingMessage(data, callback) {
-      (new ChatMessage(data)).populate('creator', function(err, message) {
+      (new ChatMessage(data)).populate('creator', CONSTANTS.SKIP_FIELDS.USER, function(err, message) {
         if (err) {
           callback(err);
           return;

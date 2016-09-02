@@ -36,5 +36,8 @@ module.exports = {
     PRIVATE: 'private',
     CHANNEL: 'channel',
     COMMUNITY: 'community'
+  },
+  SKIP_FIELDS: {
+    USER: '-password -accounts'
   }
 };
