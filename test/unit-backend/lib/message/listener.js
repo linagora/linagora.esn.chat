@@ -113,8 +113,9 @@ describe('The linagora.esn.chat lib listener module', function() {
       var module = require('../../../../backend/lib/message/listener')(dependencies);
       module.start(channel);
 
-      ChatMessageMock.populate = function(field, callback) {
+      ChatMessageMock.populate = function(field, excluded_field, callback) {
         expect(field).to.equals('creator');
+        expect(excluded_field).to.be.equal(CONSTANTS.SKIP_FIELDS.USER);
         expect(ChatMessageMock).to.have.been.calledWith(data.message);
         callback(null, {toJSON: _.constant({})});
         expect(globalPublish).to.have.been.calledWith({room: data.room, message: {state: data.message.state}});

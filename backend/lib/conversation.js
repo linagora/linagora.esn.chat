@@ -9,6 +9,7 @@ var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var async = require('async');
 var _ = require('lodash');
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+var SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
 
@@ -26,7 +27,7 @@ module.exports = function(dependencies) {
   var logger = dependencies('logger');
 
   function getChannels(options, callback) {
-    Conversation.find({type: CONVERSATION_TYPE.CHANNEL}).populate('members').exec(function(err, channels) {
+    Conversation.find({type: CONVERSATION_TYPE.CHANNEL}).populate('members', SKIP_FIELDS.USER).exec(function(err, channels) {
       channels = channels || [];
       if (channels.length === 0) {
         return createConversation(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
@@ -41,11 +42,11 @@ module.exports = function(dependencies) {
   }
 
   function getConversation(channel, callback) {
-    Conversation.findById(channel).populate('members').exec(callback);
+    Conversation.findById(channel).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
   function getCommunityConversationByCommunityId(communityId, callback) {
-    Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members').exec(callback);
+    Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
   function deleteConversation(channel, callback) {
@@ -90,7 +91,7 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Conversation.find(request).populate('members').populate('last_message.creator').populate('last_message.user_mentions').sort('-last_message.date').exec(callback);
+    Conversation.find(request).populate('members', SKIP_FIELDS.USER).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
   }
 
   function createConversation(options, callback) {
@@ -316,7 +317,7 @@ module.exports = function(dependencies) {
   }
 
   function getMessage(messageId, callback) {
-    ChatMessage.findById(messageId).populate('creator user_mentions').exec(callback);
+    ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
   }
 
   function getMessages(channel, query, callback) {
@@ -324,8 +325,8 @@ module.exports = function(dependencies) {
     var channelId = channel._id || channel;
     var q = {channel: channelId};
     var mq = ChatMessage.find(q);
-    mq.populate('creator');
-    mq.populate('user_mentions');
+    mq.populate('creator', SKIP_FIELDS.USER);
+    mq.populate('user_mentions', SKIP_FIELDS.USER);
     mq.limit(query.limit || 20);
     mq.skip(query.offset || 0);
     mq.sort('-timestamps.creation');
