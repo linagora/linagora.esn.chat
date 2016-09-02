@@ -51,7 +51,8 @@ describe('chatLocalState service', function() {
         }),
         leaveConversation: sinon.spy(function() {
           return $q.when(null);
-        })
+        }),
+        resetCache: sinon.spy()
       };
 
       return conversationsServiceMock;

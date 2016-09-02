@@ -10,6 +10,13 @@ angular.module('linagora.esn.chat')
     var activeRoom = {};
 
     function initLocalState() {
+      conversationsService.resetCache();
+      service.channels = [];
+      service.privateConversations = [];
+      service.conversations = [];
+      service.communityConversations = [];
+      activeRoom = {};
+
       conversationsService.getConversations().then(function(conversations) {
         conversations.forEach(function(conversation) {
           addConversation(conversation);

@@ -193,6 +193,23 @@ describe('The linagora.esn.chat conversationsServices', function() {
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match(channel));
     });
+
+    it('should refetch data after the cache has been resetted', function() {
+      var channel = {_id: 'channelId', data: 'data1'};
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([channel]);
+      conversationsService.getChannels();
+      $rootScope.$digest();
+      $httpBackend.flush();
+
+      conversationsService.resetCache();
+      var newChannel = {_id: 'channelId', data: 'data2'};
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([newChannel]);
+      var callback = sinon.spy();
+      conversationsService.getConversation('channelId').then(callback);
+      $rootScope.$digest();
+      $httpBackend.flush();
+      expect(callback).to.have.been.calledWith(sinon.match(newChannel));
+    });
   });
 
   describe('getConversations', function() {
@@ -267,6 +284,40 @@ describe('The linagora.esn.chat conversationsServices', function() {
         length: 1
       }));
     });
+
+    it('should fetch data from the rest API when data has been cached from the first retrieve and if resetCache has been called mainwhile', function() {
+      var conversations = [{
+        _id: 1,
+        type: CHAT_CONVERSATION_TYPE.CHANNEL
+      }, {
+        _id: 2,
+        type: CHAT_CONVERSATION_TYPE.PRIVATE
+      }];
+      var callback = sinon.spy();
+
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(conversations);
+      conversationsService.getChannels();
+      $rootScope.$digest();
+      $httpBackend.flush();
+
+      var newConversations = [{
+        _id: 42,
+        type: CHAT_CONVERSATION_TYPE.CHANNEL
+      }, {
+        _id: 2,
+        type: CHAT_CONVERSATION_TYPE.PRIVATE
+      }];
+
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(newConversations);
+      conversationsService.resetCache();
+      conversationsService.getChannels().then(callback);
+      $httpBackend.flush();
+      $rootScope.$digest();
+      expect(callback).to.have.been.calledWith(sinon.match({
+        0: newConversations[0],
+        length: 1
+      }));
+    });
   });
 
   describe('getPrivateConversations', function() {
@@ -302,6 +353,32 @@ describe('The linagora.esn.chat conversationsServices', function() {
       expect(callback).to.have.been.calledWith(sinon.match({
         0: {_id: 1},
         length: 2
+      }));
+    });
+
+    it('should fetch data from the rest API when data has been cached from the first retieve if reset cache has been called mainwhile', function() {
+      var groups = [1, 2].map(function(i) {
+        return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
+      });
+
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(groups);
+      conversationsService.getPrivateConversations();
+      $rootScope.$digest();
+      $httpBackend.flush();
+
+      var newGroups = [1, 2, 3].map(function(i) {
+        return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
+      });
+      $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(newGroups);
+      conversationsService.resetCache();
+
+      var callback = sinon.spy();
+      conversationsService.getPrivateConversations().then(callback);
+      $httpBackend.flush();
+      $rootScope.$digest();
+      expect(callback).to.have.been.calledWith(sinon.match({
+        0: {_id: 1},
+        length: 3
       }));
     });
   });
