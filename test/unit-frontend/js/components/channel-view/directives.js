@@ -64,7 +64,7 @@ describe('The linagora.esn.chat conversation-view directive', function() {
       };
       initDirective();
       expect(angular.element(element.find('.day-divider')).length).to.be.equal(1);
-      expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal(moment(currentMessage.timestamps.creation, 'x').format('MMMM Do'));
+      expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal(moment(currentMessage.timestamps.creation, 'x').format('Do MMMM'));
     });
 
     it('should create a message separation with value Yesterday', function() {

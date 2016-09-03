@@ -232,7 +232,7 @@ angular.module('linagora.esn.chat')
         };
 
         $scope.formatDate = function(timestamp) {
-          return moment(timestamp, 'x').format('MMMM Do');
+          return moment(timestamp, 'x').format('Do MMMM');
         };
       }
     };
