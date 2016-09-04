@@ -69,7 +69,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function deleteConversation(req, res) {
-    lib.conversation.deleteConversation(req.params.id, function(err, result) {
+    lib.conversation.deleteConversation(req.user._id, req.params.id, function(err, numDeleted) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -79,7 +79,27 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-      res.status(200).json(result);
+
+      if (!req.params.id) {
+        return res.status(400).json({
+          error: {
+            code: 400,
+            message: 'Bad request',
+            details: 'You should provide the conversation id'
+          }
+        });
+      }
+
+      if (!numDeleted) {
+        return res.status(404).json({
+          error: {
+            code: 500,
+            message: 'Not found',
+            details: 'Conversation not found'
+          }
+        });
+      }
+      res.status(200).end();
     });
   }
 

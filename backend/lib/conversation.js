@@ -49,12 +49,13 @@ module.exports = function(dependencies) {
     Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function deleteConversation(channel, callback) {
-    Conversation.findByIdAndRemove(channel, function(err) {
+  function deleteConversation(userId, channel, callback) {
+    Conversation.remove({_id: channel, members: userId}, function(err, result) {
       if (!err) {
         channelDeletionTopic.publish(channel);
       }
-      callback.apply(null, arguments);
+
+      callback(err, result.result.n);
     });
   }
 
