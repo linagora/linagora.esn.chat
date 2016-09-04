@@ -14,6 +14,7 @@ module.exports = function(dependencies) {
     name: {type: String},
     type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COMMUNITY], required: true, index: true},
     creator: {type: ObjectId, ref: 'User'},
+    avatar: ObjectId,
     isNotRead: {type: Boolean},
     members: [{type: ObjectId, ref: 'User', index: true}],
     community: {type: ObjectId, ref: 'Community', index: true, unique: true, sparse: true},

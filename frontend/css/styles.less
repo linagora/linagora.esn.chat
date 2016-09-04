@@ -9,7 +9,7 @@
 
 body {
   #wrap {
-    padding-bottom: 0px!important; // to override inherited value from la cerise 
+    padding-bottom: 0px!important; // to override inherited value from la cerise
   }
 }
 
@@ -100,5 +100,57 @@ body {
 @media (min-width: @screen-sm-min) {
   #messages-main .ms-body {
     padding-left: 0;
+  }
+}
+
+.chat-image-container {
+  .flex-wrap();
+  height: 100%;
+
+  &.chat-image-container-size-3 {
+    .flex-direction(column);
+  }
+
+  img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  img.avatar {
+    width: 100%;
+  }
+
+  &.chat-image-container-size-1 > div {
+    height: 100%;
+  }
+
+  &.chat-image-container-size-2 > div {
+    height: 100%;
+    .flex-shorthand(0, 0, 50%);
+    overflow: hidden;
+
+    img {
+      margin-left: -50%;
+    }
+  }
+
+  &.chat-image-container-size-3 > div {
+    &.chat-image-avatar-position-0 {
+      width: 50%;
+      .flex-shorthand(0, 0, 100%);
+      height: 100%;
+      img {
+        margin-left: -50%;
+      }
+    }
+    overflow: hidden;
+    .flex-shorthand(0, 0, 50%);
+    height: 50%;
+  }
+
+  &.chat-image-container-size-4 > div {
+    overflow: hidden;
+    .flex-shorthand(0, 0, 50%);
+    height: 50%;
   }
 }
