@@ -748,11 +748,34 @@ describe('The chat API', function() {
   });
 
   describe('DELETE /api/conversation', function() {
+    it('should return 404 and not delete the conversation for a conversation where the user is not in', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
+      }).then(function(mongoResponse) {
+        channelId = mongoResponse._id;
+        return Q.denodeify(function(callback) {
+          request(app.express)
+            .delete('/api/conversations/' + channelId)
+            .expect(404)
+            .end(callback);
+        })();
+      }).then(function(res) {
+        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+      }).then(function(channel) {
+        expect(channel).to.not.be.null;
+        done();
+      }).catch(done);
+    });
+
     it('should delete a conversation', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.createConversation)({
-        type: CONVERSATION_TYPE.CHANNEL
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
         return Q.denodeify(function(callback) {
