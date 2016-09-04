@@ -55,7 +55,7 @@ module.exports = function(dependencies) {
         channelDeletionTopic.publish(channel);
       }
 
-      callback(err, result.result.n);
+      callback(err, result);
     });
   }
 

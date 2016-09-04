@@ -60,11 +60,12 @@
   "license": "AGPLv3",
   "dependencies": {
     "async": "^2.0.0-rc.2",
-    "lodash": "4.7.0",
     "awesome-module": "1.0.0",
     "bower": "1.7.0",
     "express": "4.13.3",
     "i18n": "~0.4.1",
+    "lodash": "4.7.0",
+    "mongoose": "^3.8.23",
     "node-uuid": "^1.4.7",
     "q": "1.4.1",
     "request": "2.69.0"
