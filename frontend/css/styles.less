@@ -104,25 +104,29 @@ body {
 }
 
 .chat-image-container {
-  display: flex;
+  .flex-wrap();
   height: 100%;
-  flex-wrap: wrap;
 
   &.chat-image-container-size-3 {
-    flex-direction: column;
+    .flex-direction(column);
   }
 
   img {
     height: 100%;
+    object-fit: cover;
   }
 
-  &.chat-image-container-size-1>div {
+  img.avatar {
+    width: 100%;
+  }
+
+  &.chat-image-container-size-1 > div {
     height: 100%;
   }
 
-  &.chat-image-container-size-2>div {
+  &.chat-image-container-size-2 > div {
     height: 100%;
-    flex: 0 0 50%;
+    .flex-shorthand(0, 0, 50%);
     overflow: hidden;
 
     img {
@@ -130,7 +134,7 @@ body {
     }
   }
 
-  &.chat-image-container-size-3>div {
+  &.chat-image-container-size-3 > div {
     &.chat-image-avatar-position-0 {
       width: 50%;
       .flex-shorthand(0, 0, 100%);
@@ -140,13 +144,13 @@ body {
       }
     }
     overflow: hidden;
-    flex: 0 0 50%;
+    .flex-shorthand(0, 0, 50%);
     height: 50%;
   }
 
-  &.chat-image-container-size-4>div {
+  &.chat-image-container-size-4 > div {
     overflow: hidden;
-    flex: 0 0 50%;
+    .flex-shorthand(0, 0, 50%);
     height: 50%;
   }
 }

@@ -559,6 +559,7 @@ describe('The linagora.esn.chat webserver controller', function() {
       var name = 'MyChannel';
       var topic = 'MyTopic';
       var purpose = 'MyPurpose';
+      var avatar = 'avatar';
       var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.createConversation({
         user: user,
@@ -567,6 +568,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           name: name,
           type: 'type',
           topic: topic,
+          avatar: avatar,
           purpose: purpose
         }
       }, {
@@ -575,6 +577,7 @@ describe('The linagora.esn.chat webserver controller', function() {
               name: name,
               type: 'type',
               creator: user,
+              avatar: avatar,
               topic: {
                 value: topic,
                 creator: user

@@ -1,4 +1,6 @@
-.chat-image-container(ng-class="'chat-image-container-size-' + getMembers().length")
+.chat-image-container(ng-if='conversation.avatar')
+  img.avatar(src='images/user.png', ng-src="/api/avatars?objectType=image&id={{conversation.avatar}}")
+.chat-image-container(ng-if='!conversation.avatar', ng-class="'chat-image-container-size-' + getMembers().length")
   div(ng-repeat='member in getMembers() track by member._id', ng-class="'chat-image-avatar-position-' + $index")
     a(ui-sref='cerise.base.profile({id: member._id})', title='{{member.name}} <{{member.address}}>')
       img(src='images/user.png', ng-src="/api/users/{{::member._id}}/profile/avatar")
