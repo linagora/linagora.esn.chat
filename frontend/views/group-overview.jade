@@ -1,7 +1,6 @@
 .row.group-item(ng-class="{'chat-unread-conversation': item.unreadMessageCount > 0}")
   .col-xs-2.group-badge
-    a(ui-sref='cerise.base.profile({id: otherUsers[0]._id})', title='{{otherUsers[0].name}} <{{otherUsers[0].address}}>')
-      img(src='images/user.png', ng-src="/api/users/{{::otherUsers[0]._id}}/profile/avatar")
+    chat-conversation-image(conversation='item')
   .col-xs-7.group-body(ui-sref='{{channelState}}({id: item._id})')
     .row
       .col-xs-12.group-name.ellipsis

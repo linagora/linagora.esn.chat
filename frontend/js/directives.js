@@ -59,6 +59,26 @@ angular.module('linagora.esn.chat')
     };
   })
 
+  .directive('chatConversationImage', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        conversation: '='
+      },
+      controller: function($scope, session, _) {
+        session.ready.then(function(session) {
+          $scope.getMembers = function() {
+            var members = $scope.conversation && $scope.conversation.members ? $scope.conversation.members : [];
+
+            members = members.length === 1 ? members : _.reject(members, {_id: session.user._id});
+            return members.slice(0, 4);
+          };
+        });
+      },
+      templateUrl: '/chat/views/conversation-image.html'
+    };
+  })
+
   .directive('chatConversationItem', function() {
     return {
       restrict: 'E',
