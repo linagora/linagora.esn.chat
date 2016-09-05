@@ -6,13 +6,14 @@ var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var _ = require('lodash');
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  var deps, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic;
+  var deps, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -35,6 +36,11 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
 
     channelUpdateTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelDeletionTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -116,6 +122,9 @@ describe('The linagora.esn.chat conversation lib', function() {
             }
             if (name === CONVERSATION_UPDATE) {
               return channelUpdateTopic;
+            }
+            if (name === CHANNEL_DELETION) {
+              return channelDeletionTopic;
             }
           }
         }
@@ -683,6 +692,24 @@ describe('The linagora.esn.chat conversation lib', function() {
       };
 
       require('../../../backend/lib/conversation')(dependencies).makeAllMessageReadedForAnUser(userId, channelId, done);
+    });
+  });
+
+  describe('The deleteConversation function', function() {
+    it('should delete the conversation and its messages', function() {
+      modelsMock.ChatConversation.findOneAndRemove = sinon.spy(function(query, cb) {
+        cb(null, {_id: 'channelId'});
+      });
+      modelsMock.ChatMessage = {
+        remove: sinon.spy(function(query, cb) {
+          cb();
+        })
+      };
+
+      require('../../../backend/lib/conversation')(dependencies).deleteConversation('userId', 'channelId', function() {
+        expect(modelsMock.ChatConversation.findOneAndRemove).to.have.been.calledWith({_id: 'channelId', members: 'userId'});
+        expect(modelsMock.ChatMessage.remove).to.have.been.calledWith({channel: 'channelId'});
+      });
     });
   });
 });
