@@ -50,12 +50,15 @@ module.exports = function(dependencies) {
   }
 
   function deleteConversation(userId, channel, callback) {
-    Conversation.remove({_id: channel, members: userId}, function(err, result) {
+    Conversation.findOneAndRemove({_id: channel, members: userId}, function(err, deleteResult) {
       if (!err) {
         channelDeletionTopic.publish(channel);
+        ChatMessage.remove({channel: channel}, function(err, result) {
+          callback(err, deleteResult);
+        });
+      } else {
+        callback(err);
       }
-
-      callback(err, result);
     });
   }
 
