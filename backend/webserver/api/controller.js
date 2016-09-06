@@ -126,7 +126,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.findConversationByTypeAndByMembers(CONSTANTS.PRIVATE, false, true, members, function(err, conversations) {
+    lib.conversation.findConversation({type: CONSTANTS.PRIVATE, exactMembersMatch: true, name: req.body.name ? req.body.name : null, members: members}, function(err, conversations) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -235,7 +235,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.findConversationByTypeAndByMembers(type, true, true, members, function(err, userGroups) {
+    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, function(err, userGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -309,7 +309,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function findMyConversationByType(type, req, res) {
-    lib.conversation.findConversationByTypeAndByMembers(type, true, false, [String(req.user._id)], function(err, usersGroups) {
+    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, usersGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -324,7 +324,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function findMyConversations(req, res)  {
-    lib.conversation.findConversationByTypeAndByMembers(req.query.type, true, false, [String(req.user._id)], function(err, usersGroups) {
+    lib.conversation.findConversation({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, usersGroups) {
       if (err) {
         return res.status(500).json({
           error: {

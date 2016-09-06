@@ -32,7 +32,7 @@ describe('The linagora.esn.chat webserver controller', function() {
         createConversation: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        findConversationByTypeAndByMembers: sinon.spy(function(type, ignoreMemberForChannel, exact, members, callback) {
+        findConversation: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
         removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
@@ -218,7 +218,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(lib.conversation.findConversation).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -235,7 +235,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith('type', true, false, ['id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: 'type', ignoreMemberFilterForChannel: true, members: ['id']});
               expect(json).to.equal(result);
               done();
             }
@@ -254,7 +254,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(lib.conversation.findConversation).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -271,7 +271,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, false, ['id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, members: ['id']});
               expect(json).to.equal(result);
               done();
             }
@@ -290,7 +290,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(lib.conversation.findConversation).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -307,7 +307,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.COMMUNITY, true, false, ['id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.COMMUNITY, ignoreMemberFilterForChannel: true, members: ['id']});
               expect(json).to.equal(result);
               done();
             }
@@ -394,7 +394,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(lib.conversation.findConversation).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -411,7 +411,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
               expect(json).to.equal(result);
               done();
             }
@@ -428,7 +428,12 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', '2', 'id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({
+                type: CONVERSATION_TYPE.PRIVATE,
+                ignoreMemberFilterForChannel: true,
+                exactMembersMatch: true,
+                members: ['1', '2', 'id']
+              });
               done();
             }
           };
@@ -444,7 +449,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
               done();
             }
           };
@@ -460,7 +465,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
               done();
             }
           };
@@ -478,7 +483,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(500);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.called;
+              expect(lib.conversation.findConversation).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -495,7 +500,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
               expect(json).to.equal(result);
               done();
             }
@@ -512,7 +517,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', '2', 'id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', '2', 'id']});
               done();
             }
           };
@@ -528,7 +533,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
               done();
             }
           };
@@ -544,7 +549,7 @@ describe('The linagora.esn.chat webserver controller', function() {
           expect(code).to.equal(200);
           return {
             json: function(json) {
-              expect(lib.conversation.findConversationByTypeAndByMembers).to.have.been.calledWith(CONVERSATION_TYPE.PRIVATE, true, true, ['1', 'id']);
+              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
               done();
             }
           };

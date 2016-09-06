@@ -63,24 +63,50 @@ module.exports = function(dependencies) {
   }
 
   /**
-   * @param {string|[string]} type - allowed types if none provided all type are accepted
-   * @param {boolean} ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
+   *
+   * @param {string|[string]} options.type - allowed types if none provided all type are accepted
+   * @param {boolean} options.ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
    *    This makes sense because everybody can access channels even if there are not member of it.
-   * @param {boolean} exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
-   * @param {[string]} list of members' id
+   * @param {boolean} options.exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
+   * @param {[string]} options.members of members' id
+   * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
    * @return {[Conversation]}
    */
-  function findConversationByTypeAndByMembers(type, ignoreMemberFilterForChannel, exactMembersMatch, members, callback) {
-    var request = {
-      members: {
+  function findConversation(options, callback) {
+    var type = options.type;
+    var ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
+    var exactMembersMatch = options.exactMembersMatch;
+    var members = options.members;
+    var name = options.name;
+
+    if (exactMembersMatch && !members) {
+      throw new Error('Could not set exactMembersMatch to true without providing members');
+    }
+
+    if (ignoreMemberFilterForChannel && !members) {
+      throw new Error('Could not set ignoreMemberFilterForChannel to true without providing members');
+    }
+
+    var request = {};
+
+    if (members) {
+      request.members = {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
         })
-      }
-    };
+      };
+    }
 
     if (type) {
       request.type = {$in:  _.isArray(type) ? type : [type]};
+    }
+
+    if (name) {
+      request.name = name;
+    }
+
+    if (name === null) {
+      request.$or = [{name:  {$exists: false}}, {name: null}];
     }
 
     if (ignoreMemberFilterForChannel && (!type || type.indexOf(CONVERSATION_TYPE.CHANNEL) > -1)) {
@@ -101,21 +127,21 @@ module.exports = function(dependencies) {
   function createConversation(options, callback) {
     async.waterfall([
         function(callback) {
-          var channel = new Conversation(options);
-          channel.last_message = {
-            date: channel.timestamps && channel.timestamps.creation || new Date(),
+          var conversation = new Conversation(options);
+          conversation.last_message = {
+            date: conversation.timestamps && conversation.timestamps.creation || new Date(),
             user_mentions: []
           };
-          channel.numOfMessage = channel.numOfMessage || 0;
-          channel.numOfReadedMessage = channel.numOfReadedMessage || {};
-          channel.save(callback);
+          conversation.numOfMessage = conversation.numOfMessage || 0;
+          conversation.numOfReadedMessage = conversation.numOfReadedMessage || {};
+          conversation.save(callback);
         },
-        function(channel, _num, callback) {
-          Conversation.populate(channel, 'members', callback);
+        function(conversation, _num, callback) {
+          Conversation.populate(conversation, 'members', callback);
         },
-        function(channel, callback) {
-          channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
-          callback(null, channel);
+        function(conversation, callback) {
+          channelCreationTopic.publish(JSON.parse(JSON.stringify(conversation)));
+          callback(null, conversation);
         }
     ], callback);
   }
@@ -303,10 +329,10 @@ module.exports = function(dependencies) {
     });
   }
 
-  function removeMemberFromConversation(channelId, userId, callback) {
+  function removeMemberFromConversation(conversationId, userId, callback) {
     var unsetOperation = {};
     unsetOperation['numOfReadedMessage.' + userId] = '';
-    Conversation.findByIdAndUpdate(channelId, {
+    Conversation.findByIdAndUpdate(conversationId, {
       $pull: {members: new ObjectId(userId)},
       $unset: unsetOperation
     }, function(err, conversation) {
@@ -324,10 +350,10 @@ module.exports = function(dependencies) {
     ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function getMessages(channel, query, callback) {
+  function getMessages(conversation, query, callback) {
     query = query || {};
-    var channelId = channel._id || channel;
-    var q = {channel: channelId};
+    var conversationId = conversation._id || conversation;
+    var q = {channel: conversationId};
     var mq = ChatMessage.find(q);
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);
@@ -343,8 +369,8 @@ module.exports = function(dependencies) {
     });
   }
 
-  function updateTopic(channelId, topic, callback) {
-    Conversation.findByIdAndUpdate({_id: channelId}, {
+  function updateTopic(conversationId, topic, callback) {
+    Conversation.findByIdAndUpdate({_id: conversationId}, {
       $set: {
         topic: {
           value: topic.value,
@@ -352,27 +378,27 @@ module.exports = function(dependencies) {
           last_set: topic.last_set
         }
       }
-    }, function(err, channel) {
+    }, function(err, conversation) {
       var message = {
         type: 'text',
         subtype: 'channel:topic',
         date: Date.now(),
-        channel: String(channel._id),
+        channel: String(conversation._id),
         user: String(topic.creator),
         topic: {
-          value: channel.topic.value,
-          creator: String(channel.topic.creator),
-          last_set: channel.topic.last_set
+          value: conversation.topic.value,
+          creator: String(conversation.topic.creator),
+          last_set: conversation.topic.last_set
         },
         text: 'set the channel topic: ' + topic.value
       };
       channelTopicUpdateTopic.publish(message);
-      callback(err, channel);
+      callback(err, conversation);
     });
   }
 
-  function countMessages(channel, callback) {
-    ChatMessage.count({channel: channel}, callback);
+  function countMessages(conversation, callback) {
+    ChatMessage.count({channel: conversation}, callback);
   }
 
   return {
@@ -383,7 +409,7 @@ module.exports = function(dependencies) {
     updateCommunityConversation: updateCommunityConversation,
     updateConversation: updateConversation,
     removeMemberFromConversation: removeMemberFromConversation,
-    findConversationByTypeAndByMembers: findConversationByTypeAndByMembers,
+    findConversation: findConversation,
     createMessage: createMessage,
     createConversation: createConversation,
     getConversation: getConversation,

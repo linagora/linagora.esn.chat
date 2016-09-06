@@ -271,12 +271,12 @@ describe('The linagora.esn.chat conversation lib', function() {
       type = 'type';
     });
 
-    it('should call Channel.findwith correct parameters when exactMatch', function(done) {
+    it('should call Channel.find with correct parameters when exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, false, true, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({type: type, exactMembersMatch: true, members: members}, function() {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
@@ -296,12 +296,38 @@ describe('The linagora.esn.chat conversation lib', function() {
       });
     });
 
+    it('should call Channel.find with correct arguments when name is null', function(done) {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({name: null}, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          $or: [{name: {$exists: false}}, {name: null}]
+        });
+
+        expect(mq.populate).to.have.been.calledWith('members');
+        expect(mq.populate).to.have.been.calledWith('last_message.creator');
+        expect(mq.populate).to.have.been.calledWith('last_message.user_mentions');
+        done();
+      });
+    });
+
+    it('should call Channel.find with correct arguments when name is defined', function(done) {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({name: 'name'}, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          name: 'name'
+        });
+
+        expect(mq.populate).to.have.been.calledWith('members');
+        expect(mq.populate).to.have.been.calledWith('last_message.creator');
+        expect(mq.populate).to.have.been.calledWith('last_message.user_mentions');
+        done();
+      });
+    });
+
     it('should call Channel.find with correct parameters when not exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(type, false, false, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({type: type, members: members}, function() {
         members.forEach(function(participant) {
           expect(ObjectIdMock).to.have.been.calledWith(participant);
         });
@@ -325,7 +351,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       var anObjectId = {};
       var type2 = 'type2';
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers([type, type2], false, false, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({type: [type, type2], members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
           type:  {$in: [type, type2]},
           members: {
@@ -341,7 +367,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       var members = ['one'];
       var anObjectId = {};
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(null, false, false, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
           members: {
             $all: [anObjectId]
@@ -352,11 +378,20 @@ describe('The linagora.esn.chat conversation lib', function() {
       });
     });
 
+    it('should handle no members', function(done) {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({}, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+        });
+
+        done();
+      });
+    });
+
     it('should do not considere member when ignoreMemberFilterForChannel is true', function(done) {
       var members = ['one'];
       var anObjectId = {};
 
-      require('../../../backend/lib/conversation')(dependencies).findConversationByTypeAndByMembers(null, true, false, members, function() {
+      require('../../../backend/lib/conversation')(dependencies).findConversation({ignoreMemberFilterForChannel: true, members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
           $or: [{
             members: {
