@@ -127,21 +127,21 @@ module.exports = function(dependencies) {
   function createConversation(options, callback) {
     async.waterfall([
         function(callback) {
-          var channel = new Conversation(options);
-          channel.last_message = {
-            date: channel.timestamps && channel.timestamps.creation || new Date(),
+          var conversation = new Conversation(options);
+          conversation.last_message = {
+            date: conversation.timestamps && conversation.timestamps.creation || new Date(),
             user_mentions: []
           };
-          channel.numOfMessage = channel.numOfMessage || 0;
-          channel.numOfReadedMessage = channel.numOfReadedMessage || {};
-          channel.save(callback);
+          conversation.numOfMessage = conversation.numOfMessage || 0;
+          conversation.numOfReadedMessage = conversation.numOfReadedMessage || {};
+          conversation.save(callback);
         },
-        function(channel, _num, callback) {
-          Conversation.populate(channel, 'members', callback);
+        function(conversation, _num, callback) {
+          Conversation.populate(conversation, 'members', callback);
         },
-        function(channel, callback) {
-          channelCreationTopic.publish(JSON.parse(JSON.stringify(channel)));
-          callback(null, channel);
+        function(conversation, callback) {
+          channelCreationTopic.publish(JSON.parse(JSON.stringify(conversation)));
+          callback(null, conversation);
         }
     ], callback);
   }
@@ -329,10 +329,10 @@ module.exports = function(dependencies) {
     });
   }
 
-  function removeMemberFromConversation(channelId, userId, callback) {
+  function removeMemberFromConversation(conversationId, userId, callback) {
     var unsetOperation = {};
     unsetOperation['numOfReadedMessage.' + userId] = '';
-    Conversation.findByIdAndUpdate(channelId, {
+    Conversation.findByIdAndUpdate(conversationId, {
       $pull: {members: new ObjectId(userId)},
       $unset: unsetOperation
     }, function(err, conversation) {
@@ -350,10 +350,10 @@ module.exports = function(dependencies) {
     ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function getMessages(channel, query, callback) {
+  function getMessages(conversation, query, callback) {
     query = query || {};
-    var channelId = channel._id || channel;
-    var q = {channel: channelId};
+    var conversationId = conversation._id || conversation;
+    var q = {channel: conversationId};
     var mq = ChatMessage.find(q);
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);
@@ -369,8 +369,8 @@ module.exports = function(dependencies) {
     });
   }
 
-  function updateTopic(channelId, topic, callback) {
-    Conversation.findByIdAndUpdate({_id: channelId}, {
+  function updateTopic(conversationId, topic, callback) {
+    Conversation.findByIdAndUpdate({_id: conversationId}, {
       $set: {
         topic: {
           value: topic.value,
@@ -378,27 +378,27 @@ module.exports = function(dependencies) {
           last_set: topic.last_set
         }
       }
-    }, function(err, channel) {
+    }, function(err, conversation) {
       var message = {
         type: 'text',
         subtype: 'channel:topic',
         date: Date.now(),
-        channel: String(channel._id),
+        channel: String(conversation._id),
         user: String(topic.creator),
         topic: {
-          value: channel.topic.value,
-          creator: String(channel.topic.creator),
-          last_set: channel.topic.last_set
+          value: conversation.topic.value,
+          creator: String(conversation.topic.creator),
+          last_set: conversation.topic.last_set
         },
         text: 'set the channel topic: ' + topic.value
       };
       channelTopicUpdateTopic.publish(message);
-      callback(err, channel);
+      callback(err, conversation);
     });
   }
 
-  function countMessages(channel, callback) {
-    ChatMessage.count({channel: channel}, callback);
+  function countMessages(conversation, callback) {
+    ChatMessage.count({channel: conversation}, callback);
   }
 
   return {
