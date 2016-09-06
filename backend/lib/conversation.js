@@ -52,7 +52,7 @@ module.exports = function(dependencies) {
   function deleteConversation(userId, channel, callback) {
     Conversation.findOneAndRemove({_id: channel, members: userId}, function(err, deleteResult) {
       if (!err) {
-        channelDeletionTopic.publish(channel);
+        channelDeletionTopic.publish(deleteResult);
         ChatMessage.remove({channel: channel}, function(err, result) {
           callback(err, deleteResult);
         });

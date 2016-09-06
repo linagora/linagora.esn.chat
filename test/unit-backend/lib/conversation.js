@@ -697,8 +697,9 @@ describe('The linagora.esn.chat conversation lib', function() {
 
   describe('The deleteConversation function', function() {
     it('should delete the conversation and its messages', function() {
+      var deleteResult = {_id: 'channelId'};
       modelsMock.ChatConversation.findOneAndRemove = sinon.spy(function(query, cb) {
-        cb(null, {_id: 'channelId'});
+        cb(null, deleteResult);
       });
       modelsMock.ChatMessage = {
         remove: sinon.spy(function(query, cb) {
@@ -709,6 +710,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       require('../../../backend/lib/conversation')(dependencies).deleteConversation('userId', 'channelId', function() {
         expect(modelsMock.ChatConversation.findOneAndRemove).to.have.been.calledWith({_id: 'channelId', members: 'userId'});
         expect(modelsMock.ChatMessage.remove).to.have.been.calledWith({channel: 'channelId'});
+        expect(channelDeletionTopic.publish).to.have.been.calledWith(deleteResult);
       });
     });
   });
