@@ -63,24 +63,50 @@ module.exports = function(dependencies) {
   }
 
   /**
-   * @param {string|[string]} type - allowed types if none provided all type are accepted
-   * @param {boolean} ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
+   *
+   * @param {string|[string]} options.type - allowed types if none provided all type are accepted
+   * @param {boolean} options.ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
    *    This makes sense because everybody can access channels even if there are not member of it.
-   * @param {boolean} exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
-   * @param {[string]} list of members' id
+   * @param {boolean} options.exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
+   * @param {[string]} options.members of members' id
+   * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
    * @return {[Conversation]}
    */
-  function findConversationByTypeAndByMembers(type, ignoreMemberFilterForChannel, exactMembersMatch, members, callback) {
-    var request = {
-      members: {
+  function findConversation(options, callback) {
+    var type = options.type;
+    var ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
+    var exactMembersMatch = options.exactMembersMatch;
+    var members = options.members;
+    var name = options.name;
+
+    if (exactMembersMatch && !members) {
+      throw new Error('Could not set exactMembersMatch to true without providing members');
+    }
+
+    if (ignoreMemberFilterForChannel && !members) {
+      throw new Error('Could not set ignoreMemberFilterForChannel to true without providing members');
+    }
+
+    var request = {};
+
+    if (members) {
+      request.members = {
         $all: members.map(function(participant) {
           return new ObjectId(participant);
         })
-      }
-    };
+      };
+    }
 
     if (type) {
       request.type = {$in:  _.isArray(type) ? type : [type]};
+    }
+
+    if (name) {
+      request.name = name;
+    }
+
+    if (name === null) {
+      request.$or = [{name:  {$exists: false}}, {name: null}];
     }
 
     if (ignoreMemberFilterForChannel && (!type || type.indexOf(CONVERSATION_TYPE.CHANNEL) > -1)) {
@@ -383,7 +409,7 @@ module.exports = function(dependencies) {
     updateCommunityConversation: updateCommunityConversation,
     updateConversation: updateConversation,
     removeMemberFromConversation: removeMemberFromConversation,
-    findConversationByTypeAndByMembers: findConversationByTypeAndByMembers,
+    findConversation: findConversation,
     createMessage: createMessage,
     createConversation: createConversation,
     getConversation: getConversation,

@@ -219,7 +219,7 @@ describe('The chat API', function() {
         });
     });
 
-    it('should fail with a 403 if it is a community conversation', function() {
+    it('should fail with a 403 if it is a community conversation', function(done) {
       request(app.express)
         .post('/api/conversations')
         .type('json')
@@ -229,7 +229,238 @@ describe('The chat API', function() {
           topic: 'topic',
           purpose: 'purpose'
         })
-        .expect(403);
+        .expect(403)
+        .end(function() {
+          done();
+        });
+    });
+
+    it('should not create a new conversation if the conversation has no name and an other with the same participant exist', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members
+          })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body).to.shallowDeepEqual({
+            _id: id
+          });
+
+          done();
+        });
+      });
+    });
+
+    it('should not create a new conversation if the conversation has no name and an other with the same participant exist and has null for name', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members,
+        name: null
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members
+          })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body).to.shallowDeepEqual({
+            _id: id
+          });
+
+          done();
+        });
+      });
+    });
+
+    it('should not create a new conversation if the conversation has a name and an other with the same participant exist and has the same name', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members,
+        name: 'name'
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members,
+            name: 'name'
+          })
+        .expect('Content-Type', /json/)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body).to.shallowDeepEqual({
+              _id: id,
+            });
+
+            done();
+          });
+      });
+    });
+
+    it('should create a new conversation if the conversation has a name and an other with the same participant exist but has a different name', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members,
+        name: 'name'
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members,
+            name: 'name2'
+          })
+        .expect('Content-Type', /json/)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body._id).to.not.equal(id);
+
+            done();
+          });
+      });
+    });
+
+    it('should create a new conversation if the conversation has no name and an other with the same participant exist but has a name', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members,
+        name: 'name'
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members
+          })
+        .expect('Content-Type', /json/)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body._id).to.not.equal(id);
+
+            done();
+          });
+      });
+    });
+
+    it('should create a new conversation if the conversation has a name and an other with the same participant exist but has no name', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members,
+        name: null
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members,
+            name: 'name2'
+          })
+        .expect('Content-Type', /json/)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body._id).to.not.equal(id);
+
+            done();
+          });
+      });
+    });
+
+    it('should not create the conversation if the conversation has a name and an other with the same participant exist and has the same name', function(done) {
+      var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+
+      Q.denodeify(app.lib.conversation.createConversation)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: members,
+        name: 'name'
+      }).then(function(mongoResponse) {
+        var id = mongoResponse._id.toString();
+
+        request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.PRIVATE,
+            members: members,
+            name: 'name'
+          })
+        .expect('Content-Type', /json/)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body).to.shallowDeepEqual({
+              _id: id,
+            });
+
+            done();
+          });
+      });
     });
   });
 
