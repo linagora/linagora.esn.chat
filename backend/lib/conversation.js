@@ -286,8 +286,13 @@ module.exports = function(dependencies) {
       };
     }
 
+    mongoModifications.$set = {};
     if (modifications.name) {
-      mongoModifications.$set = {name: modifications.name};
+      mongoModifications.$set.name = modifications.name;
+    }
+
+    if (modifications.avatar) {
+      mongoModifications.$set.avatar = new ObjectId(modifications.avatar);
     }
 
     function done(callback, err, conversation) {
@@ -318,6 +323,10 @@ module.exports = function(dependencies) {
       //mongo does not allow to do those modification in one request
       nextMongoModification = {$addToSet: mongoModifications.$addToSet};
       delete mongoModifications.$addToSet;
+    }
+
+    if (_.isEmpty(mongoModifications.$set)) {
+      delete mongoModifications.$set;
     }
 
     Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, function(err, conversation) {
