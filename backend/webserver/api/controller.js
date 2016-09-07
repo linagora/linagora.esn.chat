@@ -69,6 +69,17 @@ module.exports = function(dependencies, lib) {
   }
 
   function deleteConversation(req, res) {
+
+    if (!req.params.id) {
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad request',
+          details: 'You should provide the conversation id'
+        }
+      });
+    }
+
     lib.conversation.deleteConversation(req.user._id, req.params.id, function(err, numDeleted) {
       if (err) {
         return res.status(500).json({
@@ -76,16 +87,6 @@ module.exports = function(dependencies, lib) {
             code: 500,
             message: 'Server Error',
             details: err.message || 'Error while deleting channel'
-          }
-        });
-      }
-
-      if (!req.params.id) {
-        return res.status(400).json({
-          error: {
-            code: 400,
-            message: 'Bad request',
-            details: 'You should provide the conversation id'
           }
         });
       }
