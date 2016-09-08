@@ -18,6 +18,7 @@ module.exports = function(dependencies) {
     isNotRead: {type: Boolean},
     members: [{type: ObjectId, ref: 'User', index: true}],
     community: {type: ObjectId, ref: 'Community', index: true, unique: true, sparse: true},
+    moderate: {type: Boolean, default: false},
     topic: {
       value: {type: String},
       creator: {type: ObjectId, ref: 'User'},
