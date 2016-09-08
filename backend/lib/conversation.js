@@ -329,6 +329,18 @@ module.exports = function(dependencies) {
     });
   }
 
+  function moderateConversation(conversationId, moderate, callback) {
+    Conversation.findByIdAndUpdate(conversationId, {
+      $set: {moderate: moderate}
+    }, callback);
+  }
+  
+  function moderateMessage(messageId, moderate, callback) {
+    ChatMessage.findByIdAndUpdate(messageId, {
+      $set: {moderate: moderate}
+    }, callback);
+  }
+
   function removeMemberFromConversation(conversationId, userId, callback) {
     var unsetOperation = {};
     unsetOperation['numOfReadedMessage.' + userId] = '';
@@ -408,6 +420,8 @@ module.exports = function(dependencies) {
     addMemberToConversation: addMemberToConversation,
     updateCommunityConversation: updateCommunityConversation,
     updateConversation: updateConversation,
+    moderateConversation: moderateConversation,
+    moderateMessage: moderateMessage,
     removeMemberFromConversation: removeMemberFromConversation,
     findConversation: findConversation,
     createMessage: createMessage,
