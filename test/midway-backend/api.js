@@ -29,6 +29,9 @@ describe('The chat API', function() {
 
     deps = {
       logger: require('../fixtures/logger'),
+      user: {
+        moderation: {registerHandler: _.constant()}
+      },
       pubsub: pubsub,
       db: {
         mongo: {

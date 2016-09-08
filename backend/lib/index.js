@@ -10,10 +10,12 @@ module.exports = function(dependencies) {
   var message = require('./message')(dependencies);
   var conversation = require('./conversation')(dependencies);
   var userState = require('./userState')(dependencies);
+  var moderate = require('./moderate')(dependencies);
 
   function start(callback) {
     message.listener.start(conversation);
     userState.init();
+    moderate.start();
     callback();
   }
 
@@ -21,6 +23,7 @@ module.exports = function(dependencies) {
     start: start,
     constants: require('./constants'),
     conversation: conversation,
+    moderate: moderate,
     message: message,
     userState: userState,
     models: models
