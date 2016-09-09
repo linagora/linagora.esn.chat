@@ -2,7 +2,6 @@
 
 var _ = require('lodash');
 var CONSTANTS = require('../../lib/constants');
-var moderation = require('../../lib/moderation');
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies, lib) {
@@ -19,27 +18,8 @@ module.exports = function(dependencies, lib) {
         });
       }
 
-      return res.status(200).json(moderation.filterModeratedMessages(results));
+      return res.status(200).json(results);
     });
-  }
-
-  function moderationCheck(object, res) {
-    if (moderation.isModerated(object)) {
-      return {
-        status: 403,
-        json: {
-          error: {
-            code: 403,
-            message: 'Forbidden',
-            details: 'Resource has been moderated'
-          }
-        }
-      };
-    }
-    return {
-      status: 200,
-      json: object
-    };
   }
 
   function getMessage(req, res) {
@@ -54,13 +34,12 @@ module.exports = function(dependencies, lib) {
         });
       }
 
-      var response = moderationCheck(message, res);
-      return res.status(response.status).json(response.json);
+      return res.status(200).json(message);
     });
   }
 
   function getChannels(req, res) {
-    lib.conversation.getChannels({}, function(err, channels) {
+    lib.conversation.getChannels({}, function(err, result) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -70,12 +49,12 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-      res.status(200).json(moderation.filterModeratedConversations(channels));
+      res.status(200).json(result);
     });
   }
 
   function getConversation(req, res) {
-    lib.conversation.getConversation(req.params.id, function(err, conversation) {
+    lib.conversation.getConversation(req.params.id, function(err, result) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -85,9 +64,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-
-      var response = moderationCheck(conversation, res);
-      return res.status(response.status).json(response.json);
+      res.status(200).json(result);
     });
   }
 
@@ -259,7 +236,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, function(err, conversations) {
+    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, function(err, userGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -269,7 +246,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-      res.status(200).json(moderation.filterModeratedConversations(conversations));
+      res.status(200).json(userGroups);
     });
   }
 
@@ -328,13 +305,12 @@ module.exports = function(dependencies, lib) {
         });
       }
 
-      var response = moderationCheck(conversation, res);
-      return res.status(response.status).json(response.json);
+      res.status(200).json(conversation);
     });
   }
 
   function findMyConversationByType(type, req, res) {
-    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, conversations) {
+    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, usersGroups) {
       if (err) {
         return res.status(500).json({
           error: {
@@ -344,12 +320,23 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-      res.status(200).json(moderation.filterModeratedConversations(conversations));
+      res.status(200).json(usersGroups);
     });
   }
 
   function findMyConversations(req, res)  {
-    return findMyConversationByType(req.query.type, req, res);
+    lib.conversation.findConversation({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, usersGroups) {
+      if (err) {
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while finding groups of user ' + req.user._id
+          }
+        });
+      }
+      res.status(200).json(usersGroups);
+    });
   }
 
   function getUserState(req, res) {
