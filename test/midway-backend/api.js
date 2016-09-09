@@ -71,7 +71,7 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/channels', function() {
-    it('should return an array of channels', function(done) {
+    it('should return an array of non moderate channels', function(done) {
       function execTest(err, channel) {
         err && done(err);
         request(app.express)
@@ -89,14 +89,20 @@ describe('The chat API', function() {
       }
 
       app.lib.conversation.createConversation({
-        type: CONVERSATION_TYPE.CHANNEL
-      }, execTest);
+        type: CONVERSATION_TYPE.CHANNEL,
+        moderate: true
+      }, function(err, conversation) {
+        err && done(err);
+        app.lib.conversation.createConversation({
+          type: CONVERSATION_TYPE.CHANNEL
+        }, execTest);
+      });
 
     });
   });
 
   describe('GET /api/conversations/:id', function() {
-    it('should the given conversation', function(done) {
+    it('should return the given conversation', function(done) {
       app.lib.conversation.createConversation({
         type: CONVERSATION_TYPE.CHANNEL
       }, function(err, channel) {
@@ -118,7 +124,7 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/:channel/messages', function() {
-    it('should return an array of messages from a conversation', function(done) {
+    it('should return an array of messages that are not moderated from a conversation', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.createConversation)({
@@ -129,9 +135,18 @@ describe('The chat API', function() {
           channel: channelId,
           text: 'hello world',
           type: 'text',
+          moderate: true,
+          creator: userId
+        });
+      }).then(function() {
+        return Q.denodeify(app.lib.conversation.createMessage)({
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
           creator: userId
         });
       }).then(function(mongoResult) {
+        console.log('mongoResult', mongoResult);
         request(app.express)
           .get('/api/' + channelId + '/messages')
           .expect('Content-Type', /json/)
@@ -547,14 +562,20 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/community', function() {
-    it('should return community conversations with given participants parameters', function(done) {
+    it('should return non moderated community conversations with given participants parameters', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel;
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.COMMUNITY,
+        moderate: true,
         members: [userId, otherMember1, otherMember2]
+      }).then(function() {
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.COMMUNITY,
+          members: [userId, otherMember1, otherMember2]
+        });
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
@@ -681,14 +702,20 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/conversations/private', function() {
-    it('should return private conversations with given participants parameters', function(done) {
+    it('should return non moderate private conversations with given participants parameters', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel;
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.PRIVATE,
+        moderate: true,
         members: [userId, otherMember1, otherMember2]
+      }).then(function() {
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          members: [userId, otherMember1, otherMember2]
+        });
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
@@ -763,7 +790,7 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/me/private', function() {
-    it('should return all private conversations with me inside', function(done) {
+    it('should return all private conversations with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
@@ -774,26 +801,32 @@ describe('The chat API', function() {
       }).then(function(mongoResponse) {
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.PRIVATE,
+          moderate: true,
+          members: [userId, otherMember2]
+        });
+      }).then(function(mongoResponse) {
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2]
-        }).then(function(mongoResponse) {
-          channel = mongoResponse;
-          request(app.express)
-            .get('/api/me/private')
-            .expect(200)
-            .end(function(err, res) {
-              if (err) {
-                return done(err);
-              }
-              expect(res.body).to.deep.equal([jsonnify(channel)]);
-              done();
-            });
-        }).catch(done);
-      });
+        });
+      }).then(function(mongoResponse) {
+        channel = mongoResponse;
+        request(app.express)
+          .get('/api/me/private')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal([jsonnify(channel)]);
+            done();
+          });
+      }).catch(done);
     });
   });
 
   describe('GET /api/me/conversation', function() {
-    it('should return all conversation with me inside', function(done) {
+    it('should return all conversation with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
@@ -804,6 +837,13 @@ describe('The chat API', function() {
         timestamps: {creation: new Date(2e6)}
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.PRIVATE,
+          moderate: true,
+          members: [userId, otherMember2],
+          timestamps: {creation: new Date(1e6)}
+        });
+      }).then(function(mongoResponse) {
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2],
@@ -952,7 +992,7 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/me/community', function() {
-    it('should return all community conversations with me inside', function(done) {
+    it('should return all community conversations with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
@@ -960,24 +1000,33 @@ describe('The chat API', function() {
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [otherMember1, otherMember2]
-      }).then(function(mongoResponse) {
+      })
+      .then(function(mongoResponse) {
+        return Q.denodeify(app.lib.conversation.createConversation)({
+          type: CONVERSATION_TYPE.COMMUNITY,
+          moderate: true,
+          members: [userId, otherMember1, otherMember2]
+        });
+      })
+      .then(function(mongoResponse) {
         return Q.denodeify(app.lib.conversation.createConversation)({
           type: CONVERSATION_TYPE.COMMUNITY,
           members: [userId, otherMember1, otherMember2]
-        }).then(function(mongoResponse) {
-          channel = mongoResponse;
-          request(app.express)
-            .get('/api/me/community')
-            .expect(200)
-            .end(function(err, res) {
-              if (err) {
-                return done(err);
-              }
-              expect(res.body).to.deep.equal([jsonnify(channel)]);
-              done();
-            });
-        }).catch(done);
-      });
+        });
+      })
+      .then(function(mongoResponse) {
+        channel = mongoResponse;
+        request(app.express)
+          .get('/api/me/community')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal([jsonnify(channel)]);
+            done();
+          });
+      }).catch(done);
     });
   });
 
