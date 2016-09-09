@@ -27,7 +27,7 @@ module.exports = function(dependencies) {
   var logger = dependencies('logger');
 
   function getChannels(options, callback) {
-    Conversation.find({type: CONVERSATION_TYPE.CHANNEL}).populate('members', SKIP_FIELDS.USER).exec(function(err, channels) {
+    Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec(function(err, channels) {
       channels = channels || [];
       if (channels.length === 0) {
         return createConversation(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
@@ -78,6 +78,7 @@ module.exports = function(dependencies) {
     var exactMembersMatch = options.exactMembersMatch;
     var members = options.members;
     var name = options.name;
+    var moderate = Boolean(options.moderate);
 
     if (exactMembersMatch && !members) {
       throw new Error('Could not set exactMembersMatch to true without providing members');
@@ -87,7 +88,7 @@ module.exports = function(dependencies) {
       throw new Error('Could not set ignoreMemberFilterForChannel to true without providing members');
     }
 
-    var request = {};
+    var request = {moderate: moderate};
 
     if (members) {
       request.members = {
@@ -110,10 +111,12 @@ module.exports = function(dependencies) {
     }
 
     if (ignoreMemberFilterForChannel && (!type || type.indexOf(CONVERSATION_TYPE.CHANNEL) > -1)) {
+      delete request.moderate;
       request = {
         $or: [request, {
           type: CONVERSATION_TYPE.CHANNEL
-        }]
+        }],
+        moderate: moderate
       };
     }
 
@@ -343,7 +346,7 @@ module.exports = function(dependencies) {
       $set: {moderate: moderate}
     }, callback);
   }
-  
+
   function moderateMessage(messageId, moderate, callback) {
     ChatMessage.findByIdAndUpdate(messageId, {
       $set: {moderate: moderate}
@@ -373,8 +376,13 @@ module.exports = function(dependencies) {
 
   function getMessages(conversation, query, callback) {
     query = query || {};
+
+    if (!query.moderate) {
+      query.moderate = false;
+    }
+
     var conversationId = conversation._id || conversation;
-    var q = {channel: conversationId};
+    var q = {channel: conversationId, moderate: false};
     var mq = ChatMessage.find(q);
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);

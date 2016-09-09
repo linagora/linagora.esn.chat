@@ -182,7 +182,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         cb(null, {});
       };
       require('../../../backend/lib/conversation')(dependencies).getChannels({}, function() {
-        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.CHANNEL});
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.CHANNEL, moderate: false});
         expect(mq.populate).to.have.been.calledWith('members');
         done();
       });
@@ -191,7 +191,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should return the default channel', function(done) {
       var module = require('../../../backend/lib/conversation')(dependencies);
       module.getChannels({}, function(err, channels) {
-        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.CHANNEL});
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.CHANNEL, moderate: false});
         expect(mq.populate).to.have.been.calledWith('members');
         expect(err).to.be.equal(null);
         expect(channels).not.to.be.empty;
@@ -283,6 +283,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
           type:  {$in: [type]},
+          moderate: false,
           members: {
             $all: [anObjectId],
             $size: 1
@@ -299,7 +300,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should call Channel.find with correct arguments when name is null', function(done) {
       require('../../../backend/lib/conversation')(dependencies).findConversation({name: null}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          $or: [{name: {$exists: false}}, {name: null}]
+          $or: [{name: {$exists: false}}, {name: null}],
+          moderate: false
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
@@ -312,7 +314,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should call Channel.find with correct arguments when name is defined', function(done) {
       require('../../../backend/lib/conversation')(dependencies).findConversation({name: 'name'}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          name: 'name'
+          name: 'name',
+          moderate: false
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
@@ -336,7 +339,8 @@ describe('The linagora.esn.chat conversation lib', function() {
           type:  {$in: [type]},
           members: {
             $all: [anObjectId]
-          }
+          },
+          moderate: false
         });
 
         expect(mq.populate).to.have.been.calledWith('members');
@@ -356,7 +360,8 @@ describe('The linagora.esn.chat conversation lib', function() {
           type:  {$in: [type, type2]},
           members: {
             $all: [anObjectId]
-          }
+          },
+          moderate: false
         });
 
         done();
@@ -371,7 +376,8 @@ describe('The linagora.esn.chat conversation lib', function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
           members: {
             $all: [anObjectId]
-          }
+          },
+          moderate: false
         });
 
         done();
@@ -381,6 +387,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should handle no members', function(done) {
       require('../../../backend/lib/conversation')(dependencies).findConversation({}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          moderate: false,
         });
 
         done();
@@ -399,7 +406,8 @@ describe('The linagora.esn.chat conversation lib', function() {
             }
           }, {
             type: CONVERSATION_TYPE.CHANNEL
-          }]
+          }],
+          moderate: false
         });
 
         done();
@@ -607,7 +615,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
       modelsMock.ChatMessage = {
         find: function(q) {
-          expect(q).to.deep.equal({channel: id});
+          expect(q).to.deep.equal({channel: id, moderate: false});
           return {
             populate: populateMock,
             limit: limitMock,
