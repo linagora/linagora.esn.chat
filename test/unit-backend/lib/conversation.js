@@ -136,6 +136,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should call ChatConversation.find with the correct param', function(done) {
       var id = 'id';
       var callback = 'callback';
+      var populateMock;
+
       var exec = function(_callback_) {
         expect(modelsMock.ChatConversation.findOne).to.have.been.calledWith({
           type: CONVERSATION_TYPE.COMMUNITY,
@@ -148,8 +150,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         done();
       };
 
-      var populateMock = sinon.stub().returns({exec: exec});
-
+      populateMock = sinon.stub().returns({exec: exec});
       modelsMock.ChatConversation.findOne = sinon.stub().returns({populate: populateMock});
 
       require('../../../backend/lib/conversation')(dependencies).getCommunityConversationByCommunityId(id, callback);

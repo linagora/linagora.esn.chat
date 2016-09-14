@@ -346,6 +346,7 @@ module.exports = function(dependencies) {
   function updateConversation(communityId, modifications, callback) {
 
     var mongoModifications = {};
+    var nextMongoModification = null;
 
     if (modifications.newMembers && modifications.newMembers.length) {
       mongoModifications.$addToSet = {
@@ -393,7 +394,6 @@ module.exports = function(dependencies) {
       });
     }
 
-    var nextMongoModification = null;
     if (mongoModifications.$addToSet && mongoModifications.$pullAll) {
       //mongo does not allow to do those modification in one request
       nextMongoModification = {$addToSet: mongoModifications.$addToSet};
@@ -458,8 +458,8 @@ module.exports = function(dependencies) {
     var mq = ChatMessage.find(q);
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);
-    mq.limit(query.limit || 20);
-    mq.skip(query.offset || 0);
+    mq.limit(+query.limit || 20);
+    mq.skip(+query.offset || 0);
     mq.sort('-timestamps.creation');
     mq.exec(function(err, result) {
       if (!err) {

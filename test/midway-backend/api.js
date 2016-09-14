@@ -23,6 +23,7 @@ describe('The chat API', function() {
 
   beforeEach(function(done) {
     mongoose = require('mongoose');
+    mongoose.Promise = Q.Promise;
     mongoose.connect(this.testEnv.mongoUrl);
     userId = mongoose.Types.ObjectId();
     redisClient = redis.createClient(this.testEnv.redisPort);
@@ -527,7 +528,7 @@ describe('The chat API', function() {
         return Q.denodeify(app.lib.conversation.getConversation)(channelId);
       }).then(function(channel) {
         expect(channel.members).to.shallowDeepEqual({
-          0: {_id: userId},
+          0: {_id: String(userId)},
           length: 1
         });
         done();
