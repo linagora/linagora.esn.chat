@@ -10,11 +10,22 @@ While waiting for a npm-based dependency injection handler, you have to install 
 
 Clone somewhere, the two following git repository:
 
+ * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.rse/browse
  * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.emoticon/browse
  * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.chat/browse
 
-Go inside each repo and run:
+Go inside linagora.esn.rse repo and run:
 
+    npm install
+    npm link
+
+Go inside linagora.esn.emotion and run:
+
+    npm install
+
+Go inside linagora.esn.chat and run:
+
+    npm link linagora-rse
     npm install
 
 **2. Add component in the configuration file**
