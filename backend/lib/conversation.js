@@ -127,6 +127,78 @@ module.exports = function(dependencies) {
     Conversation.find(request).populate('members', SKIP_FIELDS.USER).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
   }
 
+  function listConversation(options, callback) {
+    var query;
+    options = options || {};
+    options.limit = options.limit || CONSTANTS.DEFAULT_LIMIT;
+    options.offset = options.offset || CONSTANTS.DEFAULT_OFFSET;
+    var sort = 'timestamps.creation';
+
+    if (options.creator) {
+      query = query || {};
+      query.creator = options.creator;
+    }
+
+    Conversation.find(query).count().exec(function(err, count) {
+      if (err) {
+        return callback(err);
+      }
+
+      var conversationQuery = query ? Conversation.find(query) : Conversation.find();
+      conversationQuery = conversationQuery.skip(options.offset);
+
+      if (options.limit > 0) {
+        conversationQuery = conversationQuery.limit(options.limit);
+      }
+
+      conversationQuery.sort(sort).populate('creator members last_message.creator', CONSTANTS.SKIP_FIELDS.USER).exec(function(err, causes) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, {
+          total_count: count,
+          list: causes || []
+        });
+      });
+    });
+  }
+
+  function listMessage(options, callback) {
+    var query;
+    options = options || {};
+    options.limit = options.limit || CONSTANTS.DEFAULT_LIMIT;
+    options.offset = options.offset || CONSTANTS.DEFAULT_OFFSET;
+    var sort = 'timestamps.creation';
+
+    if (options.creator) {
+      query = query || {};
+      query.creator = options.creator;
+    }
+
+    ChatMessage.find(query).count().exec(function(err, count) {
+      if (err) {
+        return callback(err);
+      }
+
+      var messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
+      messageQuery = messageQuery.skip(options.offset);
+
+      if (options.limit > 0) {
+        messageQuery = messageQuery.limit(options.limit);
+      }
+
+      messageQuery.sort(sort).populate('creator', CONSTANTS.SKIP_FIELDS.USER).exec(function(err, causes) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, {
+          total_count: count,
+          list: causes || []
+        });
+      });
+    });
+  }
+
   function createConversation(options, callback) {
     async.waterfall([
         function(callback) {
@@ -448,6 +520,8 @@ module.exports = function(dependencies) {
     deleteConversation: deleteConversation,
     updateTopic: updateTopic,
     makeAllMessageReadedForAnUser: makeAllMessageReadedForAnUser,
-    countMessages: countMessages
+    countMessages: countMessages,
+    listConversation: listConversation,
+    listMessage: listMessage
   };
 };
