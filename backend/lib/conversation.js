@@ -130,8 +130,8 @@ module.exports = function(dependencies) {
   function listConversation(options, callback) {
     var query;
     options = options || {};
-    options.limit = options.limit || CONSTANTS.DEFAULT_LIMIT;
-    options.offset = options.offset || CONSTANTS.DEFAULT_OFFSET;
+    options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
+    options.offset = +(options.offset || CONSTANTS.DEFAULT_OFFSET);
     var sort = 'timestamps.creation';
 
     if (options.creator) {
@@ -139,12 +139,13 @@ module.exports = function(dependencies) {
       query.creator = options.creator;
     }
 
-    Conversation.find(query).count().exec(function(err, count) {
+    var conversationQuery = query ? Conversation.find(query) : Conversation.find();
+
+    Conversation.find(conversationQuery).count().exec(function(err, count) {
       if (err) {
         return callback(err);
       }
 
-      var conversationQuery = query ? Conversation.find(query) : Conversation.find();
       conversationQuery = conversationQuery.skip(options.offset);
 
       if (options.limit > 0) {
@@ -166,8 +167,8 @@ module.exports = function(dependencies) {
   function listMessage(options, callback) {
     var query;
     options = options || {};
-    options.limit = options.limit || CONSTANTS.DEFAULT_LIMIT;
-    options.offset = options.offset || CONSTANTS.DEFAULT_OFFSET;
+    options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
+    options.offset = +(options.offset || CONSTANTS.DEFAULT_OFFSET);
     var sort = 'timestamps.creation';
 
     if (options.creator) {
@@ -175,7 +176,8 @@ module.exports = function(dependencies) {
       query.creator = options.creator;
     }
 
-    ChatMessage.find(query).count().exec(function(err, count) {
+    var messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
+    ChatMessage.find(messageQuery).count().exec(function(err, count) {
       if (err) {
         return callback(err);
       }
