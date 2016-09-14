@@ -70,6 +70,10 @@ angular.module('linagora.esn.chat')
   .directive('chatMessagesView', function() {
     return {
       restrict: 'E',
+      scope: {
+        conversation: '=',
+        messages: '='
+      },
       templateUrl: '/chat/views/components/conversation-view/messages-view.html'
     };
   })
