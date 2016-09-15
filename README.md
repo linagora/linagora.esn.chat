@@ -8,13 +8,24 @@ While waiting for a npm-based dependency injection handler, you have to install 
 
 **1. Clone linagora.esn.chat and linagora.esn.emoticon**
 
-Clone somewhere, the two following git repository:
+Clone somewhere, the three following git repository:
 
+ * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.rse/browse
  * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.emoticon/browse
  * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.chat/browse
 
-Go inside each repo and run:
+Go inside linagora.esn.rse repo and run:
 
+    npm install
+    npm link
+
+Go inside linagora.esn.emotion and run:
+
+    npm install
+
+Go inside linagora.esn.chat and run:
+
+    npm link linagora-rse
     npm install
 
 **2. Add component in the configuration file**
