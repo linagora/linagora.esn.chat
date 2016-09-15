@@ -418,12 +418,16 @@ module.exports = function(dependencies) {
   function moderateConversation(conversationId, moderate, callback) {
     Conversation.findByIdAndUpdate(conversationId, {
       $set: {moderate: moderate}
+    }, {
+      new: true
     }, callback);
   }
 
   function moderateMessage(messageId, moderate, callback) {
     ChatMessage.findByIdAndUpdate(messageId, {
       $set: {moderate: moderate}
+    }, {
+      new: true
     }, callback);
   }
 
