@@ -42,8 +42,8 @@ angular.module('linagora.esn.chat')
       },
       templateUrl: '/chat/views/components/conversation-view/messages/message.html',
       controller: function($scope, $filter, $timeout, chatParseMention, ChatScroll, conversationsService) {
-
         var parsedText = $filter('oembedImageFilter')($scope.message.text);
+
         parsedText = $filter('linky')(parsedText, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
         parsedText = chatParseMention.chatParseMention(parsedText, $scope.message.user_mentions);
@@ -70,6 +70,10 @@ angular.module('linagora.esn.chat')
   .directive('chatMessagesView', function() {
     return {
       restrict: 'E',
+      scope: {
+        conversation: '=',
+        messages: '='
+      },
       templateUrl: '/chat/views/components/conversation-view/messages-view.html'
     };
   })

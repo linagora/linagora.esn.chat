@@ -1,5 +1,5 @@
 .block-header.visible-md
-  h2 \#{{::getConversationName(chatLocalStateService.activeRoom)}}
+  h2 \#{{::getConversationName(conversation)}}
   ul.actions
     li
       a(href='')
@@ -15,14 +15,14 @@
     .listview.lv-message
       .lv-header.message-header
         .lvh-label
-          a(href='') {{(chatLocalStateService.activeRoom.members || []).length}} #{__('members')}
+          a(href='') {{(conversation.members || [])}} #{__('members')}
           span(ng-show="displayTopic")
             span.divider |
-            span(ng-if="!chatLocalStateService.activeRoom.topic.value" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
+            span(ng-if="!conversation.topic.value" editable-text="conversation.topic.value" buttons="no" onbeforesave='updateTopic($data)')
               a(href="#" )
                 | Add a topic
                 i.mdi.mdi-plus
-            span(ng-if="chatLocalStateService.activeRoom.topic.value" ng-bind-html="chatLocalStateService.activeRoom.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="chatLocalStateService.activeRoom.topic.value" buttons="no" onbeforesave='updateTopic($data)')
+            span(ng-if="conversation.topic.value" ng-bind-html="conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="conversation.topic.value" buttons="no" onbeforesave='updateTopic($data)')
               a(href="#")
                 | Edit
                 i.mdi.mdi-pencil
