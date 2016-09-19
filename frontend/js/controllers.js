@@ -47,7 +47,8 @@ angular.module('linagora.esn.chat')
       var d1 = moment().startOf('day');
       var d2 = moment(last_message.date);
       var numberDay = moment.duration(d1.diff(d2)).asDays() + 1;
-      return parseInt(numberDay);
+
+      return parseInt(numberDay, 10);
     }
 
     function computeIsConnected() {
