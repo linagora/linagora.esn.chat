@@ -67,14 +67,19 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .directive('chatMessagesView', function() {
+  .directive('chatMessagesView', function(conversationsService) {
     return {
       restrict: 'E',
       scope: {
         conversation: '=',
         messages: '='
       },
-      templateUrl: '/chat/views/components/conversation-view/messages-view.html'
+      templateUrl: '/chat/views/components/conversation-view/messages-view.html',
+      link: function(scope) {
+        conversationsService.getConversationNamePromise.then(function(getConversationName) {
+          scope.getConversationName = getConversationName;
+        });
+      }
     };
   })
 
