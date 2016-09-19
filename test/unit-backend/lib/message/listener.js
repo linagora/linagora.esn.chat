@@ -164,7 +164,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       messageReceivedListener(data);
     });
 
-    it('should not save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is not from someone in the channel', function() {
+    it('should not save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is not from someone in the conversation', function(done) {
       var type = 'text';
       var text = 'yolo';
       var date = '0405';
@@ -190,7 +190,20 @@ describe('The linagora.esn.chat lib listener module', function() {
           callback(null, createMessageResult);
         }),
         getConversation: sinon.spy(function(id, callback) {
-          return callback(null, {members: [{_id: 'id'}]});
+          expect(id).to.be.equal(conversation);
+          callback(null, {members: [{_id: 'id'}]});
+          expect(globalPublish).to.not.have.been.called;
+          expect(conversationMock.createMessage).to.not.have.been.called;
+          done();
+        })
+      };
+
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
+      module.start(conversationMock);
+
+      globalPublish = sinon.spy();
+      messageReceivedListener(data);
+    });
         })
       };
 
