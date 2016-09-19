@@ -17,13 +17,12 @@ angular.module('linagora.esn.chat')
 
       if (channelId) {
         chatLocalStateService.setActive(channelId);
+        ChatConversationService.fetchMessages(channelId, {}).then(function(result) {
+          result.forEach(addUniqId);
+          $scope.messages = result || [];
+          ChatScroll.scrollDown();
+        });
       }
-
-      ChatConversationService.fetchMessages(chatLocalStateService.activeRoom._id, {}).then(function(result) {
-        result.forEach(addUniqId);
-        $scope.messages = result || [];
-        ChatScroll.scrollDown();
-      });
 
       $scope.$on('$destroy', function() {
         if ($scope.chatLocalStateService.activeRoom && $scope.chatLocalStateService.activeRoom._id === channelId) {
