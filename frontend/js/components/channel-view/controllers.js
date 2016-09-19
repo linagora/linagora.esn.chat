@@ -4,17 +4,11 @@ angular.module('linagora.esn.chat')
 
   .controller('conversationViewController', function(
         $scope,
-        $window,
-        $log,
-        $rootScope,
         session,
         ChatConversationService,
         conversationsService,
-        CHAT,
         CHAT_EVENTS,
         ChatScroll,
-        _,
-        webNotification,
         chatLocalStateService,
         $stateParams) {
 
@@ -48,6 +42,7 @@ angular.module('linagora.esn.chat')
       for (var i = messages.length - 1; i > -1; i--) {
         if (messages[i].timestamps.creation < message.timestamps.creation) {
           messages.splice(i + 1, 0, message);
+
           return;
         }
       }

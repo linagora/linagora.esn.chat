@@ -33,6 +33,7 @@ angular.module('linagora.esn.chat')
     $scope.channelState = $scope.channelState || 'chat.channels-views';
     $scope.allUsersConnected = true;
     var userToConnected = {};
+
     if ($scope.item.last_message) {
       $scope.numberOfDays = calcNumberOfDays($scope.item.last_message);
       $scope.item.last_message.text = chatParseMention.chatParseMention($scope.item.last_message.text, $scope.item.last_message.user_mentions, {skipLink: true});
@@ -81,6 +82,7 @@ angular.module('linagora.esn.chat')
       $q.all(statesPromises).then(computeIsConnected);
 
       var unbind = $rootScope.$on(CHAT_EVENTS.USER_CHANGE_STATE, function(event, data) {
+
         if (angular.isDefined(userToConnected[data.userId])) {
           userToConnected[data.userId] = data.state !== 'disconnected';
           computeIsConnected();
