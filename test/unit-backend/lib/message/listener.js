@@ -8,7 +8,7 @@ var CONSTANTS = require('../../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib listener module', function() {
 
-  var deps, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, createConversationMock, communityResult, getCommunityConversationByCommunityIdMock, addMemberToConversationMock, communityCreatedListener, memberAddedListener, comunityUpdateListener;
+  var deps, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, communityCreatedListener, memberAddedListener, comunityUpdateListener;
 
   beforeEach(function() {
     dependencies = function(name) {
@@ -17,20 +17,6 @@ describe('The linagora.esn.chat lib listener module', function() {
 
     ChatMessageMock = sinon.spy(function() {
       this.populate = ChatMessageMock.populate;
-    });
-
-    createConversationMock = sinon.spy();
-
-    createConversationMock = sinon.spy();
-
-    communityResult = 'communityResult';
-
-    getCommunityConversationByCommunityIdMock = sinon.spy(function(_id, callback) {
-      callback(communityResult);
-    });
-
-    addMemberToConversationMock = sinon.spy(function(_conversation, _id, callback) {
-      callback();
     });
 
     logger = {
@@ -111,6 +97,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       };
 
       var module = require('../../../../backend/lib/message/listener')(dependencies);
+
       module.start(channel);
 
       ChatMessageMock.populate = function(field, excluded_field, callback) {
@@ -155,6 +142,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       };
 
       var module = require('../../../../backend/lib/message/listener')(dependencies);
+
       module.start(conversationMock);
 
       globalPublish = function(data) {
@@ -176,7 +164,7 @@ describe('The linagora.esn.chat lib listener module', function() {
       messageReceivedListener(data);
     });
 
-    it('should not save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is not from someone in the channel', function() {
+    it('should not save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is not from someone in the conversation', function(done) {
       var type = 'text';
       var text = 'yolo';
       var date = '0405';
@@ -202,7 +190,11 @@ describe('The linagora.esn.chat lib listener module', function() {
           callback(null, createMessageResult);
         }),
         getConversation: sinon.spy(function(id, callback) {
-          return callback(null, {members: [{_id: 'id'}]});
+          expect(id).to.be.equal(conversation);
+          callback(null, {members: [{_id: 'id'}]});
+          expect(globalPublish).to.not.have.been.called;
+          expect(conversationMock.createMessage).to.not.have.been.called;
+          done();
         })
       };
 
@@ -211,11 +203,47 @@ describe('The linagora.esn.chat lib listener module', function() {
 
       globalPublish = sinon.spy();
       messageReceivedListener(data);
-      process.nextTick(function() {
-        expect(globalPublish).to.not.have.been.called;
-        expect(conversationMock.createMessage).to.not.have.been.called;
-        expect(conversationMock.getConversation).to.have.been.calledWith(creator);
-      });
+    });
+
+    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message if the conversation is a channel even if the message is not from someone in the channel', function(done) {
+      var type = 'text';
+      var text = 'yolo';
+      var date = '0405';
+      var creator = '1';
+      var conversation = 'general';
+      var attachments = [1, 2, 3];
+      var data = {
+        message: {
+          type: type,
+          text: text,
+          date: date,
+          creator: creator,
+          channel: conversation,
+          attachments: attachments
+        },
+        room: 'room'
+      };
+
+      var createMessageResult = 'createMessageResult';
+
+      var conversationMock = {
+        createMessage: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        }),
+        getConversation: sinon.spy(function(id, callback) {
+          expect(id).to.be.equal(conversation);
+          callback(null, {members: [{_id: 'id'}], type: 'channel'});
+          expect(globalPublish).to.have.been.called;
+          expect(conversationMock.createMessage).to.have.been.called;
+          done();
+        })
+      };
+
+      var module = require('../../../../backend/lib/message/listener')(dependencies);
+      module.start(conversationMock);
+
+      globalPublish = sinon.spy();
+      messageReceivedListener(data);
     });
   });
 
@@ -246,6 +274,7 @@ describe('The linagora.esn.chat lib listener module', function() {
 
     it('should call all the handlers even if some fails', function() {
       var data = {foo: 'bar'};
+
       logger.warn = sinon.stub();
       var handler1 = sinon.spy();
       var handler2 = sinon.stub().throws(new Error('You failed'));
@@ -263,5 +292,4 @@ describe('The linagora.esn.chat lib listener module', function() {
       expect(logger.warn).to.have.been.called;
     });
   });
-
 });
