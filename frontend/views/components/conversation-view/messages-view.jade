@@ -15,7 +15,7 @@
     .listview.lv-message
       .lv-header.message-header
         .lvh-label
-          a(href='') {{(conversation.members || [])}} #{__('members')}
+          a(href='') {{(conversation.members || []).length}} #{__('members')}
           span(ng-show="displayTopic")
             span.divider |
             span(ng-if="!conversation.topic.value" editable-text="conversation.topic.value" buttons="no" onbeforesave='updateTopic($data)')

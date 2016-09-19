@@ -4,31 +4,31 @@ angular.module('linagora.esn.chat')
 
   .controller('conversationViewController', function(
         $scope,
-        $window,
-        $log,
-        $rootScope,
         session,
         ChatConversationService,
         conversationsService,
-        CHAT,
         CHAT_EVENTS,
         ChatScroll,
-        _,
-        webNotification,
         chatLocalStateService,
         $stateParams) {
 
     chatLocalStateService.ready.then(function() {
-      if (!$stateParams.id) {
-        chatLocalStateService.setActive(chatLocalStateService.channels[0]._id);
-      } else {
-        chatLocalStateService.setActive($stateParams.id);
+      var channelId = $stateParams.id || chatLocalStateService.channels[0] && chatLocalStateService.channels[0]._id;
+
+      if (channelId) {
+        chatLocalStateService.setActive(channelId);
       }
 
       ChatConversationService.fetchMessages(chatLocalStateService.activeRoom._id, {}).then(function(result) {
         result.forEach(addUniqId);
         $scope.messages = result || [];
         ChatScroll.scrollDown();
+      });
+
+      $scope.$on('$destroy', function() {
+        if ($scope.chatLocalStateService.activeRoom && $scope.chatLocalStateService.activeRoom._id === channelId) {
+          chatLocalStateService.unsetActive();
+        }
       });
     });
 
@@ -48,6 +48,7 @@ angular.module('linagora.esn.chat')
       for (var i = messages.length - 1; i > -1; i--) {
         if (messages[i].timestamps.creation < message.timestamps.creation) {
           messages.splice(i + 1, 0, message);
+
           return;
         }
       }
@@ -70,6 +71,4 @@ angular.module('linagora.esn.chat')
         }
       });
     });
-
-    $scope.$on('$destroy', chatLocalStateService.unsetActive);
   });
