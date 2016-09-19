@@ -1,6 +1,6 @@
 .lv-item.media.chat-message
     a.lv-avatar.pull-left
-      img(ng-src='/api/users/{{::message.creator._id}}/profile/avatar', alt='', ng-if='user._id !== message.creator._id')
+      img(ng-src='/api/users/{{::message.creator._id}}/profile/avatar', alt='')
     .media-body
       .chat-message-title
         div(ng-if='user._id !== message.creator._id')
