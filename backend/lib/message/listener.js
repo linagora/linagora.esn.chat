@@ -37,10 +37,10 @@ module.exports = function(dependencies) {
           return callback(err);
         }
 
-        if (!_.find(conversation.members, function(member) {
+        if (conversation.type !== CONSTANTS.CONVERSATION_TYPE.CHANNEL && !_.find(conversation.members, function(member) {
           return String(member._id) === String(data.message.creator._id || data.message.creator);
         })) {
-          return callback('The user is not into the conversation');
+          return callback('The user is not into the conversation and this conversation is not public');
         }
 
         var chatMessage = {
@@ -63,6 +63,7 @@ module.exports = function(dependencies) {
       (new ChatMessage(data)).populate('creator', CONSTANTS.SKIP_FIELDS.USER, function(err, message) {
         if (err) {
           callback(err);
+
           return;
         }
         var result = message.toJSON();
@@ -77,6 +78,7 @@ module.exports = function(dependencies) {
         populateTypingMessage(data.message, function(err, message) {
           if (err) {
             logger.error('Can not populate user typing message', err);
+
             return;
           }
           globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
@@ -85,6 +87,7 @@ module.exports = function(dependencies) {
         saveAsChatMessage(data, function(err, message) {
           if (err) {
             logger.error('Can not save ChatMessage', err);
+
             return;
           }
           logger.debug('Chat Message saved', message);

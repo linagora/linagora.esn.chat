@@ -204,6 +204,38 @@ describe('The linagora.esn.chat lib listener module', function() {
       globalPublish = sinon.spy();
       messageReceivedListener(data);
     });
+
+    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message if the conversation is a channel even if the message is not from someone in the channel', function(done) {
+      var type = 'text';
+      var text = 'yolo';
+      var date = '0405';
+      var creator = '1';
+      var conversation = 'general';
+      var attachments = [1, 2, 3];
+      var data = {
+        message: {
+          type: type,
+          text: text,
+          date: date,
+          creator: creator,
+          channel: conversation,
+          attachments: attachments
+        },
+        room: 'room'
+      };
+
+      var createMessageResult = 'createMessageResult';
+
+      var conversationMock = {
+        createMessage: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        }),
+        getConversation: sinon.spy(function(id, callback) {
+          expect(id).to.be.equal(conversation);
+          callback(null, {members: [{_id: 'id'}], type: 'channel'});
+          expect(globalPublish).to.have.been.called;
+          expect(conversationMock.createMessage).to.have.been.called;
+          done();
         })
       };
 
@@ -212,11 +244,6 @@ describe('The linagora.esn.chat lib listener module', function() {
 
       globalPublish = sinon.spy();
       messageReceivedListener(data);
-      process.nextTick(function() {
-        expect(globalPublish).to.not.have.been.called;
-        expect(conversationMock.createMessage).to.not.have.been.called;
-        expect(conversationMock.getConversation).to.have.been.calledWith(creator);
-      });
     });
   });
 
