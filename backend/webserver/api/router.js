@@ -1,13 +1,12 @@
 'use strict';
 
-var express = require('express');
+let express = require('express');
 
 module.exports = function(dependencies, lib) {
 
-  var authorizationMW = dependencies('authorizationMW');
-  var controller = require('./controller')(dependencies, lib);
-
-  var router = express.Router();
+  let authorizationMW = dependencies('authorizationMW');
+  let controller = require('./controller')(dependencies, lib);
+  let router = express.Router();
 
   router.get('/messages/:id',
     authorizationMW.requiresAPILogin,
@@ -54,7 +53,6 @@ module.exports = function(dependencies, lib) {
     controller.findMyConversations);
 
   router.get('/state/:id',
-    authorizationMW.requiresAPILogin,
     authorizationMW.requiresAPILogin,
     controller.getUserState);
 

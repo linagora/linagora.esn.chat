@@ -1,13 +1,14 @@
 'use strict';
 
-var _ = require('lodash');
-var CONSTANTS = require('../../lib/constants');
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+let _ = require('lodash');
+const CONSTANTS = require('../../lib/constants');
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
+/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 module.exports = function(dependencies, lib) {
 
   function getMessages(req, res) {
-    lib.conversation.getMessages(req.params.channel, {}, function(err, results) {
+    lib.conversation.getMessages(req.params.channel, {}, (err, results) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -23,7 +24,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function getMessage(req, res) {
-    lib.conversation.getMessage(req.params.id, function(err, message) {
+    lib.conversation.getMessage(req.params.id, (err, message) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -39,7 +40,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function getChannels(req, res) {
-    lib.conversation.getChannels({}, function(err, result) {
+    lib.conversation.getChannels({}, (err, result) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -49,12 +50,13 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).json(result);
     });
   }
 
   function getConversation(req, res) {
-    lib.conversation.getConversation(req.params.id, function(err, result) {
+    lib.conversation.getConversation(req.params.id, (err, result) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -64,12 +66,12 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).json(result);
     });
   }
 
   function deleteConversation(req, res) {
-
     if (!req.params.id) {
       return res.status(400).json({
         error: {
@@ -80,7 +82,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.deleteConversation(req.user._id, req.params.id, function(err, numDeleted) {
+    lib.conversation.deleteConversation(req.user._id, req.params.id, (err, numDeleted) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -100,12 +102,13 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).end();
     });
   }
 
   function createConversation(req, res) {
-    var members = [];
+    let members = [];
 
     if (req.body.members) {
       members = req.body.members.map(function(member) {
@@ -127,7 +130,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.findConversation({type: CONSTANTS.PRIVATE, exactMembersMatch: true, name: req.body.name ? req.body.name : null, members: members}, function(err, conversations) {
+    lib.conversation.findConversation({type: CONSTANTS.PRIVATE, exactMembersMatch: true, name: req.body.name ? req.body.name : null, members: members}, (err, conversations) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -141,7 +144,7 @@ module.exports = function(dependencies, lib) {
       if (conversations && conversations.length > 0) {
         res.status(201).json(conversations[0]);
       } else {
-        var conversation = {
+        let conversation = {
           name: req.body.name,
           type: req.body.type,
           creator: req.user,
@@ -157,7 +160,7 @@ module.exports = function(dependencies, lib) {
           }
         };
 
-        lib.conversation.createConversation(conversation, function(err, result) {
+        lib.conversation.createConversation(conversation, (err, result) => {
           if (err) {
             return res.status(500).json({
               error: {
@@ -167,6 +170,7 @@ module.exports = function(dependencies, lib) {
               }
             });
           }
+
           res.status(201).json(result);
         });
       }
@@ -174,7 +178,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function markAllMessageOfAConversationReaded(req, res) {
-    lib.conversation.makeAllMessageReadedForAnUser(req.user._id, req.params.id, function(err) {
+    lib.conversation.makeAllMessageReadedForAnUser(req.user._id, req.params.id, err => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -190,7 +194,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function joinConversation(req, res) {
-    lib.conversation.addMemberToConversation(req.params.id, req.user._id, function(err) {
+    lib.conversation.addMemberToConversation(req.params.id, req.user._id, err => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -200,12 +204,13 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(204).end();
     });
   }
 
   function leaveConversation(req, res) {
-    lib.conversation.removeMemberFromConversation(req.params.id, req.user._id, function(err) {
+    lib.conversation.removeMemberFromConversation(req.params.id, req.user._id, err => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -215,6 +220,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(204).end();
     });
   }
@@ -230,13 +236,13 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    var members = _.isArray(req.query.members) ? req.query.members : [req.query.members];
+    let members = _.isArray(req.query.members) ? req.query.members : [req.query.members];
 
     if (members.indexOf(String(req.user._id)) === -1) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, function(err, userGroups) {
+    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, (err, userGroups) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -246,6 +252,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).json(userGroups);
     });
   }
@@ -275,7 +282,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.getCommunityConversationByCommunityId(req.query.id, function(err, conversation) {
+    lib.conversation.getCommunityConversationByCommunityId(req.query.id, (err, conversation) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -310,7 +317,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function findMyConversationByType(type, req, res) {
-    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, usersGroups) {
+    lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -320,12 +327,13 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).json(usersGroups);
     });
   }
 
   function findMyConversations(req, res)  {
-    lib.conversation.findConversation({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, function(err, usersGroups) {
+    lib.conversation.findConversation({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -335,16 +343,15 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).json(usersGroups);
     });
   }
 
   function getUserState(req, res) {
-    lib.userState.get(req.params.id).then(function(state) {
-      return res.status(200).json({
-        state: state
-      });
-    }).catch(function(err) {
+    lib.userState.get(req.params.id).then(state => {
+      res.status(200).json({state});
+    }).catch(err => {
       res.status(500).json({
         error: {
           code: 500,
@@ -366,9 +373,9 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.userState.set(req.user._id, req.body.state).then(function() {
+    lib.userState.set(req.user._id, req.body.state).then(() => {
       res.status(204).end();
-    }).catch(function(err) {
+    }).catch(err => {
       res.status(500).json({
         error: {
           code: 500,
@@ -380,12 +387,13 @@ module.exports = function(dependencies, lib) {
   }
 
   function updateTopic(req, res) {
-    var topic = {
+    let topic = {
       value: req.body.value,
       creator: req.user._id,
       last_set: new Date()
     };
-    lib.conversation.updateTopic(req.params.id, topic, function(err, conversation) {
+
+    lib.conversation.updateTopic(req.params.id, topic, (err, conversation) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -395,6 +403,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
+
       res.status(200).json(conversation);
     });
   }
@@ -420,7 +429,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.updateConversation(req.body.conversation, req.body.modifications, function(err, conversation) {
+    lib.conversation.updateConversation(req.body.conversation, req.body.modifications, (err, conversation) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -436,23 +445,23 @@ module.exports = function(dependencies, lib) {
   }
 
   return {
-    getMessage: getMessage,
-    getMessages: getMessages,
-    getChannels: getChannels,
-    getConversation: getConversation,
-    markAllMessageOfAConversationReaded: markAllMessageOfAConversationReaded,
+    getMessage,
+    getMessages,
+    getChannels,
+    getConversation,
+    markAllMessageOfAConversationReaded,
     findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
-    findCommunity: findCommunity,
+    findCommunity,
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyCommunityConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
-    findMyConversations: findMyConversations,
-    getUserState: getUserState,
-    setMyState: setMyState,
-    joinConversation: joinConversation,
-    leaveConversation: leaveConversation,
-    deleteConversation: deleteConversation,
-    createConversation: createConversation,
-    updateTopic: updateTopic,
-    updateConversation: updateConversation
+    findMyConversations,
+    getUserState,
+    setMyState,
+    joinConversation,
+    leaveConversation,
+    deleteConversation,
+    createConversation,
+    updateTopic,
+    updateConversation
   };
 };

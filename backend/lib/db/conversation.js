@@ -1,16 +1,16 @@
 'use strict';
 
-var uuid = require('node-uuid');
-var cleanUser = require('./utils').cleanUser;
-var CONSTANTS = require('../constants');
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+let uuid = require('node-uuid');
+let cleanUser = require('./utils').cleanUser;
+const CONSTANTS = require('../constants');
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies) {
 
-  var mongoose = dependencies('db').mongo.mongoose;
-  var ObjectId = mongoose.Schema.ObjectId;
+  let mongoose = dependencies('db').mongo.mongoose;
+  let ObjectId = mongoose.Schema.ObjectId;
 
-  var ConversationSchema = new mongoose.Schema({
+  let ConversationSchema = new mongoose.Schema({
     name: {type: String},
     type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COMMUNITY], required: true, index: true},
     creator: {type: ObjectId, ref: 'User'},
@@ -49,6 +49,7 @@ module.exports = function(dependencies) {
     numOfMessage: {type: Number, default: 0}
   });
 
+  /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
   function cleanConversation(original, object) {
     object.members && object.members.map(cleanUser);
 

@@ -1,10 +1,10 @@
 'use strict';
 
-var express = require('express');
-var FRONTEND_PATH = require('./constants').FRONTEND_PATH;
+let express = require('express');
+const FRONTEND_PATH = require('./constants').FRONTEND_PATH;
 
 module.exports = function(dependencies) {
-  var application = express();
+  let application = express();
 
   require('./config/i18n')(dependencies, application);
   application.use(express.static(FRONTEND_PATH));

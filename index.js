@@ -1,13 +1,15 @@
 'use strict';
 
-var AwesomeModule = require('awesome-module');
-var Dependency = AwesomeModule.AwesomeModuleDependency;
-var path = require('path');
+let AwesomeModule = require('awesome-module');
+let Dependency = AwesomeModule.AwesomeModuleDependency;
+let path = require('path');
+let glob = require('glob-all');
 
-var NAME = 'chat';
-var MODULE_NAME = 'linagora.esn.' + NAME;
+const NAME = 'chat';
+const MODULE_NAME = 'linagora.esn.' + NAME;
+const FRONTEND_JS_PATH = __dirname + '/frontend/js/';
 
-var chatModule = new AwesomeModule(MODULE_NAME, {
+let chatModule = new AwesomeModule(MODULE_NAME, {
   dependencies: [
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.logger', 'logger'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.auth', 'auth'),
@@ -24,48 +26,33 @@ var chatModule = new AwesomeModule(MODULE_NAME, {
   ],
   states: {
     lib: function(dependencies, callback) {
-      var libModule = require('./backend/lib')(dependencies);
-      var chat = require('./backend/webserver/api')(dependencies, libModule);
-
-      var lib = {
+      let libModule = require('./backend/lib')(dependencies);
+      let chat = require('./backend/webserver/api')(dependencies, libModule);
+      let lib = {
         api: {
           chat: chat
         },
         lib: libModule
       };
-      return callback(null, lib);
+
+      callback(null, lib);
     },
 
     deploy: function(dependencies, callback) {
-      var app = require('./backend/webserver/application')(this, dependencies);
-      app.use('/api/chat', this.api.chat);
+      let webserverWrapper = dependencies('webserver-wrapper');
+      let app = require('./backend/webserver/application')(this, dependencies);
+      let lessFile = path.resolve(__dirname, './frontend/css/styles.less');
+      let frontendModules = glob.sync([
+        FRONTEND_JS_PATH + '**/chat.app.js',
+        FRONTEND_JS_PATH + '**/!(*spec).js'
+      ]).map(filepath => filepath.replace(FRONTEND_JS_PATH, ''));
 
-      var webserverWrapper = dependencies('webserver-wrapper');
-      var frontendModules = [
-        'app.js',
-        'app.config.js',
-        'app.routes.js',
-        'app.run.js',
-        'constants.js',
-        'controllers.js',
-        'directives.js',
-        'services/conversations.js',
-        'services/services.js',
-        'services/chat-local-state-service.js',
-        'services/humanize-entities-label.js',
-        'services/message.js',
-        'services/parse-mention.js',
-        'services/text-entity-selector.js',
-        'components/channel-view/controllers.js',
-        'components/channel-view/directives.js',
-        'components/channel-view/chat-emoticon-chooser.component.js',
-        'components/channel-view/mention-chooser.component.js'
-      ];
+      app.use('/api/chat', this.api.chat);
       webserverWrapper.injectAngularModules(NAME, frontendModules, MODULE_NAME, ['esn']);
-      var lessFile = path.resolve(__dirname, './frontend/css/styles.less');
       webserverWrapper.injectLess(NAME, [lessFile], 'esn');
       webserverWrapper.addApp(NAME, app);
-      return callback();
+
+      callback();
     },
 
     start: function(dependencies, callback) {
