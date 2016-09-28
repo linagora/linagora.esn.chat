@@ -1,59 +1,12 @@
 'use strict';
 
+/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
+
 let _ = require('lodash');
 const CONSTANTS = require('../../lib/constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 module.exports = function(dependencies, lib) {
-
-  function getMessages(req, res) {
-    lib.conversation.getMessages(req.params.channel, {}, (err, results) => {
-      if (err) {
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while getting messages'
-          }
-        });
-      }
-
-      return res.status(200).json(results);
-    });
-  }
-
-  function getMessage(req, res) {
-    lib.conversation.getMessage(req.params.id, (err, message) => {
-      if (err) {
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while getting message'
-          }
-        });
-      }
-
-      return res.status(200).json(message);
-    });
-  }
-
-  function getChannels(req, res) {
-    lib.conversation.getChannels({}, (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while getting channels'
-          }
-        });
-      }
-
-      res.status(200).json(result);
-    });
-  }
 
   function getConversation(req, res) {
     lib.conversation.getConversation(req.params.id, (err, result) => {
@@ -257,65 +210,6 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function findCommunity(req, res) {
-    if (req.query.members && req.query.id) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'can not use members and id attribute at the same time'
-        }
-      });
-    }
-
-    if (req.query.members) {
-      return findConversationByTypeAndByMembers(CONVERSATION_TYPE.COMMUNITY, req, res);
-    }
-
-    if (!req.query.id) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'should provide members or id attribute'
-        }
-      });
-    }
-
-    lib.conversation.getCommunityConversationByCommunityId(req.query.id, (err, conversation) => {
-      if (err) {
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while fetching conversation of group:' + req.query.id
-          }
-        });
-      }
-
-      if (!conversation) {
-        return res.status(404).json({
-          error: {
-            code: 404,
-            message: 'Not Found',
-            details: 'Community conversation not found'
-          }
-        });
-      }
-
-      if (!_.find(conversation.members, {_id: req.user._id})) {
-        return res.status(404).json({
-          error: {
-            code: 404,
-            message: 'Community conversation not found'
-          }
-        });
-      }
-
-      res.status(200).json(conversation);
-    });
-  }
-
   function findMyConversationByType(type, req, res) {
     lib.conversation.findConversation({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
       if (err) {
@@ -345,44 +239,6 @@ module.exports = function(dependencies, lib) {
       }
 
       res.status(200).json(usersGroups);
-    });
-  }
-
-  function getUserState(req, res) {
-    lib.userState.get(req.params.id).then(state => {
-      res.status(200).json({state});
-    }).catch(err => {
-      res.status(500).json({
-        error: {
-          code: 500,
-          message: 'Server Error',
-          details: err.message || 'Error while fetching user state for user' + req.params.id
-        }
-      });
-    });
-  }
-
-  function setMyState(req, res) {
-    if (!req.body.state) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'You should provide the user state'
-        }
-      });
-    }
-
-    lib.userState.set(req.user._id, req.body.state).then(() => {
-      res.status(204).end();
-    }).catch(err => {
-      res.status(500).json({
-        error: {
-          code: 500,
-          message: 'Server Error',
-          details: err.message || 'Error while setting user state for user' + req.params.id
-        }
-      });
     });
   }
 
@@ -445,18 +301,13 @@ module.exports = function(dependencies, lib) {
   }
 
   return {
-    getMessage,
-    getMessages,
-    getChannels,
     getConversation,
     markAllMessageOfAConversationReaded,
+    findMyConversationByType,
+    findConversationByTypeAndByMembers,
     findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
-    findCommunity,
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
-    findMyCommunityConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
     findMyConversations,
-    getUserState,
-    setMyState,
     joinConversation,
     leaveConversation,
     deleteConversation,
