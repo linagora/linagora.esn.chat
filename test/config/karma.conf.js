@@ -62,7 +62,8 @@ module.exports = function(config) {
       stripPrefix: 'frontend',
       cacheIdFromPath: function(filepath) {
         var cacheId = filepath.replace(/jade$/, 'html').replace(/^frontend/, '/chat');
-        return cacheId;
+
+return cacheId;
       },
       prependPrefix: '/linagora.esn.chat',
       // setting this option will create only a single module that contains templates
