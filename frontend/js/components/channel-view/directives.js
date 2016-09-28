@@ -2,7 +2,7 @@
 
 angular.module('linagora.esn.chat')
 
-  .directive('chatUserTyping', function(_, $q, session, userUtils) {
+  .directive('chatUserTyping', function(_, session, userUtils) {
     return {
       restrict: 'E',
       scope: true,
@@ -11,12 +11,13 @@ angular.module('linagora.esn.chat')
 
         session.ready.then(function(session) {
           scope.typing = {};
+          /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
           scope.$on('chat:message:user_typing', function(evt, message) {
             scope.typing[message.creator._id] = message;
 
             scope.usersTyping = _.chain(scope.typing)
-              .filter(function(message, key) {
-                return message.state && scope.chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id; //TODO rename message.channel to message.conversation
+              .filter(function(message) {
+                return message.state && scope.chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
               })
               .map('creator')
               .map(userUtils.displayNameOf)
@@ -107,7 +108,7 @@ angular.module('linagora.esn.chat')
     return {
       restrict: 'E',
       templateUrl: '/chat/views/components/conversation-view/messages/message-compose.html',
-      link: function(scope, element, attrs) {
+      link: function(scope, element) {
         chatMessageService.connect();
         var textarea = element.find('textarea').get(0);
         var timer = null;
@@ -190,6 +191,7 @@ angular.module('linagora.esn.chat')
         scope.sendMessage = function() {
           if (!scope.text) {
             $log.debug('Can not send message');
+
             return;
           }
 
@@ -211,7 +213,7 @@ angular.module('linagora.esn.chat')
 
         scope.onFileSelect = function(files) {
           $log.debug('Sending message with attachments', files);
-          chatMessageService.sendMessageWithAttachments(buildCurrentMessage(), files).then(function(response) {
+          chatMessageService.sendMessageWithAttachments(buildCurrentMessage(), files).then(function() {
             scope.text = '';
           }, function(err) {
             $log.error('Error while uploading message', err);
@@ -237,6 +239,7 @@ angular.module('linagora.esn.chat')
         $scope.diffDate = function(timestamp) {
           var messageDate = moment(timestamp, 'x');
           var formatDate = [messageDate.year(), messageDate.month(), messageDate.date()];
+
           return moment().diff(formatDate, 'day');
         };
 

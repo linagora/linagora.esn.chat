@@ -2,7 +2,7 @@
 
 angular.module('linagora.esn.chat')
 
-  .controller('chatRootController', function($scope, $rootScope, CHAT_EVENTS, chatNotification, chatLocalStateService) {
+  .controller('chatRootController', function($scope, chatNotification, chatLocalStateService) {
     $scope.isEnabled = function() {
       return chatNotification.isEnabled();
     };
@@ -89,6 +89,7 @@ angular.module('linagora.esn.chat')
         }
       });
 
+      /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
       $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         setLastMessageIsMe(message);
         $scope.numberOfDays = calcNumberOfDays(message);
@@ -99,7 +100,7 @@ angular.module('linagora.esn.chat')
     });
   })
 
-  .controller('chatAddGroupController', function($scope, $state, conversationsService, _, chatLocalStateService) {
+  .controller('chatAddGroupController', function($scope, $state, conversationsService, chatLocalStateService) {
     $scope.members = [];
     $scope.addGroup = function() {
       var group = {

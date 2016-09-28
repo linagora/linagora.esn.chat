@@ -16,6 +16,7 @@ angular.module('linagora.esn.chat')
       link: function(scope) {
         scope.toggleNotification = function() {
           var enable = chatNotification.isEnabled();
+
           chatNotification.setNotificationStatus(!enable);
           scope.isNotificationEnabled = !enable;
         };
@@ -31,7 +32,7 @@ angular.module('linagora.esn.chat')
         channelState: '@',
         types: '='
       },
-      controller: function($scope, $state, chatLocalStateService) {
+      controller: function($scope, chatLocalStateService) {
         $scope.wanted = function(conversation) {
           return $scope.types.indexOf(conversation.type) > -1;
         };
@@ -71,6 +72,7 @@ angular.module('linagora.esn.chat')
             var members = $scope.conversation && $scope.conversation.members ? $scope.conversation.members : [];
 
             members = members.length === 1 ? members : _.reject(members, {_id: session.user._id});
+
             return members.slice(0, 4);
           };
         });

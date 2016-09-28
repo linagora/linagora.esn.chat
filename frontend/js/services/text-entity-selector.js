@@ -1,4 +1,5 @@
 (function() {
+  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular.module('linagora.esn.chat').factory('ChatTextEntitySelector', function(KEY_CODE, $q, chatHumanizeEntitiesLabel, _) {
@@ -14,6 +15,7 @@
       this._resetState();
 
       var matchStartChar = startChar === '^' ? '\\^' : '[' + startChar + ']';
+
       this.REGEXP_ENTITY_IN_EDITION = new RegExp(matchStartChar + '([a-zA-Z0-9_+-]+)$');
       this.endChar = endChar || '';
       this.startChar = startChar;
@@ -43,9 +45,11 @@
       this.textarea = textareaAdapter;
       if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
         this._resetState();
+
         return;
       }
       var self = this;
+
       this._entityListResolver('').then(function(entityList) {
         self.inEdition = '';
         self.setEntityList(entityList);
@@ -64,12 +68,14 @@
 
     ChatTextEntitySelector.prototype.textChanged = function(textareaAdapter, lengthEdition, hideForNoResults) {
       var self = this;
+
       this.textarea = textareaAdapter;
       this.lengthEdition = _.isNumber(lengthEdition) ? lengthEdition : 2;
       this.hideForNoResults = _.isBoolean(hideForNoResults) ? hideForNoResults : true;
 
       if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
         this._resetState();
+
         return;
       }
 
@@ -77,6 +83,7 @@
 
       if (inEdition.length < this.lengthEdition) {
         this._resetState();
+
         return;
       }
 
@@ -119,6 +126,7 @@
 
       if (selectionStart > value.length) {
         var lim = selectionStart - value.length;
+
         for (var i = 0; i < lim; i++) {
           value = value + ' ';
         }
@@ -128,6 +136,7 @@
 
       var regexp = valueStart.match(this.REGEXP_ENTITY_IN_EDITION);
       var distanceToColon = 0;
+
       if (regexp) {
         distanceToColon = this.startChar.length;
         distanceToColon = distanceToColon + valueStart.match(this.REGEXP_ENTITY_IN_EDITION)[1].length;
@@ -140,6 +149,7 @@
       }
 
       var newValueStart = valueStart.substr(0, valueStart.length - distanceToColon) + humanLabel;
+
       this.textarea.replaceText(newValueStart  + valueEnd, newValueStart.length, newValueStart.length);
     };
 
@@ -165,6 +175,7 @@
 
     ChatTextEntitySelector.prototype.loadMoreElements = function() {
       var self = this;
+
       this.entityList.slice(this.entityListDisplayed.length, this.entityListDisplayed.length + this.NUMBER_ENTITY_DISPLAYED).map(function(entity) {
         self.entityListDisplayed.push(entity);
       });

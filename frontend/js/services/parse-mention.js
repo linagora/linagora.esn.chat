@@ -1,4 +1,5 @@
 (function() {
+  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular

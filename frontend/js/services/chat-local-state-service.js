@@ -29,12 +29,15 @@ angular.module('linagora.esn.chat')
       activeRoom = {};
 
       var sio = livenotification(CHAT_NAMESPACE);
+
       sio.on(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
       sio.on(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, function(conversation) {
         var conv = findConversation(conversation._id);
+
         if (!conv) {
           addConversation(conversation);
+
           return;
         }
         conv.members = conversation.members;
@@ -42,8 +45,10 @@ angular.module('linagora.esn.chat')
 
       sio.on(CHAT_EVENTS.CONVERSATIONS.UPDATE, function(conversation) {
         var conv = findConversation(conversation._id);
+
         if (!conv) {
           addConversation(conversation);
+
           return;
         }
 
@@ -54,12 +59,14 @@ angular.module('linagora.esn.chat')
         $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.UPDATE, conv);
       });
 
+      /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
         addConversation(data);
       });
 
       $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         var conversation = findConversation(message.channel);
+
         if (!conversation) {
           return;
         }
@@ -105,6 +112,7 @@ angular.module('linagora.esn.chat')
 
     function setActive(conversationId) {
       var conversation;
+
       if (isActiveRoom(conversationId)) {
         return true;
       }
@@ -124,6 +132,7 @@ angular.module('linagora.esn.chat')
 
     function unreadMessage(message) {
       var conversation = findConversation(message.channel);
+
       if (conversation && !isActiveRoom(conversation._id)) {
         conversation.unreadMessageCount = (conversation.unreadMessageCount || 0) + 1;
         if (chatParseMention.userIsMentioned(message.text, session.user)) {
@@ -134,6 +143,7 @@ angular.module('linagora.esn.chat')
 
     function getNumberOfUnreadedMessages() {
       var unreadedMessages = 0;
+
       service.conversations.forEach(function(conversation) {
         unreadedMessages = unreadedMessages + conversation.unreadMessageCount;
       });
@@ -146,6 +156,7 @@ angular.module('linagora.esn.chat')
         if (!conversation.last_message || !conversation.last_message.date) {
           return -(new Date());
         }
+
         return -(new Date(conversation.last_message.date));
       });
 
@@ -170,9 +181,12 @@ angular.module('linagora.esn.chat')
 
     function deleteConversationInCache(conv) {
       var array = [];
+
       var conversation = !conv._id ? _.find(service.conversations, {_id: conv}) : conv;
+
       if (!conversation) {
         $log.warn('Trying to delete a conversation that does not exist', conv);
+
         return;
       }
       if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
