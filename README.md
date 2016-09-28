@@ -35,6 +35,7 @@ Add "linagora.esn.chat" in config/default.json:
       "modules": [
         "linagora.esn.core.webserver",
         "linagora.esn.core.wsserver",
+        "linagora.esn.emoticon",
         "linagora.esn.chat"
       ],
 
