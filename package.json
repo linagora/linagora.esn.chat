@@ -59,12 +59,16 @@
     "url": "https://ci.open-paas.org/stash/scm/om/linagora.esn.chat.git"
   },
   "author": "Linagora R&D",
-  "license": "AGPLv3",
+  "license": "AGPL-3.0",
+  "engines" : {
+    "node" : ">=6.5.0"
+  },
   "dependencies": {
     "async": "2.0.1",
     "awesome-module": "1.0.0",
     "bower": "1.7.9",
     "express": "4.14.0",
+    "glob-all": "^3.1.0",
     "i18n": "0.8.3",
     "lodash": "4.15.0",
     "mongoose": "4.6.0",
