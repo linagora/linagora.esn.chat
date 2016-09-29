@@ -3,13 +3,37 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
+    .factory('chatLocalStateService', chatLocalStateService);
 
-    .factory('chatLocalStateService', function($rootScope, $q, $log, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
-      var service;
+    chatLocalStateService.$inject = ['$rootScope', '$q', '$log', '_', 'session', 'livenotification', 'conversationsService', 'chatParseMention', 'CHAT_CONVERSATION_TYPE', 'CHAT_EVENTS', 'CHAT_NAMESPACE'];
 
+    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
       var deferred = $q.defer();
-
       var activeRoom = {};
+      var service = {
+        setActive: setActive,
+        ready: deferred.promise,
+        unsetActive: unsetActive,
+        initLocalState: initLocalState,
+        find: find,
+        findConversation: findConversation,
+        isActiveRoom: isActiveRoom,
+        getNumberOfUnreadedMessages: getNumberOfUnreadedMessages,
+        addConversation: addConversation,
+        deleteConversation: deleteConversation,
+        leaveConversation: leaveConversation,
+        channels: [],
+        privateConversations: [],
+        communityConversations: [],
+        conversations: [],
+        get activeRoom() {
+          return activeRoom;
+        }
+      };
+
+      return service;
+
+      ////////////
 
       function initLocalState() {
         conversationsService.resetCache();
@@ -224,28 +248,5 @@
         activeRoom = {};
         $rootScope.$broadcast(CHAT_EVENTS.UNSET_ACTIVE_ROOM);
       }
-
-      service = {
-        setActive: setActive,
-        ready: deferred.promise,
-        unsetActive: unsetActive,
-        initLocalState: initLocalState,
-        find: find,
-        findConversation: findConversation,
-        isActiveRoom: isActiveRoom,
-        getNumberOfUnreadedMessages: getNumberOfUnreadedMessages,
-        addConversation: addConversation,
-        deleteConversation: deleteConversation,
-        leaveConversation: leaveConversation,
-        channels: [],
-        privateConversations: [],
-        communityConversations: [],
-        conversations: [],
-        get activeRoom() {
-          return activeRoom;
-        }
-      };
-
-      return service;
-    });
+    }
 })();
