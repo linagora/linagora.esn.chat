@@ -4,16 +4,24 @@
 
   'use strict';
 
-  angular.module('linagora.esn.chat').component('chatMentionChooser', {
-    templateUrl: '/chat/views/components/conversation-view/messages/mention-chooser.html',
-    controllerAs: 'ctlr',
-    controller: ChatMentionsChooser
-  });
+  angular
+    .module('linagora.esn.chat')
+    .component('chatMentionChooser', {
+      templateUrl: '/chat/views/components/conversation-view/messages/mention-chooser.html',
+      controllerAs: 'ctlr',
+      controller: ChatMentionsChooserController
+    });
 
-  function ChatMentionsChooser($scope, ChatTextEntitySelector, session, domainAPI, _, MENTION_CHOOSER_MAX_RESULT) {
+  ChatMentionsChooserController.$inject = ['$scope', 'ChatTextEntitySelector', 'session', 'domainAPI', '_', 'MENTION_CHOOSER_MAX_RESULT'];
 
+  function ChatMentionsChooserController($scope, ChatTextEntitySelector, session, domainAPI, _, MENTION_CHOOSER_MAX_RESULT) {
     var self = this;
-    var membersResolver = function(string) {
+
+    self.entitySelector = new ChatTextEntitySelector(membersResolver, '@', null, function(user) {
+      return user.firstname + '_' + user.lastname;
+    }, _.property('_id'));
+
+    function membersResolver(string) {
       return session.ready.then(function(session) {
         return domainAPI.getMembers(session.domain._id, {
           search: string.replace(/_/g, ' '),
@@ -25,11 +33,7 @@
           });
         });
       });
-    };
-
-    self.entitySelector = new ChatTextEntitySelector(membersResolver, '@', null, function(user) {
-      return user.firstname + '_' + user.lastname;
-    }, _.property('_id'));
+    }
 
     $scope.$on('chat:message:compose:keydown', function(angularEvent, event) {
       self.entitySelector.keyDown(event);
