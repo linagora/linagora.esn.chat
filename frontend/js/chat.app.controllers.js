@@ -3,9 +3,9 @@
 
   angular.module('linagora.esn.chat')
 
-    .controller('chatRootController', function($scope, chatNotification, chatLocalStateService) {
+    .controller('chatRootController', function($scope, chatNotificationService, chatLocalStateService) {
       $scope.isEnabled = function() {
-        return chatNotification.isEnabled();
+        return chatNotificationService.isEnabled();
       };
 
       $scope.chatLocalStateService = chatLocalStateService;

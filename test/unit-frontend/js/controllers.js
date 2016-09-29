@@ -21,7 +21,7 @@ describe('The linagora.esn.chat module controllers', function() {
     livenotificationMock,
     CHAT_CONVERSATION_TYPE,
     ChatMessageAdapter,
-    chatNotification,
+    chatNotificationService,
     chatScroll,
     CHAT_EVENTS,
     getItemResult,
@@ -104,13 +104,13 @@ describe('The linagora.esn.chat module controllers', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotification_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotificationService_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
     CHAT_EVENTS = _CHAT_EVENTS_;
-    chatNotification = _chatNotification_;
+    chatNotificationService = _chatNotificationService_;
     chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
@@ -146,9 +146,9 @@ describe('The linagora.esn.chat module controllers', function() {
       expect(chatLocalStateService.setActive).to.be.calledWith(channels[0]._id);
     });
 
-    it('should set the isNotificationEnabled value from chatNotification service', function() {
+    it('should set the isNotificationEnabled value from chatNotificationService service', function() {
       initCtrl();
-      chatNotification.setNotificationStatus(true);
+      chatNotificationService.setNotificationStatus(true);
       expect(scope.isEnabled()).to.be.equal(true);
     });
   });

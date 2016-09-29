@@ -2,10 +2,10 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-  .run(function(chatNotification, chatMessageService, chatLocalStateService, editableOptions) {
+  .run(function(chatNotificationService, chatMessageService, chatLocalStateService, editableOptions) {
     chatLocalStateService.initLocalState();
     chatMessageService.connect();
-    chatNotification.start();
+    chatNotificationService.start();
     editableOptions.theme = 'bs3';
   });
 })();

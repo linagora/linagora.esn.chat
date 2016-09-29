@@ -10,15 +10,15 @@
       };
     })
 
-    .directive('chatSidebar', function(chatNotification) {
+    .directive('chatSidebar', function(chatNotificationService) {
       return {
         restrict: 'E',
         templateUrl: '/chat/views/aside/sidebar.html',
         link: function(scope) {
           scope.toggleNotification = function() {
-            var enable = chatNotification.isEnabled();
+            var enable = chatNotificationService.isEnabled();
 
-            chatNotification.setNotificationStatus(!enable);
+            chatNotificationService.setNotificationStatus(!enable);
             scope.isNotificationEnabled = !enable;
           };
         }

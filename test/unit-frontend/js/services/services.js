@@ -17,7 +17,7 @@ describe('The linagora.esn.chat services', function() {
     chatUserState,
     chatNamespace,
     $httpBackend,
-    chatNotification,
+    chatNotificationService,
     chatLocalStateService,
     CHAT_CONVERSATION_TYPE,
     conversationsServiceMock,
@@ -91,10 +91,10 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotification_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotificationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
     ChatConversationService = _ChatConversationService_;
-    chatNotification = _chatNotification_;
+    chatNotificationService = _chatNotificationService_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
@@ -151,11 +151,11 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  describe('chatNotification service', function() {
+  describe('chatNotificationService service', function() {
     describe('start() method', function() {
       it('should listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
         $rootScope.$on = sinon.spy();
-        chatNotification.start();
+        chatNotificationService.start();
         expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
       });
     });
