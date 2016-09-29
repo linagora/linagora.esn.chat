@@ -11,5 +11,5 @@
     var chatItem = new dynamicDirectiveServiceProvider.DynamicDirective(true, 'chat-application-menu', {priority: 35});
 
     dynamicDirectiveServiceProvider.addInjection('esn-application-menu', chatItem);
-}
+  }
 })();
