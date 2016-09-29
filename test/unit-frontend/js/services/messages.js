@@ -13,8 +13,8 @@ describe('The linagora.esn.chat messages', function() {
   domain,
   $rootScope,
   chatMessageService,
-  ChatWSTransportMock,
-  ChatWSTransportMockInstance,
+  ChatTransportMock,
+  ChatTransportMockInstance,
   fileUploadServiceMock,
   backgroundProcessorServiceMock,
   sessionFactory,
@@ -40,9 +40,9 @@ describe('The linagora.esn.chat messages', function() {
   describe('chatMessageService', function() {
     beforeEach(function() {
 
-      ChatWSTransportMock = sinon.spy(function() {
+      ChatTransportMock = sinon.spy(function() {
         var self = this;
-        ChatWSTransportMockInstance = self;
+        ChatTransportMockInstance = self;
         this.connect = sinon.spy();
         this.sendMessage = sinon.spy(function() {
           return $q.when({});
@@ -57,7 +57,7 @@ describe('The linagora.esn.chat messages', function() {
 
       module('linagora.esn.chat', function($provide) {
         $provide.factory('session', sessionFactory);
-        $provide.value('ChatWSTransport', ChatWSTransportMock);
+        $provide.value('ChatTransport', ChatTransportMock);
         $provide.value('backgroundProcessorService', backgroundProcessorServiceMock);
         $provide.value('fileUploadService', fileUploadServiceMock);
         $provide.value('DEFAULT_FILE_TYPE', DEFAULT_FILE_TYPE);
@@ -74,7 +74,7 @@ describe('The linagora.esn.chat messages', function() {
 
     it('should pass correct argument when constructing transport object', function() {
       $rootScope.$digest();
-      expect(ChatWSTransportMock).to.have.been.calledWith({
+      expect(ChatTransportMock).to.have.been.calledWith({
         user: 'userId',
         room: 'domainId'
       });
@@ -85,7 +85,7 @@ describe('The linagora.esn.chat messages', function() {
         var promiseCallback = sinon.spy();
         chatMessageService.sendMessage({data: 'data'}).then(promiseCallback);
         $rootScope.$digest();
-        expect(ChatWSTransportMockInstance.sendMessage).to.have.been.calledWith({data: 'data', type: 'text'});
+        expect(ChatTransportMockInstance.sendMessage).to.have.been.calledWith({data: 'data', type: 'text'});
         expect(promiseCallback).to.have.been.calledOnce;
       });
     });
@@ -95,7 +95,7 @@ describe('The linagora.esn.chat messages', function() {
         var promiseCallback = sinon.spy();
         chatMessageService.sendUserTyping({data: 'data'}).then(promiseCallback);
         $rootScope.$digest();
-        expect(ChatWSTransportMockInstance.sendMessage).to.have.been.calledWith({data: 'data', type: 'user_typing'});
+        expect(ChatTransportMockInstance.sendMessage).to.have.been.calledWith({data: 'data', type: 'user_typing'});
         expect(promiseCallback).to.have.been.calledOnce;
       });
     });
@@ -105,7 +105,7 @@ describe('The linagora.esn.chat messages', function() {
         chatMessageService.connect();
         $rootScope.$digest();
         chatMessageService.connect();
-        expect(ChatWSTransportMockInstance.connect).to.have.been.calledOnce;
+        expect(ChatTransportMockInstance.connect).to.have.been.calledOnce;
       });
 
       describe('connect given handler', function() {
@@ -113,7 +113,7 @@ describe('The linagora.esn.chat messages', function() {
         beforeEach(function() {
           chatMessageService.connect();
           $rootScope.$digest();
-          expect(ChatWSTransportMockInstance.connect).to.have.been.calledWith(sinon.match.func.and(sinon.match(function(_callback_) {
+          expect(ChatTransportMockInstance.connect).to.have.been.calledWith(sinon.match.func.and(sinon.match(function(_callback_) {
             callback = _callback_;
             return true;
           })));
@@ -154,14 +154,14 @@ describe('The linagora.esn.chat messages', function() {
     });
   });
 
-  describe('ChatWSTransport', function() {
-    var ChatWSTransport, CHAT_NAMESPACE, livenotificationMock, chatSioMock;
+  describe('ChatTransport', function() {
+    var ChatTransport, CHAT_NAMESPACE, livenotificationMock, chatSioMock;
 
     beforeEach(function() {
 
-      ChatWSTransportMock = sinon.spy(function() {
+      ChatTransportMock = sinon.spy(function() {
         var self = this;
-        ChatWSTransportMockInstance = self;
+        ChatTransportMockInstance = self;
         this.connect = sinon.spy();
         this.sendMessage = sinon.spy(function() {
           return $q.when({});
@@ -197,19 +197,19 @@ describe('The linagora.esn.chat messages', function() {
       });
     });
 
-    beforeEach(angular.mock.inject(function(_ChatWSTransport_, _CHAT_NAMESPACE_) {
-      ChatWSTransport = _ChatWSTransport_;
+    beforeEach(angular.mock.inject(function(_ChatTransport_, _CHAT_NAMESPACE_) {
+      ChatTransport = _ChatTransport_;
       CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     }));
 
     var instance, onMessage;
     beforeEach(function() {
       onMessage = sinon.spy();
-      instance = new ChatWSTransport({room: 'roomId'});
+      instance = new ChatTransport({room: 'roomId'});
       instance.connect(onMessage);
     });
 
-    describe('ChatWSTransport connect function', function() {
+    describe('ChatTransport connect function', function() {
 
       it('should connect to CHAT_NAMESPACE in the good room', function() {
         expect(livenotificationMock).to.have.been.calledWith(CHAT_NAMESPACE, 'roomId');

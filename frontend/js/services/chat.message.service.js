@@ -9,7 +9,7 @@
           $log,
           $rootScope,
           session,
-          ChatWSTransport,
+          ChatTransport,
           fileUploadService,
           backgroundProcessorService,
           MESSAGE_TYPE,
@@ -19,7 +19,7 @@
         var userId = session.user._id;
         var domainId = session.domain._id;
 
-        var transport = new ChatWSTransport({
+        var transport = new ChatTransport({
           room: domainId,
           user: userId
         });
@@ -164,40 +164,5 @@
         sendUserTyping: bindToPromiseResult(chatMessageServicePromise, 'sendUserTyping'),
         sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments'),
       };
-    })
-
-    .factory('ChatWSTransport', function($log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
-
-      function ChatWSTransport(options) {
-        this.options = options;
-      }
-
-      ChatWSTransport.prototype.sendMessage = function(message) {
-        $log.info('Send message to peers', message);
-        this.sio.send('message', message);
-
-        return $q.when(message);
-      };
-
-      ChatWSTransport.prototype.connect = function(onMessage) {
-        var self = this;
-
-        if (!this.sio) {
-          this.sio = livenotification(CHAT_NAMESPACE, self.options.room);
-
-          this.sio.on('message', function(message) {
-            $log.debug('Got a message on transport', message);
-            onMessage(message);
-          });
-
-          this.sio.on('connected', function() {
-            $log.info('Connected');
-          });
-          this.sio = livenotification(CHAT_NAMESPACE);
-          this.sio.on(CHAT_EVENTS.TOPIC_UPDATED, onMessage);
-        }
-      };
-
-      return ChatWSTransport;
     });
 })();
