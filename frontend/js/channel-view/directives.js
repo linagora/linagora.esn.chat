@@ -88,7 +88,7 @@
     .directive('chatConversationView', function() {
       return {
         restrict: 'E',
-        controller: 'conversationViewController',
+        controller: 'chatConversationViewController',
         templateUrl: '/chat/views/components/conversation-view/conversation-view.html',
         scope: {
           displayTopic: '='
