@@ -9,7 +9,7 @@
           $log,
           $rootScope,
           session,
-          ChatTransport,
+          ChatTransportService,
           fileUploadService,
           backgroundProcessorService,
           MESSAGE_TYPE,
@@ -19,7 +19,7 @@
         var userId = session.user._id;
         var domainId = session.domain._id;
 
-        var transport = new ChatTransport({
+        var transport = new ChatTransportService({
           room: domainId,
           user: userId
         });

@@ -57,7 +57,7 @@ describe('The linagora.esn.chat messages', function() {
 
       module('linagora.esn.chat', function($provide) {
         $provide.factory('session', sessionFactory);
-        $provide.value('ChatTransport', ChatTransportMock);
+        $provide.value('ChatTransportService', ChatTransportMock);
         $provide.value('backgroundProcessorService', backgroundProcessorServiceMock);
         $provide.value('fileUploadService', fileUploadServiceMock);
         $provide.value('DEFAULT_FILE_TYPE', DEFAULT_FILE_TYPE);
@@ -154,8 +154,8 @@ describe('The linagora.esn.chat messages', function() {
     });
   });
 
-  describe('ChatTransport', function() {
-    var ChatTransport, CHAT_NAMESPACE, livenotificationMock, chatSioMock;
+  describe('ChatTransportService', function() {
+    var ChatTransportService, CHAT_NAMESPACE, livenotificationMock, chatSioMock;
 
     beforeEach(function() {
 
@@ -197,19 +197,19 @@ describe('The linagora.esn.chat messages', function() {
       });
     });
 
-    beforeEach(angular.mock.inject(function(_ChatTransport_, _CHAT_NAMESPACE_) {
-      ChatTransport = _ChatTransport_;
+    beforeEach(angular.mock.inject(function(_ChatTransportService_, _CHAT_NAMESPACE_) {
+      ChatTransportService = _ChatTransportService_;
       CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     }));
 
     var instance, onMessage;
     beforeEach(function() {
       onMessage = sinon.spy();
-      instance = new ChatTransport({room: 'roomId'});
+      instance = new ChatTransportService({room: 'roomId'});
       instance.connect(onMessage);
     });
 
-    describe('ChatTransport connect function', function() {
+    describe('ChatTransportService connect function', function() {
 
       it('should connect to CHAT_NAMESPACE in the good room', function() {
         expect(livenotificationMock).to.have.been.calledWith(CHAT_NAMESPACE, 'roomId');

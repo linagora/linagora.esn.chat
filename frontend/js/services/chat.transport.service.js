@@ -3,24 +3,24 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .factory('ChatTransport', ChatTransport);
+    .factory('ChatTransportService', ChatTransportService);
 
-    ChatTransport.$inject = ['$log', '$q', 'livenotification', 'CHAT_NAMESPACE', 'CHAT_EVENTS'];
+    ChatTransportService.$inject = ['$log', '$q', 'livenotification', 'CHAT_NAMESPACE', 'CHAT_EVENTS'];
 
-    function ChatTransport($log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
+    function ChatTransportService($log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
 
-      function ChatTransport(options) {
+      function ChatTransportService(options) {
         this.options = options;
       }
 
-      ChatTransport.prototype.sendMessage = function(message) {
+      ChatTransportService.prototype.sendMessage = function(message) {
         $log.info('Send message to peers', message);
         this.sio.send('message', message);
 
         return $q.when(message);
       };
 
-      ChatTransport.prototype.connect = function(onMessage) {
+      ChatTransportService.prototype.connect = function(onMessage) {
         var self = this;
 
         if (!this.sio) {
@@ -39,6 +39,6 @@
         }
       };
 
-      return ChatTransport;
+      return ChatTransportService;
     }
 })();
