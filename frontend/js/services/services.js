@@ -5,35 +5,6 @@
 
   angular.module('linagora.esn.chat')
 
-    .factory('chatUserState', function($q, $rootScope, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
-      var cache = {};
-
-      session.ready.then(function() {
-        var sio = livenotification(CHAT_NAMESPACE);
-
-        sio.on(CHAT_EVENTS.USER_CHANGE_STATE, function(data) {
-          $rootScope.$broadcast(CHAT_EVENTS.USER_CHANGE_STATE, data);
-          cache[data.userId] = data.state;
-        });
-      });
-
-      return {
-        get: function(userId) {
-          if (cache[userId]) {
-            return $q.when(cache[userId]);
-          }
-
-          return ChatRestangular.one('state', userId).get().then(function(response) {
-            var state = response.data.state;
-
-            cache[userId] = state;
-
-            return state;
-          });
-        }
-      };
-    })
-
     .factory('ChatConversationService', function(ChatRestangular) {
       function fetchMessages(conversation, options) {
         return ChatRestangular.one(conversation).all('messages').getList(options).then(function(response) {
