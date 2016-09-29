@@ -1,8 +1,14 @@
-'use strict';
+(function() {
+  'use strict';
 
-angular.module('linagora.esn.chat')
-.config(function(dynamicDirectiveServiceProvider) {
-  var chatItem = new dynamicDirectiveServiceProvider.DynamicDirective(true, 'chat-application-menu', {priority: 35});
+  angular.module('linagora.esn.chat')
+    .config(injectApplicationMenu);
 
-  dynamicDirectiveServiceProvider.addInjection('esn-application-menu', chatItem);
-});
+  injectApplicationMenu.$inject = ['dynamicDirectiveServiceProvider'];
+
+  function injectApplicationMenu(dynamicDirectiveServiceProvider) {
+    var chatItem = new dynamicDirectiveServiceProvider.DynamicDirective(true, 'chat-application-menu', {priority: 35});
+
+    dynamicDirectiveServiceProvider.addInjection('esn-application-menu', chatItem);
+}
+})();
