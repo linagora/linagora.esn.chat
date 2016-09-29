@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The linagora.esn.chat services', function() {
   var $q,
-    ChatConversationService,
+    chatConversationService,
     CHAT_NAMESPACE,
     CHAT_EVENTS,
     sessionMock,
@@ -91,9 +91,9 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _ChatConversationService_, _chatNotificationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _chatConversationService_, _chatNotificationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
-    ChatConversationService = _ChatConversationService_;
+    chatConversationService = _chatConversationService_;
     chatNotificationService = _chatNotificationService_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;

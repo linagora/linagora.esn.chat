@@ -4,8 +4,18 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
+    .factory('chatConversationService', chatConversationService);
 
-    .factory('ChatConversationService', function(ChatRestangular) {
+    chatConversationService.$inject = ['ChatRestangular'];
+
+    function chatConversationService(ChatRestangular) {
+      var service = {
+        getMessage: getMessage,
+        fetchMessages: fetchMessages
+      };
+
+      return service;
+
       function fetchMessages(conversation, options) {
         return ChatRestangular.one(conversation).all('messages').getList(options).then(function(response) {
           return ChatRestangular.stripRestangular(response.data);
@@ -17,10 +27,5 @@
           return ChatRestangular.stripRestangular(response.data);
         });
       }
-
-      return {
-        getMessage: getMessage,
-        fetchMessages: fetchMessages
-      };
-    });
+    }
 })();

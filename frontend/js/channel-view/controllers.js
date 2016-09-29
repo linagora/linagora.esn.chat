@@ -7,7 +7,7 @@
     .controller('conversationViewController', function(
           $scope,
           session,
-          ChatConversationService,
+          chatConversationService,
           chatConversationsService,
           CHAT_EVENTS,
           chatScrollService,
@@ -19,7 +19,7 @@
 
         if (channelId) {
           chatLocalStateService.setActive(channelId);
-          ChatConversationService.fetchMessages(channelId, {}).then(function(result) {
+          chatConversationService.fetchMessages(channelId, {}).then(function(result) {
             result.forEach(addUniqId);
             $scope.messages = result || [];
             chatScrollService.scrollDown();
