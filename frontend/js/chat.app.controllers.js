@@ -14,7 +14,7 @@
       }
     })
 
-    .controller('chatAddChannelController', function($scope, CHAT_CONVERSATION_TYPE, $state, conversationsService, chatLocalStateService) {
+    .controller('chatAddChannelController', function($scope, CHAT_CONVERSATION_TYPE, $state, chatConversationsService, chatLocalStateService) {
       $scope.addChannel = function() {
         var channel = {
           name: $scope.channel.name,
@@ -23,14 +23,14 @@
           purpose: $scope.channel.purpose || ''
         };
 
-        conversationsService.addChannels(channel).then(function(response) {
+        chatConversationsService.addChannels(channel).then(function(response) {
           chatLocalStateService.addConversation(response.data);
           $state.go('chat.channels-views', {id: response.data._id});
         });
       };
     })
 
-    .controller('chatConversationItemController', function($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, conversationsService) {
+    .controller('chatConversationItemController', function($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationsService) {
       $scope.channelState = $scope.channelState || 'chat.channels-views';
       $scope.allUsersConnected = true;
       var userToConnected = {};
@@ -41,7 +41,7 @@
         $scope.item.last_message.text = $filter('esnEmoticonify')($scope.item.last_message.text, {class: 'chat-emoji'});
       }
 
-      conversationsService.getConversationNamePromise.then(function(getConversationName) {
+      chatConversationsService.getConversationNamePromise.then(function(getConversationName) {
         $scope.getConversationName = getConversationName;
       });
 
@@ -101,23 +101,23 @@
       });
     })
 
-    .controller('chatAddGroupController', function($scope, $state, conversationsService, chatLocalStateService) {
+    .controller('chatAddGroupController', function($scope, $state, chatConversationsService, chatLocalStateService) {
       $scope.members = [];
       $scope.addGroup = function() {
         var group = {
           members: $scope.members
         };
 
-        conversationsService.addPrivateConversation(group).then(function(response) {
+        chatConversationsService.addPrivateConversation(group).then(function(response) {
           chatLocalStateService.addConversation(response.data);
           $state.go('chat.channels-views', { id: response.data._id});
         });
       };
     })
 
-    .controller('chatConversationSubheaderController', function($scope, chatLocalStateService, conversationsService) {
+    .controller('chatConversationSubheaderController', function($scope, chatLocalStateService, chatConversationsService) {
       $scope.chatLocalStateService = chatLocalStateService;
-      conversationsService.getConversationNamePromise.then(function(getConversationName) {
+      chatConversationsService.getConversationNamePromise.then(function(getConversationName) {
         $scope.getConversationName = getConversationName;
       });
     });

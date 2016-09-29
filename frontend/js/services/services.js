@@ -71,7 +71,7 @@
       };
     })
 
-    .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, conversationsService, chatParseMention) {
+    .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, chatConversationsService, chatParseMention) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
 
@@ -94,7 +94,7 @@
         start: function() {
           initLocalPermission();
           $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-            conversationsService.getConversation(message.channel).then(function(channel) {
+            chatConversationsService.getConversation(message.channel).then(function(channel) {
               if (canSendNotification(message)) {
                 var channelName = channel.name || 'OpenPaas Chat';
                 var parsedText = chatParseMention.chatParseMention(message.text, message.user_mentions, {skipLink: true});

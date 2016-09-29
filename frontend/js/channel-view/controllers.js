@@ -8,7 +8,7 @@
           $scope,
           session,
           ChatConversationService,
-          conversationsService,
+          chatConversationsService,
           CHAT_EVENTS,
           ChatScroll,
           chatLocalStateService,
@@ -62,7 +62,7 @@
       };
 
       $scope.updateTopic = function($data) {
-        conversationsService.updateConversationTopic($data, chatLocalStateService.activeRoom._id);
+        chatConversationsService.updateConversationTopic($data, chatLocalStateService.activeRoom._id);
       };
 
       [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {

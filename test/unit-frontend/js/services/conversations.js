@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The linagora.esn.chat conversationsServices', function() {
   var $q,
-  conversationsService,
+  chatConversationsService,
   CHAT_NAMESPACE,
   CHAT_CONVERSATION_TYPE,
   CHAT_EVENTS,
@@ -66,9 +66,9 @@ describe('The linagora.esn.chat conversationsServices', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _conversationsService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _$httpBackend_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _chatConversationsService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _$httpBackend_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
-    conversationsService = _conversationsService_;
+    chatConversationsService = _chatConversationsService_;
     CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $httpBackend =  _$httpBackend_;
@@ -87,7 +87,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       callback('channel1');
       var thenSpy = sinon.spy();
 
-      conversationsService.getChannels().then(thenSpy);
+      chatConversationsService.getChannels().then(thenSpy);
       $rootScope.$digest();
       expect(thenSpy).to.have.been.calledWith(sinon.match({length: 1, 0: channels[1]}));
 
@@ -100,7 +100,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
 
     beforeEach(function() {
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
-      conversationsService.getConversationNamePromise.then(function(gcn) {
+      chatConversationsService.getConversationNamePromise.then(function(gcn) {
         getConversationName = gcn;
       });
       $rootScope.$digest();
@@ -144,9 +144,9 @@ describe('The linagora.esn.chat conversationsServices', function() {
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
       $httpBackend.flush();
       $httpBackend.expectDELETE('/chat/api/chat/conversations/channel1').respond(204, null);
-      conversationsService.deleteConversation('channel1').then(thenSpyForDelete);
+      chatConversationsService.deleteConversation('channel1').then(thenSpyForDelete);
       $httpBackend.flush();
-      conversationsService.getChannels().then(thenSpyForGet);
+      chatConversationsService.getChannels().then(thenSpyForGet);
       $rootScope.$digest();
       expect(thenSpyForDelete).to.have.been.calledOnce;
       expect(thenSpyForGet).to.have.been.calledWith(sinon.match({length:1, 0: {_id: 'channel2'}}));
@@ -160,9 +160,9 @@ describe('The linagora.esn.chat conversationsServices', function() {
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
       $httpBackend.flush();
       $httpBackend.expectDELETE('/chat/api/chat/conversations/channel1/members').respond(204, null);
-      conversationsService.leaveConversation('channel1').then(thenSpyForDelete);
+      chatConversationsService.leaveConversation('channel1').then(thenSpyForDelete);
       $httpBackend.flush();
-      conversationsService.getChannels().then(thenSpyForGet);
+      chatConversationsService.getChannels().then(thenSpyForGet);
       $rootScope.$digest();
       expect(thenSpyForDelete).to.have.been.calledOnce;
       expect(thenSpyForGet).to.have.been.calledWith(sinon.match({length:1, 0: {_id: 'channel2'}}));
@@ -175,7 +175,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var callback = sinon.spy();
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([]);
       $httpBackend.expectGET('/chat/api/chat/conversations/channelId').respond(channel);
-      conversationsService.getConversation('channelId').then(callback);
+      chatConversationsService.getConversation('channelId').then(callback);
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledWith(sinon.match(channel));
@@ -184,12 +184,12 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should not fetch data from the rest API if channel is in the cached data', function() {
       var channel = {_id: 'channelId'};
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([channel]);
-      conversationsService.getChannels();
+      chatConversationsService.getChannels();
       $rootScope.$digest();
       $httpBackend.flush();
 
       var callback = sinon.spy();
-      conversationsService.getConversation('channelId').then(callback);
+      chatConversationsService.getConversation('channelId').then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match(channel));
     });
@@ -197,15 +197,15 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should refetch data after the cache has been resetted', function() {
       var channel = {_id: 'channelId', data: 'data1'};
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([channel]);
-      conversationsService.getChannels();
+      chatConversationsService.getChannels();
       $rootScope.$digest();
       $httpBackend.flush();
 
-      conversationsService.resetCache();
+      chatConversationsService.resetCache();
       var newChannel = {_id: 'channelId', data: 'data2'};
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond([newChannel]);
       var callback = sinon.spy();
-      conversationsService.getConversation('channelId').then(callback);
+      chatConversationsService.getConversation('channelId').then(callback);
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledWith(sinon.match(newChannel));
@@ -227,7 +227,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var callback = sinon.spy();
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(conversations);
-      conversationsService.getConversations().then(callback);
+      chatConversationsService.getConversations().then(callback);
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledOnce;
@@ -252,7 +252,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var callback = sinon.spy();
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(conversations);
-      conversationsService.getChannels().then(callback);
+      chatConversationsService.getChannels().then(callback);
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledOnce;
@@ -273,11 +273,11 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var callback = sinon.spy();
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(conversations);
-      conversationsService.getChannels();
+      chatConversationsService.getChannels();
       $rootScope.$digest();
       $httpBackend.flush();
 
-      conversationsService.getChannels().then(callback);
+      chatConversationsService.getChannels().then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match({
         0: conversations[0],
@@ -296,7 +296,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var callback = sinon.spy();
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(conversations);
-      conversationsService.getChannels();
+      chatConversationsService.getChannels();
       $rootScope.$digest();
       $httpBackend.flush();
 
@@ -309,8 +309,8 @@ describe('The linagora.esn.chat conversationsServices', function() {
       }];
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(newConversations);
-      conversationsService.resetCache();
-      conversationsService.getChannels().then(callback);
+      chatConversationsService.resetCache();
+      chatConversationsService.getChannels().then(callback);
       $httpBackend.flush();
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match({
@@ -328,7 +328,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       });
       var callback = sinon.spy();
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(groups);
-      conversationsService.getPrivateConversations().then(callback);
+      chatConversationsService.getPrivateConversations().then(callback);
       $rootScope.$digest();
       $httpBackend.flush();
       expect(callback).to.have.been.calledWith(sinon.match({
@@ -343,12 +343,12 @@ describe('The linagora.esn.chat conversationsServices', function() {
       });
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(groups);
-      conversationsService.getPrivateConversations();
+      chatConversationsService.getPrivateConversations();
       $rootScope.$digest();
       $httpBackend.flush();
 
       var callback = sinon.spy();
-      conversationsService.getPrivateConversations().then(callback);
+      chatConversationsService.getPrivateConversations().then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match({
         0: {_id: 1},
@@ -362,7 +362,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       });
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(groups);
-      conversationsService.getPrivateConversations();
+      chatConversationsService.getPrivateConversations();
       $rootScope.$digest();
       $httpBackend.flush();
 
@@ -370,10 +370,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
         return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(newGroups);
-      conversationsService.resetCache();
+      chatConversationsService.resetCache();
 
       var callback = sinon.spy();
-      conversationsService.getPrivateConversations().then(callback);
+      chatConversationsService.getPrivateConversations().then(callback);
       $httpBackend.flush();
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(sinon.match({
@@ -396,7 +396,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       $httpBackend.expectPUT('/chat/api/chat/conversations/channelId/topic', {
         value: value,
       }).respond(channel);
-      conversationsService.updateConversationTopic(value, 'channelId');
+      chatConversationsService.updateConversationTopic(value, 'channelId');
       $httpBackend.flush();
     });
   });
@@ -415,19 +415,19 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should set the topic of a room', function() {
 
       $httpBackend.expectGET('/chat/api/chat/me/conversation').respond(channels);
-      conversationsService.getChannels();
+      chatConversationsService.getChannels();
       $httpBackend.flush();
-      conversationsService.setTopicChannel(topic).then(function(isSet) {
+      chatConversationsService.setTopicChannel(topic).then(function(isSet) {
         expect(isSet).to.be.equal(true);
       });
-      conversationsService.getConversation(topic.channel).then(function(channel) {
+      chatConversationsService.getConversation(topic.channel).then(function(channel) {
         expect(channel.topic).to.be.deep.equal(topic.topic);
       });
     });
 
     it('should not set the topic for a channel who don\'t exist', function() {
       topic.channel = 'channel3';
-      conversationsService.setTopicChannel(topic).then(function(isSet) {
+      chatConversationsService.setTopicChannel(topic).then(function(isSet) {
         expect(isSet).to.be.equal(false);
       });
     });

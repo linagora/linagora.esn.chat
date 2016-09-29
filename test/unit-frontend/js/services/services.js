@@ -86,7 +86,7 @@ describe('The linagora.esn.chat services', function() {
     angular.mock.module(function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
-      $provide.value('conversationsService', conversationsServiceMock);
+      $provide.value('chatConversationsService', conversationsServiceMock);
       $provide.value('localStorageService', localStorageService);
     });
   });

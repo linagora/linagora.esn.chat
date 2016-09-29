@@ -61,7 +61,7 @@ describe('chatLocalState service', function() {
     angular.mock.module(function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
-      $provide.factory('conversationsService', conversationsServiceFactory);
+      $provide.factory('chatConversationsService', conversationsServiceFactory);
     });
 
   });
@@ -283,7 +283,7 @@ describe('chatLocalState service', function() {
       expect(chatLocalStateService.communityConversations).to.deep.equals(communitys.slice(1));
     });
 
-    it('should correctly call conversationsService.deleteConversation', function() {
+    it('should correctly call chatConversationsService.deleteConversation', function() {
       var thenSpy = sinon.spy();
       chatLocalStateService.deleteConversation(channels[1]).then(thenSpy);
       $rootScope.$digest();
@@ -316,7 +316,7 @@ describe('chatLocalState service', function() {
       expect(chatLocalStateService.communityConversations).to.deep.equals(communitys.slice(1));
     });
 
-    it('should correctly call conversationsService.leaveConversation', function() {
+    it('should correctly call chatConversationsService.leaveConversation', function() {
       var thenSpy = sinon.spy();
       chatLocalStateService.leaveConversation(channels[1]).then(thenSpy);
       $rootScope.$digest();

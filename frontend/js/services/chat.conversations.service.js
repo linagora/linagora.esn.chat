@@ -3,39 +3,20 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .factory('conversationsService', function($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
+    .factory('chatConversationsService', chatConversationsService);
 
+    chatConversationsService.$inject = ['$rootScope', '$q', '$log', 'CHAT_CONVERSATION_TYPE', 'CHAT_NAMESPACE', 'CHAT_EVENTS', 'livenotification', 'session', 'ChatRestangular', '_'];
+
+    function chatConversationsService($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
       var defer = $q.defer();
       var conversationsPromise = defer.promise;
+      var sio = livenotification(CHAT_NAMESPACE);
 
       session.ready.then(function() {
         fetchAllConversation();
       });
 
-      var sio = livenotification(CHAT_NAMESPACE);
-
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
-
-      function fetchAllConversation() {
-        return $q.all({
-          conversations: ChatRestangular.one('me').all('conversation').getList(),
-          session: session.ready
-        }).then(function(resolved) {
-          var conversations = resolved.conversations.data;
-
-          defer.resolve(conversations);
-        }, function(err) {
-          $log.error('Can not fetch the user conversations', err);
-          defer.reject(err);
-        });
-      }
-
-      function resetCache() {
-        defer = $q.defer();
-        conversationsPromise = defer.promise;
-        fetchAllConversation();
-      }
-
       var getConversationNamePromise = session.ready.then(function(session) {
         var myId = session.user._id;
 
@@ -59,6 +40,48 @@
           }
         };
       });
+
+      var service = {
+        getConversationNamePromise: getConversationNamePromise,
+        resetCache: resetCache,
+        deleteConversation: deleteConversation,
+        leaveConversation: leaveConversation,
+        getConversations: getConversations,
+        getChannels: getChannels,
+        getConversation: getConversation,
+        getPrivateConversations: getPrivateConversations,
+        addPrivateConversation: addPrivateConversation,
+        addChannels: addChannels,
+        updateConversationTopic: updateConversationTopic,
+        setTopicChannel: setTopicChannel,
+        markAllMessageReaded: markAllMessageReaded,
+        getConversationByCommunityId: getConversationByCommunityId,
+        updateConversation: updateConversation
+      };
+
+      return service;
+
+      ////////////
+
+      function fetchAllConversation() {
+        return $q.all({
+          conversations: ChatRestangular.one('me').all('conversation').getList(),
+          session: session.ready
+        }).then(function(resolved) {
+          var conversations = resolved.conversations.data;
+
+          defer.resolve(conversations);
+        }, function(err) {
+          $log.error('Can not fetch the user conversations', err);
+          defer.reject(err);
+        });
+      }
+
+      function resetCache() {
+        defer = $q.defer();
+        conversationsPromise = defer.promise;
+        fetchAllConversation();
+      }
 
       function getConversationByType(type) {
         return conversationsPromise.then(_.partialRight(_.filter, {type: type}));
@@ -168,23 +191,5 @@
 
         return ChatRestangular.one('conversations', conversationId).customPUT(body);
       }
-
-      return {
-        getConversationNamePromise: getConversationNamePromise,
-        resetCache: resetCache,
-        deleteConversation: deleteConversation,
-        leaveConversation: leaveConversation,
-        getConversations: getConversations,
-        getChannels: getChannels,
-        getConversation: getConversation,
-        getPrivateConversations: getPrivateConversations,
-        addPrivateConversation: addPrivateConversation,
-        addChannels: addChannels,
-        updateConversationTopic: updateConversationTopic,
-        setTopicChannel: setTopicChannel,
-        markAllMessageReaded: markAllMessageReaded,
-        getConversationByCommunityId: getConversationByCommunityId,
-        updateConversation: updateConversation
-      };
-    });
+    }
 })();

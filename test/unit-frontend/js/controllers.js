@@ -28,7 +28,7 @@ describe('The linagora.esn.chat module controllers', function() {
     getItem,
     setItem,
     localStorageService,
-    conversationsService,
+    chatConversationsService,
     chatLocalStateService,
     chatLocalStateServiceMock;
 
@@ -53,7 +53,7 @@ describe('The linagora.esn.chat module controllers', function() {
       })
     };
 
-    conversationsService = {
+    chatConversationsService = {
       getChannels: sinon.spy(function() {
         return $q.when(channels);
       }),
@@ -93,7 +93,7 @@ describe('The linagora.esn.chat module controllers', function() {
       });
       $provide.value('$stateParams', $stateParams);
       $provide.value('$stateProvider', $stateProvider);
-      $provide.value('conversationsService', conversationsService);
+      $provide.value('chatConversationsService', chatConversationsService);
       $provide.value('localStorageService', localStorageService);
       $provide.value('session', sessionMock);
       $provide.value('$state', $state);

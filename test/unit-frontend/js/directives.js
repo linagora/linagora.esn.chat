@@ -50,7 +50,7 @@ describe('The linagora.esn.chat module directive', function() {
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
       $provide.value('esnEmoticonifyFilter', sinon.spy());
-      $provide.factory('conversationsService', function($q) {
+      $provide.factory('chatConversationsService', function($q) {
         return {getConversationNamePromise: $q.when(getConversationNameMock)};
       });
     });

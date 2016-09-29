@@ -5,9 +5,9 @@
   angular.module('linagora.esn.chat')
     .factory('chatLocalStateService', chatLocalStateService);
 
-    chatLocalStateService.$inject = ['$rootScope', '$q', '$log', '_', 'session', 'livenotification', 'conversationsService', 'chatParseMention', 'CHAT_CONVERSATION_TYPE', 'CHAT_EVENTS', 'CHAT_NAMESPACE'];
+    chatLocalStateService.$inject = ['$rootScope', '$q', '$log', '_', 'session', 'livenotification', 'chatConversationsService', 'chatParseMention', 'CHAT_CONVERSATION_TYPE', 'CHAT_EVENTS', 'CHAT_NAMESPACE'];
 
-    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, conversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
+    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, chatConversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
       var deferred = $q.defer();
       var activeRoom = {};
       var service = {
@@ -36,14 +36,14 @@
       ////////////
 
       function initLocalState() {
-        conversationsService.resetCache();
+        chatConversationsService.resetCache();
         service.channels = [];
         service.privateConversations = [];
         service.conversations = [];
         service.communityConversations = [];
         activeRoom = {};
 
-        conversationsService.getConversations().then(function(conversations) {
+        chatConversationsService.getConversations().then(function(conversations) {
           conversations.forEach(function(conversation) {
             addConversation(conversation);
           });
@@ -100,7 +100,7 @@
           unreadMessage(message);
 
           if (isActiveRoom(conversation._id)) {
-            conversationsService.markAllMessageReaded(conversation._id);
+            chatConversationsService.markAllMessageReaded(conversation._id);
           }
 
           var parsedText = chatParseMention.chatParseMention(message.text, message.user_mentions, {skipLink: true});
@@ -150,7 +150,7 @@
         conversation.mentionCount = 0;
         activeRoom = conversation;
 
-        conversationsService.markAllMessageReaded(conversation._id);
+        chatConversationsService.markAllMessageReaded(conversation._id);
         $rootScope.$broadcast(CHAT_EVENTS.SET_ACTIVE_ROOM, conversation);
 
         return true;
@@ -228,13 +228,13 @@
       }
 
       function deleteConversation(conversation) {
-        return conversationsService.deleteConversation(conversation._id).then(function() {
+        return chatConversationsService.deleteConversation(conversation._id).then(function() {
           deleteConversationInCache(conversation);
         });
       }
 
       function leaveConversation(conversation) {
-        return conversationsService.leaveConversation(conversation._id).then(function() {
+        return chatConversationsService.leaveConversation(conversation._id).then(function() {
           deleteConversationInCache(conversation);
         });
       }
