@@ -2,9 +2,10 @@
   /*eslint strict: [2, "function"]*/
   'use strict';
 
-  angular
-    .module('linagora.esn.chat')
+  angular.module('linagora.esn.chat')
     .factory('chatHumanizeEntitiesLabel', chatHumanizeEntitiesLabel);
+
+  chatHumanizeEntitiesLabel.$inject = ['_'];
 
   function chatHumanizeEntitiesLabel(_) {
     var humanPresentation = {};
