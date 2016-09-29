@@ -22,7 +22,7 @@ describe('The linagora.esn.chat module controllers', function() {
     CHAT_CONVERSATION_TYPE,
     ChatMessageAdapter,
     chatNotification,
-    ChatScroll,
+    chatScroll,
     CHAT_EVENTS,
     getItemResult,
     getItem,
@@ -99,7 +99,7 @@ describe('The linagora.esn.chat module controllers', function() {
       $provide.value('$state', $state);
       $provide.value('livenotification', livenotificationMock);
       $provide.value('ChatMessageAdapter', ChatMessageAdapter);
-      $provide.value('ChatScroll', ChatScroll);
+      $provide.value('chatScroll', chatScroll);
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
     });
   });

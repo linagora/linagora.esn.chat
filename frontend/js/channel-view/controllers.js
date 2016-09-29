@@ -10,7 +10,7 @@
           ChatConversationService,
           chatConversationsService,
           CHAT_EVENTS,
-          ChatScroll,
+          chatScroll,
           chatLocalStateService,
           $stateParams) {
 
@@ -22,7 +22,7 @@
           ChatConversationService.fetchMessages(channelId, {}).then(function(result) {
             result.forEach(addUniqId);
             $scope.messages = result || [];
-            ChatScroll.scrollDown();
+            chatScroll.scrollDown();
           });
         }
 
@@ -58,7 +58,7 @@
 
       $scope.newMessage = function(message) {
         insertMessage($scope.messages, message);
-        ChatScroll.scrollDown();
+        chatScroll.scrollDown();
       };
 
       $scope.updateTopic = function($data) {

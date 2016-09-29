@@ -24,17 +24,6 @@
       };
     })
 
-    .factory('ChatScroll', function(elementScrollService) {
-
-      function scrollDown() {
-        elementScrollService.autoScrollDown($('.ms-body .lv-body'));
-      }
-
-      return {
-        scrollDown: scrollDown
-      };
-    })
-
     .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, chatConversationsService, chatParseMention) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
