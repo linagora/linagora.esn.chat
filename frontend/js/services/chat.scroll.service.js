@@ -4,11 +4,11 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .factory('chatScroll', chatScroll);
+    .factory('chatScrollService', chatScrollService);
 
-    chatScroll.$inject = ['elementScrollService'];
+    chatScrollService.$inject = ['elementScrollService'];
 
-    function chatScroll(elementScrollService) {
+    function chatScrollService(elementScrollService) {
 
       return {
         scrollDown: scrollDown

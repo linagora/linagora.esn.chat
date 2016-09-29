@@ -43,7 +43,7 @@
           message: '='
         },
         templateUrl: '/chat/views/components/conversation-view/messages/message.html',
-        controller: function($scope, $filter, $timeout, chatParseMention, chatScroll, conversationsService) {
+        controller: function($scope, $filter, $timeout, chatParseMention, chatScrollService, conversationsService) {
           var parsedText = $filter('oembedImageFilter')($scope.message.text);
 
           parsedText = $filter('linky')(parsedText, '_blank');
@@ -62,7 +62,7 @@
           session.ready.then(function(session) {
             $scope.user = session.user;
             $timeout(function() {
-              chatScroll.scrollDown();
+              chatScrollService.scrollDown();
             });
           });
         }
@@ -96,7 +96,7 @@
       };
     })
 
-    .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, chatScroll, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
+    .directive('chatMessageCompose', function($log, $rootScope, deviceDetector, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
 
       function isEventPrevented(event) {
         if ('isDefaultPrevented' in event) {
@@ -203,7 +203,7 @@
 
             // hack to reset autoSize
             $('textarea')[0].style.height = '56px';
-            chatScroll.scrollDown();
+            chatScrollService.scrollDown();
 
             chatMessageService.sendMessage(message).then(function(result) {
               $log.debug('Message ACK', result);
