@@ -2,9 +2,20 @@
   /*eslint strict: [2, "function"]*/
   'use strict';
 
-  angular
-    .module('linagora.esn.chat')
-    .factory('chatParseMention', function() {
+  angular.module('linagora.esn.chat')
+    .factory('chatParseMention', chatParseMention);
+
+    function chatParseMention() {
+      var service = {
+        chatParseMention: chatParseMention,
+        generateDisplayName: generateDisplayName,
+        generateProfileLink: generateProfileLink,
+        userIsMentioned: userIsMentioned
+      };
+
+      return service;
+
+      ////////////
 
       function generateDisplayName(user) {
         return '@' + user.firstname + '.' + user.lastname;
@@ -26,12 +37,5 @@
       function userIsMentioned(text, user) {
         return new RegExp('@' + user._id, 'g').exec(text);
       }
-
-      return {
-        chatParseMention: chatParseMention,
-        generateDisplayName: generateDisplayName,
-        generateProfileLink: generateProfileLink,
-        userIsMentioned: userIsMentioned
-      };
-    });
+    }
 })();
