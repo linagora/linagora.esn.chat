@@ -3,7 +3,11 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .factory('ChatTransport', function($log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
+    .factory('ChatTransport', ChatTransport);
+
+    ChatTransport.$inject = ['$log', '$q', 'livenotification', 'CHAT_NAMESPACE', 'CHAT_EVENTS'];
+
+    function ChatTransport($log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
 
       function ChatTransport(options) {
         this.options = options;
@@ -36,5 +40,5 @@
       };
 
       return ChatTransport;
-    });
+    }
 })();
