@@ -5,13 +5,6 @@
 
   angular.module('linagora.esn.chat')
 
-    .factory('ChatRestangular', function(Restangular) {
-      return Restangular.withConfig(function(RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl('/chat/api/chat');
-        RestangularConfigurer.setFullResponse(true);
-      });
-    })
-
     .factory('chatUserState', function($q, $rootScope, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
       var cache = {};
 
