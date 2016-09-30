@@ -1,14 +1,15 @@
 'use strict';
+/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var _ = require('lodash');
-var CONSTANTS = require('../../../../backend/lib/constants');
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+let expect = require('chai').expect;
+let sinon = require('sinon');
+let _ = require('lodash');
+let CONSTANTS = require('../../../../backend/lib/constants');
+let CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
-describe('The linagora.esn.chat webserver controller', function() {
+describe('The conversation controller', function() {
 
-  var lib, err, result, user;
+  let lib, err, result, user;
 
   beforeEach(function() {
     err = undefined;
@@ -48,174 +49,19 @@ describe('The linagora.esn.chat webserver controller', function() {
     };
   });
 
-  describe('The getMessages function', function() {
-
-    function createMessage(base, timestamp) {
-      var msg = _.cloneDeep(base);
-      var jsonMsg = _.cloneDeep(base);
-      msg.creator = {
-        password: 'yolo'
-      };
-      jsonMsg.creator = {};
-      msg.timestamps = {
-        creation: new Date(timestamp)
-      };
-      jsonMsg.timestamps = {
-        creation: timestamp
-      };
-      msg.toJSON = function() {
-        return msg;
-      };
-
-      return {source: msg, dest: jsonMsg};
-    }
-
-    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
-      var channelId = 1;
-      err = new Error('failed');
-      var req = {params: {channel: channelId}};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.getMessages(req, {
-        status: function(code) {
-          expect(code).to.equal(500);
-          return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
-              done();
-            }
-          };
-        }
-      });
-    });
-
-    it('should send back HTTP 200 with the lib.getMessages result', function(done) {
-      var channelId = 1;
-      var msg1 = createMessage({text: 'foo'}, 156789);
-      var msg2 = createMessage({text: 'bar'}, 2345677);
-      result = [msg1.dest, msg2.dest];
-      var req = {params: {channel: channelId}};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.getMessages(req, {
-        status: function(code) {
-          expect(code).to.equal(200);
-          return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
-              expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
-              done();
-            }
-          };
-        }
-      });
-    });
-  });
-
-  describe('The getMessage function', function() {
-
-    function createMessage(base, timestamp) {
-      var msg = _.cloneDeep(base);
-      var jsonMsg = _.cloneDeep(base);
-      msg.creator = {
-        password: 'yolo'
-      };
-      jsonMsg.creator = {};
-      msg.timestamps = {
-        creation: new Date(timestamp)
-      };
-      jsonMsg.timestamps = {
-        creation: timestamp
-      };
-      msg.toJSON = function() {
-        return msg;
-      };
-
-      return {source: msg, dest: jsonMsg};
-    }
-
-    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
-      var messageId = 1;
-      err = new Error('failed');
-      var req = {params: {id: messageId}};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.getMessage(req, {
-        status: function(code) {
-          expect(code).to.equal(500);
-          return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.conversation.getMessage).to.have.been.calledWith(messageId);
-              done();
-            }
-          };
-        }
-      });
-    });
-
-    it('should send back HTTP 200 with the lib.getMessage result', function(done) {
-      var messageId = 1;
-      var msg1 = createMessage({text: 'foo'}, 156789);
-      result = msg1.dest;
-      var req = {params: {id: messageId}};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.getMessage(req, {
-        status: function(code) {
-          expect(code).to.equal(200);
-          return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual(msg1.dest);
-              expect(lib.conversation.getMessage).to.have.been.calledWith(messageId);
-              done();
-            }
-          };
-        }
-      });
-    });
-  });
-
-  describe('The getChannels function', function() {
-    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
-      err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.getChannels({}, {
-        status: function(code) {
-          expect(code).to.equal(500);
-          return {
-            json: function(json) {
-              expect(lib.conversation.getChannels).to.have.been.calledWith({});
-              expect(json).to.shallowDeepEqual({error: {code: 500}});
-              done();
-            }
-          };
-        }
-      });
-    });
-
-    it('should send back HTTP 200 with the lib.getChannels result', function(done) {
-      result = [{id: 1}, {id: 2}];
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.getChannels({}, {
-        status: function(code) {
-          expect(code).to.equal(200);
-          return {
-            json: function(json) {
-              expect(lib.conversation.getChannels).to.have.been.calledWith({});
-              expect(json).to.deep.equal(result);
-              done();
-            }
-          };
-        }
-      });
-    });
-  });
+  function getController(dependencies, lib) {
+    return require('../../../../backend/webserver/controllers/conversation')(dependencies, lib);
+  }
 
   describe('The findMyConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findMyPrivateConversations({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.called;
@@ -229,10 +75,12 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 200 with the lib.findConversationByTypeAndByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findMyConversations({query: {type: 'type'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: 'type', ignoreMemberFilterForChannel: true, members: ['id']});
@@ -248,10 +96,12 @@ describe('The linagora.esn.chat webserver controller', function() {
   describe('The findMyPrivateConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findMyPrivateConversations({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.called;
@@ -265,10 +115,12 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findMyPrivateConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, members: ['id']});
@@ -281,49 +133,15 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
   });
 
-  describe('The findMyCommunityConversations', function() {
-    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
-      err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findMyCommunityConversations({user: {_id: 'id'}}, {
-        status: function(code) {
-          expect(code).to.equal(500);
-          return {
-            json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.called;
-              expect(json).to.shallowDeepEqual({error: {code: 500}});
-              done();
-            }
-          };
-        }
-      });
-    });
-
-    it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
-      result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
-      controller.findMyCommunityConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
-        status: function(code) {
-          expect(code).to.equal(200);
-          return {
-            json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.COMMUNITY, ignoreMemberFilterForChannel: true, members: ['id']});
-              expect(json).to.equal(result);
-              done();
-            }
-          };
-        }
-      });
-    });
-  });
-
   describe('leaveConversation', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(lib.conversation.removeMemberFromConversation).to.have.been.calledWith('channelId', 'id');
@@ -336,10 +154,12 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
 
     it('shoud send back HTTP 204 when lib.leaveConversation success', function(done) {
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
+
           return {
             end: function() {
               expect(lib.conversation.removeMemberFromConversation).to.have.been.calledWith('channelId', 'id');
@@ -354,10 +174,12 @@ describe('The linagora.esn.chat webserver controller', function() {
   describe('joinConversation', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(lib.conversation.addMemberToConversation).to.have.been.calledWith('channelId', 'id');
@@ -370,10 +192,12 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
 
     it('shoud send back HTTP 204 when lib.joinConversation success', function(done) {
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
+
           return {
             end: function() {
               expect(lib.conversation.addMemberToConversation).to.have.been.calledWith('channelId', 'id');
@@ -388,10 +212,12 @@ describe('The linagora.esn.chat webserver controller', function() {
   describe('The findPrivateByMembers', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.called;
@@ -405,10 +231,12 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === true', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
@@ -422,12 +250,14 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should handle query with more than one member and add auth user as a member', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
-            json: function(json) {
+            json: function() {
               expect(lib.conversation.findConversation).to.have.been.calledWith({
                 type: CONVERSATION_TYPE.PRIVATE,
                 ignoreMemberFilterForChannel: true,
@@ -443,12 +273,14 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
       controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
-            json: function(json) {
+            json: function() {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
               done();
             }
@@ -459,12 +291,14 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should not add auth user if already passed as membres arguments', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
-            json: function(json) {
+            json: function() {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
               done();
             }
@@ -477,10 +311,12 @@ describe('The linagora.esn.chat webserver controller', function() {
   describe('The findPrivateByMembers', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.called;
@@ -494,10 +330,12 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === true', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
             json: function(json) {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
@@ -511,12 +349,14 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should handle query with more than one member and add auth user as a member', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
-            json: function(json) {
+            json: function() {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', '2', 'id']});
               done();
             }
@@ -527,12 +367,14 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
-            json: function(json) {
+            json: function() {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
               done();
             }
@@ -543,12 +385,14 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should not add auth user if already passed as members arguments', function(done) {
       result = {};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
+
           return {
-            json: function(json) {
+            json: function() {
               expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
               done();
             }
@@ -561,11 +405,12 @@ describe('The linagora.esn.chat webserver controller', function() {
   describe('The createConversation function', function() {
 
     it('should call the api with right parameters', function(done) {
-      var name = 'MyChannel';
-      var topic = 'MyTopic';
-      var purpose = 'MyPurpose';
-      var avatar = 'avatar';
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let name = 'MyChannel';
+      let topic = 'MyTopic';
+      let purpose = 'MyPurpose';
+      let avatar = 'avatar';
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.createConversation({
         user: user,
         query: {},
@@ -599,10 +444,11 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
 
     it('should take into consideration extras members', function(done) {
-      var name = 'MyChannel';
-      var topic = 'MyTopic';
-      var purpose = 'MyPurpose';
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let name = 'MyChannel';
+      let topic = 'MyTopic';
+      let purpose = 'MyPurpose';
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.createConversation({
         user: user,
         body: {
@@ -624,11 +470,13 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 500 with error when channel can not be created', function(done) {
       err = new Error('failed');
-      var req = {body: {}, query: {}, user: user};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let req = {body: {}, query: {}, user: user};
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
@@ -641,11 +489,13 @@ describe('The linagora.esn.chat webserver controller', function() {
 
     it('should send back HTTP 403 if request try to create a commnity conversation', function(done) {
       err = new Error('failed');
-      var req = {body: {type: CONVERSATION_TYPE.COMMUNITY}, query: {}, user: user};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let req = {body: {type: CONVERSATION_TYPE.COMMUNITY}, query: {}, user: user};
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(403);
+
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 403}});
@@ -657,13 +507,15 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
 
     it('should send back HTTP 201 when channel has been created', function(done) {
-      var channel = {id: 1};
+      let channel = {id: 1};
+      let req = {body: {}, query: {}, user: user};
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       result = channel;
-      var req = {body: {}, query: {}, user: user};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(201);
+
           return {
             json: function(json) {
               expect(json).to.deep.equal(channel);
@@ -675,18 +527,20 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
 
     it('should send back previous channel if channel existed', function(done) {
-      var channel = {id: 1, members: ['user1']};
-      result = [channel, {id: 2}];
-      var query = {
+      let channel = {id: 1, members: ['user1']};
+      let query = {
         body: {
           members: ['user1']
         }
       };
-      var req = {body: {}, query: query, user: user};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let req = {body: {}, query: query, user: user};
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
+      result = [channel, {id: 2}];
       controller.createConversation(req, {
         status: function(code) {
           expect(code).to.equal(201);
+
           return {
             json: function(json) {
               expect(json).to.deep.equal(channel);
@@ -701,11 +555,13 @@ describe('The linagora.esn.chat webserver controller', function() {
   describe('The updateTopic function', function() {
     it('should send back HTTP 500 with error when channel can not be updated', function(done) {
       err = new Error('failed');
-      var req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
+      let req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.updateTopic(req, {
         status: function(code) {
           expect(code).to.equal(500);
+
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
@@ -717,18 +573,20 @@ describe('The linagora.esn.chat webserver controller', function() {
     });
 
     it('should send back HTTP 200 when channel has been updated', function(done) {
-      var channel = {id: 1};
-      var topic = {
+      let channel = {id: 1};
+      let topic = {
         value: 'topic',
         creator: user._id,
         last: new Date()
       };
+      let req = {body: topic, params: {id: channel.id}, query: {}, user: user};
+      let controller = getController(this.moduleHelpers.dependencies, lib);
+
       result = topic;
-      var req = {body: topic, params: {id: channel.id}, query: {}, user: user};
-      var controller = require('../../../../backend/webserver/api/controller')(this.moduleHelpers.dependencies, lib);
       controller.updateTopic(req, {
         status: function(code) {
           expect(code).to.be.equal(200);
+
           return {
             json: function(json) {
               expect(json).to.be.deep.equal(topic);

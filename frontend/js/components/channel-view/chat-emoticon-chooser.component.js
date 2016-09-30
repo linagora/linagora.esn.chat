@@ -1,4 +1,5 @@
 (function() {
+  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular.module('linagora.esn.chat').component('chatEmoticonChooser', {
@@ -8,8 +9,10 @@
   });
 
   function ChatEmoticonChooserController($scope, esnEmoticonRegistry, KEY_CODE, ChatTextEntitySelector) {
+    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     var self = this;
     var emoticonListResolver = ChatTextEntitySelector.entityListResolverFromList(esnEmoticonRegistry.getShortNames());
+
     self.entitySelector = new ChatTextEntitySelector(emoticonListResolver, ':', ':');
     self.listAllEmoticon = false;
 
@@ -42,6 +45,7 @@
         selectionStart: self.textInput.length + 1,
         selectionEnd: self.textInput.length + 1,
       };
+
       self.entitySelector.textChanged(adapter, 0, false);
     };
   }

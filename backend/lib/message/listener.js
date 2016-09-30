@@ -1,24 +1,24 @@
 'use strict';
 
-var CONSTANTS = require('../constants');
-var _ = require('lodash');
+const CONSTANTS = require('../constants');
+let _ = require('lodash');
 
 module.exports = function(dependencies) {
 
-  var localPubsub = dependencies('pubsub').local;
-  var globalPubsub = dependencies('pubsub').global;
-  var logger = dependencies('logger');
+  let localPubsub = dependencies('pubsub').local;
+  let globalPubsub = dependencies('pubsub').global;
+  let logger = dependencies('logger');
 
-  var mongoose = dependencies('db').mongo.mongoose;
-  var ChatMessage = mongoose.model('ChatMessage');
-  var messageHandlers = [];
+  let mongoose = dependencies('db').mongo.mongoose;
+  let ChatMessage = mongoose.model('ChatMessage');
+  let messageHandlers = [];
 
   function addHandler(handler) {
     handler && messageHandlers.push(handler);
   }
 
   function handleMessage(data) {
-    messageHandlers.map(function(handler) {
+    messageHandlers.map(handler => {
       try {
         handler(data);
       } catch (err) {
@@ -32,7 +32,7 @@ module.exports = function(dependencies) {
     addHandler(require('./handlers/mentions')(dependencies));
 
     function saveAsChatMessage(data, callback) {
-      conversationLib.getConversation(data.message.channel._id || data.message.channel, function(err, conversation) {
+      conversationLib.getConversation(data.message.channel._id || data.message.channel, (err, conversation) => {
         if (err) {
           return callback(err);
         }
@@ -43,7 +43,7 @@ module.exports = function(dependencies) {
           return callback('The user is not into the conversation and this conversation is not public');
         }
 
-        var chatMessage = {
+        let chatMessage = {
           type: data.message.type,
           text: data.message.text,
           date: data.message.date,
@@ -60,20 +60,20 @@ module.exports = function(dependencies) {
     }
 
     function populateTypingMessage(data, callback) {
-      (new ChatMessage(data)).populate('creator', CONSTANTS.SKIP_FIELDS.USER, function(err, message) {
+      (new ChatMessage(data)).populate('creator', CONSTANTS.SKIP_FIELDS.USER, (err, message) => {
         if (err) {
           callback(err);
 
           return;
         }
-        var result = message.toJSON();
+        let result = message.toJSON();
 
         result.state = data.state;
         callback(null, result);
       });
     }
 
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(function(data) {
+    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(data => {
       if (data.message.type === 'user_typing') {
         populateTypingMessage(data.message, function(err, message) {
           if (err) {
@@ -84,7 +84,7 @@ module.exports = function(dependencies) {
           globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
         });
       } else {
-        saveAsChatMessage(data, function(err, message) {
+        saveAsChatMessage(data, (err, message) => {
           if (err) {
             logger.error('Can not save ChatMessage', err);
 
@@ -100,8 +100,8 @@ module.exports = function(dependencies) {
   }
 
   return {
-    start: start,
-    addHandler: addHandler,
-    handleMessage: handleMessage
+    start,
+    addHandler,
+    handleMessage
   };
 };

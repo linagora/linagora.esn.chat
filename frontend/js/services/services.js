@@ -1,4 +1,5 @@
 'use strict';
+/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
 angular.module('linagora.esn.chat')
 
@@ -9,11 +10,12 @@ angular.module('linagora.esn.chat')
     });
   })
 
-  .factory('chatUserState', function($q, $rootScope, _, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
+  .factory('chatUserState', function($q, $rootScope, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
     var cache = {};
 
-    session.ready.then(function(session) {
+    session.ready.then(function() {
       var sio = livenotification(CHAT_NAMESPACE);
+
       sio.on(CHAT_EVENTS.USER_CHANGE_STATE, function(data) {
         $rootScope.$broadcast(CHAT_EVENTS.USER_CHANGE_STATE, data);
         cache[data.userId] = data.state;
@@ -28,14 +30,16 @@ angular.module('linagora.esn.chat')
 
         return ChatRestangular.one('state', userId).get().then(function(response) {
           var state = response.data.state;
+
           cache[userId] = state;
+
           return state;
         });
       }
     };
   })
 
-  .factory('ChatConversationService', function($q, session, ChatRestangular, _) {
+  .factory('ChatConversationService', function(ChatRestangular) {
     function fetchMessages(conversation, options) {
       return ChatRestangular.one(conversation).all('messages').getList(options).then(function(response) {
         return ChatRestangular.stripRestangular(response.data);
@@ -54,7 +58,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('ChatScroll', function($timeout, elementScrollService) {
+  .factory('ChatScroll', function(elementScrollService) {
 
     function scrollDown() {
       elementScrollService.autoScrollDown($('.ms-body .lv-body'));
@@ -65,7 +69,7 @@ angular.module('linagora.esn.chat')
     };
   })
 
-  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, conversationsService, chatLocalStateService, chatParseMention) {
+  .factory('chatNotification', function($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, conversationsService, chatParseMention) {
     var enable;
     var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
 
@@ -92,6 +96,7 @@ angular.module('linagora.esn.chat')
             if (canSendNotification(message)) {
               var channelName = channel.name || 'OpenPaas Chat';
               var parsedText = chatParseMention.chatParseMention(message.text, message.user_mentions, {skipLink: true});
+
               webNotification.showNotification('New message in ' + channelName, {
                 body: parsedText,
                 icon: '/api/users/' + message.creator + '/profile/avatar',

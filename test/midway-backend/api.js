@@ -147,7 +147,6 @@ describe('The chat API', function() {
           creator: userId
         });
       }).then(function(mongoResult) {
-        console.log('mongoResult', mongoResult);
         request(app.express)
           .get('/api/' + channelId + '/messages')
           .expect('Content-Type', /json/)
@@ -566,8 +565,8 @@ describe('The chat API', function() {
     it('should return non moderated community conversations with given participants parameters', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
-
       var channel;
+
       Q.denodeify(app.lib.conversation.createConversation)({
         type: CONVERSATION_TYPE.COMMUNITY,
         moderate: true,
@@ -583,6 +582,7 @@ describe('The chat API', function() {
           .get('/api/community?members=' + otherMember1.toString() + '&members=' + otherMember2.toString())
           .expect(200)
           .end(function(err, res) {
+
             if (err) {
               return done(err);
             }

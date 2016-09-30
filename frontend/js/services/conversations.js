@@ -5,11 +5,13 @@ angular.module('linagora.esn.chat')
 
     var defer = $q.defer();
     var conversationsPromise = defer.promise;
+
     session.ready.then(function() {
       fetchAllConversation();
     });
 
     var sio = livenotification(CHAT_NAMESPACE);
+
     sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
 
     function fetchAllConversation() {
@@ -18,6 +20,7 @@ angular.module('linagora.esn.chat')
         session: session.ready
       }).then(function(resolved) {
         var conversations = resolved.conversations.data;
+
         defer.resolve(conversations);
       }, function(err) {
         $log.error('Can not fetch the user conversations', err);
@@ -33,6 +36,7 @@ angular.module('linagora.esn.chat')
 
     var getConversationNamePromise = session.ready.then(function(session) {
       var myId = session.user._id;
+
       return function(group, onlyFirstName) {
         function userToString(u) {
           return onlyFirstName ? u.firstname : (u.firstname + ' ' + u.lastname);
@@ -58,11 +62,11 @@ angular.module('linagora.esn.chat')
       return conversationsPromise.then(_.partialRight(_.filter, {type: type}));
     }
 
-    function getPrivateConversations(options) {
+    function getPrivateConversations() {
       return getConversationByType(CHAT_CONVERSATION_TYPE.PRIVATE);
     }
 
-    function getChannels(options) {
+    function getChannels() {
       return getConversationByType(CHAT_CONVERSATION_TYPE.CHANNEL);
     }
 
@@ -81,6 +85,7 @@ angular.module('linagora.esn.chat')
     function postConversations(conversation) {
       return ChatRestangular.one('conversations').customPOST(conversation).then(function(c) {
         $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, c.data);
+
         return c;
       });
     }
@@ -95,11 +100,13 @@ angular.module('linagora.esn.chat')
 
     function addPrivateConversation(privateConversation) {
       privateConversation.type = CHAT_CONVERSATION_TYPE.PRIVATE;
+
       return postConversations(privateConversation);
     }
 
     function addChannels(channel) {
       channel.type = CHAT_CONVERSATION_TYPE.CHANNEL;
+
       return postConversations(channel);
     }
 
@@ -116,6 +123,7 @@ angular.module('linagora.esn.chat')
     function setTopicChannel(topic) {
       return getConversation(topic.channel).then(function(channel) {
         channel.topic = topic.topic;
+
         return true;
       }, function() {
         return false;
@@ -135,6 +143,7 @@ angular.module('linagora.esn.chat')
         for (var i = 0, len = conversations.length; i < len; i++) {
           if (conversations[i]._id === conversationId) {
             conversations.splice(i, 1);
+
             return;
           }
         }
@@ -154,6 +163,7 @@ angular.module('linagora.esn.chat')
         conversation: conversationId,
         modifications: modifications
       };
+
       return ChatRestangular.one('conversations', conversationId).customPUT(body);
     }
 

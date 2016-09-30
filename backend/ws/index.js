@@ -1,32 +1,31 @@
 'use strict';
 
-var CONSTANTS = require('../lib/constants');
-var initialized = false;
-var NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
-var chatNamespace;
-var USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
-var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-var MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+const CONSTANTS = require('../lib/constants');
+const NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
+const USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
+const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
+const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+let initialized = false;
+let chatNamespace;
 
 function init(dependencies, lib) {
-  var logger = dependencies('logger');
-  var pubsub = dependencies('pubsub');
-  var localPubsub = pubsub.local;
-  var globalPubsub = pubsub.global;
-  var io = dependencies('wsserver').io;
-  var helper = dependencies('wsserver').ioHelper;
+  let logger = dependencies('logger');
+  let io = dependencies('wsserver').io;
+  let helper = dependencies('wsserver').ioHelper;
+  let pubsub = dependencies('pubsub');
+  let localPubsub = pubsub.local;
+  let globalPubsub = pubsub.global;
 
   function sendDataToUsers(users, type, data) {
-    users.forEach(function(user) {
-      var sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
-      sockets.forEach(function(socket) {
-        socket.emit(type, data);
-      });
+    users.forEach(user => {
+      let sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
+
+      sockets.forEach(socket => socket.emit(type, data));
     });
   }
 
@@ -39,78 +38,57 @@ function init(dependencies, lib) {
   }
 
   function sendMessage(room, message) {
-    lib.conversation.getConversation(message.channel, function(err, channel) {
+    lib.conversation.getConversation(message.channel, (err, channel) => {
       if (err) {
-        logger.warn('Message sended to inexisting channel', message);
-        return;
+        return logger.warn('Message sended to inexisting channel', message);
       }
-      sendDataToConversation(channel, 'message', {room: room, data: message});
+      sendDataToConversation(channel, 'message', {room, data: message});
     });
   }
 
   if (initialized) {
-    logger.warn('The chat notification service is already initialized');
-    return;
+    return logger.warn('The chat notification service is already initialized');
   }
 
   chatNamespace = io.of(NAMESPACE);
+  chatNamespace.on('connection', socket => {
+    let userId = helper.getUserId(socket);
 
-  chatNamespace.on('connection', function(socket) {
-    var userId = helper.getUserId(socket);
     logger.info('New connection on %s by user %s', NAMESPACE, userId);
 
-    socket.on('subscribe', function(room) {
+    socket.on('subscribe', room => {
       logger.info('Joining chat channel', room);
       socket.join(room);
 
-      socket.on('unsubscribe', function(room) {
+      socket.on('unsubscribe', room => {
         logger.info('Leaving chat channel', room);
         socket.leave(room);
       });
 
-      socket.on('message', function(data) {
+      socket.on('message', data => {
         data.date = Date.now();
         data.room = room;
         data.creator = helper.getUserId(socket);
-        localPubsub.topic(MESSAGE_RECEIVED).publish({room: room, message: data});
+        localPubsub.topic(MESSAGE_RECEIVED).publish({room, message: data});
       });
     });
 
     initialized = true;
   });
 
-  globalPubsub.topic(USER_STATE).subscribe(function(data) {
-    chatNamespace.emit(USER_STATE, data);
-  });
-
-  globalPubsub.topic(CHANNEL_CREATION).subscribe(function(data) {
-    sendDataToConversation(data, CHANNEL_CREATION, data);
-  });
-
-  globalPubsub.topic(CHANNEL_DELETION).subscribe(function(data) {
-    sendDataToConversation(data, CHANNEL_DELETION, data);
-  });
-
-  globalPubsub.topic(TOPIC_UPDATED).subscribe(function(data) {
-    chatNamespace.emit(TOPIC_UPDATED, data);
-  });
-
-  globalPubsub.topic(MESSAGE_RECEIVED).subscribe(function(data) {
-    sendMessage(data.room, data.message);
-  });
-
-  globalPubsub.topic(ADD_MEMBERS_TO_CHANNEL).subscribe(function(data) {
-    sendDataToConversation(data, ADD_MEMBERS_TO_CHANNEL, data);
-  });
-
-  globalPubsub.topic(CONVERSATION_UPDATE).subscribe(function(data) {
-    var conversation = data.conversation;
+  globalPubsub.topic(USER_STATE).subscribe(data => chatNamespace.emit(USER_STATE, data));
+  globalPubsub.topic(CHANNEL_CREATION).subscribe(data => sendDataToConversation(data, CHANNEL_CREATION, data));
+  globalPubsub.topic(CHANNEL_DELETION).subscribe(data => sendDataToConversation(data, CHANNEL_DELETION, data));
+  globalPubsub.topic(TOPIC_UPDATED).subscribe(data => chatNamespace.emit(TOPIC_UPDATED, data));
+  globalPubsub.topic(MESSAGE_RECEIVED).subscribe(data => sendMessage(data.room, data.message));
+  globalPubsub.topic(ADD_MEMBERS_TO_CHANNEL).subscribe(data => sendDataToConversation(data, ADD_MEMBERS_TO_CHANNEL, data));
+  globalPubsub.topic(CONVERSATION_UPDATE).subscribe(data => {
+    let conversation = data.conversation;
 
     sendDataToConversation(conversation, CONVERSATION_UPDATE, conversation);
     if (data.deleteMembers) {
       sendDataToUsers(data.deleteMembers, CHANNEL_DELETION, conversation);
     }
-
   });
 }
 

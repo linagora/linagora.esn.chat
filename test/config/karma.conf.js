@@ -27,10 +27,10 @@ module.exports = function(config) {
       'frontend/components/angular-xeditable/dist/js/xeditable.js',
       'frontend/components/angular-sanitize/angular-sanitize.min.js',
       'test/unit-frontend/module.js',
-      'frontend/js/app.js',
-      'frontend/js/constants.js',
-      'frontend/js/controllers.js',
-      'frontend/js/directives.js',
+      'frontend/js/chat.app.js',
+      'frontend/js/chat.app.constants.js',
+      'frontend/js/chat.app.controllers.js',
+      'frontend/js/chat.app.directives.js',
       'frontend/js/*/**/*.js',
       'test/unit-frontend/js/**/*.js',
       'frontend/views/**/*.jade'
@@ -62,7 +62,8 @@ module.exports = function(config) {
       stripPrefix: 'frontend',
       cacheIdFromPath: function(filepath) {
         var cacheId = filepath.replace(/jade$/, 'html').replace(/^frontend/, '/chat');
-        return cacheId;
+
+return cacheId;
       },
       prependPrefix: '/linagora.esn.chat',
       // setting this option will create only a single module that contains templates

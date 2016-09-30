@@ -1,36 +1,35 @@
 'use strict';
 
-var CONSTANTS = require('../lib/constants');
-var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-var MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-var async = require('async');
-var _ = require('lodash');
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-var SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
+let async = require('async');
+let _ = require('lodash');
+let CONSTANTS = require('../lib/constants');
+let CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+let CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+let CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
+let MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+let TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+let CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+let SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
 
-  var mongoose = dependencies('db').mongo.mongoose;
-  var ObjectId = mongoose.Types.ObjectId;
-  var Conversation = mongoose.model('ChatConversation');
-  var ChatMessage = mongoose.model('ChatMessage');
-
-  var pubsubGlobal = dependencies('pubsub').global;
-  var channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
-  var channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
-  var channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
-  var channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
-  var channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
-  var logger = dependencies('logger');
+  let logger = dependencies('logger');
+  let mongoose = dependencies('db').mongo.mongoose;
+  let ObjectId = mongoose.Types.ObjectId;
+  let Conversation = mongoose.model('ChatConversation');
+  let ChatMessage = mongoose.model('ChatMessage');
+  let pubsubGlobal = dependencies('pubsub').global;
+  let channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  let channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
+  let channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
+  let channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
+  let channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
 
   function getChannels(options, callback) {
-    Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec(function(err, channels) {
+    Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
       channels = channels || [];
       if (channels.length === 0) {
-        return createConversation(CONSTANTS.DEFAULT_CHANNEL, function(err, channel) {
+        return createConversation(CONSTANTS.DEFAULT_CHANNEL, (err, channel) => {
           if (err) {
             return callback(new Error('Can not create the default channel'));
           }
@@ -50,15 +49,15 @@ module.exports = function(dependencies) {
   }
 
   function deleteConversation(userId, channel, callback) {
-    Conversation.findOneAndRemove({_id: channel, members: userId}, function(err, deleteResult) {
-      if (!err) {
-        channelDeletionTopic.publish(deleteResult);
-        ChatMessage.remove({channel: channel}, function(err, result) {
-          callback(err, deleteResult);
-        });
-      } else {
-        callback(err);
+    Conversation.findOneAndRemove({_id: channel, members: userId}, (err, deleteResult) => {
+      if (err) {
+        return callback(err);
       }
+
+      channelDeletionTopic.publish(deleteResult);
+      ChatMessage.remove({channel: channel}, err => {
+        callback(err, deleteResult);
+      });
     });
   }
 
@@ -73,12 +72,12 @@ module.exports = function(dependencies) {
    * @return {[Conversation]}
    */
   function findConversation(options, callback) {
-    var type = options.type;
-    var ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
-    var exactMembersMatch = options.exactMembersMatch;
-    var members = options.members;
-    var name = options.name;
-    var moderate = Boolean(options.moderate);
+    let type = options.type;
+    let ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
+    let exactMembersMatch = options.exactMembersMatch;
+    let members = options.members;
+    let name = options.name;
+    let moderate = Boolean(options.moderate);
 
     if (exactMembersMatch && !members) {
       throw new Error('Could not set exactMembersMatch to true without providing members');
@@ -88,7 +87,7 @@ module.exports = function(dependencies) {
       throw new Error('Could not set ignoreMemberFilterForChannel to true without providing members');
     }
 
-    var request = {moderate: moderate};
+    let request = {moderate: moderate};
 
     if (members) {
       request.members = {
@@ -128,20 +127,21 @@ module.exports = function(dependencies) {
   }
 
   function listConversation(options, callback) {
-    var query;
+    let query;
+    let sort = 'timestamps.creation';
+
     options = options || {};
     options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
     options.offset = +(options.offset || CONSTANTS.DEFAULT_OFFSET);
-    var sort = 'timestamps.creation';
 
     if (options.creator) {
       query = query || {};
       query.creator = options.creator;
     }
 
-    var conversationQuery = query ? Conversation.find(query) : Conversation.find();
+    let conversationQuery = query ? Conversation.find(query) : Conversation.find();
 
-    Conversation.find(conversationQuery).count().exec(function(err, count) {
+    Conversation.find(conversationQuery).count().exec((err, count) => {
       if (err) {
         return callback(err);
       }
@@ -152,50 +152,53 @@ module.exports = function(dependencies) {
         conversationQuery = conversationQuery.limit(options.limit);
       }
 
-      conversationQuery.sort(sort).populate('creator members last_message.creator', CONSTANTS.SKIP_FIELDS.USER).exec(function(err, causes) {
+      conversationQuery.sort(sort).populate('creator members last_message.creator', CONSTANTS.SKIP_FIELDS.USER).exec((err, conversations) => {
         if (err) {
           return callback(err);
         }
         callback(null, {
           total_count: count,
-          list: causes || []
+          list: conversations || []
         });
       });
     });
   }
 
   function listMessage(options, callback) {
-    var query;
+    let query;
+    let sort = 'timestamps.creation';
+
     options = options || {};
     options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
     options.offset = +(options.offset || CONSTANTS.DEFAULT_OFFSET);
-    var sort = 'timestamps.creation';
 
     if (options.creator) {
       query = query || {};
       query.creator = options.creator;
     }
 
-    var messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
-    ChatMessage.find(messageQuery).count().exec(function(err, count) {
+    let messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
+
+    ChatMessage.find(messageQuery).count().exec((err, count) => {
       if (err) {
         return callback(err);
       }
 
-      var messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
+      let messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
+
       messageQuery = messageQuery.skip(options.offset);
 
       if (options.limit > 0) {
         messageQuery = messageQuery.limit(options.limit);
       }
 
-      messageQuery.sort(sort).populate('creator', CONSTANTS.SKIP_FIELDS.USER).exec(function(err, causes) {
+      messageQuery.sort(sort).populate('creator', CONSTANTS.SKIP_FIELDS.USER).exec((err, messages) => {
         if (err) {
           return callback(err);
         }
         callback(null, {
           total_count: count,
-          list: causes || []
+          list: messages || []
         });
       });
     });
@@ -204,7 +207,8 @@ module.exports = function(dependencies) {
   function createConversation(options, callback) {
     async.waterfall([
         function(callback) {
-          var conversation = new Conversation(options);
+          let conversation = new Conversation(options);
+
           conversation.last_message = {
             date: conversation.timestamps && conversation.timestamps.creation || new Date(),
             user_mentions: []
@@ -213,6 +217,7 @@ module.exports = function(dependencies) {
           conversation.numOfReadedMessage = conversation.numOfReadedMessage || {};
           conversation.save(callback);
         },
+        /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
         function(conversation, _num, callback) {
           Conversation.populate(conversation, 'members', callback);
         },
@@ -231,7 +236,8 @@ module.exports = function(dependencies) {
 
   function makeAllMessageReadedForAnUserHelper(userIds, conversation, callback) {
     userIds = _.isArray(userIds) ? userIds : [userIds];
-    var updateMaxOperation = {};
+    let updateMaxOperation = {};
+
     userIds.forEach(function(userId) {
       updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;
     });
@@ -253,7 +259,8 @@ module.exports = function(dependencies) {
 
   function createMessage(message, callback) {
     parseMention(message);
-    var chatMessage = new ChatMessage(message);
+    let chatMessage = new ChatMessage(message);
+
     async.waterfall([
         function(callback) {
           chatMessage.save(callback);
@@ -279,7 +286,7 @@ module.exports = function(dependencies) {
           });
         },
         function(message, conversation, callback) {
-          makeAllMessageReadedForAnUserHelper(message.creator, conversation, function(err) {
+          makeAllMessageReadedForAnUserHelper(message.creator, conversation, err => {
             callback(err, message);
           });
         },
@@ -297,7 +304,8 @@ module.exports = function(dependencies) {
   }
 
   function addMemberToConversation(conversationId, userId, callback) {
-    var userObjectId = ensureObjectId(userId);
+    let userObjectId = ensureObjectId(userId);
+
     Conversation.findByIdAndUpdate(conversationId, {
       $addToSet: {members: userObjectId}
     }, function(err, conversation) {
@@ -312,7 +320,7 @@ module.exports = function(dependencies) {
 
   function updateCommunityConversation(communityId, modifications, callback) {
 
-    var mongoModifications = {};
+    let mongoModifications = {};
 
     if (modifications.newMembers) {
       mongoModifications.$addToSet = {
@@ -332,7 +340,7 @@ module.exports = function(dependencies) {
       mongoModifications.$set = {name: modifications.title};
     }
 
-    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}, mongoModifications, function(err, conversation) {
+    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}, mongoModifications, (err, conversation) => {
       if (err) {
         return callback(err);
       }
@@ -347,8 +355,8 @@ module.exports = function(dependencies) {
 
   function updateConversation(communityId, modifications, callback) {
 
-    var mongoModifications = {};
-    var nextMongoModification = null;
+    let mongoModifications = {};
+    let nextMongoModification = null;
 
     if (modifications.newMembers && modifications.newMembers.length) {
       mongoModifications.$addToSet = {
@@ -378,7 +386,7 @@ module.exports = function(dependencies) {
         return callback(err);
       }
 
-      Conversation.populate(conversation.toObject(), 'members', function(err, conversation) {
+      Conversation.populate(conversation.toObject(), 'members', (err, conversation) => {
         if (err) {
           return callback(err);
         }
@@ -406,7 +414,7 @@ module.exports = function(dependencies) {
       delete mongoModifications.$set;
     }
 
-    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, function(err, conversation) {
+    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, (err, conversation) => {
       if (nextMongoModification) {
         Conversation.findOneAndUpdate({_id: communityId}, nextMongoModification, done.bind(null, callback));
       } else {
@@ -432,12 +440,13 @@ module.exports = function(dependencies) {
   }
 
   function removeMemberFromConversation(conversationId, userId, callback) {
-    var unsetOperation = {};
+    let unsetOperation = {};
+
     unsetOperation['numOfReadedMessage.' + userId] = '';
     Conversation.findByIdAndUpdate(conversationId, {
       $pull: {members: new ObjectId(userId)},
       $unset: unsetOperation
-    }, function(err, conversation) {
+    }, (err, conversation) => {
       if (!err) {
         channelUpdateTopic.publish({
           conversation: conversation,
@@ -459,15 +468,16 @@ module.exports = function(dependencies) {
       query.moderate = false;
     }
 
-    var conversationId = conversation._id || conversation;
-    var q = {channel: conversationId, moderate: false};
-    var mq = ChatMessage.find(q);
+    let conversationId = conversation._id || conversation;
+    let q = {channel: conversationId, moderate: false};
+    let mq = ChatMessage.find(q);
+
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);
     mq.limit(+query.limit || 20);
     mq.skip(+query.offset || 0);
     mq.sort('-timestamps.creation');
-    mq.exec(function(err, result) {
+    mq.exec((err, result) => {
       if (!err) {
         result.reverse();
       }
@@ -486,7 +496,7 @@ module.exports = function(dependencies) {
         }
       }
     }, function(err, conversation) {
-      var message = {
+      let message = {
         type: 'text',
         subtype: 'channel:topic',
         date: Date.now(),
@@ -499,6 +509,7 @@ module.exports = function(dependencies) {
         },
         text: 'set the channel topic: ' + topic.value
       };
+
       channelTopicUpdateTopic.publish(message);
       callback(err, conversation);
     });
@@ -509,25 +520,25 @@ module.exports = function(dependencies) {
   }
 
   return {
-    getMessage: getMessage,
-    getMessages: getMessages,
-    getCommunityConversationByCommunityId: getCommunityConversationByCommunityId,
-    addMemberToConversation: addMemberToConversation,
-    updateCommunityConversation: updateCommunityConversation,
-    updateConversation: updateConversation,
-    moderateConversation: moderateConversation,
-    moderateMessage: moderateMessage,
-    removeMemberFromConversation: removeMemberFromConversation,
-    findConversation: findConversation,
-    createMessage: createMessage,
-    createConversation: createConversation,
-    getConversation: getConversation,
-    getChannels: getChannels,
-    deleteConversation: deleteConversation,
-    updateTopic: updateTopic,
-    makeAllMessageReadedForAnUser: makeAllMessageReadedForAnUser,
-    countMessages: countMessages,
-    listConversation: listConversation,
-    listMessage: listMessage
+    getMessage,
+    getMessages,
+    getCommunityConversationByCommunityId,
+    addMemberToConversation,
+    updateCommunityConversation,
+    updateConversation,
+    moderateConversation,
+    moderateMessage,
+    removeMemberFromConversation,
+    findConversation,
+    createMessage,
+    createConversation,
+    getConversation,
+    getChannels,
+    deleteConversation,
+    updateTopic,
+    makeAllMessageReadedForAnUser,
+    countMessages,
+    listConversation,
+    listMessage
   };
 };

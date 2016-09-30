@@ -64,6 +64,7 @@ angular.module('linagora.esn.chat')
     };
 
     [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
+      /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
       $scope.$on(eventReceived, function(event, message) {
         if (message.channel === $scope.chatLocalStateService.activeRoom._id) {
           $scope.newMessage(message);
