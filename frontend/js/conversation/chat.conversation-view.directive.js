@@ -4,12 +4,14 @@
 
   angular
     .module('linagora.esn.chat')
-    .directive('chatConversationView', chatConversationViewDirective);
+    .directive('chatConversationView', chatConversationView);
 
-  function chatConversationViewDirective() {
+  function chatConversationView() {
     var directive = {
       restrict: 'E',
-      controller: 'chatConversationViewController',
+      controller: 'ChatConversationViewController',
+      controllerAs: 'vm',
+      bindToController: true,
       templateUrl: '/chat/views/components/conversation-view/conversation-view.html',
       scope: {
         displayTopic: '='

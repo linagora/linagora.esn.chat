@@ -4,14 +4,14 @@
 
   angular
     .module('linagora.esn.chat')
-    .directive('chatMessageCompose', chatMessageComposeDirective);
+    .directive('chatMessageCompose', chatMessageCompose);
 
-  chatMessageComposeDirective.$inject = ['$log', '$rootScope', 'deviceDetector', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel'];
+  chatMessageCompose.$inject = ['$log', '$rootScope', 'deviceDetector', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel'];
 
-  function chatMessageComposeDirective($log, $rootScope, deviceDetector, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
+  function chatMessageCompose($log, $rootScope, deviceDetector, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
     var directive = {
       restrict: 'E',
-      templateUrl: '/chat/views/components/conversation-view/messages/message-compose.html',
+      templateUrl: '/chat/conversation/compose/message-compose.html',
       link: link
     };
 

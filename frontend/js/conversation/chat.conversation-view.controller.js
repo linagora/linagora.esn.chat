@@ -5,11 +5,11 @@
 
   angular
     .module('linagora.esn.chat')
-    .controller('chatConversationViewController', chatConversationViewController);
+    .controller('ChatConversationViewController', ChatConversationViewController);
 
-  chatConversationViewController.$inject = ['$scope', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'chatScrollService', 'chatLocalStateService', '$stateParams'];
+  ChatConversationViewController.$inject = ['$scope', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'chatScrollService', 'chatLocalStateService', '$stateParams'];
 
-  function chatConversationViewController($scope, session, chatConversationService, chatConversationsService, CHAT_EVENTS, chatScrollService, chatLocalStateService, $stateParams) {
+  function ChatConversationViewController($scope, session, chatConversationService, chatConversationsService, CHAT_EVENTS, chatScrollService, chatLocalStateService, $stateParams) {
     var self = this;
 
     self.chatLocalStateService = chatLocalStateService;
@@ -18,7 +18,7 @@
     self.glued = true;
     self.newMessage = newMessage;
     self.updateTopic = updateTopic;
-    chatLocalStateService.ready.then(whenReady);
+    self.chatLocalStateService.ready.then(whenReady);
 
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
@@ -44,14 +44,14 @@
     }
 
     function updateTopic($data) {
-      chatConversationsService.updateConversationTopic($data, chatLocalStateService.activeRoom._id);
+      chatConversationsService.updateConversationTopic($data, self.chatLocalStateService.activeRoom._id);
     }
 
     function whenReady() {
-      var channelId = $stateParams.id || chatLocalStateService.channels[0] && chatLocalStateService.channels[0]._id;
+      var channelId = $stateParams.id || self.chatLocalStateService.channels[0] && self.chatLocalStateService.channels[0]._id;
 
       if (channelId) {
-        chatLocalStateService.setActive(channelId);
+        self.chatLocalStateService.setActive(channelId);
         chatConversationService.fetchMessages(channelId, {}).then(function(result) {
           result.forEach(addUniqId);
           self.messages = result || [];
@@ -61,7 +61,7 @@
 
       $scope.$on('$destroy', function() {
         if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === channelId) {
-          chatLocalStateService.unsetActive();
+          self.chatLocalStateService.unsetActive();
         }
       });
     }
