@@ -7,7 +7,7 @@
     $stateProvider
       .state('chat', {
         url: '/chat',
-        templateUrl: '/chat/app/chat.html',
+        templateUrl: '/chat/app/index.html',
         controller: 'ChatController',
         controllerAs: 'root',
         resolve: {

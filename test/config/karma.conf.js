@@ -27,11 +27,11 @@ module.exports = function(config) {
       'frontend/components/angular-xeditable/dist/js/xeditable.js',
       'frontend/components/angular-sanitize/angular-sanitize.min.js',
       'test/config/module.js',
-      'frontend/app/chat.js',
+      'frontend/app/chat.app.js',
       'frontend/app/**/*.js',
       'frontend/app/**/*.jade'
     ],
-    exclude: ['frontend/app/chat.run.js'],
+    exclude: ['frontend/app/chat.app.run.js'],
     frameworks: ['mocha'],
     colors: true,
     singleRun: true,
