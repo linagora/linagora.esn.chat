@@ -8,7 +8,7 @@
       .state('chat', {
         url: '/chat',
         templateUrl: '/chat/app/chat.html',
-        controller: 'ChatRootController',
+        controller: 'ChatController',
         controllerAs: 'root',
         resolve: {
           domain: routeResolver.session('domain'),

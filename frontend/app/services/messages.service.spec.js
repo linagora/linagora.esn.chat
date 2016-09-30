@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat messages', function() {
+describe('The linagora.esn.chat messages services', function() {
   var $q,
   $logMock,
   CHAT_EVENTS,

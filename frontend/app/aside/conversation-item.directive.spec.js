@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat module directive', function() {
+describe('The chat-conversation-item directive', function() {
   var chatUserState,
   $q,
   $rootScope,
@@ -76,6 +76,7 @@ describe('The linagora.esn.chat module directive', function() {
       $scope = $rootScope.$new();
       $scope.item = item;
       var element = $compile('<chat-conversation-item item="item"/>')($scope);
+
       $scope.$digest();
       eleScope = element.isolateScope();
     }
@@ -91,7 +92,7 @@ describe('The linagora.esn.chat module directive', function() {
 
     it('should put getConversationName in the scope', function() {
       initDirective();
-      expect(eleScope.getConversationName).to.equal(getConversationNameMock);
+      expect(eleScope.vm.getConversationName).to.equal(getConversationNameMock);
     });
 
     it('should initialize allUsersConnected to true only if all user other than me are not disconnected', function() {
@@ -102,7 +103,7 @@ describe('The linagora.esn.chat module directive', function() {
       $rootScope.$digest();
       expect(chatUserState.get).to.have.been.calledWith(2);
       expect(chatUserState.get).to.have.been.calledWith(3);
-      expect(eleScope.allUsersConnected).to.be.true;
+      expect(eleScope.vm.allUsersConnected).to.be.true;
     });
 
     it('should initialize allUsersConnected to false only if only one user other than me is disconnected', function() {
@@ -113,28 +114,30 @@ describe('The linagora.esn.chat module directive', function() {
       $rootScope.$digest();
       expect(chatUserState.get).to.have.been.calledWith(2);
       expect(chatUserState.get).to.have.been.calledWith(3);
-      expect(eleScope.allUsersConnected).to.be.false;
+      expect(eleScope.vm.allUsersConnected).to.be.false;
     });
 
     it('should set lastMessageIsMe to true if the last message is from me ', function() {
       initDirective();
-      expect(eleScope.lastMessageIsMe).to.be.equal(true);
+      expect(eleScope.vm.lastMessageIsMe).to.be.equal(true);
     });
 
     it('should set lastMessageIsMe to false if the last message is from me ', function() {
       item.last_message.creator._id = 'userId2';
       initDirective();
-      expect(eleScope.lastMessageIsMe).to.be.equal(false);
+      expect(eleScope.vm.lastMessageIsMe).to.be.equal(false);
     });
 
     describe('listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
       var callback, destroy;
+
       beforeEach(function() {
         destroy = sinon.spy();
         $rootScope.$on = sinon.stub().returns(destroy);
         initDirective();
         expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE, sinon.match.func.and(function(_callback) {
           callback = _callback;
+
           return true;
         }));
       });
@@ -145,7 +148,7 @@ describe('The linagora.esn.chat module directive', function() {
             _id: 'userId'
           }
         });
-        expect(eleScope.lastMessageIsMe).to.be.equal(true);
+        expect(eleScope.vm.lastMessageIsMe).to.be.equal(true);
       });
 
       it('should set lastMessageIsMe to false if the new message is not from me', function() {
@@ -154,7 +157,7 @@ describe('The linagora.esn.chat module directive', function() {
             _id: 'userId2'
           }
         });
-        expect(eleScope.lastMessageIsMe).to.be.equal(false);
+        expect(eleScope.vm.lastMessageIsMe).to.be.equal(false);
       });
     });
 
@@ -176,7 +179,7 @@ describe('The linagora.esn.chat module directive', function() {
           state: 'disconnected'
         });
 
-        expect(eleScope.allUsersConnected).to.be.false;
+        expect(eleScope.vm.allUsersConnected).to.be.false;
       });
 
       it('should ignore state changement of current user', function() {
@@ -185,7 +188,7 @@ describe('The linagora.esn.chat module directive', function() {
           state: 'disconnected'
         });
 
-        expect(eleScope.allUsersConnected).to.be.true;
+        expect(eleScope.vm.allUsersConnected).to.be.true;
       });
 
       it('should ignore state changement of user which are not in the group', function() {
@@ -194,7 +197,7 @@ describe('The linagora.esn.chat module directive', function() {
           state: 'disconnected'
         });
 
-        expect(eleScope.allUsersConnected).to.be.true;
+        expect(eleScope.vm.allUsersConnected).to.be.true;
       });
 
       it('should set state back to connected if user was the last one disconnected before he get connected', function() {
@@ -213,14 +216,14 @@ describe('The linagora.esn.chat module directive', function() {
           state: 'connected'
         });
 
-        expect(eleScope.allUsersConnected).to.be.false;
+        expect(eleScope.vm.allUsersConnected).to.be.false;
 
         callback(null, {
           userId: 2,
           state: 'connected'
         });
 
-        expect(eleScope.allUsersConnected).to.be.true;
+        expect(eleScope.vm.allUsersConnected).to.be.true;
       });
 
       it('should unregister hanlder when scope get destroyed', function() {

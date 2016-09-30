@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat services', function() {
+describe('The user-state service', function() {
   var $q,
     chatConversationService,
     CHAT_NAMESPACE,
@@ -148,16 +148,6 @@ describe('The linagora.esn.chat services', function() {
       chatUserState.get('userId').then(callback);
       $rootScope.$digest();
       expect(callback).to.have.been.calledWith(state);
-    });
-  });
-
-  describe('chatNotificationService service', function() {
-    describe('start() method', function() {
-      it('should listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
-        $rootScope.$on = sinon.spy();
-        chatNotificationService.start();
-        expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
-      });
     });
   });
 });

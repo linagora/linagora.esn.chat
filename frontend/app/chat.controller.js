@@ -4,11 +4,11 @@
 
   angular
     .module('linagora.esn.chat')
-    .controller('ChatRootController', ChatRootController);
+    .controller('ChatController', ChatController);
 
-    ChatRootController.$inject = ['chatNotificationService', 'chatLocalStateService'];
+    ChatController.$inject = ['chatNotificationService', 'chatLocalStateService'];
 
-    function ChatRootController(chatNotificationService, chatLocalStateService) {
+    function ChatController(chatNotificationService, chatLocalStateService) {
       var self = this;
 
       self.isEnabled = isEnabled;

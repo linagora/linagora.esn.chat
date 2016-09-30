@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat module controllers', function() {
+describe('The linagora.esn.chat ChatController controller', function() {
   var $state,
     $q,
     windowMock,
@@ -123,21 +123,22 @@ describe('The linagora.esn.chat module controllers', function() {
     var controller = $controller(ctrl, {
       $scope: scope
     });
+
     scope.$digest();
 
     return controller;
   }
 
-  describe('The ChatRootController controller', function() {
+  describe('The ChatController controller', function() {
 
     function initCtrl() {
-      return initController('ChatRootController');
+      return initController('ChatController as vm');
     }
 
     it('should instanciate chatLocalStateService', function() {
       initCtrl();
       $rootScope.$digest();
-      expect(scope.chatLocalStateService).to.be.equal(chatLocalStateService);
+      expect(scope.vm.chatLocalStateService).to.be.equal(chatLocalStateService);
     });
 
     it('should call setActive with the default channel', function() {
@@ -149,85 +150,8 @@ describe('The linagora.esn.chat module controllers', function() {
     it('should set the isNotificationEnabled value from chatNotificationService service', function() {
       initCtrl();
       chatNotificationService.setNotificationStatus(true);
-      expect(scope.isEnabled()).to.be.equal(true);
+      expect(scope.vm.isEnabled()).to.be.true;
     });
   });
 
-  describe('The chatController controller', function() {
-    it('should inject the subheader', function() {
-    });
-
-    it('should fetch channel messages from server', function() {
-
-    });
-
-    it('should add message on scope on chat:message:text scope event', function() {
-
-    });
-
-    describe('The newMessage function', function() {
-      it('should notify user', function() {
-
-      });
-
-      it('should set the channel.isNotRead flag to true when target is not the current channel', function() {
-
-      });
-
-      it('should populate the message, push it in the scope and scroll down', function() {
-
-      });
-    });
-
-    describe('The notifyNewMessage function', function() {
-      it('should show notification when window has focus', function() {
-
-      });
-
-      it('and should show notification when conversation is read', function() {
-
-      });
-
-      it('and should show notification when notification is enabled', function() {
-
-      });
-
-      it('and should show notification when user is not current one', function() {
-
-      });
-    });
-
-  });
-
-  describe('The ChatAddChannelController controller', function() {
-
-    it('should add the subheader', function() {
-
-    });
-
-    describe('The addChannel function', function() {
-      it('should create the channel', function() {
-
-      });
-
-      it('should change to channel view when created', function() {
-
-      });
-
-      it('should add channel in scope when created', function() {
-
-      });
-    });
-  });
-
-  describe('chatConversationSubheaderController', function() {
-    function initCtrl() {
-      return initController('chatConversationSubheaderController');
-    }
-
-    beforeEach(function() {
-      $rootScope.$on = sinon.spy();
-      initCtrl();
-    });
-  });
 });

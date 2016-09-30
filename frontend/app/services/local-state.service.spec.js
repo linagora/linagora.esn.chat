@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('chatLocalState service', function() {
+describe('The chatLocalState service', function() {
   var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q, $httpBackend;
 
   beforeEach(
