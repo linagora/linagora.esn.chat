@@ -4,11 +4,11 @@
 
   angular
     .module('linagora.esn.chat')
-    .controller('ChatConversationItemController', ChatConversationItemController);
+    .controller('ChatChannelItemController', ChatChannelItemController);
 
-  ChatConversationItemController.$inject = ['$scope', '$rootScope', '$q', '$filter', '_', 'CHAT_EVENTS', 'CHAT_CONVERSATION_TYPE', 'chatParseMention', 'chatUserState', 'session', 'moment', 'userUtils', 'chatConversationsService'];
+  ChatChannelItemController.$inject = ['$scope', '$rootScope', '$q', '$filter', '_', 'CHAT_EVENTS', 'CHAT_CONVERSATION_TYPE', 'chatParseMention', 'chatUserState', 'session', 'moment', 'userUtils', 'chatConversationsService'];
 
-  function ChatConversationItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationsService) {
+  function ChatChannelItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationsService) {
     var self = this;
 
     self.channelState = self.channelState || 'chat.channels-views';

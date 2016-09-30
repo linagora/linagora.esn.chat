@@ -4,14 +4,14 @@
 
   angular
     .module('linagora.esn.chat')
-    .directive('chatSidebar', chatSidebar);
+    .directive('chatAside', chatAside);
 
-  chatSidebar.$inject = ['chatNotificationService'];
+  chatAside.$inject = ['chatNotificationService'];
 
-  function chatSidebar(chatNotificationService) {
+  function chatAside(chatNotificationService) {
     var directive = {
       restrict: 'E',
-      templateUrl: '/chat/app/aside/sidebar.html',
+      templateUrl: '/chat/app/aside/aside.html',
       link: link
     };
 

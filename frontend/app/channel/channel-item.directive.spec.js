@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The chat-conversation-item directive', function() {
+describe('The chat-channel-item directive', function() {
   var chatUserState,
   $q,
   $rootScope,
@@ -69,13 +69,13 @@ describe('The chat-conversation-item directive', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
   }));
 
-  describe('The chatConversationItem directive', function() {
+  describe('The chatChannelItem directive', function() {
     var item, $scope, eleScope;
 
     function initDirective() {
       $scope = $rootScope.$new();
       $scope.item = item;
-      var element = $compile('<chat-conversation-item item="item"/>')($scope);
+      var element = $compile('<chat-channel-item item="item"/>')($scope);
 
       $scope.$digest();
       eleScope = element.isolateScope();
