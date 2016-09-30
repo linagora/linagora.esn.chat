@@ -1,3 +1,3 @@
 .conversation-list
-  .no-messages(ng-if="!hasWantedConversation()") #{__('You do not have any messages yet.')}
-  chat-conversation-overview(channel-state='channelState', ng-repeat="item in groups|filter:wanted" item="item", ng-click='goToChannel($event, item._id)')
+  .no-messages(ng-if="!vm.hasWantedConversation()") #{__('You do not have any messages yet.')}
+  chat-conversation-overview(channel-state='vm.channelState', ng-repeat="item in vm.groups|filter:wanted" item="item", ng-click='vm.goToChannel($event, item._id)')

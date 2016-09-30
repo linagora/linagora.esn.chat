@@ -14,15 +14,17 @@
         currentMessage: '='
       },
       templateUrl: '/chat/app/conversation/message-separator.html',
-      controller: chatMessageSeparatorController
+      controller: chatMessageSeparatorController,
+      controllerAs: 'vm',
+      bindToController: true
     };
 
     return directive;
   }
 
-  chatMessageSeparatorController.$inject = ['$scope', 'moment'];
+  chatMessageSeparatorController.$inject = ['moment'];
 
-  function chatMessageSeparatorController($scope, moment) {
+  function chatMessageSeparatorController(moment) {
     var self = this;
 
     self.sameDay = sameDay;

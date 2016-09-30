@@ -1,5 +1,5 @@
 .block-header.visible-md
-  h2 \#{{::vm.getConversationName(vm.conversation)}}
+  h2 \#{{::getConversationName(conversation)}}
   ul.actions
     li
       a(href='')
@@ -15,14 +15,14 @@
     .listview.lv-message
       .lv-header.message-header
         .lvh-label
-          a(href='') {{(vm.conversation.members || []).length}} #{__('members')}
-          span(ng-show="vm.displayTopic")
+          a(href='') {{(conversation.members || []).length}} #{__('members')}
+          span(ng-show="displayTopic")
             span.divider |
-            span(ng-if="!vm.conversation.topic.value" editable-text="vm.conversation.topic.value" buttons="no" onbeforesave='vm.updateTopic($data)')
+            span(ng-if="!conversation.topic.value" editable-text="conversation.topic.value" buttons="no" onbeforesave='updateTopic($data)')
               a(href="#" )
                 | Add a topic
                 i.mdi.mdi-plus
-            span(ng-if="vm.conversation.topic.value" ng-bind-html="vm.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="vm.conversation.topic.value" buttons="no" onbeforesave='vm.updateTopic($data)')
+            span(ng-if="conversation.topic.value" ng-bind-html="conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="conversation.topic.value" buttons="no" onbeforesave='updateTopic($data)')
               a(href="#")
                 | Edit
                 i.mdi.mdi-pencil
@@ -31,6 +31,6 @@
             a(href='')
               i.mdi.mdi-information-outline
       .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true", scroll-glue="glued")
-        div(ng-repeat="message in vm.messages track by message._uniqId")
-          chat-message-separator(prev-message="$first ? null : vm.messages[$index - 1]", current-message="message")
+        div(ng-repeat="message in messages track by message._uniqId")
+          chat-message-separator(prev-message="$first ? null : messages[$index - 1]", current-message="message")
           chat-message(message="message")

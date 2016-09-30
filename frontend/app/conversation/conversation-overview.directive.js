@@ -13,7 +13,9 @@
         item: '=',
         channelState: '=?'
       },
-      controller: 'chatConversationItemController',
+      controller: 'ChatConversationItemController',
+      controllerAs: 'vm',
+      bindToController: true,
       templateUrl: '/chat/app/conversation/conversation-overview.html'
     };
 

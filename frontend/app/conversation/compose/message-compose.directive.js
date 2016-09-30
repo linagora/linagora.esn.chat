@@ -6,9 +6,9 @@
     .module('linagora.esn.chat')
     .directive('chatMessageCompose', chatMessageCompose);
 
-  chatMessageCompose.$inject = ['$log', '$rootScope', 'deviceDetector', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel'];
+  chatMessageCompose.$inject = ['$log', '$rootScope', 'deviceDetector', 'session', 'chatLocalStateService', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel'];
 
-  function chatMessageCompose($log, $rootScope, deviceDetector, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
+  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatLocalStateService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
     var directive = {
       restrict: 'E',
       templateUrl: '/chat/app/conversation/compose/message-compose.html',
@@ -38,7 +38,7 @@
       function sendUserTyping(state) {
         var message = {
           state: state,
-          channel: scope.chatLocalStateService.activeRoom._id,
+          channel: chatLocalStateService.activeRoom._id,
           date: Date.now()
         };
 
@@ -101,8 +101,8 @@
         return {
           type: 'text',
           text: chatHumanizeEntitiesLabel.replaceHumanPresentationByRealData(scope.text),
-          creator: scope.user._id,
-          channel: scope.chatLocalStateService.activeRoom._id,
+          creator: session.user._id,
+          channel: chatLocalStateService.activeRoom._id,
           date: Date.now()
         };
       }

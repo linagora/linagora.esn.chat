@@ -14,15 +14,16 @@
         },
         templateUrl: '/chat/app/conversation/message.html',
         controller: chatMessageController,
+        controllerAs: 'vm',
         bindToController: true
       };
 
       return directive;
     }
 
-    chatMessageController.$inject = ['$filter', '$timeout', 'chatParseMention', 'session', 'chatScrollService', 'conversationsService'];
+    chatMessageController.$inject = ['$filter', '$timeout', 'chatParseMention', 'session', 'chatScrollService', 'chatConversationsService'];
 
-    function chatMessageController($filter, $timeout, chatParseMention, session, chatScrollService, conversationsService) {
+    function chatMessageController($filter, $timeout, chatParseMention, session, chatScrollService, chatConversationsService) {
       var self = this;
       var parsedText = $filter('oembedImageFilter')(self.message.text);
 
@@ -36,7 +37,7 @@
         text: parsedText
       };
 
-      conversationsService.getConversationNamePromise.then(setConversationName);
+      chatConversationsService.getConversationNamePromise.then(setConversationName);
       session.ready.then(sessionReady);
 
       ////////////

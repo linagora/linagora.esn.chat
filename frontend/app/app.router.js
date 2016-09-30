@@ -33,7 +33,7 @@
         url: '/groups/add',
         views: {
           'main@chat': {
-            templateUrl: '/chat/app/groups/add-group.html',
+            templateUrl: '/chat/app/group/add-group.html',
             controller: 'ChatAddGroupController',
             controllerAs: 'vm'
           }
