@@ -13,7 +13,7 @@
         prevMessage: '=?',
         currentMessage: '='
       },
-      templateUrl: '/chat/app/conversation/message-separator.html',
+      templateUrl: '/chat/app/conversation/message/message-separator.html',
       controller: chatMessageSeparatorController,
       controllerAs: 'vm',
       bindToController: true

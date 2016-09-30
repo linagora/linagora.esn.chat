@@ -13,7 +13,7 @@
       var directive = {
         restrict: 'E',
         scope: true,
-        templateUrl: '/chat/app/conversation/user-typing.html',
+        templateUrl: '/chat/app/conversation/user-typing/user-typing.html',
         link: link
       };
 

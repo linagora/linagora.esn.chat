@@ -12,7 +12,7 @@
         scope: {
           message: '='
         },
-        templateUrl: '/chat/app/conversation/message.html',
+        templateUrl: '/chat/app/conversation/message/message.html',
         controller: chatMessageController,
         controllerAs: 'vm',
         bindToController: true
