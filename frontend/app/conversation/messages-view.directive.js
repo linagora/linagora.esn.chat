@@ -15,7 +15,7 @@
         conversation: '=',
         messages: '='
       },
-      templateUrl: '/chat/views/components/conversation-view/messages-view.html',
+      templateUrl: '/chat/app/conversation/messages-view.html',
       link: link
     };
 

@@ -7,7 +7,7 @@
   angular
     .module('linagora.esn.chat')
     .component('chatMentionChooser', {
-      templateUrl: '/chat/conversation/compose/mention-chooser.html',
+      templateUrl: '/chat/app/conversation/compose/mention-chooser.html',
       controllerAs: 'ctlr',
       controller: ChatMentionsChooserController
     });

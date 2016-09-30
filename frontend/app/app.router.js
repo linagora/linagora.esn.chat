@@ -7,7 +7,7 @@
     $stateProvider
       .state('chat', {
         url: '/chat',
-        templateUrl: '/chat/views/index.html',
+        templateUrl: '/chat/app/index.html',
         controller: 'ChatRootController',
         controllerAs: 'root',
         resolve: {
@@ -33,7 +33,7 @@
         url: '/groups/add',
         views: {
           'main@chat': {
-            templateUrl: '/chat/views/channels/group-add.html',
+            templateUrl: '/chat/app/groups/add-group.html',
             controller: 'ChatAddGroupController',
             controllerAs: 'vm'
           }
@@ -43,7 +43,7 @@
         url: '/channels/add',
         views: {
           'main@chat': {
-            templateUrl: '/chat/views/channels/channel-add.html',
+            templateUrl: '/chat/app/channel/add-channel.html',
             controller: 'ChatAddChannelController',
             controllerAs: 'vm'
           }

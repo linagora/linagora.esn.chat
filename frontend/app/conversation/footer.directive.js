@@ -9,7 +9,7 @@
   function chatFooter() {
     var directive = {
       restrict: 'E',
-      templateUrl: '/chat/views/components/conversation-view/channel-footer.html'
+      templateUrl: '/chat/app/conversation/footer.html'
     };
 
     return directive;

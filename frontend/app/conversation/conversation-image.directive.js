@@ -13,7 +13,7 @@
         conversation: '='
       },
       controller: ChatConversationImageController,
-      templateUrl: '/chat/views/conversation-image.html',
+      templateUrl: '/chat/app/conversation/conversation-image.html',
       bindToController: true
     };
 

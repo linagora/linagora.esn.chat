@@ -10,7 +10,7 @@
     var directive = {
       restrict: 'E',
       scope: true,
-      templateUrl: '/chat/views/subheaders/channel.html',
+      templateUrl: '/chat/app/conversation/subheader/conversation-subheader.html',
       controller: 'ChatConversationSubheaderController',
       controllerAs: 'vm'
     };

@@ -11,7 +11,7 @@
   function chatSidebar(chatNotificationService) {
     var directive = {
       restrict: 'E',
-      templateUrl: '/chat/views/aside/sidebar.html',
+      templateUrl: '/chat/app/aside/sidebar.html',
       link: link
     };
 

@@ -14,7 +14,7 @@
         channelState: '=?'
       },
       controller: 'chatConversationItemController',
-      templateUrl: '/chat/views/group-overview.html'
+      templateUrl: '/chat/app/conversation/conversation-overview.html'
     };
 
     return directive;

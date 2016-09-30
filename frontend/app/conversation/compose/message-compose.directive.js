@@ -11,7 +11,7 @@
   function chatMessageCompose($log, $rootScope, deviceDetector, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
     var directive = {
       restrict: 'E',
-      templateUrl: '/chat/conversation/compose/message-compose.html',
+      templateUrl: '/chat/app/conversation/compose/message-compose.html',
       link: link
     };
 
