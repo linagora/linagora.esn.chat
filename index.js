@@ -42,7 +42,7 @@ let chatModule = new AwesomeModule(MODULE_NAME, {
     deploy: function(dependencies, callback) {
       let webserverWrapper = dependencies('webserver-wrapper');
       let app = require('./backend/webserver/application')(this, dependencies);
-      let lessFile = path.resolve(__dirname, './frontend/css/styles.less');
+      let lessFile = path.resolve(__dirname, './frontend/app/styles.less');
       let frontendModules = glob.sync([
         FRONTEND_JS_PATH + '**/!(*spec).js'
       ]).map(filepath => filepath.replace(FRONTEND_JS_PATH, ''));
