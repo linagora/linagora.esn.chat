@@ -8,7 +8,8 @@
       .state('chat', {
         url: '/chat',
         templateUrl: '/chat/views/index.html',
-        controller: 'chatRootController',
+        controller: 'ChatRootController',
+        controllerAs: 'root',
         resolve: {
           domain: routeResolver.session('domain'),
           user: routeResolver.session('user')
@@ -33,7 +34,8 @@
         views: {
           'main@chat': {
             templateUrl: '/chat/views/channels/group-add.html',
-            controller: 'chatAddGroupController'
+            controller: 'ChatAddGroupController',
+            controllerAs: 'vm'
           }
         }
       })
@@ -42,7 +44,8 @@
         views: {
           'main@chat': {
             templateUrl: '/chat/views/channels/channel-add.html',
-            controller: 'chatAddChannelController'
+            controller: 'ChatAddChannelController',
+            controllerAs: 'vm'
           }
         }
       });

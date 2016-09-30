@@ -128,10 +128,10 @@ describe('The linagora.esn.chat module controllers', function() {
     return controller;
   }
 
-  describe('The chatRootController controller', function() {
+  describe('The ChatRootController controller', function() {
 
     function initCtrl() {
-      return initController('chatRootController');
+      return initController('ChatRootController');
     }
 
     it('should instanciate chatLocalStateService', function() {
@@ -199,7 +199,7 @@ describe('The linagora.esn.chat module controllers', function() {
 
   });
 
-  describe('The chatAddChannelController controller', function() {
+  describe('The ChatAddChannelController controller', function() {
 
     it('should add the subheader', function() {
 

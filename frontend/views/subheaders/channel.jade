@@ -1,5 +1,5 @@
 .conversation-subheader.row
-  .title(ng-if= "chatLocalStateService.activeRoom")
-    span.ellipsis {{ getConversationName(chatLocalStateService.activeRoom) }}
+  .title(ng-if= "vm.chatLocalStateService.activeRoom")
+    span.ellipsis {{ vm.getConversationName(vm.chatLocalStateService.activeRoom) }}
   a.close.hidden-md.button(contextual-sidebar, data-content-template="/chat/views/aside/sidebar.html")
     i.mdi.mdi-menu

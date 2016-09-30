@@ -12,8 +12,7 @@
     var directive = {
       restrict: 'E',
       templateUrl: '/chat/views/components/conversation-view/messages/message-compose.html',
-      link: link,
-      bindToController: true
+      link: link
     };
 
     return directive;

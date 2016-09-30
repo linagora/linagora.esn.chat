@@ -14,15 +14,17 @@
           channelState: '@',
           types: '='
         },
-        controller: chatConversationListController
+        controller: chatConversationListController,
+        controllerAs: 'vm',
+        bindToController: true
       };
 
       return directive;
     }
 
-    chatConversationListController.$inject = ['$scope', 'chatLocalStateService'];
+    chatConversationListController.$inject = ['chatLocalStateService'];
 
-    function chatConversationListController($scope, chatLocalStateService) {
+    function chatConversationListController(chatLocalStateService) {
       var self = this;
 
       self.wanted = wanted;
@@ -30,13 +32,13 @@
       self.hasWantedConversation = hasWantedConversation;
 
       function hasWantedConversation() {
-        return $scope.groups.some(function(group) {
-          return $scope.wanted(group);
+        return self.groups.some(function(group) {
+          return wanted(group);
         });
       }
 
       function wanted(conversation) {
-        return $scope.types.indexOf(conversation.type) > -1;
+        return self.types.indexOf(conversation.type) > -1;
       }
     }
 })();

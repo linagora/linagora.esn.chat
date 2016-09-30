@@ -12,7 +12,7 @@
       scope: {
         conversation: '='
       },
-      controller: chatConversationImageController,
+      controller: ChatConversationImageController,
       templateUrl: '/chat/views/conversation-image.html',
       bindToController: true
     };
@@ -20,9 +20,9 @@
     return directive;
   }
 
-  chatConversationImageController.$inject = ['session', '_'];
+  ChatConversationImageController.$inject = ['session', '_'];
 
-  function chatConversationImageController(session, _) {
+  function ChatConversationImageController(session, _) {
     var self = this;
 
     session.ready.then(sessionReady);

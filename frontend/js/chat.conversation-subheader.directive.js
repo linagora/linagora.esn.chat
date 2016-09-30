@@ -11,7 +11,8 @@
       restrict: 'E',
       scope: true,
       templateUrl: '/chat/views/subheaders/channel.html',
-      controller: 'chatConversationSubheaderController'
+      controller: 'ChatConversationSubheaderController',
+      controllerAs: 'vm'
     };
 
     return directive;
