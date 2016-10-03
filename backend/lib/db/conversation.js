@@ -1,6 +1,5 @@
 'use strict';
 
-let uuid = require('node-uuid');
 let cleanUser = require('./utils').cleanUser;
 const CONSTANTS = require('../constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
@@ -31,12 +30,6 @@ module.exports = function(dependencies) {
     },
     timestamps: {
       creation: {type: Date, default: Date.now}
-    },
-    activity_stream: {
-      uuid: {type: String, default: uuid.v4},
-      timestamps: {
-        creation: {type: Date, default: Date.now}
-      }
     },
     last_message: {
       text: {type: String},
