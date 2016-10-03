@@ -4,15 +4,17 @@ const constants = require('./constants');
 
 module.exports = function(dependencies) {
 
-  let models = {
+  const models = {
     conversation: require('./db/conversation')(dependencies),
     message: require('./db/message')(dependencies)
   };
 
-  let message = require('./message')(dependencies);
-  let conversation = require('./conversation')(dependencies);
-  let userState = require('./userState')(dependencies);
-  let moderate = require('./moderate')(dependencies);
+  const utils = require('./utils')(dependencies);
+  const message = require('./message')(dependencies);
+  const conversation = require('./conversation')(dependencies, {utils});
+  const community = require('./community')(dependencies, {utils, conversation});
+  const userState = require('./userState')(dependencies);
+  const moderate = require('./moderate')(dependencies);
 
   function start(callback) {
     message.listener.start(conversation);
@@ -25,6 +27,7 @@ module.exports = function(dependencies) {
     start,
     constants,
     conversation,
+    community,
     moderate,
     message,
     userState,

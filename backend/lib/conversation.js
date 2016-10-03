@@ -11,7 +11,7 @@ const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
-module.exports = function(dependencies) {
+module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
   const mongoose = dependencies('db').mongo.mongoose;
@@ -24,6 +24,7 @@ module.exports = function(dependencies) {
   const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  const ensureObjectId = lib.utils.ensureObjectId;
 
   function getChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
@@ -42,10 +43,6 @@ module.exports = function(dependencies) {
 
   function getConversation(channel, callback) {
     Conversation.findById(channel).populate('members', SKIP_FIELDS.USER).exec(callback);
-  }
-
-  function getCommunityConversationByCommunityId(communityId, callback) {
-    Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
   function deleteConversation(userId, channel, callback) {
@@ -299,10 +296,6 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
-  function ensureObjectId(id) {
-    return id.constructor === ObjectId ? id : new ObjectId(id);
-  }
-
   function addMemberToConversation(conversationId, userId, callback) {
     let userObjectId = ensureObjectId(userId);
 
@@ -315,41 +308,6 @@ module.exports = function(dependencies) {
 
       makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
       channelAddMember.publish(conversation);
-    });
-  }
-
-  function updateCommunityConversation(communityId, modifications, callback) {
-
-    let mongoModifications = {};
-
-    if (modifications.newMembers) {
-      mongoModifications.$addToSet = {
-        members: {
-          $each: modifications.newMembers.map(ensureObjectId)
-        }
-      };
-    }
-
-    if (modifications.deleteMembers) {
-      mongoModifications.$pullAll = {
-        members: modifications.deleteMembers.map(ensureObjectId)
-      };
-    }
-
-    if (modifications.title) {
-      mongoModifications.$set = {name: modifications.title};
-    }
-
-    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}, mongoModifications, (err, conversation) => {
-      if (err) {
-        return callback(err);
-      }
-
-      if (mongoModifications.$addToSet) {
-        makeAllMessageReadedForAnUserHelper(mongoModifications.$addToSet.$each, conversation, callback);
-      } else {
-        callback(err, conversation);
-      }
     });
   }
 
@@ -522,9 +480,7 @@ module.exports = function(dependencies) {
   return {
     getMessage,
     getMessages,
-    getCommunityConversationByCommunityId,
     addMemberToConversation,
-    updateCommunityConversation,
     updateConversation,
     moderateConversation,
     moderateMessage,
@@ -537,6 +493,7 @@ module.exports = function(dependencies) {
     deleteConversation,
     updateTopic,
     makeAllMessageReadedForAnUser,
+    makeAllMessageReadedForAnUserHelper,
     countMessages,
     listConversation,
     listMessage
