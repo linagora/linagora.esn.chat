@@ -1,0 +1,151 @@
+@esnAsideFontSize: 1.6em;
+@esnAsideHeadingFontSize: 1.8em;
+@esnAsideIconFontSize: 2.2em;
+@esnAsideMailboxNameHeight: 30px;
+
+.esn-aside {
+
+  i.mdi-checkbox-blank-circle.connected {
+    color: green
+  }
+
+  color: @secondaryTextColor;
+
+  hr {
+    margin: 8px 5px;
+    border-top: 1px solid @darkenBgColor;
+  }
+
+  .clickable {
+    line-height: @esnAsideIconFontSize;
+
+    &.selected {
+      background-color: @darkenBgColor;
+
+      .item-name .item-name-after:after {
+        background-color: @darkenBgColor;
+      }
+    }
+  }
+
+  .item-icon {
+    font-size: @esnAsideIconFontSize;
+    vertical-align: middle;
+    font-size: 1.4em;
+  }
+
+
+  chat-channel-item {
+    .notread .item-name-inner {
+      font-weight: bold;
+      color: @m-black;
+      font-size: 15px;
+    }
+  }
+
+  .item-name {
+    background-color: inherit;
+    overflow: hidden;
+    height: @esnAsideMailboxNameHeight;
+    text-align: left;
+    line-height: @esnAsideMailboxNameHeight;
+
+    .item-name-inner {
+      width: 100%;
+      white-space: nowrap;
+      text-align: left;
+      display: inline-block;
+      vertical-align: top;
+      height: @esnAsideMailboxNameHeight + 1;
+    }
+
+    .item-name-after {
+      width: 1px;
+      height: @esnAsideMailboxNameHeight + 1;
+      display: inline-block;
+      position: relative;
+    }
+
+    .item-name-after:after {
+      content: "…";
+      width: auto;
+      background-color: white;
+      margin-right: 6px;
+      position: absolute;
+      bottom: @esnAsideMailboxNameHeight + 1;
+      left: 0;
+      height: @esnAsideMailboxNameHeight + 1;
+      min-width: 1px;
+    }
+
+  }
+
+  .listview:not(.lv-lg):not(.lv-message) {
+    .lv-item:not(.menu-heading) {
+      padding: 2px 30px 2px 20px;
+    }
+  }
+
+  &.esn-aside-desktop-menu {
+    margin-top: 35px;
+    max-width: 300px;
+
+    .listview:not(.lv-lg):not(.lv-message) {
+      .lv-item.menu-heading {
+        padding: 8px 0 8px 15px;
+      }
+    }
+
+    .menu-heading {
+      .flex;
+
+      border-left: 5px solid @primaryColor;
+
+      .add-folder {
+        .transition(0.25s ease-out);
+        opacity: 0.5;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+
+      .menu-icon {
+        margin: 0;
+        font-size: 2.2em;
+        vertical-align: bottom;
+      }
+
+      .title {
+        .flex;
+        .flex-shorthand(1);
+
+        .text {
+          .flex-shorthand(1);
+
+          margin-left: 5px;
+          font-weight: bold;
+          font-size: @esnAsideFontSize;
+          color: @primaryColor;
+        }
+      }
+    }
+
+    .settings-overlay {
+      font-size: @esnAsideIconFontSize;
+    }
+
+    .item-name {
+      .item-name-after:after {
+        background-color: @body-bg;
+      }
+    }
+
+    .clickable.selected {
+      .item-name .item-name-after:after {
+        background-color: @darkenBgColor;
+      }
+    }
+  }
+
+}

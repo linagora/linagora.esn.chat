@@ -1,0 +1,19 @@
+.row.group-item(ng-class="{'chat-unread-conversation': vm.item.unreadMessageCount > 0}")
+  .col-xs-2.group-badge
+    chat-conversation-image(conversation='vm.item')
+  .col-xs-7.group-body(ui-sref='{{vm.channelState}}({id: vm.item._id})')
+    .row
+      .col-xs-12.group-name.ellipsis
+        span {{vm.getConversationName(vm.item)}}
+    .row
+      .col-xs-12.group-text.ellipsis
+        span(ng-if="vm.lastMessageIsMe")
+          | #{__('You')} :
+        span(ng-if="!vm.lastMessageIsMe")
+          {{vm.lastMessageDisplayName}} :
+        span(ng-bind-html="vm.item.last_message.text")
+
+  .col-xs-3.group-date
+    span(ng-if="vm.numberOfDays === 0") {{vm.item.last_message.date | amDateFormat:"HH:mm"}}
+    span(ng-if="vm.numberOfDays === 1") #{__('Yesterday')} {{vm.item.last_message.date | amDateFormat:"HH:mm"}}
+    span(ng-if="vm.numberOfDays > 1") {{vm.item.last_message.date | amDateFormat:"DD/MM/YY"}}

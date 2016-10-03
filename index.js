@@ -4,10 +4,12 @@ let AwesomeModule = require('awesome-module');
 let Dependency = AwesomeModule.AwesomeModuleDependency;
 let path = require('path');
 let glob = require('glob-all');
+let _ = require('lodash');
 
 const NAME = 'chat';
+const APP_ENTRY_POINT = NAME + '.app.js';
 const MODULE_NAME = 'linagora.esn.' + NAME;
-const FRONTEND_JS_PATH = __dirname + '/frontend/js/';
+const FRONTEND_JS_PATH = __dirname + '/frontend/app/';
 
 let chatModule = new AwesomeModule(MODULE_NAME, {
   dependencies: [
@@ -41,14 +43,16 @@ let chatModule = new AwesomeModule(MODULE_NAME, {
     deploy: function(dependencies, callback) {
       let webserverWrapper = dependencies('webserver-wrapper');
       let app = require('./backend/webserver/application')(this, dependencies);
-      let lessFile = path.resolve(__dirname, './frontend/css/styles.less');
+      let lessFile = path.resolve(__dirname, './frontend/app/style.less');
       let frontendModules = glob.sync([
-        FRONTEND_JS_PATH + '**/chat.app.js',
         FRONTEND_JS_PATH + '**/!(*spec).js'
       ]).map(filepath => filepath.replace(FRONTEND_JS_PATH, ''));
 
+      _.pull(frontendModules, APP_ENTRY_POINT);
+      frontendModules = [APP_ENTRY_POINT].concat(frontendModules);
+
       app.use('/api/chat', this.api.chat);
-      webserverWrapper.injectAngularModules(NAME, frontendModules, MODULE_NAME, ['esn']);
+      webserverWrapper.injectAngularAppModules(NAME, frontendModules, MODULE_NAME, ['esn']);
       webserverWrapper.injectLess(NAME, [lessFile], 'esn');
       webserverWrapper.addApp(NAME, app);
 

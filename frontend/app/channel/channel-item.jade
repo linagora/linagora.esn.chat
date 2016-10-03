@@ -1,0 +1,13 @@
+.lv-item.clickable(title="{{::vm.getConversationName(vm.item)}}", ui-sref='{{vm.channelState}}({id: vm.item._id})', ui-sref-active="selected", ng-class="{notread: vm.item.unreadMessageCount > 0}")
+  .row
+    .col-xs-2.badge-container
+      i.item-icon.mdi(ng-class="{'mdi-pound': vm.item.type === CHAT_CONVERSATION_TYPE.CHANNEL, 'mdi-checkbox-blank-circle': vm.item.type !== CHAT_CONVERSATION_TYPE.CHANNEL, 'connected': vm.allUsersConnected}")
+    .col-xs-8.item-name
+      span.item-name-inner.ellipsis
+        bdi {{::vm.getConversationName(vm.item)}}
+    .col-xs-2
+      span(ng-if="vm.item.mentionCount > 0")
+        i.fa.fa-circle.fa-stack-2x
+        i.fa.fa-inverse.fa-stack-1x
+          {{vm.item.mentionCount}}
+      span.item-name-after

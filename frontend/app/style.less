@@ -1,0 +1,156 @@
+@import '@{components}/material-admin/less/inc/chat';
+@import '@{components}/material-admin/less/inc/messages';
+@import './aside/aside.less';
+@import './conversation/footer/footer.less';
+@import './channel/add-channel.less';
+@import './conversation/conversation-view.less';
+@import './conversation/conversation-overview.less';
+@import './conversation/subheader/conversation-subheader.less';
+
+body {
+  #wrap {
+    padding-bottom: 0px!important; // to override inherited value from la cerise
+  }
+}
+
+.ms-reply textarea {
+  font-size: 16px; //in order to avoid autozoom when focus on text area on iphone
+}
+
+.lv-message .lv-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.chat-message {
+  .lv-avatar > img {
+    border-radius: 2px;
+  }
+
+  .chat-message-title {
+
+    a {
+      color: @text-color;
+    }
+
+    .displayname {
+      font-weight: 600;
+    }
+
+    .date {
+      color: #B3B3B3;
+      padding-left: 10px;
+      display: inline;
+    }
+  }
+
+  .chat-message-text {
+    white-space: pre-wrap;
+
+    .chat-emoji {
+      width: 1em;
+    }
+
+    span i {
+      margin-left: 5px;
+      font-size: 20px;
+      vertical-align: middle;
+    }
+  }
+
+  .attachment-container {
+
+    .attachment {
+      padding: 7px 10px 8px;
+      border-top: 1px solid #e8e8e8;
+      line-height: 100%;
+
+      img {
+        height: auto;
+        width: auto;
+        max-width: 100%;
+        max-height: 250px;
+      }
+    }
+  }
+}
+
+.day-divider {
+  padding: 1.75rem 0 1.25rem;
+
+  .day-divider-line {
+    line-height: 0;
+    text-align: center;
+    height: 1px;
+    background: #dbdbdb;
+
+    .day-divider-label span {
+      top: -.375rem;
+      background: #fff;
+      padding: .25rem .75rem;
+      display: inline-block;
+      position: relative;
+      border-radius: 1rem;
+      color: #666;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (min-width: @screen-sm-min) {
+  #messages-main .ms-body {
+    padding-left: 0;
+  }
+}
+
+.chat-image-container {
+  .flex-wrap();
+  height: 100%;
+
+  &.chat-image-container-size-3 {
+    .flex-direction(column);
+  }
+
+  img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  img.avatar {
+    width: 100%;
+  }
+
+  &.chat-image-container-size-1 > div {
+    height: 100%;
+  }
+
+  &.chat-image-container-size-2 > div {
+    height: 100%;
+    .flex-shorthand(0, 0, 50%);
+    overflow: hidden;
+
+    img {
+      margin-left: -50%;
+    }
+  }
+
+  &.chat-image-container-size-3 > div {
+    &.chat-image-avatar-position-0 {
+      width: 50%;
+      .flex-shorthand(0, 0, 100%);
+      height: 100%;
+      img {
+        margin-left: -50%;
+      }
+    }
+    overflow: hidden;
+    .flex-shorthand(0, 0, 50%);
+    height: 50%;
+  }
+
+  &.chat-image-container-size-4 > div {
+    overflow: hidden;
+    .flex-shorthand(0, 0, 50%);
+    height: 50%;
+  }
+}

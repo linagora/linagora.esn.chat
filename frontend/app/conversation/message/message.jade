@@ -1,0 +1,19 @@
+.lv-item.media.chat-message
+    a.lv-avatar.pull-left
+      img(ng-src='/api/users/{{::vm.message.creator._id}}/profile/avatar', alt='')
+    .media-body
+      .chat-message-title
+        user-profile-link.displayname(user="vm.message.creator")
+        small.date {{::vm.message.timestamps.creation | amDateFormat:'h:mm A'}}
+      .chat-message-text(ng-if='vm.message.type === "text"', ng-bind-html="vm.parsed.text", ng-class='(vm.user._id === vm.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
+      .oembeds.attachment-container
+        oembeds(message="vm.message.text")
+      .attachment-container(ng-if="vm.message.attachments.length > 0")
+        .chat-message-text(ng-repeat="attachment in vm.message.attachments track by $index")
+          span(ng-click='vm.toggleFile()')
+            | #{__('Uploaded an Image')} :
+          a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
+          span(ng-click='vm.toggleFile()')
+            i(ng-class="vm.displayFile ? 'fa fa-caret-down' : 'fa fa-caret-right'")
+          .attachment
+            file-preview(file="attachment", ng-show="vm.displayFile")
