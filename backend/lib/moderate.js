@@ -1,14 +1,20 @@
 'use strict';
 
-let q = require('q');
+const q = require('q');
 
 module.exports = function(dependencies) {
 
-  let logger = dependencies('logger');
-  let userModerationModule = dependencies('user').moderation;
-  let mongoose = dependencies('db').mongo.mongoose;
-  let Conversation = mongoose.model('ChatConversation');
-  let Message = mongoose.model('ChatMessage');
+  const logger = dependencies('logger');
+  const userModerationModule = dependencies('user').moderation;
+  const mongoose = dependencies('db').mongo.mongoose;
+  const Conversation = mongoose.model('ChatConversation');
+  const Message = mongoose.model('ChatMessage');
+
+  return {
+    start,
+    switchMessageModerate,
+    switchConversationModerate
+  };
 
   function switchConversationModerate(value) {
     return function(user) {
@@ -55,10 +61,4 @@ module.exports = function(dependencies) {
       onUserEnabled: switchMessageModerate(false)
     });
   }
-
-  return {
-    start,
-    switchMessageModerate,
-    switchConversationModerate
-  };
 };

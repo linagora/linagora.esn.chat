@@ -8,7 +8,7 @@ module.exports = function(dependencies, lib) {
 
   const mongoose = dependencies('db').mongo.mongoose;
   const Conversation = mongoose.model('ChatConversation');
-  const ensureObjectId = lib.utils.ensureObjectId;
+  const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
 
   return {
     getCommunityConversationByCommunityId,
