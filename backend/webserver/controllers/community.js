@@ -33,7 +33,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.community.getCommunityConversationByCommunityId(req.query.id, (err, conversation) => {
+    lib.community.getConversationByCommunityId(req.query.id, (err, conversation) => {
       if (err) {
         return res.status(500).json({
           error: {

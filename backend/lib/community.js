@@ -11,15 +11,15 @@ module.exports = function(dependencies, lib) {
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
 
   return {
-    getCommunityConversationByCommunityId,
-    updateCommunityConversation
+    getConversationByCommunityId,
+    updateConversation
   };
 
-  function getCommunityConversationByCommunityId(communityId, callback) {
+  function getConversationByCommunityId(communityId, callback) {
     Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function updateCommunityConversation(communityId, modifications, callback) {
+  function updateConversation(communityId, modifications, callback) {
 
     let mongoModifications = {};
 

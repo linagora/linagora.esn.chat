@@ -141,7 +141,7 @@ describe('The linagora.esn.chat community lib', function() {
     };
   });
 
-  describe('The getCommunityConversationByCommunityId', function() {
+  describe('The getConversationByCommunityId', function() {
     it('should call ChatConversation.find with the correct param', function(done) {
       var id = 'id';
       var callback = 'callback';
@@ -162,12 +162,12 @@ describe('The linagora.esn.chat community lib', function() {
       populateMock = sinon.stub().returns({exec: exec});
       modelsMock.ChatConversation.findOne = sinon.stub().returns({populate: populateMock});
 
-      require('../../../backend/lib/community')(dependencies, lib).getCommunityConversationByCommunityId(id, callback);
+      require('../../../backend/lib/community')(dependencies, lib).getConversationByCommunityId(id, callback);
 
     });
   });
 
-  describe('The updateCommunityConversation function', function() {
+  describe('The updateConversation function', function() {
     it('should update correctly the conversation', function(done) {
       var newConversation = {};
       var communityId = 'communityId';
@@ -196,7 +196,7 @@ describe('The linagora.esn.chat community lib', function() {
         });
       };
 
-      require('../../../backend/lib/community')(dependencies, lib).updateCommunityConversation(communityId, modification, function(err, conv) {
+      require('../../../backend/lib/community')(dependencies, lib).updateConversation(communityId, modification, function(err, conv) {
         expect(conv).to.equal(newConversation);
         expect(err).to.be.null;
         done();

@@ -16,7 +16,7 @@ describe('The community controller', function() {
 
     lib = {
       conversation: {
-        getCommunityConversationByCommunityId: sinon.spy(function(id, callback) {
+        getConversationByCommunityId: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
         getChannels: sinon.spy(function(options, callback) {

@@ -16,7 +16,7 @@ describe('The channel controller', function() {
         getById: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
-        getCommunityConversationByCommunityId: sinon.spy(function(id, callback) {
+        getConversationByCommunityId: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
         getForConversation: sinon.spy(function(channel, options, callback) {
