@@ -147,7 +147,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function markAllMessageOfAConversationReaded(req, res) {
-    lib.message.makeAllMessageReadedForAnUser(req.user._id, req.params.id, err => {
+    lib.message.markAllAsReadById(req.user._id, req.params.id, err => {
       if (err) {
         return res.status(500).json({
           error: {

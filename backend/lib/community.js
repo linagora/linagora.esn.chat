@@ -47,7 +47,7 @@ module.exports = function(dependencies, lib) {
       }
 
       if (mongoModifications.$addToSet) {
-        lib.conversation.makeAllMessageReadedForAnUserHelper(mongoModifications.$addToSet.$each, conversation, callback);
+        lib.conversation.markAllAsRead(mongoModifications.$addToSet.$each, conversation, callback);
       } else {
         callback(err, conversation);
       }

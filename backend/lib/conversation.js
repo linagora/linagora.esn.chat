@@ -209,7 +209,7 @@ module.exports = function(dependencies) {
         return callback(err);
       }
 
-      messageLib.makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
+      messageLib.markAllAsRead(userId, conversation, callback);
       channelAddMember.publish(conversation);
     });
   }
@@ -258,7 +258,7 @@ module.exports = function(dependencies) {
         });
 
         if (modifications.newMembers && modifications.newMembers.length) {
-          messageLib.makeAllMessageReadedForAnUserHelper((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
+          messageLib.markAllAsRead((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
         } else {
           callback(err, conversation);
         }

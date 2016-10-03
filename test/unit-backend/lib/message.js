@@ -233,7 +233,7 @@ describe('The linagora.esn.chat message lib', function() {
     });
   });
 
-  describe('The getMessages function', function() {
+  describe('The getForConversation function', function() {
 
     it('should call ChatMessage.find with the correct param and reverse the result', function(done) {
       var id = 1;
@@ -268,7 +268,7 @@ describe('The linagora.esn.chat message lib', function() {
         }
       };
 
-      require('../../../backend/lib/message')(dependencies).getMessages(options, query, function(err, _result) {
+      require('../../../backend/lib/message')(dependencies).getForConversation(options, query, function(err, _result) {
         expect(err).to.be.null;
         expect(_result).to.be.deep.equal(result);
         done();
@@ -297,7 +297,7 @@ describe('The linagora.esn.chat message lib', function() {
         callback();
       };
 
-      require('../../../backend/lib/message')(dependencies).makeAllMessageReadedForAnUser(userId, channelId, done);
+      require('../../../backend/lib/message')(dependencies).markAllAsReadById(userId, channelId, done);
     });
   });
 

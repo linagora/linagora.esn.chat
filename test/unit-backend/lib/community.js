@@ -134,7 +134,7 @@ describe('The linagora.esn.chat community lib', function() {
     lib = {
       utils: require('../../../backend/lib/utils')(dependencies),
       conversation: {
-        makeAllMessageReadedForAnUserHelper: function(user, conversation, callback) {
+        markAllAsRead: function(user, conversation, callback) {
           callback(null, conversation);
         }
       }

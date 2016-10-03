@@ -16,11 +16,11 @@ module.exports = function(dependencies) {
   return {
     count,
     create,
-    getMessage,
-    getMessages,
+    getById,
+    getForConversation,
     list,
-    makeAllMessageReadedForAnUser,
-    makeAllMessageReadedForAnUserHelper,
+    markAllAsReadById,
+    markAllAsRead,
     moderate,
     parseMention
   };
@@ -34,48 +34,53 @@ module.exports = function(dependencies) {
     let chatMessage = new ChatMessage(message);
 
     async.waterfall([
-      function(callback) {
-        chatMessage.save(callback);
-      },
-      function(message, _num, callback) {
-        Conversation.findByIdAndUpdate(message.channel, {
-          $set: {
-            last_message: {
-              text: message.text,
-              date: message.timestamps.creation,
-              creator: message.creator,
-              user_mentions: message.user_mentions
-            }
-          },
-          $inc: {
-            numOfMessage: 1
-          }
-        }, (err, conversation) => {
-          if (err) {
-            logger.error('Can not update channel with last_update', err);
-          }
-          callback(null, message, conversation);
-        });
-      },
-      function(message, conversation, callback) {
-        makeAllMessageReadedForAnUserHelper(message.creator, conversation, err => {
-          callback(err, message);
-        });
-      },
-      function(message, callback) {
-        ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
-      },
+      save, updateLastMessage, markAsRead, populate,
       function(message, callback) {
         callback(null, message.toJSON());
       }
     ], callback);
+
+    function save(callback) {
+      chatMessage.save(callback);
+    }
+
+    function updateLastMessage(message, _num, callback) {
+      Conversation.findByIdAndUpdate(message.channel, {
+        $set: {
+          last_message: {
+            text: message.text,
+            date: message.timestamps.creation,
+            creator: message.creator,
+            user_mentions: message.user_mentions
+          }
+        },
+        $inc: {
+          numOfMessage: 1
+        }
+      }, (err, conversation) => {
+        if (err) {
+          logger.error('Can not update channel with last_update', err);
+        }
+        callback(null, message, conversation);
+      });
+    }
+
+    function markAsRead(message, conversation, callback) {
+      markAllAsRead(message.creator, conversation, err => {
+        callback(err, message);
+      });
+    }
+
+    function populate(message, callback) {
+      ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
+    }
   }
 
-  function getMessage(messageId, callback) {
+  function getById(messageId, callback) {
     ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function getMessages(conversation, query, callback) {
+  function getForConversation(conversation, query, callback) {
     query = query || {};
 
     if (!query.moderate) {
@@ -140,7 +145,7 @@ module.exports = function(dependencies) {
     });
   }
 
-  function makeAllMessageReadedForAnUserHelper(userIds, conversation, callback) {
+  function markAllAsRead(userIds, conversation, callback) {
     userIds = _.isArray(userIds) ? userIds : [userIds];
     let updateMaxOperation = {};
 
@@ -153,13 +158,13 @@ module.exports = function(dependencies) {
     }, callback);
   }
 
-  function makeAllMessageReadedForAnUser(userId, conversationId, callback) {
+  function markAllAsReadById(userId, conversationId, callback) {
     Conversation.findOne({_id: conversationId}, function(err, conversation) {
       if (err) {
         return callback(err);
       }
 
-      makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
+      markAllAsRead(userId, conversation, callback);
     });
   }
 
