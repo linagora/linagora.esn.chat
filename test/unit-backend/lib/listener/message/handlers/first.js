@@ -54,17 +54,22 @@ describe('The first channel message handler', function() {
     var countSpy = sinon.spy();
     var getSpy = sinon.spy();
 
-    mockery.registerMock('../../conversation', function() {
+    mockery.registerMock('../../../message', function() {
       return {
-        countMessages: function(channel, callback) {
+        count: function(channel, callback) {
           countSpy(channel);
           callback(new Error('Count failure'));
-        },
+        }
+      };
+    });
+
+    mockery.registerMock('../../../conversation', function() {
+      return {
         getConversation: getSpy
       };
     });
 
-    require('../../../../../backend/lib/message/handlers/first')(dependencies)(data);
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
     expect(getSpy).to.not.have.been.called;
     expect(countSpy).to.have.been.calledWith(channelId);
     expect(globalPublish).to.not.have.been.called;
@@ -74,17 +79,22 @@ describe('The first channel message handler', function() {
     var countSpy = sinon.spy();
     var getSpy = sinon.spy();
 
-    mockery.registerMock('../../conversation', function() {
+    mockery.registerMock('../../../message', function() {
       return {
-        countMessages: function(channel, callback) {
+        count: function(channel, callback) {
           countSpy(channel);
           callback(null, 0);
-        },
+        }
+      };
+    });
+
+    mockery.registerMock('../../../conversation', function() {
+      return {
         getConversation: getSpy
       };
     });
 
-    require('../../../../../backend/lib/message/handlers/first')(dependencies)(data);
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
     expect(getSpy).to.not.have.been.called;
     expect(countSpy).to.have.been.calledWith(channelId);
     expect(globalPublish).to.not.have.been.called;
@@ -94,7 +104,16 @@ describe('The first channel message handler', function() {
     var countSpy = sinon.spy();
     var getSpy = sinon.spy();
 
-    mockery.registerMock('../../conversation', function() {
+    mockery.registerMock('../../../message', function() {
+      return {
+        count: function(channel, callback) {
+          countSpy(channel);
+          callback(null, 2);
+        }
+      };
+    });
+
+    mockery.registerMock('../../../conversation', function() {
       return {
         countMessages: function(channel, callback) {
           countSpy(channel);
@@ -104,7 +123,7 @@ describe('The first channel message handler', function() {
       };
     });
 
-    require('../../../../../backend/lib/message/handlers/first')(dependencies)(data);
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
     expect(getSpy).to.not.have.been.called;
     expect(countSpy).to.have.been.calledWith(channelId);
     expect(globalPublish).to.not.have.been.called;
@@ -114,12 +133,17 @@ describe('The first channel message handler', function() {
     var countSpy = sinon.spy();
     var getSpy = sinon.spy();
 
-    mockery.registerMock('../../conversation', function() {
+    mockery.registerMock('../../../message', function() {
       return {
-        countMessages: function(channel, callback) {
+        count: function(channel, callback) {
           countSpy(channel);
           callback(null, 1);
-        },
+        }
+      };
+    });
+
+    mockery.registerMock('../../../conversation', function() {
+      return {
         getConversation: function(channel, callback) {
           getSpy(channel);
           callback(new Error('Get conversation failure'));
@@ -127,7 +151,7 @@ describe('The first channel message handler', function() {
       };
     });
 
-    require('../../../../../backend/lib/message/handlers/first')(dependencies)(data);
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
     expect(getSpy).to.have.been.calledWith(channelId);
     expect(countSpy).to.have.been.calledWith(channelId);
     expect(globalPublish).to.not.have.been.called;
@@ -137,12 +161,17 @@ describe('The first channel message handler', function() {
     var countSpy = sinon.spy();
     var getSpy = sinon.spy();
 
-    mockery.registerMock('../../conversation', function() {
+    mockery.registerMock('../../../message', function() {
       return {
-        countMessages: function(channel, callback) {
+        count: function(channel, callback) {
           countSpy(channel);
           callback(null, 1);
-        },
+        }
+      };
+    });
+
+    mockery.registerMock('../../../conversation', function() {
+      return {
         getConversation: function(channel, callback) {
           getSpy(channel);
           callback(null, {members: [{_id: creator._id}]});
@@ -150,7 +179,7 @@ describe('The first channel message handler', function() {
       };
     });
 
-    require('../../../../../backend/lib/message/handlers/first')(dependencies)(data);
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
     expect(getSpy).to.have.been.calledWith(channelId);
     expect(countSpy).to.have.been.calledWith(channelId);
     expect(globalPublish).to.not.have.been.called;
@@ -166,12 +195,17 @@ describe('The first channel message handler', function() {
       }
     };
 
-    mockery.registerMock('../../conversation', function() {
+    mockery.registerMock('../../../message', function() {
       return {
-        countMessages: function(channel, callback) {
+        count: function(channel, callback) {
           countSpy(channel);
           callback(null, 1);
-        },
+        }
+      };
+    });
+
+    mockery.registerMock('../../../conversation', function() {
+      return {
         getConversation: function(channel, callback) {
           getSpy(channel);
           callback(null, {
@@ -184,7 +218,7 @@ describe('The first channel message handler', function() {
       };
     });
 
-    require('../../../../../backend/lib/message/handlers/first')(dependencies)(data);
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
     expect(getSpy).to.have.been.calledWith(channelId);
     expect(countSpy).to.have.been.calledWith(channelId);
     expect(globalPublish).to.have.been.calledTwice;

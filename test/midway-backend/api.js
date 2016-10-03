@@ -132,7 +132,7 @@ describe('The chat API', function() {
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
-        return Q.denodeify(app.lib.conversation.createMessage)({
+        return Q.denodeify(app.lib.message.create)({
           channel: channelId,
           text: 'hello world',
           type: 'text',
@@ -140,7 +140,7 @@ describe('The chat API', function() {
           creator: userId
         });
       }).then(function() {
-        return Q.denodeify(app.lib.conversation.createMessage)({
+        return Q.denodeify(app.lib.message.create)({
           channel: channelId,
           text: 'hello world',
           type: 'text',
@@ -177,7 +177,7 @@ describe('The chat API', function() {
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
-        return Q.denodeify(app.lib.conversation.createMessage)({
+        return Q.denodeify(app.lib.message.create)({
           channel: channelId,
           text: 'hello world',
           type: 'text',

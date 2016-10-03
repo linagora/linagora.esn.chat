@@ -1,17 +1,18 @@
 'use strict';
 
-const CONSTANTS = require('../../constants');
+const CONSTANTS = require('../../../constants');
 
 module.exports = function(dependencies) {
 
   let pubsub = dependencies('pubsub').global;
   let logger = dependencies('logger');
-  let conversationLib = require('../../conversation')(dependencies);
+  let conversationLib = require('../../../conversation')(dependencies);
+  let messageLib = require('../../../message')(dependencies);
 
   return function(data) {
     let channel = data.message.channel;
 
-    conversationLib.countMessages(channel, (err, count) => {
+    messageLib.count(channel, (err, count) => {
       if (err) {
         return logger.error('Can not count messages in channel %s', channel, err);
       }

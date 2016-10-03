@@ -4,9 +4,9 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var mockery = require('mockery');
 var _ = require('lodash');
-var CONSTANTS = require('../../../../backend/lib/constants');
+var CONSTANTS = require('../../../../../backend/lib/constants');
 
-describe('The linagora.esn.chat lib listener module', function() {
+describe('The linagora.esn.chat lib message listener module', function() {
 
   var deps, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, communityCreatedListener, memberAddedListener, comunityUpdateListener;
 
@@ -96,7 +96,7 @@ describe('The linagora.esn.chat lib listener module', function() {
         }
       };
 
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
+      var module = require('../../../../../backend/lib/listener/message')(dependencies);
 
       module.start(channel);
 
@@ -133,20 +133,23 @@ describe('The linagora.esn.chat lib listener module', function() {
       var createMessageResult = 'createMessageResult';
 
       var conversationMock = {
-        createMessage: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-        }),
         getConversation: sinon.spy(function(id, callback) {
           return callback(null, {members: [{_id: creator}]});
         })
       };
 
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
+      var messageMock = {
+        create: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        })
+      };
 
-      module.start(conversationMock);
+      var module = require('../../../../../backend/lib/listener/message')(dependencies);
+
+      module.start({conversation: conversationMock, message: messageMock});
 
       globalPublish = function(data) {
-        expect(conversationMock.createMessage).to.have.been.calledWith({
+        expect(messageMock.create).to.have.been.calledWith({
           type: type,
           text: text,
           date: date,
@@ -197,9 +200,14 @@ describe('The linagora.esn.chat lib listener module', function() {
           done();
         })
       };
+      var messageMock = {
+        create: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        })
+      };
 
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
-      module.start(conversationMock);
+      var module = require('../../../../../backend/lib/listener/message')(dependencies);
+      module.start({conversation: conversationMock, message: messageMock});
 
       globalPublish = sinon.spy();
       messageReceivedListener(data);
@@ -225,22 +233,24 @@ describe('The linagora.esn.chat lib listener module', function() {
       };
 
       var createMessageResult = 'createMessageResult';
+      var messageMock = {
+        create: sinon.spy(function(_m, callback) {
+          callback(null, createMessageResult);
+        })
+      };
 
       var conversationMock = {
-        createMessage: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-        }),
         getConversation: sinon.spy(function(id, callback) {
           expect(id).to.be.equal(conversation);
           callback(null, {members: [{_id: 'id'}], type: 'channel'});
           expect(globalPublish).to.have.been.called;
-          expect(conversationMock.createMessage).to.have.been.called;
+          expect(messageMock.create).to.have.been.called;
           done();
         })
       };
 
-      var module = require('../../../../backend/lib/message/listener')(dependencies);
-      module.start(conversationMock);
+      var module = require('../../../../../backend/lib/listener/message')(dependencies);
+      module.start({conversation: conversationMock, message: messageMock});
 
       globalPublish = sinon.spy();
       messageReceivedListener(data);
@@ -252,7 +262,7 @@ describe('The linagora.esn.chat lib listener module', function() {
     var module;
 
     beforeEach(function() {
-      module = require('../../../../backend/lib/message/listener')(dependencies);
+      module = require('../../../../../backend/lib/listener/message')(dependencies);
     });
 
     it('should call all the handlers', function() {

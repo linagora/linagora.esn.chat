@@ -3,7 +3,7 @@
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var _ = require('lodash');
-var CONSTANTS = require('../../../../../backend/lib/constants');
+var CONSTANTS = require('../../../../../../backend/lib/constants');
 
 describe('The chat mentions handler', function() {
 
@@ -46,7 +46,7 @@ describe('The chat mentions handler', function() {
   it('should broadcast users_mention', function() {
     var message = {user_mentions: ['user']};
     var room = 1;
-    require('../../../../../backend/lib/message/handlers/mentions')(dependencies)({room: room, message: message});
+    require('../../../../../../backend/lib/listener/message/handlers/mentions')(dependencies)({room: room, message: message});
     expect(globalPublish).to.have.been.calledWith({room: room, message: message, for: 'user'});
     expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.USERS_MENTION);
   });

@@ -14,32 +14,11 @@ describe('The message controller', function() {
     result = undefined;
 
     lib = {
-      conversation: {
+      message: {
         getMessage: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
-        getCommunityConversationByCommunityId: sinon.spy(function(id, callback) {
-          return callback(err, result);
-        }),
         getMessages: sinon.spy(function(channel, options, callback) {
-          return callback(err, result);
-        }),
-        getChannels: sinon.spy(function(options, callback) {
-          return callback(err, result);
-        }),
-        createConversation: sinon.spy(function(options, callback) {
-          return callback(err, result);
-        }),
-        findConversation: sinon.spy(function(options, callback) {
-          return callback(err, result);
-        }),
-        removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
-          return callback(err, result);
-        }),
-        addMemberToConversation: sinon.spy(function(channelId, userId, callback) {
-          return callback(err, result);
-        }),
-        updateTopic: sinon.spy(function(channelId, topic, callback) {
           return callback(err, result);
         })
       }
@@ -85,7 +64,7 @@ describe('The message controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
+              expect(lib.message.getMessages).to.have.been.calledWith(channelId);
               done();
             }
           };
@@ -108,7 +87,7 @@ describe('The message controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
-              expect(lib.conversation.getMessages).to.have.been.calledWith(channelId);
+              expect(lib.message.getMessages).to.have.been.calledWith(channelId);
               done();
             }
           };
@@ -153,7 +132,7 @@ describe('The message controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.conversation.getMessage).to.have.been.calledWith(messageId);
+              expect(lib.message.getMessage).to.have.been.calledWith(messageId);
               done();
             }
           };
@@ -175,7 +154,7 @@ describe('The message controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual(msg1.dest);
-              expect(lib.conversation.getMessage).to.have.been.calledWith(messageId);
+              expect(lib.message.getMessage).to.have.been.calledWith(messageId);
               done();
             }
           };

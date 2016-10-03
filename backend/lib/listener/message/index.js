@@ -1,6 +1,6 @@
 'use strict';
 
-const CONSTANTS = require('../constants');
+const CONSTANTS = require('../../constants');
 let _ = require('lodash');
 
 module.exports = function(dependencies) {
@@ -27,12 +27,12 @@ module.exports = function(dependencies) {
     });
   }
 
-  function start(conversationLib) {
+  function start(lib) {
     addHandler(require('./handlers/first')(dependencies));
     addHandler(require('./handlers/mentions')(dependencies));
 
     function saveAsChatMessage(data, callback) {
-      conversationLib.getConversation(data.message.channel._id || data.message.channel, (err, conversation) => {
+      lib.conversation.getConversation(data.message.channel._id || data.message.channel, (err, conversation) => {
         if (err) {
           return callback(err);
         }
@@ -55,7 +55,7 @@ module.exports = function(dependencies) {
           chatMessage.attachments = data.message.attachments;
         }
 
-        conversationLib.createMessage(chatMessage, callback);
+        lib.message.create(chatMessage, callback);
       });
     }
 

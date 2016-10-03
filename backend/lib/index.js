@@ -11,13 +11,14 @@ module.exports = function(dependencies) {
 
   const utils = require('./utils')(dependencies);
   const message = require('./message')(dependencies);
-  const conversation = require('./conversation')(dependencies, {utils});
+  const conversation = require('./conversation')(dependencies);
   const community = require('./community')(dependencies, {utils, conversation});
   const userState = require('./userState')(dependencies);
   const moderate = require('./moderate')(dependencies);
+  const listener = require('./listener')(dependencies);
 
   function start(callback) {
-    message.listener.start(conversation);
+    listener.start({conversation, message});
     userState.init();
     moderate.start();
     callback();
@@ -25,6 +26,7 @@ module.exports = function(dependencies) {
 
   return {
     start,
+    listener: listener,
     constants,
     conversation,
     community,

@@ -3,7 +3,7 @@
 module.exports = function(dependencies, lib) {
 
   function getMessages(req, res) {
-    lib.conversation.getMessages(req.params.channel, {}, (err, results) => {
+    lib.message.getMessages(req.params.channel, {}, (err, results) => {
       if (err) {
         return res.status(500).json({
           error: {
@@ -19,7 +19,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function getMessage(req, res) {
-    lib.conversation.getMessage(req.params.id, (err, message) => {
+    lib.message.getMessage(req.params.id, (err, message) => {
       if (err) {
         return res.status(500).json({
           error: {

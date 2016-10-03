@@ -11,7 +11,7 @@ var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 var _ = require('lodash');
 
-describe('The linagora.esn.chat conversation lib', function() {
+describe('The linagora.esn.chat community lib', function() {
 
   var deps, lib, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
