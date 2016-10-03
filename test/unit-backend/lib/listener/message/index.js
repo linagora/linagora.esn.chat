@@ -133,7 +133,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
       var createMessageResult = 'createMessageResult';
 
       var conversationMock = {
-        getConversation: sinon.spy(function(id, callback) {
+        getById: sinon.spy(function(id, callback) {
           return callback(null, {members: [{_id: creator}]});
         })
       };
@@ -160,7 +160,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
 
         expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
         expect(data).to.be.deep.equals({room: data.room, message: createMessageResult});
-        expect(conversationMock.getConversation).to.have.been.calledWith(conversation);
+        expect(conversationMock.getById).to.have.been.calledWith(conversation);
         done();
       };
 
@@ -192,7 +192,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
         createMessage: sinon.spy(function(_m, callback) {
           callback(null, createMessageResult);
         }),
-        getConversation: sinon.spy(function(id, callback) {
+        getById: sinon.spy(function(id, callback) {
           expect(id).to.be.equal(conversation);
           callback(null, {members: [{_id: 'id'}]});
           expect(globalPublish).to.not.have.been.called;
@@ -240,7 +240,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
       };
 
       var conversationMock = {
-        getConversation: sinon.spy(function(id, callback) {
+        getById: sinon.spy(function(id, callback) {
           expect(id).to.be.equal(conversation);
           callback(null, {members: [{_id: 'id'}], type: 'channel'});
           expect(globalPublish).to.have.been.called;

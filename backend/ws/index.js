@@ -38,7 +38,7 @@ function init(dependencies, lib) {
   }
 
   function sendMessage(room, message) {
-    lib.conversation.getConversation(message.channel, (err, channel) => {
+    lib.conversation.getById(message.channel, (err, channel) => {
       if (err) {
         return logger.warn('Message sended to inexisting channel', message);
       }

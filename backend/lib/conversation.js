@@ -26,11 +26,25 @@ module.exports = function(dependencies) {
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
   const messageLib = require('./message')(dependencies);
 
+  return {
+    addMember,
+    create,
+    find,
+    getById,
+    getChannels,
+    list,
+    moderate,
+    remove,
+    removeMember,
+    update,
+    updateTopic
+  };
+
   function getChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
       channels = channels || [];
       if (channels.length === 0) {
-        return createConversation(CONSTANTS.DEFAULT_CHANNEL, (err, channel) => {
+        return create(CONSTANTS.DEFAULT_CHANNEL, (err, channel) => {
           if (err) {
             return callback(new Error('Can not create the default channel'));
           }
@@ -41,11 +55,11 @@ module.exports = function(dependencies) {
     });
   }
 
-  function getConversation(channel, callback) {
+  function getById(channel, callback) {
     Conversation.findById(channel).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function deleteConversation(userId, channel, callback) {
+  function remove(userId, channel, callback) {
     Conversation.findOneAndRemove({_id: channel, members: userId}, (err, deleteResult) => {
       if (err) {
         return callback(err);
@@ -68,7 +82,7 @@ module.exports = function(dependencies) {
    * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
    * @return {[Conversation]}
    */
-  function findConversation(options, callback) {
+  function find(options, callback) {
     let type = options.type;
     let ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
     let exactMembersMatch = options.exactMembersMatch;
@@ -123,7 +137,7 @@ module.exports = function(dependencies) {
     Conversation.find(request).populate('members', SKIP_FIELDS.USER).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
   }
 
-  function listConversation(options, callback) {
+  function list(options, callback) {
     let query;
     let sort = 'timestamps.creation';
 
@@ -161,7 +175,7 @@ module.exports = function(dependencies) {
     });
   }
 
-  function createConversation(options, callback) {
+  function create(options, callback) {
     async.waterfall([
         function(callback) {
           let conversation = new Conversation(options);
@@ -185,7 +199,7 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
-  function addMemberToConversation(conversationId, userId, callback) {
+  function addMember(conversationId, userId, callback) {
     let userObjectId = ensureObjectId(userId);
 
     Conversation.findByIdAndUpdate(conversationId, {
@@ -200,7 +214,7 @@ module.exports = function(dependencies) {
     });
   }
 
-  function updateConversation(conversationId, modifications, callback) {
+  function update(conversationId, modifications, callback) {
 
     let mongoModifications = {};
     let nextMongoModification = null;
@@ -270,7 +284,7 @@ module.exports = function(dependencies) {
     });
   }
 
-  function moderateConversation(conversationId, moderate, callback) {
+  function moderate(conversationId, moderate, callback) {
     Conversation.findByIdAndUpdate(conversationId, {
       $set: {moderate: moderate}
     }, {
@@ -278,7 +292,7 @@ module.exports = function(dependencies) {
     }, callback);
   }
 
-  function removeMemberFromConversation(conversationId, userId, callback) {
+  function removeMember(conversationId, userId, callback) {
     let unsetOperation = {};
 
     unsetOperation['numOfReadedMessage.' + userId] = '';
@@ -324,19 +338,4 @@ module.exports = function(dependencies) {
       callback(err, conversation);
     });
   }
-
-
-  return {
-    addMemberToConversation,
-    updateConversation,
-    moderateConversation,
-    removeMemberFromConversation,
-    findConversation,
-    createConversation,
-    getConversation,
-    getChannels,
-    deleteConversation,
-    updateTopic,
-    listConversation,
-  };
 };

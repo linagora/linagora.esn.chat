@@ -65,7 +65,7 @@ describe('The first channel message handler', function() {
 
     mockery.registerMock('../../../conversation', function() {
       return {
-        getConversation: getSpy
+        getById: getSpy
       };
     });
 
@@ -90,7 +90,7 @@ describe('The first channel message handler', function() {
 
     mockery.registerMock('../../../conversation', function() {
       return {
-        getConversation: getSpy
+        getById: getSpy
       };
     });
 
@@ -119,7 +119,7 @@ describe('The first channel message handler', function() {
           countSpy(channel);
           callback(null, 2);
         },
-        getConversation: getSpy
+        getById: getSpy
       };
     });
 
@@ -144,7 +144,7 @@ describe('The first channel message handler', function() {
 
     mockery.registerMock('../../../conversation', function() {
       return {
-        getConversation: function(channel, callback) {
+        getById: function(channel, callback) {
           getSpy(channel);
           callback(new Error('Get conversation failure'));
         }
@@ -172,7 +172,7 @@ describe('The first channel message handler', function() {
 
     mockery.registerMock('../../../conversation', function() {
       return {
-        getConversation: function(channel, callback) {
+        getById: function(channel, callback) {
           getSpy(channel);
           callback(null, {members: [{_id: creator._id}]});
         }
@@ -206,7 +206,7 @@ describe('The first channel message handler', function() {
 
     mockery.registerMock('../../../conversation', function() {
       return {
-        getConversation: function(channel, callback) {
+        getById: function(channel, callback) {
           getSpy(channel);
           callback(null, {
             members: [{_id: creator._id}, {_id: 1}, {_id: 2}],

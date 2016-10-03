@@ -32,7 +32,7 @@ module.exports = function(dependencies) {
     addHandler(require('./handlers/mentions')(dependencies));
 
     function saveAsChatMessage(data, callback) {
-      lib.conversation.getConversation(data.message.channel._id || data.message.channel, (err, conversation) => {
+      lib.conversation.getById(data.message.channel._id || data.message.channel, (err, conversation) => {
         if (err) {
           return callback(err);
         }

@@ -89,12 +89,12 @@ describe('The chat API', function() {
           });
       }
 
-      app.lib.conversation.createConversation({
+      app.lib.conversation.create({
         type: CONVERSATION_TYPE.CHANNEL,
         moderate: true
       }, function(err, conversation) {
         err && done(err);
-        app.lib.conversation.createConversation({
+        app.lib.conversation.create({
           type: CONVERSATION_TYPE.CHANNEL
         }, execTest);
       });
@@ -104,7 +104,7 @@ describe('The chat API', function() {
 
   describe('GET /api/conversations/:id', function() {
     it('should return the given conversation', function(done) {
-      app.lib.conversation.createConversation({
+      app.lib.conversation.create({
         type: CONVERSATION_TYPE.CHANNEL
       }, function(err, channel) {
         err && done(err);
@@ -128,7 +128,7 @@ describe('The chat API', function() {
     it('should return an array of messages that are not moderated from a conversation', function(done) {
       var channelId;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
@@ -173,7 +173,7 @@ describe('The chat API', function() {
     it('should return the message', function(done) {
       var channelId;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
@@ -256,7 +256,7 @@ describe('The chat API', function() {
     it('should not create a new conversation if the conversation has no name and an other with the same participant exist', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members
       }).then(function(mongoResponse) {
@@ -288,7 +288,7 @@ describe('The chat API', function() {
     it('should not create a new conversation if the conversation has no name and an other with the same participant exist and has null for name', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members,
         name: null
@@ -321,7 +321,7 @@ describe('The chat API', function() {
     it('should not create a new conversation if the conversation has a name and an other with the same participant exist and has the same name', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members,
         name: 'name'
@@ -355,7 +355,7 @@ describe('The chat API', function() {
     it('should create a new conversation if the conversation has a name and an other with the same participant exist but has a different name', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members,
         name: 'name'
@@ -387,7 +387,7 @@ describe('The chat API', function() {
     it('should create a new conversation if the conversation has no name and an other with the same participant exist but has a name', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members,
         name: 'name'
@@ -418,7 +418,7 @@ describe('The chat API', function() {
     it('should create a new conversation if the conversation has a name and an other with the same participant exist but has no name', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members,
         name: null
@@ -450,7 +450,7 @@ describe('The chat API', function() {
     it('should not create the conversation if the conversation has a name and an other with the same participant exist and has the same name', function(done) {
       var members = [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: members,
         name: 'name'
@@ -487,7 +487,7 @@ describe('The chat API', function() {
       var channelId;
       var numOfMessage = 42;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         numOfMessage: numOfMessage
       }).then(function(mongoResponse) {
@@ -499,7 +499,7 @@ describe('The chat API', function() {
             .end(callback);
         })();
       }).then(function(res) {
-        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
         var wanted = {};
         wanted[String(userId)] = numOfMessage;
@@ -513,7 +513,7 @@ describe('The chat API', function() {
     it('should add the user in members of the conversation', function(done) {
       var channelId;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
@@ -524,7 +524,7 @@ describe('The chat API', function() {
             .end(callback);
         })();
       }).then(function(res) {
-        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
         expect(channel.members).to.shallowDeepEqual({
           0: {_id: String(userId)},
@@ -540,7 +540,7 @@ describe('The chat API', function() {
     it('it should delete the user in members of the conversation', function(done) {
       var channelId;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         members: [userId]
       }).then(function(mongoResponse) {
@@ -552,7 +552,7 @@ describe('The chat API', function() {
             .end(callback);
         })();
       }).then(function(res) {
-        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
         expect(channel.members.length).to.deep.equal(0);
         done();
@@ -567,12 +567,12 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
       var channel;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         moderate: true,
         members: [userId, otherMember1, otherMember2]
       }).then(function() {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COMMUNITY,
           members: [userId, otherMember1, otherMember2]
         });
@@ -594,7 +594,7 @@ describe('The chat API', function() {
 
     it('should return community conversations with the given id is provided', function(done) {
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [userId],
         community: new mongoose.Types.ObjectId()
@@ -627,7 +627,7 @@ describe('The chat API', function() {
 
     it('should return 404 if user try to obtain a community where he is not present', function(done) {
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: []
       }).then(function(mongoResponse) {
@@ -648,7 +648,7 @@ describe('The chat API', function() {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
@@ -669,7 +669,7 @@ describe('The chat API', function() {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
@@ -683,7 +683,7 @@ describe('The chat API', function() {
       var otherMember = new mongoose.Types.ObjectId();
 
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [otherMember]
       }).then(function(mongoResponse) {
@@ -708,12 +708,12 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         moderate: true,
         members: [userId, otherMember1, otherMember2]
       }).then(function() {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2]
         });
@@ -736,7 +736,7 @@ describe('The chat API', function() {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
@@ -757,7 +757,7 @@ describe('The chat API', function() {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
@@ -771,7 +771,7 @@ describe('The chat API', function() {
       var otherMember = new mongoose.Types.ObjectId();
 
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: [otherMember]
       }).then(function(mongoResponse) {
@@ -796,17 +796,17 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.PRIVATE,
         members: [otherMember1, otherMember2]
       }).then(function(mongoResponse) {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           moderate: true,
           members: [userId, otherMember2]
         });
       }).then(function(mongoResponse) {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2]
         });
@@ -832,27 +832,27 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel1, channel2;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [userId, otherMember1, otherMember2],
         timestamps: {creation: new Date(2e6)}
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           moderate: true,
           members: [userId, otherMember2],
           timestamps: {creation: new Date(1e6)}
         });
       }).then(function(mongoResponse) {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2],
           timestamps: {creation: new Date(1e6)}
         });
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [otherMember1, otherMember2],
           timestamps: {creation: new Date(0)}
@@ -872,7 +872,7 @@ describe('The chat API', function() {
     });
 
     it('should return channel even if I am not a member of them yet', function(done) {
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         members: []
       }).then(function(mongoResponse) {
@@ -894,13 +894,13 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel1, channel2;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [userId, otherMember1, otherMember2],
         last_message: {date: new Date(1469605336000)}
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2],
           last_message: {date: new Date(1469605337000)}
@@ -925,18 +925,18 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel1, channel2;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2]
         });
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [otherMember1, otherMember2]
         });
@@ -959,20 +959,20 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel1, channel2;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         members: [userId, otherMember1, otherMember2],
         timestamps: {creation: new Date(1e6)}
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.PRIVATE,
           members: [userId, otherMember1, otherMember2],
           timestamps: {creation: new Date(2e6)}
         });
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COMMUNITY,
           members: [userId, otherMember1, otherMember2],
           timestamps: {creation: new Date(3e6)}
@@ -998,19 +998,19 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel;
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COMMUNITY,
         members: [otherMember1, otherMember2]
       })
       .then(function(mongoResponse) {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COMMUNITY,
           moderate: true,
           members: [userId, otherMember1, otherMember2]
         });
       })
       .then(function(mongoResponse) {
-        return Q.denodeify(app.lib.conversation.createConversation)({
+        return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COMMUNITY,
           members: [userId, otherMember1, otherMember2]
         });
@@ -1035,7 +1035,7 @@ describe('The chat API', function() {
     it('should return 404 and not delete the conversation for a conversation where the user is not in', function(done) {
       var channelId;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         members: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
       }).then(function(mongoResponse) {
@@ -1047,7 +1047,7 @@ describe('The chat API', function() {
             .end(callback);
         })();
       }).then(function(res) {
-        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
         expect(channel).to.not.be.null;
         done();
@@ -1057,7 +1057,7 @@ describe('The chat API', function() {
     it('should delete a conversation', function(done) {
       var channelId;
 
-      Q.denodeify(app.lib.conversation.createConversation)({
+      Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         members: [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
       }).then(function(mongoResponse) {
@@ -1069,7 +1069,7 @@ describe('The chat API', function() {
             .end(callback);
         })();
       }).then(function(res) {
-        return Q.denodeify(app.lib.conversation.getConversation)(channelId);
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
         expect(channel).to.be.null;
         done();

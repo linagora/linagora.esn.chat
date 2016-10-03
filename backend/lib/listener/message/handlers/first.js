@@ -18,7 +18,7 @@ module.exports = function(dependencies) {
       }
 
       if (count === 1) {
-        conversationLib.getConversation(channel, (err, conversation) => {
+        conversationLib.getById(channel, (err, conversation) => {
           if (err) {
             return logger.error('Can not get channel %s', channel, err);
           }
