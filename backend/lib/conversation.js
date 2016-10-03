@@ -1,29 +1,29 @@
 'use strict';
 
-let async = require('async');
-let _ = require('lodash');
-let CONSTANTS = require('../lib/constants');
-let CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-let CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-let CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-let MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-let TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-let CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-let SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
+const async = require('async');
+const _ = require('lodash');
+const CONSTANTS = require('../lib/constants');
+const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+const CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
+const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
 
-  let logger = dependencies('logger');
-  let mongoose = dependencies('db').mongo.mongoose;
-  let ObjectId = mongoose.Types.ObjectId;
-  let Conversation = mongoose.model('ChatConversation');
-  let ChatMessage = mongoose.model('ChatMessage');
-  let pubsubGlobal = dependencies('pubsub').global;
-  let channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
-  let channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
-  let channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
-  let channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
-  let channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  const logger = dependencies('logger');
+  const mongoose = dependencies('db').mongo.mongoose;
+  const ObjectId = mongoose.Types.ObjectId;
+  const Conversation = mongoose.model('ChatConversation');
+  const ChatMessage = mongoose.model('ChatMessage');
+  const pubsubGlobal = dependencies('pubsub').global;
+  const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  const channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
+  const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
+  const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
+  const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
 
   function getChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
@@ -353,7 +353,7 @@ module.exports = function(dependencies) {
     });
   }
 
-  function updateConversation(communityId, modifications, callback) {
+  function updateConversation(conversationId, modifications, callback) {
 
     let mongoModifications = {};
     let nextMongoModification = null;
@@ -414,9 +414,9 @@ module.exports = function(dependencies) {
       delete mongoModifications.$set;
     }
 
-    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, (err, conversation) => {
+    Conversation.findOneAndUpdate({_id: conversationId}, mongoModifications, (err, conversation) => {
       if (nextMongoModification) {
-        Conversation.findOneAndUpdate({_id: communityId}, nextMongoModification, done.bind(null, callback));
+        Conversation.findOneAndUpdate({_id: conversationId}, nextMongoModification, done.bind(null, callback));
       } else {
         done(callback, err, conversation);
       }
