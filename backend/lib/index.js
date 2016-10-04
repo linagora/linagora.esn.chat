@@ -13,7 +13,7 @@ module.exports = function(dependencies) {
   const message = require('./message')(dependencies);
   const conversation = require('./conversation')(dependencies);
   const community = require('./community')(dependencies);
-  const userState = require('./userState')(dependencies);
+  const userState = require('./user-state')(dependencies);
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies);
 

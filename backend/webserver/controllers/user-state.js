@@ -4,6 +4,11 @@
 
 module.exports = function(dependencies, lib) {
 
+  return {
+    getUserState,
+    setMyState
+  };
+
   function getUserState(req, res) {
     lib.userState.get(req.params.id).then(state => {
       res.status(200).json({state});
@@ -41,9 +46,4 @@ module.exports = function(dependencies, lib) {
       });
     });
   }
-
-  return {
-    setMyState,
-    getUserState
-  };
 };
