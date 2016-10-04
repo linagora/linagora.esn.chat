@@ -1,20 +1,49 @@
 'use strict';
 
+const _ = require('lodash');
 const CONSTANTS = require('../../constants');
-let _ = require('lodash');
 
 module.exports = function(dependencies) {
 
-  let localPubsub = dependencies('pubsub').local;
-  let globalPubsub = dependencies('pubsub').global;
-  let logger = dependencies('logger');
-
-  let mongoose = dependencies('db').mongo.mongoose;
-  let ChatMessage = mongoose.model('ChatMessage');
+  const localPubsub = dependencies('pubsub').local;
+  const globalPubsub = dependencies('pubsub').global;
+  const logger = dependencies('logger');
+  let forwardHandlers = {};
   let messageHandlers = [];
+
+  return {
+    addForwardHandler,
+    addHandler,
+    handleMessage,
+    start
+  };
+
+  function addForwardHandler(type, handler) {
+    forwardHandlers[type] = handler;
+  }
 
   function addHandler(handler) {
     handler && messageHandlers.push(handler);
+  }
+
+  function forwardMessage(room, message) {
+    let handler = getForwardHandler(message.type);
+
+    if (!handler) {
+      return logger.error('Can not find a valid forward handler for message of type %s', message.type);
+    }
+
+    handler(message, (err, message) => {
+      if (err) {
+        return logger.error('Can not forward message', err);
+      }
+
+      publish({room, message});
+    });
+  }
+
+  function getForwardHandler(type) {
+    return forwardHandlers[type];
   }
 
   function handleMessage(data) {
@@ -27,9 +56,36 @@ module.exports = function(dependencies) {
     });
   }
 
+  function isForwardable(message) {
+    return !!forwardHandlers[message.type];
+  }
+
+  function publish(data) {
+    globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish(data);
+  }
+
   function start(lib) {
     addHandler(require('./handlers/first')(dependencies));
     addHandler(require('./handlers/mentions')(dependencies));
+    addForwardHandler(CONSTANTS.MESSAGE_TYPE.USER_TYPING, require('./forward/user-typing')(dependencies));
+
+    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(onMessageReceived);
+
+    function onMessageReceived(data) {
+      if (isForwardable(data.message)) {
+        return forwardMessage(data.room, data.message);
+      }
+
+      saveAsChatMessage(data, (err, message) => {
+        if (err) {
+          return logger.error('Can not save ChatMessage', err);
+        }
+        logger.debug('Chat Message saved', message);
+        publish({room: data.room, message: message});
+
+        handleMessage({message: message, room: data.room});
+      });
+    }
 
     function saveAsChatMessage(data, callback) {
       lib.conversation.getById(data.message.channel._id || data.message.channel, (err, conversation) => {
@@ -58,50 +114,5 @@ module.exports = function(dependencies) {
         lib.message.create(chatMessage, callback);
       });
     }
-
-    function populateTypingMessage(data, callback) {
-      (new ChatMessage(data)).populate('creator', CONSTANTS.SKIP_FIELDS.USER, (err, message) => {
-        if (err) {
-          callback(err);
-
-          return;
-        }
-        let result = message.toJSON();
-
-        result.state = data.state;
-        callback(null, result);
-      });
-    }
-
-    localPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).subscribe(data => {
-      if (data.message.type === 'user_typing') {
-        populateTypingMessage(data.message, function(err, message) {
-          if (err) {
-            logger.error('Can not populate user typing message', err);
-
-            return;
-          }
-          globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
-        });
-      } else {
-        saveAsChatMessage(data, (err, message) => {
-          if (err) {
-            logger.error('Can not save ChatMessage', err);
-
-            return;
-          }
-          logger.debug('Chat Message saved', message);
-          globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish({room: data.room, message: message});
-
-          handleMessage({message: message, room: data.room});
-        });
-      }
-    });
   }
-
-  return {
-    start,
-    addHandler,
-    handleMessage
-  };
 };

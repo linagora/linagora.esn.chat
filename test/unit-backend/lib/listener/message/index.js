@@ -79,13 +79,16 @@ describe('The linagora.esn.chat lib message listener module', function() {
       mockery.registerMock('./handlers/mentions', function() {
         return function() {};
       });
+      mockery.registerMock('./forward/user-typing', function() {
+        return function() {};
+      });
     });
 
-    it('should not save, populate and keep state when message.type is user_typing', function(done) {
+    it('should not save when message is forwardable', function(done) {
+      var type = 'forwardable_type';
       var data = {
         message: {
-          state: 'state',
-          type: 'user_typing'
+          type: type
         },
         room: 'room'
       };
@@ -96,22 +99,19 @@ describe('The linagora.esn.chat lib message listener module', function() {
         }
       };
 
-      var module = require('../../../../../backend/lib/listener/message')(dependencies);
-
-      module.start(channel);
-
-      ChatMessageMock.populate = function(field, excluded_field, callback) {
-        expect(field).to.equals('creator');
-        expect(excluded_field).to.be.equal(CONSTANTS.SKIP_FIELDS.USER);
-        expect(ChatMessageMock).to.have.been.calledWith(data.message);
-        callback(null, {toJSON: _.constant({})});
-        expect(globalPublish).to.have.been.calledWith({room: data.room, message: {state: data.message.state}});
+      var handler = function(message) {
+        expect(message).to.deep.equals(data.message);
         done();
       };
+
+      var module = require('../../../../../backend/lib/listener/message')(dependencies);
+
+      module.addForwardHandler(type, handler);
+      module.start(channel);
       messageReceivedListener(data);
     });
 
-    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is from someone in the channel', function(done) {
+    it('should save the message and broadcast to globalpubsub the saved message and if the message is from someone in the channel', function(done) {
       var type = 'text';
       var text = 'yolo';
       var date = '0405';
@@ -167,7 +167,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
       messageReceivedListener(data);
     });
 
-    it('should not save the message when message.type is not user_typing and broadcast to globalpubsub the saved message and if the message is not from someone in the conversation', function(done) {
+    it('should not save the message and broadcast to globalpubsub the saved message and if the message is not from someone in the conversation', function(done) {
       var type = 'text';
       var text = 'yolo';
       var date = '0405';
@@ -213,7 +213,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
       messageReceivedListener(data);
     });
 
-    it('should save the message when message.type is not user_typing and broadcast to globalpubsub the saved message if the conversation is a channel even if the message is not from someone in the channel', function(done) {
+    it('should save the message and broadcast to globalpubsub the saved message if the conversation is a channel even if the message is not from someone in the channel', function(done) {
       var type = 'text';
       var text = 'yolo';
       var date = '0405';
