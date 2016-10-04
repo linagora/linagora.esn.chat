@@ -14,37 +14,12 @@ let initialized = false;
 let chatNamespace;
 
 function init(dependencies, lib) {
-  let logger = dependencies('logger');
-  let io = dependencies('wsserver').io;
-  let helper = dependencies('wsserver').ioHelper;
-  let pubsub = dependencies('pubsub');
-  let localPubsub = pubsub.local;
-  let globalPubsub = pubsub.global;
-
-  function sendDataToUsers(users, type, data) {
-    users.forEach(user => {
-      let sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
-
-      sockets.forEach(socket => socket.emit(type, data));
-    });
-  }
-
-  function sendDataToConversation(conversation, type, data) {
-    if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COMMUNITY) {
-      sendDataToUsers(conversation.members, type, data);
-    } else {
-      chatNamespace.emit(type, data);
-    }
-  }
-
-  function sendMessage(room, message) {
-    lib.conversation.getById(message.channel, (err, channel) => {
-      if (err) {
-        return logger.warn('Message sended to inexisting channel', message);
-      }
-      sendDataToConversation(channel, 'message', {room, data: message});
-    });
-  }
+  const logger = dependencies('logger');
+  const io = dependencies('wsserver').io;
+  const helper = dependencies('wsserver').ioHelper;
+  const pubsub = dependencies('pubsub');
+  const localPubsub = pubsub.local;
+  const globalPubsub = pubsub.global;
 
   if (initialized) {
     return logger.warn('The chat notification service is already initialized');
@@ -52,7 +27,7 @@ function init(dependencies, lib) {
 
   chatNamespace = io.of(NAMESPACE);
   chatNamespace.on('connection', socket => {
-    let userId = helper.getUserId(socket);
+    const userId = helper.getUserId(socket);
 
     logger.info('New connection on %s by user %s', NAMESPACE, userId);
 
@@ -65,11 +40,11 @@ function init(dependencies, lib) {
         socket.leave(room);
       });
 
-      socket.on('message', data => {
-        data.date = Date.now();
-        data.room = room;
-        data.creator = helper.getUserId(socket);
-        localPubsub.topic(MESSAGE_RECEIVED).publish({room, message: data});
+      socket.on('message', message => {
+        message.date = Date.now();
+        message.room = room;
+        message.creator = helper.getUserId(socket);
+        localPubsub.topic(MESSAGE_RECEIVED).publish({room, message});
       });
     });
 
@@ -90,6 +65,36 @@ function init(dependencies, lib) {
       sendDataToUsers(data.deleteMembers, CHANNEL_DELETION, conversation);
     }
   });
+
+  function sendDataToUsers(users, type, data) {
+    users.forEach(user => {
+      let sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
+
+      sockets.forEach(socket => socket.emit(type, data));
+    });
+  }
+
+  function sendDataToConversation(conversation, type, data) {
+    if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COMMUNITY) {
+      sendDataToUsers(conversation.members, type, data);
+    } else {
+      chatNamespace.emit(type, data);
+    }
+  }
+
+  function sendMessage(room, message) {
+    lib.conversation.getById(message.channel, (err, channel) => {
+      if (err) {
+        return logger.error('Error while getting channel to send message', err);
+      }
+
+      if (!channel) {
+        return logger.warn('Can not find channel to send message');
+      }
+
+      sendDataToConversation(channel, 'message', {room, data: message});
+    });
+  }
 }
 
 module.exports.init = init;
