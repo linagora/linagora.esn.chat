@@ -1,10 +1,10 @@
 'use strict';
 
-let express = require('express');
+const express = require('express');
 
 module.exports = function(dependencies, lib) {
 
-  let router = express.Router();
+  const router = express.Router();
 
   require('./channel')(dependencies, lib, router);
   require('./community')(dependencies, lib, router);

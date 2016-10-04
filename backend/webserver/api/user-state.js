@@ -2,9 +2,10 @@
 
 module.exports = function(dependencies, lib, router) {
 
-  let authorizationMW = dependencies('authorizationMW');
-  let controller = require('../controllers/user-state')(dependencies, lib);
+  const authorizationMW = dependencies('authorizationMW');
+  const controller = require('../controllers/user-state')(dependencies, lib);
 
   router.get('/state/:id', authorizationMW.requiresAPILogin, controller.getUserState);
-  router.put('/me/state', authorizationMW.requiresAPILogin, controller.setMyState);
+
+  router.put('/user/state', authorizationMW.requiresAPILogin, controller.setMyState);
 };

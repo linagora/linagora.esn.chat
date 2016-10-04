@@ -124,7 +124,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/:channel/messages', function() {
+  describe('GET /api/conversations/:channel/messages', function() {
     it('should return an array of messages that are not moderated from a conversation', function(done) {
       var channelId;
 
@@ -148,7 +148,7 @@ describe('The chat API', function() {
         });
       }).then(function(mongoResult) {
         request(app.express)
-          .get('/api/' + channelId + '/messages')
+          .get('/api/conversations/' + channelId + '/messages')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
@@ -702,7 +702,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/conversations/private', function() {
+  describe('GET /api/conversations', function() {
     it('should return non moderate private conversations with given participants parameters', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
@@ -720,7 +720,7 @@ describe('The chat API', function() {
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/private?members=' + otherMember1.toString() + '&members=' + otherMember2.toString())
+          .get('/api/conversations?type=private&members=' + otherMember1.toString() + '&members=' + otherMember2.toString())
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -741,7 +741,7 @@ describe('The chat API', function() {
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         request(app.express)
-          .get('/api/private?members=' + otherMember1.toString())
+          .get('/api/conversations?type=private&members=' + otherMember1.toString())
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -762,7 +762,7 @@ describe('The chat API', function() {
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         request(app.express)
-          .get('/api/private')
+          .get('/api/conversations?type=private')
           .expect(400, done);
       }).catch(done);
     });
@@ -777,7 +777,7 @@ describe('The chat API', function() {
       }).then(function(mongoResponse) {
         channel = mongoResponse[0];
         request(app.express)
-          .get('/api/private?members=' + otherMember.toString())
+          .get('/api/conversations?type=private&members=' + otherMember.toString())
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -790,7 +790,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/me/private', function() {
+  describe('GET /api/user/conversations/private', function() {
     it('should return all private conversations with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
@@ -813,7 +813,7 @@ describe('The chat API', function() {
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/me/private')
+          .get('/api/user/conversations/private')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -826,7 +826,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/me/conversation', function() {
+  describe('GET /api/user/conversations', function() {
     it('should return all conversation with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
@@ -859,7 +859,7 @@ describe('The chat API', function() {
         });
       }).then(function(mongoResponse) {
         request(app.express)
-          .get('/api/me/conversation')
+          .get('/api/user/conversations')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -877,7 +877,7 @@ describe('The chat API', function() {
         members: []
       }).then(function(mongoResponse) {
         request(app.express)
-          .get('/api/me/conversation')
+          .get('/api/user/conversations')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -908,7 +908,7 @@ describe('The chat API', function() {
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
         request(app.express)
-          .get('/api/me/conversation')
+          .get('/api/user/conversations')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -942,7 +942,7 @@ describe('The chat API', function() {
         });
       }).then(function(mongoResponse) {
         request(app.express)
-          .get('/api/me/conversation?type=private')
+          .get('/api/user/conversations?type=private')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -979,7 +979,7 @@ describe('The chat API', function() {
         });
       }).then(function(mongoResponse) {
         request(app.express)
-          .get('/api/me/conversation?type=private&type=channel')
+          .get('/api/user/conversations?type=private&type=channel')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -992,7 +992,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/me/community', function() {
+  describe('GET /api/user/conversations/community', function() {
     it('should return all community conversations with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
@@ -1018,7 +1018,7 @@ describe('The chat API', function() {
       .then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/me/community')
+          .get('/api/user/conversations/community')
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -1031,7 +1031,7 @@ describe('The chat API', function() {
     });
   });
 
-  describe('DELETE /api/conversation', function() {
+  describe('DELETE /api/conversations/:id', function() {
     it('should return 404 and not delete the conversation for a conversation where the user is not in', function(done) {
       var channelId;
 

@@ -2,14 +2,23 @@
 
 module.exports = function(dependencies, lib) {
 
+  const logger = dependencies('logger');
+
+  return {
+    getById,
+    getForConversation
+  };
+
   function getForConversation(req, res) {
-    lib.message.getForConversation(req.params.channel, {}, (err, results) => {
+    lib.message.getForConversation(req.params.id, {}, (err, results) => {
       if (err) {
+        logger.error('Error while getting messages for conversation %s', req.params.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while getting messages'
+            details: err.message || 'Error while getting messages for conversation'
           }
         });
       }
@@ -21,6 +30,8 @@ module.exports = function(dependencies, lib) {
   function getById(req, res) {
     lib.message.getById(req.params.id, (err, message) => {
       if (err) {
+        logger.error('Error while getting message %s', req.params.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -33,9 +44,4 @@ module.exports = function(dependencies, lib) {
       return res.status(200).json(message);
     });
   }
-
-  return {
-    getById,
-    getForConversation
-  };
 };

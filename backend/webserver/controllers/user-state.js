@@ -4,6 +4,8 @@
 
 module.exports = function(dependencies, lib) {
 
+  const logger = dependencies('logger');
+
   return {
     getUserState,
     setMyState
@@ -13,6 +15,8 @@ module.exports = function(dependencies, lib) {
     lib.userState.get(req.params.id).then(state => {
       res.status(200).json({state});
     }).catch(err => {
+      logger.error('Error while getting user %s state', req.params.id, err);
+
       res.status(500).json({
         error: {
           code: 500,
@@ -37,6 +41,8 @@ module.exports = function(dependencies, lib) {
     lib.userState.set(req.user._id, req.body.state).then(() => {
       res.status(204).end();
     }).catch(err => {
+      logger.error('Error while setting user %s state', req.user._id, err);
+
       res.status(500).json({
         error: {
           code: 500,

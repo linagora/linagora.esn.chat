@@ -203,12 +203,12 @@ describe('The conversation controller', function() {
     });
   });
 
-  describe('The findPrivateByMembers', function() {
+  describe('The list', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -227,7 +227,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
@@ -246,7 +246,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
@@ -268,7 +268,7 @@ describe('The conversation controller', function() {
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
-      controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: '1'}, user: {_id: 'id'}}, {
 
         status: function(code) {
           expect(code).to.equal(200);
@@ -287,7 +287,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
@@ -302,12 +302,12 @@ describe('The conversation controller', function() {
     });
   });
 
-  describe('The findPrivateByMembers', function() {
+  describe('The list', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -326,7 +326,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
@@ -345,7 +345,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
@@ -363,7 +363,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: '1'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
@@ -381,7 +381,7 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 

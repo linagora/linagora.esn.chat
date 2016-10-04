@@ -4,9 +4,17 @@
 
 module.exports = function(dependencies, lib) {
 
+  const logger = dependencies('logger');
+
+  return {
+    getChannels
+  };
+
   function getChannels(req, res) {
     lib.conversation.getChannels({}, (err, result) => {
       if (err) {
+        logger.error('Error while getting conversations', err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -19,8 +27,4 @@ module.exports = function(dependencies, lib) {
       res.status(200).json(result);
     });
   }
-
-  return {
-    getChannels
-  };
 };

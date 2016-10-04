@@ -54,7 +54,7 @@ describe('The message controller', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var channelId = 1;
-      var req = {params: {channel: channelId}};
+      var req = {params: {id: channelId}};
       var controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.getForConversation(req, {
@@ -76,7 +76,7 @@ describe('The message controller', function() {
       var channelId = 1;
       var msg1 = createMessage({text: 'foo'}, 156789);
       var msg2 = createMessage({text: 'bar'}, 2345677);
-      var req = {params: {channel: channelId}};
+      var req = {params: {id: channelId}};
       var controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = [msg1.dest, msg2.dest];

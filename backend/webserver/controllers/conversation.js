@@ -8,16 +8,19 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies, lib) {
 
+  const logger = dependencies('logger');
+
   return {
     getById,
     markAllMessageOfAConversationReaded,
     findMyConversationByType,
     findConversationByTypeAndByMembers,
-    findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
+    //findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyConversations,
     joinConversation,
     leaveConversation,
+    list,
     remove,
     create,
     updateTopic,
@@ -27,6 +30,8 @@ module.exports = function(dependencies, lib) {
   function getById(req, res) {
     lib.conversation.getById(req.params.id, (err, result) => {
       if (err) {
+        logger.error('Error while getting conversation %s', req.params.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -53,6 +58,8 @@ module.exports = function(dependencies, lib) {
 
     lib.conversation.remove(req.user._id, req.params.id, (err, numDeleted) => {
       if (err) {
+        logger.error('Error while deleting conversation %s', req.params.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -101,6 +108,8 @@ module.exports = function(dependencies, lib) {
 
     lib.conversation.find({type: CONSTANTS.PRIVATE, exactMembersMatch: true, name: req.body.name ? req.body.name : null, members: members}, (err, conversations) => {
       if (err) {
+        logger.error('Error while searching conversation', err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -130,6 +139,8 @@ module.exports = function(dependencies, lib) {
         };
 
         lib.conversation.create(conversation, (err, result) => {
+          logger.error('Error while creating conversation', err);
+
           if (err) {
             return res.status(500).json({
               error: {
@@ -149,6 +160,8 @@ module.exports = function(dependencies, lib) {
   function markAllMessageOfAConversationReaded(req, res) {
     lib.message.markAllAsReadById(req.user._id, req.params.id, err => {
       if (err) {
+        logger.error('Error while marking messages as read', err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -165,6 +178,8 @@ module.exports = function(dependencies, lib) {
   function joinConversation(req, res) {
     lib.conversation.addMember(req.params.id, req.user._id, err => {
       if (err) {
+        logger.error('Error while joining conversation %s', req.params.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -180,6 +195,8 @@ module.exports = function(dependencies, lib) {
 
   function leaveConversation(req, res) {
     lib.conversation.removeMember(req.params.id, req.user._id, err => {
+      logger.error('Error while leaving conversation %s', req.params.id, err);
+
       if (err) {
         return res.status(500).json({
           error: {
@@ -213,6 +230,8 @@ module.exports = function(dependencies, lib) {
 
     lib.conversation.find({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, (err, userGroups) => {
       if (err) {
+        logger.error('Error while searching conversations', err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -229,6 +248,8 @@ module.exports = function(dependencies, lib) {
   function findMyConversationByType(type, req, res) {
     lib.conversation.find({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
       if (err) {
+        logger.error('Error while searching conversation by type', err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -245,6 +266,8 @@ module.exports = function(dependencies, lib) {
   function findMyConversations(req, res)  {
     lib.conversation.find({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
       if (err) {
+        logger.error('Error while getting user %s conversations', req.user._id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -267,6 +290,8 @@ module.exports = function(dependencies, lib) {
 
     lib.conversation.updateTopic(req.params.id, topic, (err, conversation) => {
       if (err) {
+        logger.error('Error while updating topic for %s conversation', req.params.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -303,6 +328,8 @@ module.exports = function(dependencies, lib) {
 
     lib.conversation.update(req.body.conversation, req.body.modifications, (err, conversation) => {
       if (err) {
+        logger.error('Error while updating conversation', err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -315,4 +342,19 @@ module.exports = function(dependencies, lib) {
       res.status(200).json(conversation);
     });
   }
+
+  function list(req, res) {
+    if (req.query.type === CONVERSATION_TYPE.PRIVATE) {
+      return findConversationByTypeAndByMembers(CONVERSATION_TYPE.PRIVATE, req, res);
+    }
+
+    res.status(400).json({
+      error: {
+        code: 400,
+        message: 'Bad request',
+        details: 'Can not get conversations with current parameters'
+      }
+    });
+  }
+
 };
