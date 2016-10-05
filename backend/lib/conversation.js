@@ -55,19 +55,19 @@ module.exports = function(dependencies) {
     });
   }
 
-  function getById(channel, callback) {
-    Conversation.findById(channel).populate('members', SKIP_FIELDS.USER).exec(callback);
+  function getById(channelId, callback) {
+    Conversation.findById(channelId).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function remove(userId, channel, callback) {
-    Conversation.findOneAndRemove({_id: channel, members: userId}, (err, deleteResult) => {
+  function remove(userId, channelId, callback) {
+    Conversation.findOneAndRemove({_id: channelId, members: userId}, (err, result) => {
       if (err) {
         return callback(err);
       }
 
-      channelDeletionTopic.publish(deleteResult);
-      ChatMessage.remove({channel: channel}, err => {
-        callback(err, deleteResult);
+      channelDeletionTopic.publish(result);
+      ChatMessage.remove({channel: channelId}, err => {
+        callback(err, result);
       });
     });
   }

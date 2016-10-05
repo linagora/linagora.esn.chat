@@ -25,8 +25,8 @@ module.exports = function(dependencies) {
     parseMention
   };
 
-  function count(conversation, callback) {
-    ChatMessage.count({channel: conversation}, callback);
+  function count(conversationId, callback) {
+    ChatMessage.count({channel: conversationId}, callback);
   }
 
   function create(message, callback) {
