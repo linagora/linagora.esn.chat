@@ -10,11 +10,11 @@ module.exports = function(dependencies, lib) {
   const conversationController = require('./conversation')(dependencies, lib);
 
   return {
-    findCommunity,
-    findMyCommunityConversations: conversationController.findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
+    findCollaboration,
+    findMyCollaborationConversations: conversationController.findMyConversationByType.bind(null, CONVERSATION_TYPE.COLLABORATION),
   };
 
-  function findCommunity(req, res) {
+  function findCollaboration(req, res) {
     if (req.query.members && req.query.id) {
       return res.status(400).json({
         error: {
@@ -26,7 +26,7 @@ module.exports = function(dependencies, lib) {
     }
 
     if (req.query.members) {
-      return conversationController.findConversationByTypeAndByMembers(CONVERSATION_TYPE.COMMUNITY, req, res);
+      return conversationController.findConversationByTypeAndByMembers(CONVERSATION_TYPE.COLLABORATION, req, res);
     }
 
     if (!req.query.id) {
@@ -39,9 +39,9 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.community.getConversationByCommunityId(req.query.id, (err, conversation) => {
+    lib.collaboration.getConversationByCollaboration({id: req.query.id, objectType: req.query.objectType}, (err, conversation) => {
       if (err) {
-        logger.error('Error while getting community %s conversation', req.query.id, err);
+        logger.error('Error while getting collaboration %s conversation', req.query.id, err);
 
         return res.status(500).json({
           error: {
@@ -57,7 +57,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 404,
             message: 'Not Found',
-            details: 'Community conversation not found'
+            details: 'Collaboration conversation not found'
           }
         });
       }
@@ -66,7 +66,7 @@ module.exports = function(dependencies, lib) {
         return res.status(404).json({
           error: {
             code: 404,
-            message: 'Community conversation not found'
+            message: 'Collaboration conversation not found'
           }
         });
       }

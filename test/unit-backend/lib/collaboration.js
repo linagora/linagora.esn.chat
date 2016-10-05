@@ -9,9 +9,8 @@ var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var _ = require('lodash');
 
-describe('The linagora.esn.chat community lib', function() {
+describe('The linagora.esn.chat collaboration lib', function() {
 
   var deps, lib, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
@@ -141,16 +140,16 @@ describe('The linagora.esn.chat community lib', function() {
     };
   });
 
-  describe('The getConversationByCommunityId', function() {
+  describe('The getConversationByCollaboration', function() {
     it('should call ChatConversation.find with the correct param', function(done) {
-      var id = 'id';
+      var tuple = {id: 'id', objectType: 'community'};
       var callback = 'callback';
       var populateMock;
 
       var exec = function(_callback_) {
         expect(modelsMock.ChatConversation.findOne).to.have.been.calledWith({
-          type: CONVERSATION_TYPE.COMMUNITY,
-          community: id
+          type: CONVERSATION_TYPE.COLLABORATION,
+          collaboration: tuple
         });
 
         expect(populateMock).to.have.been.calledWith('members');
@@ -162,7 +161,7 @@ describe('The linagora.esn.chat community lib', function() {
       populateMock = sinon.stub().returns({exec: exec});
       modelsMock.ChatConversation.findOne = sinon.stub().returns({populate: populateMock});
 
-      require('../../../backend/lib/community')(dependencies, lib).getConversationByCommunityId(id, callback);
+      require('../../../backend/lib/collaboration')(dependencies, lib).getConversationByCollaboration(tuple, callback);
 
     });
   });
@@ -170,7 +169,7 @@ describe('The linagora.esn.chat community lib', function() {
   describe('The updateConversation function', function() {
     it('should update correctly the conversation', function(done) {
       var newConversation = {};
-      var communityId = 'communityId';
+      var tuple = {id: 'communityId', objectType: 'community'};
       var modification = {newMembers: [1], deleteMembers: [2], title: 'title'};
 
       ObjectIdMock = sinon.spy(function(id) {
@@ -196,7 +195,7 @@ describe('The linagora.esn.chat community lib', function() {
         });
       };
 
-      require('../../../backend/lib/community')(dependencies, lib).updateConversation(communityId, modification, function(err, conv) {
+      require('../../../backend/lib/collaboration')(dependencies, lib).updateConversation(tuple, modification, function(err, conv) {
         expect(conv).to.equal(newConversation);
         expect(err).to.be.null;
         done();

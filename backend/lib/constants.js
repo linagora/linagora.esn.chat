@@ -19,9 +19,6 @@ module.exports = {
     CHANNEL_CREATION: 'chat:channel:creation',
     CHANNEL_DELETION: 'chat:channel:deletion',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
-    COMMUNITY_CREATED: 'communities:community:add',
-    MEMBER_ADDED_IN_COMMUNITY: 'community:member:add',
-    COMMUNITY_UPDATE: 'communities:community:update',
     CONVERSATION_UPDATE: 'chat:conversation:update',
     USERS_MENTION: 'chat:users_mention',
     CONVERSATION_INITIALIZED: 'chat:conversation:initialized',
@@ -37,7 +34,7 @@ module.exports = {
   CONVERSATION_TYPE: {
     PRIVATE: 'private',
     CHANNEL: 'channel',
-    COMMUNITY: 'community'
+    COLLABORATION: 'collaboration'
   },
   MESSAGE_TYPE: {
     USER_TYPING: 'user_typing'

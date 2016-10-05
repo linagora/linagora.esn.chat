@@ -75,7 +75,7 @@ function init(dependencies, lib) {
   }
 
   function sendDataToConversation(conversation, type, data) {
-    if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COMMUNITY) {
+    if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COLLABORATION) {
       sendDataToUsers(conversation.members, type, data);
     } else {
       chatNamespace.emit(type, data);

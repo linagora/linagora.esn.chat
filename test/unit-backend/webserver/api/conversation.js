@@ -483,7 +483,7 @@ describe('The conversation controller', function() {
 
     it('should send back HTTP 403 if request try to create a commnity conversation', function(done) {
       err = new Error('failed');
-      let req = {body: {type: CONVERSATION_TYPE.COMMUNITY}, query: {}, user: user};
+      let req = {body: {type: CONVERSATION_TYPE.COLLABORATION}, query: {}, user: user};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.create(req, {
