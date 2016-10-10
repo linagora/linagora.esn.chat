@@ -21,7 +21,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.put('/conversations/:id/topic', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.updateTopic);
 
-  router.post('/conversations/:id/readed', authorizationMW.requiresAPILogin, controller.markAllMessageOfAConversationReaded);
+  router.post('/conversations/:id/readed', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.markAllMessageOfAConversationReaded);
 
   router.get('/user/conversations/private', authorizationMW.requiresAPILogin, controller.findMyPrivateConversations);
   router.get('/user/conversations', authorizationMW.requiresAPILogin, controller.findMyConversations);

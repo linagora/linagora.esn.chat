@@ -132,7 +132,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function markAllMessageOfAConversationReaded(req, res) {
-    lib.message.markAllAsReadById(req.user._id, req.params.id, err => {
+    lib.message.markAllAsReadById(req.user._id, req.conversation._id, err => {
       if (err) {
         logger.error('Error while marking messages as read', err);
 

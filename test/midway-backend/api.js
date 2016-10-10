@@ -937,7 +937,82 @@ describe('The chat API', function() {
   });
 
   describe('POST /api/conversations/:id/readed', function() {
-    it('should mark all message of the conversation readed', function(done) {
+
+    it('should 404 when conversation is not found', function(done) {
+      request(app.express)
+        .post('/api/conversations/' + new mongoose.Types.ObjectId() + '/readed')
+        .expect(404)
+        .end(done);
+    });
+
+    it('should 403 when conversation is collaboration', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION
+      }, function(err, conversation) {
+        err && done(err);
+
+        request(app.express)
+          .post('/api/conversations/' + conversation._id + '/readed')
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not update conversation/);
+            done();
+          });
+        });
+    });
+
+    it('should 403 when conversation is private and user is not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId()],
+        numOfMessage: 42
+      }, function(err, conversation) {
+        err && done(err);
+
+        request(app.express)
+          .post('/api/conversations/' + conversation._id + '/readed')
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not update conversation/);
+            done();
+          });
+        });
+    });
+
+    it('should 204 when conversation is private and user is member', function(done) {
+      var channelId;
+      var numOfMessage = 42;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId],
+        numOfMessage: numOfMessage
+      }).then(function(mongoResponse) {
+        channelId = mongoResponse._id;
+
+        return Q.denodeify(function(callback) {
+          request(app.express)
+            .post('/api/conversations/' + channelId + '/readed')
+            .expect(204)
+            .end(callback);
+        })();
+      }).then(function(res) {
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
+      }).then(function(channel) {
+        var wanted = {};
+        wanted[String(userId)] = numOfMessage;
+        expect(channel.numOfReadedMessage).to.deep.equal(wanted);
+        done();
+      }).catch(done);
+    });
+
+    it('should 204 when conversation is channel', function(done) {
       var channelId;
       var numOfMessage = 42;
 
