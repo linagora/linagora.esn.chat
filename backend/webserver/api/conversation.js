@@ -12,7 +12,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, controller.get);
   router.put('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.update);
-  router.delete('/conversations/:id', authorizationMW.requiresAPILogin, controller.remove);
+  router.delete('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRemove, controller.remove);
 
   router.put('/conversations/:id/members', authorizationMW.requiresAPILogin, controller.joinConversation);
   router.delete('/conversations/:id/members', authorizationMW.requiresAPILogin, controller.leaveConversation);

@@ -61,8 +61,8 @@ module.exports = function(dependencies) {
     Conversation.findById(channelId).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function remove(userId, channelId, callback) {
-    Conversation.findOneAndRemove({_id: channelId, members: userId}, (err, result) => {
+  function remove(channelId, callback) {
+    Conversation.findOneAndRemove({_id: channelId}, (err, result) => {
       if (err) {
         return callback(err);
       }

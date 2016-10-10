@@ -17,8 +17,15 @@ module.exports = function(dependencies) {
     collaboration: userCanUpdateCollaboration
   };
 
+  let removePermissions = {
+    channel: userCanRemoveChannel,
+    private: userCanRemovePrivate,
+    collaboration: userCanRemoveCollaboration
+  };
+
   return {
     userCanRead,
+    userCanRemove,
     userCanUpdate
   };
 
@@ -42,6 +49,29 @@ module.exports = function(dependencies) {
   }
 
   function userCanReadCollaboration(user, conversation) {
+    return Q.when(false);
+  }
+
+  function userCanRemove(user, conversation) {
+    const removePermission = removePermissions[conversation.type];
+
+    if (!removePermission) {
+      return Q.reject(new Error(`Can not find remove permission for type ${conversation.type}`));
+    }
+
+    return removePermission(user, conversation);
+  }
+
+  function userCanRemoveChannel(user, conversation) {
+    // TBD
+    return Q.when(false);
+  }
+
+  function userCanRemovePrivate(user, conversation) {
+    return userIsInConversationMemberList(user, conversation);
+  }
+
+  function userCanRemoveCollaboration(user, conversation) {
     return Q.when(false);
   }
 

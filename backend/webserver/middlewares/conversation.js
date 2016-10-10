@@ -9,7 +9,7 @@ module.exports = function(dependencies, lib) {
 
   return {
     canCreate,
-    canDelete,
+    canRemove,
     canRead,
     canUpdate,
     canWrite,
@@ -30,8 +30,33 @@ module.exports = function(dependencies, lib) {
     next();
   }
 
-  function canDelete() {
+  function canRemove(req, res, next) {
+    lib.conversation.permission.userCanRemove(req.user, req.conversation).then(removable => {
+      if (removable) {
+        return next();
+      }
 
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: `Can not remove conversation ${req.conversation.id}`
+        }
+      });
+
+    }, err => {
+      const msg = `Error while checkcing remove rights on conversation ${req.conversation.id}`;
+
+      logger.error(msg, err);
+
+      return res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: msg
+        }
+      });
+    });
   }
 
   function canRead(req, res, next) {

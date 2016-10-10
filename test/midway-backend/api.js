@@ -1209,18 +1209,26 @@ describe('The chat API', function() {
   });
 
   describe('DELETE /api/conversations/:id', function() {
-    it('should return 404 and not delete the conversation for a conversation where the user is not in', function(done) {
+
+    it('should 404 when the conversation does not exist', function(done) {
+      request(app.express)
+        .delete('/api/conversations/' + new mongoose.Types.ObjectId())
+        .expect(404)
+        .end(done);
+    });
+
+    it('should 403 when conversation is channel', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
-        members: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
+        members: [userId, new mongoose.Types.ObjectId()]
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
         return Q.denodeify(function(callback) {
           request(app.express)
             .delete('/api/conversations/' + channelId)
-            .expect(404)
+            .expect(403)
             .end(callback);
         })();
       }).then(function(res) {
@@ -1231,18 +1239,37 @@ describe('The chat API', function() {
       }).catch(done);
     });
 
-    it('should delete a conversation', function(done) {
+    it('should 403 when conversation is private and user is not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + conversation._id)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not remove conversation/);
+            done();
+          });
+        });
+    });
+
+    it('should 204 when conversation is private and user is member', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [userId, new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId, new mongoose.Types.ObjectId()]
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
         return Q.denodeify(function(callback) {
           request(app.express)
             .delete('/api/conversations/' + channelId)
-            .expect(200)
+            .expect(204)
             .end(callback);
         })();
       }).then(function(res) {
@@ -1251,6 +1278,24 @@ describe('The chat API', function() {
         expect(channel).to.be.null;
         done();
       }).catch(done);
+    });
+
+    it('should 403 when trying to delete a collaboration conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION,
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + conversation._id)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not remove conversation/);
+            done();
+          });
+      });
     });
   });
 

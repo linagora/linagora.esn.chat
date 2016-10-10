@@ -51,19 +51,9 @@ module.exports = function(dependencies, lib) {
   }
 
   function remove(req, res) {
-    if (!req.params.id) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'You should provide the conversation id'
-        }
-      });
-    }
-
-    lib.conversation.remove(req.user._id, req.params.id, (err, numDeleted) => {
+    lib.conversation.remove(req.conversation._id, err => {
       if (err) {
-        logger.error('Error while deleting conversation %s', req.params.id, err);
+        logger.error('Error while deleting conversation %s', req.conversation._id, err);
 
         return res.status(500).json({
           error: {
@@ -73,18 +63,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-
-      if (!numDeleted) {
-        return res.status(404).json({
-          error: {
-            code: 500,
-            message: 'Not found',
-            details: 'Conversation not found'
-          }
-        });
-      }
-
-      res.status(200).end();
+      res.status(204).end();
     });
   }
 
@@ -301,7 +280,6 @@ module.exports = function(dependencies, lib) {
   }
 
   function update(req, res) {
-    console.log('req', req.body)
     if (!req.body) {
       return res.status(400).json({
         error: {
