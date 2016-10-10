@@ -6,12 +6,8 @@ module.exports = function(dependencies, lib) {
 
   return {
     load,
-    canRead
+    loadMessageConversation
   };
-
-  function canRead(req, res, next) {
-    next();
-  }
 
   function load(req, res, next) {
     lib.message.getById(req.params.id, (err, message) => {
@@ -38,6 +34,37 @@ module.exports = function(dependencies, lib) {
       }
 
       req.message = message;
+      next();
+    });
+  }
+
+  function loadMessageConversation(req, res, next) {
+    let message = req.message;
+
+    lib.conversation.getById(message.channel, (err, conversation) => {
+      if (err) {
+        logger.error('Error while loading conversation from message', err);
+
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: `Error while getting conversation of message ${req.params.id}`
+          }
+        });
+      }
+
+      if (!conversation) {
+        return res.status(404).json({
+          error: {
+            code: 404,
+            message: 'Not found',
+            details: `Can not find conversation for message ${message._id}`
+          }
+        });
+      }
+
+      req.conversation = conversation;
       next();
     });
   }

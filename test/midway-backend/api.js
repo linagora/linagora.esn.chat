@@ -449,13 +449,35 @@ describe('The chat API', function() {
         .end(done);
     });
 
-    it('should return the message', function(done) {
+    it('should 404 when conversation of the message does not exist', function(done) {
+      Q.denodeify(app.lib.message.create)({
+        channel: new mongoose.Types.ObjectId(),
+        text: 'hello world',
+        type: 'text',
+        creator: userId
+      }).then(function(message) {
+        request(app.express)
+          .get('/api/messages/' + message._id)
+          .expect('Content-Type', /json/)
+          .expect(404)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not find conversation for message/);
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should 200 with the message for channel conversation', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
+
         return Q.denodeify(app.lib.message.create)({
           channel: channelId,
           text: 'hello world',
@@ -472,6 +494,66 @@ describe('The chat API', function() {
               return done(err);
             }
             expect(res.body).to.deep.equal(JSON.parse(JSON.stringify(mongoResult)));
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should 200 with the message for private conversation when user is member', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId]
+      }).then(function(channels) {
+        channelId = channels._id;
+
+        return Q.denodeify(app.lib.message.create)({
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function(mongoResult) {
+        request(app.express)
+          .get('/api/messages/' + mongoResult._id)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(JSON.parse(JSON.stringify(mongoResult)));
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should 403 for private conversation when user is not member', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId()]
+      }).then(function(channels) {
+        channelId = channels._id;
+
+        return Q.denodeify(app.lib.message.create)({
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function(message) {
+        request(app.express)
+          .get('/api/messages/' + message._id)
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not read conversation/);
             done();
           });
       }).catch(done);
