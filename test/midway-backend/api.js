@@ -310,7 +310,7 @@ describe('The chat API', function() {
         });
     });
 
-    it('should fail with a 403 if it is a collabotation conversation', function(done) {
+    it('should 403 when type is collaboration', function(done) {
       request(app.express)
         .post('/api/conversations')
         .type('json')
@@ -321,7 +321,11 @@ describe('The chat API', function() {
           purpose: 'purpose'
         })
         .expect(403)
-        .end(function() {
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body.error.details).to.match(/Can not create a collaboration conversation/);
           done();
         });
     });

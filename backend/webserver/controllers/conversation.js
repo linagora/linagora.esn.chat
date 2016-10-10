@@ -101,16 +101,6 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    if (req.body.type === CONVERSATION_TYPE.COLLABORATION) {
-      return res.status(403).json({
-        error: {
-          code: 403,
-          message: 'Forbidden',
-          details: 'You can not create a collaboration conversation'
-        }
-      });
-    }
-
     lib.conversation.find({type: CONSTANTS.PRIVATE, exactMembersMatch: true, name: req.body.name ? req.body.name : null, members: members}, (err, conversations) => {
       if (err) {
         logger.error('Error while searching conversation', err);
@@ -125,40 +115,40 @@ module.exports = function(dependencies, lib) {
       }
 
       if (conversations && conversations.length > 0) {
-        res.status(201).json(conversations[0]);
-      } else {
-        let conversation = {
-          name: req.body.name,
-          type: req.body.type,
-          creator: req.user,
-          topic: {
-            value: req.body.topic,
-            creator: req.user
-          },
-          avatar: req.body.avatar,
-          members: members,
-          purpose: {
-            value: req.body.purpose,
-            creator: req.user
-          }
-        };
-
-        lib.conversation.create(conversation, (err, result) => {
-          logger.error('Error while creating conversation', err);
-
-          if (err) {
-            return res.status(500).json({
-              error: {
-                code: 500,
-                message: 'Server Error',
-                details: err.message || 'Error while creating channel'
-              }
-            });
-          }
-
-          res.status(201).json(result);
-        });
+        return res.status(201).json(conversations[0]);
       }
+
+      let conversation = {
+        name: req.body.name,
+        type: req.body.type,
+        creator: req.user,
+        topic: {
+          value: req.body.topic,
+          creator: req.user
+        },
+        avatar: req.body.avatar,
+        members: members,
+        purpose: {
+          value: req.body.purpose,
+          creator: req.user
+        }
+      };
+
+      lib.conversation.create(conversation, (err, result) => {
+        logger.error('Error while creating conversation', err);
+
+        if (err) {
+          return res.status(500).json({
+            error: {
+              code: 500,
+              message: 'Server Error',
+              details: err.message || 'Error while creating channel'
+            }
+          });
+        }
+
+        res.status(201).json(result);
+      });
     });
   }
 

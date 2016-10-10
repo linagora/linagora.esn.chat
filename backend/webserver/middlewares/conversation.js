@@ -1,10 +1,14 @@
 'use strict';
 
+const CONSTANTS = require('../../lib/constants');
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
 
   return {
+    canCreate,
     canDelete,
     canRead,
     canUpdate,
@@ -12,6 +16,19 @@ module.exports = function(dependencies, lib) {
     load
   };
 
+  function canCreate(req, res, next) {
+    if (req.body.type === CONVERSATION_TYPE.COLLABORATION) {
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: 'Can not create a collaboration conversation'
+        }
+      });
+    }
+
+    next();
+  }
 
   function canDelete() {
 

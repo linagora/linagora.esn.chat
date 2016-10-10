@@ -481,25 +481,6 @@ describe('The conversation controller', function() {
       });
     });
 
-    it('should send back HTTP 403 if request try to create a commnity conversation', function(done) {
-      err = new Error('failed');
-      let req = {body: {type: CONVERSATION_TYPE.COLLABORATION}, query: {}, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
-
-      controller.create(req, {
-        status: function(code) {
-          expect(code).to.equal(403);
-
-          return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual({error: {code: 403}});
-              done();
-            }
-          };
-        }
-      });
-    });
-
     it('should send back HTTP 201 when channel has been created', function(done) {
       let channel = {id: 1};
       let req = {body: {}, query: {}, user: user};

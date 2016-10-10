@@ -8,7 +8,7 @@ module.exports = function(dependencies, lib, router) {
   const messageController = require('../controllers/message')(dependencies, lib);
 
   router.get('/conversations', authorizationMW.requiresAPILogin, controller.list);
-  router.post('/conversations', authorizationMW.requiresAPILogin, controller.create);
+  router.post('/conversations', authorizationMW.requiresAPILogin, middleware.canCreate, controller.create);
 
   router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, controller.get);
   router.put('/conversations/:id', authorizationMW.requiresAPILogin, controller.update);
