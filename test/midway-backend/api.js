@@ -117,7 +117,66 @@ describe('The chat API', function() {
         });
     });
 
-    it('should return the given conversation', function(done) {
+    it('should 403 when conversation is private and current user is not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()]
+      }, function(err, channel) {
+        err && done(err);
+        request(app.express)
+          .get('/api/conversations/' + channel._id)
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not read conversation/);
+            done();
+          });
+      });
+    });
+
+    it('should 200 when conversation is private and current user is member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId(), userId]
+      }, function(err, channel) {
+        err && done(err);
+        request(app.express)
+          .get('/api/conversations/' + channel._id)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.deep.equal(jsonnify(channel));
+            done();
+          });
+      });
+    });
+
+    it('should 403 when conversation is collaboration', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION
+      }, function(err, channel) {
+        err && done(err);
+        request(app.express)
+          .get('/api/conversations/' + channel._id)
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not read conversation/);
+            done();
+          });
+      });
+    });
+
+    it('should 200 when the conversation is a channel', function(done) {
       app.lib.conversation.create({
         type: CONVERSATION_TYPE.CHANNEL
       }, function(err, channel) {

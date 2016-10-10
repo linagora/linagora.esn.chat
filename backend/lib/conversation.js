@@ -25,6 +25,7 @@ module.exports = function(dependencies) {
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
   const messageLib = require('./message')(dependencies);
+  const permission = require('./permission/conversation')(dependencies);
 
   return {
     addMember,
@@ -34,6 +35,7 @@ module.exports = function(dependencies) {
     getChannels,
     list,
     moderate,
+    permission,
     remove,
     removeMember,
     update,

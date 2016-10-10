@@ -10,7 +10,7 @@ module.exports = function(dependencies, lib, router) {
   router.get('/conversations', authorizationMW.requiresAPILogin, controller.list);
   router.post('/conversations', authorizationMW.requiresAPILogin, controller.create);
 
-  router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, controller.get);
+  router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, controller.get);
   router.put('/conversations/:id', authorizationMW.requiresAPILogin, controller.update);
   router.delete('/conversations/:id', authorizationMW.requiresAPILogin, controller.remove);
 
