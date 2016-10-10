@@ -39,6 +39,9 @@ module.exports = {
     CHANNEL: 'channel',
     COMMUNITY: 'community'
   },
+  MESSAGE_TYPE: {
+    USER_TYPING: 'user_typing'
+  },
   SKIP_FIELDS: {
     USER: '-password -accounts'
   }

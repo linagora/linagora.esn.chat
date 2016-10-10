@@ -13,28 +13,28 @@ describe('The channel controller', function() {
     result = undefined;
     lib = {
       conversation: {
-        getMessage: sinon.spy(function(id, callback) {
+        getById: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
-        getCommunityConversationByCommunityId: sinon.spy(function(id, callback) {
+        getConversationByCommunityId: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
-        getMessages: sinon.spy(function(channel, options, callback) {
+        getForConversation: sinon.spy(function(channel, options, callback) {
           return callback(err, result);
         }),
         getChannels: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        createConversation: sinon.spy(function(options, callback) {
+        create: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        findConversation: sinon.spy(function(options, callback) {
+        find: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
+        removeMember: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
         }),
-        addMemberToConversation: sinon.spy(function(channelId, userId, callback) {
+        addMember: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
         }),
         updateTopic: sinon.spy(function(channelId, topic, callback) {

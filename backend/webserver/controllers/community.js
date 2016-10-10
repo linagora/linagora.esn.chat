@@ -1,12 +1,18 @@
 'use strict';
 
-let _ = require('lodash');
+const _ = require('lodash');
 const CONSTANTS = require('../../lib/constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies, lib) {
 
-  let conversationController = require('./conversation')(dependencies, lib);
+  const logger = dependencies('logger');
+  const conversationController = require('./conversation')(dependencies, lib);
+
+  return {
+    findCommunity,
+    findMyCommunityConversations: conversationController.findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
+  };
 
   function findCommunity(req, res) {
     if (req.query.members && req.query.id) {
@@ -33,8 +39,10 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.getCommunityConversationByCommunityId(req.query.id, (err, conversation) => {
+    lib.community.getConversationByCommunityId(req.query.id, (err, conversation) => {
       if (err) {
+        logger.error('Error while getting community %s conversation', req.query.id, err);
+
         return res.status(500).json({
           error: {
             code: 500,
@@ -67,8 +75,4 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  return {
-    findCommunity,
-    findMyCommunityConversations: conversationController.findMyConversationByType.bind(null, CONVERSATION_TYPE.COMMUNITY),
-  };
 };

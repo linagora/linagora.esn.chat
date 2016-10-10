@@ -1,6 +1,6 @@
 'use strict';
 
-const CONSTANTS = require('../../constants');
+const CONSTANTS = require('../../../constants');
 
 module.exports = function(dependencies) {
 

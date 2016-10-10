@@ -75,7 +75,7 @@ describe('The Chat WS server', function() {
     };
 
     conversationMock = {
-      getConversation: sinon.spy()
+      getById: sinon.spy()
     };
 
     lib = {
@@ -326,7 +326,7 @@ describe('The Chat WS server', function() {
         var channel = {type: 'channel'};
         messageReceptorHandler({room: room, message: data});
 
-        expect(conversationMock.getConversation).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
+        expect(conversationMock.getById).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
           callback(null, channel);
           return true;
         })));
@@ -347,7 +347,7 @@ describe('The Chat WS server', function() {
         getUserSocketsFromNamespaceResponse = [{emit: sinon.spy()}];
         messageReceptorHandler({room: room, message: data});
 
-        expect(conversationMock.getConversation).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
+        expect(conversationMock.getById).to.have.been.calledWith(data.channel, sinon.match.func.and(sinon.match(function(callback) {
           callback(null, channel);
           return true;
         })));

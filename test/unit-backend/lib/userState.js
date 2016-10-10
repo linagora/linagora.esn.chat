@@ -6,7 +6,7 @@ var Q = require('q');
 var _ = require('lodash');
 var CONSTANTS = require('../../../backend/lib/constants');
 
-describe('The linagora.esn.chat userState lib', function() {
+describe('The linagora.esn.chat user-state lib', function() {
 
   var deps, clock, redisGet, redisSet, redisGetResult, connectionTopic, disconnectionTopic, userStateTopic;
 
@@ -25,7 +25,7 @@ describe('The linagora.esn.chat userState lib', function() {
   };
 
   function getUserState() {
-    var lib = require('../../../backend/lib/userState')(dependencies);
+    var lib = require('../../../backend/lib/user-state')(dependencies);
     lib.init();
     return lib;
   }

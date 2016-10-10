@@ -1,35 +1,50 @@
 'use strict';
 
-let async = require('async');
-let _ = require('lodash');
-let CONSTANTS = require('../lib/constants');
-let CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-let CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-let CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-let MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-let TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-let CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-let SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
+const async = require('async');
+const _ = require('lodash');
+const CONSTANTS = require('../lib/constants');
+const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+const CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
+const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
 
-  let logger = dependencies('logger');
-  let mongoose = dependencies('db').mongo.mongoose;
-  let ObjectId = mongoose.Types.ObjectId;
-  let Conversation = mongoose.model('ChatConversation');
-  let ChatMessage = mongoose.model('ChatMessage');
-  let pubsubGlobal = dependencies('pubsub').global;
-  let channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
-  let channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
-  let channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
-  let channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
-  let channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  const mongoose = dependencies('db').mongo.mongoose;
+  const ObjectId = mongoose.Types.ObjectId;
+  const Conversation = mongoose.model('ChatConversation');
+  const ChatMessage = mongoose.model('ChatMessage');
+  const pubsubGlobal = dependencies('pubsub').global;
+  const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  const channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
+  const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
+  const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
+  const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
+  const messageLib = require('./message')(dependencies);
+
+  return {
+    addMember,
+    create,
+    find,
+    getById,
+    getChannels,
+    list,
+    moderate,
+    remove,
+    removeMember,
+    update,
+    updateTopic
+  };
 
   function getChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
       channels = channels || [];
       if (channels.length === 0) {
-        return createConversation(CONSTANTS.DEFAULT_CHANNEL, (err, channel) => {
+        return create(CONSTANTS.DEFAULT_CHANNEL, (err, channel) => {
           if (err) {
             return callback(new Error('Can not create the default channel'));
           }
@@ -40,23 +55,19 @@ module.exports = function(dependencies) {
     });
   }
 
-  function getConversation(channel, callback) {
-    Conversation.findById(channel).populate('members', SKIP_FIELDS.USER).exec(callback);
+  function getById(channelId, callback) {
+    Conversation.findById(channelId).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function getCommunityConversationByCommunityId(communityId, callback) {
-    Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members', SKIP_FIELDS.USER).exec(callback);
-  }
-
-  function deleteConversation(userId, channel, callback) {
-    Conversation.findOneAndRemove({_id: channel, members: userId}, (err, deleteResult) => {
+  function remove(userId, channelId, callback) {
+    Conversation.findOneAndRemove({_id: channelId, members: userId}, (err, result) => {
       if (err) {
         return callback(err);
       }
 
-      channelDeletionTopic.publish(deleteResult);
-      ChatMessage.remove({channel: channel}, err => {
-        callback(err, deleteResult);
+      channelDeletionTopic.publish(result);
+      ChatMessage.remove({channel: channelId}, err => {
+        callback(err, result);
       });
     });
   }
@@ -71,7 +82,7 @@ module.exports = function(dependencies) {
    * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
    * @return {[Conversation]}
    */
-  function findConversation(options, callback) {
+  function find(options, callback) {
     let type = options.type;
     let ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
     let exactMembersMatch = options.exactMembersMatch;
@@ -126,7 +137,7 @@ module.exports = function(dependencies) {
     Conversation.find(request).populate('members', SKIP_FIELDS.USER).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
   }
 
-  function listConversation(options, callback) {
+  function list(options, callback) {
     let query;
     let sort = 'timestamps.creation';
 
@@ -164,47 +175,7 @@ module.exports = function(dependencies) {
     });
   }
 
-  function listMessage(options, callback) {
-    let query;
-    let sort = 'timestamps.creation';
-
-    options = options || {};
-    options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
-    options.offset = +(options.offset || CONSTANTS.DEFAULT_OFFSET);
-
-    if (options.creator) {
-      query = query || {};
-      query.creator = options.creator;
-    }
-
-    let messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
-
-    ChatMessage.find(messageQuery).count().exec((err, count) => {
-      if (err) {
-        return callback(err);
-      }
-
-      let messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
-
-      messageQuery = messageQuery.skip(options.offset);
-
-      if (options.limit > 0) {
-        messageQuery = messageQuery.limit(options.limit);
-      }
-
-      messageQuery.sort(sort).populate('creator', CONSTANTS.SKIP_FIELDS.USER).exec((err, messages) => {
-        if (err) {
-          return callback(err);
-        }
-        callback(null, {
-          total_count: count,
-          list: messages || []
-        });
-      });
-    });
-  }
-
-  function createConversation(options, callback) {
+  function create(options, callback) {
     async.waterfall([
         function(callback) {
           let conversation = new Conversation(options);
@@ -228,82 +199,7 @@ module.exports = function(dependencies) {
     ], callback);
   }
 
-  function parseMention(message) {
-    message.user_mentions = _.uniq(message.text.match(/@[a-fA-F0-9]{24}/g)).map(function(mention) {
-      return new ObjectId(mention.replace(/^@/, ''));
-    });
-  }
-
-  function makeAllMessageReadedForAnUserHelper(userIds, conversation, callback) {
-    userIds = _.isArray(userIds) ? userIds : [userIds];
-    let updateMaxOperation = {};
-
-    userIds.forEach(function(userId) {
-      updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;
-    });
-
-    Conversation.findByIdAndUpdate(conversation._id, {
-      $max: updateMaxOperation
-    }, callback);
-  }
-
-  function makeAllMessageReadedForAnUser(userId, conversationId, callback) {
-    Conversation.findOne({_id: conversationId}, function(err, conversation) {
-      if (err) {
-        return callback(err);
-      }
-
-      makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
-    });
-  }
-
-  function createMessage(message, callback) {
-    parseMention(message);
-    let chatMessage = new ChatMessage(message);
-
-    async.waterfall([
-        function(callback) {
-          chatMessage.save(callback);
-        },
-        function(message, _num, callback) {
-          Conversation.findByIdAndUpdate(message.channel, {
-            $set: {
-              last_message: {
-                text: message.text,
-                date: message.timestamps.creation,
-                creator: message.creator,
-                user_mentions: message.user_mentions
-              }
-            },
-            $inc: {
-              numOfMessage: 1
-            }
-          }, function(err, conversation) {
-            if (err) {
-              logger.error('Can not update channel with last_update', err);
-            }
-            callback(null, message, conversation);
-          });
-        },
-        function(message, conversation, callback) {
-          makeAllMessageReadedForAnUserHelper(message.creator, conversation, err => {
-            callback(err, message);
-          });
-        },
-        function(message, callback) {
-          ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
-        },
-        function(message, callback) {
-          callback(null, message.toJSON());
-        }
-    ], callback);
-  }
-
-  function ensureObjectId(id) {
-    return id.constructor === ObjectId ? id : new ObjectId(id);
-  }
-
-  function addMemberToConversation(conversationId, userId, callback) {
+  function addMember(conversationId, userId, callback) {
     let userObjectId = ensureObjectId(userId);
 
     Conversation.findByIdAndUpdate(conversationId, {
@@ -313,47 +209,12 @@ module.exports = function(dependencies) {
         return callback(err);
       }
 
-      makeAllMessageReadedForAnUserHelper(userId, conversation, callback);
+      messageLib.markAllAsRead(userId, conversation, callback);
       channelAddMember.publish(conversation);
     });
   }
 
-  function updateCommunityConversation(communityId, modifications, callback) {
-
-    let mongoModifications = {};
-
-    if (modifications.newMembers) {
-      mongoModifications.$addToSet = {
-        members: {
-          $each: modifications.newMembers.map(ensureObjectId)
-        }
-      };
-    }
-
-    if (modifications.deleteMembers) {
-      mongoModifications.$pullAll = {
-        members: modifications.deleteMembers.map(ensureObjectId)
-      };
-    }
-
-    if (modifications.title) {
-      mongoModifications.$set = {name: modifications.title};
-    }
-
-    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}, mongoModifications, (err, conversation) => {
-      if (err) {
-        return callback(err);
-      }
-
-      if (mongoModifications.$addToSet) {
-        makeAllMessageReadedForAnUserHelper(mongoModifications.$addToSet.$each, conversation, callback);
-      } else {
-        callback(err, conversation);
-      }
-    });
-  }
-
-  function updateConversation(communityId, modifications, callback) {
+  function update(conversationId, modifications, callback) {
 
     let mongoModifications = {};
     let nextMongoModification = null;
@@ -397,7 +258,7 @@ module.exports = function(dependencies) {
         });
 
         if (modifications.newMembers && modifications.newMembers.length) {
-          makeAllMessageReadedForAnUserHelper((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
+          messageLib.markAllAsRead((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
         } else {
           callback(err, conversation);
         }
@@ -414,16 +275,16 @@ module.exports = function(dependencies) {
       delete mongoModifications.$set;
     }
 
-    Conversation.findOneAndUpdate({_id: communityId}, mongoModifications, (err, conversation) => {
+    Conversation.findOneAndUpdate({_id: conversationId}, mongoModifications, (err, conversation) => {
       if (nextMongoModification) {
-        Conversation.findOneAndUpdate({_id: communityId}, nextMongoModification, done.bind(null, callback));
+        Conversation.findOneAndUpdate({_id: conversationId}, nextMongoModification, done.bind(null, callback));
       } else {
         done(callback, err, conversation);
       }
     });
   }
 
-  function moderateConversation(conversationId, moderate, callback) {
+  function moderate(conversationId, moderate, callback) {
     Conversation.findByIdAndUpdate(conversationId, {
       $set: {moderate: moderate}
     }, {
@@ -431,15 +292,7 @@ module.exports = function(dependencies) {
     }, callback);
   }
 
-  function moderateMessage(messageId, moderate, callback) {
-    ChatMessage.findByIdAndUpdate(messageId, {
-      $set: {moderate: moderate}
-    }, {
-      new: true
-    }, callback);
-  }
-
-  function removeMemberFromConversation(conversationId, userId, callback) {
+  function removeMember(conversationId, userId, callback) {
     let unsetOperation = {};
 
     unsetOperation['numOfReadedMessage.' + userId] = '';
@@ -454,35 +307,6 @@ module.exports = function(dependencies) {
         });
       }
       callback(err, conversation);
-    });
-  }
-
-  function getMessage(messageId, callback) {
-    ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
-  }
-
-  function getMessages(conversation, query, callback) {
-    query = query || {};
-
-    if (!query.moderate) {
-      query.moderate = false;
-    }
-
-    let conversationId = conversation._id || conversation;
-    let q = {channel: conversationId, moderate: false};
-    let mq = ChatMessage.find(q);
-
-    mq.populate('creator', SKIP_FIELDS.USER);
-    mq.populate('user_mentions', SKIP_FIELDS.USER);
-    mq.limit(+query.limit || 20);
-    mq.skip(+query.offset || 0);
-    mq.sort('-timestamps.creation');
-    mq.exec((err, result) => {
-      if (!err) {
-        result.reverse();
-      }
-
-      callback(err, result);
     });
   }
 
@@ -514,31 +338,4 @@ module.exports = function(dependencies) {
       callback(err, conversation);
     });
   }
-
-  function countMessages(conversation, callback) {
-    ChatMessage.count({channel: conversation}, callback);
-  }
-
-  return {
-    getMessage,
-    getMessages,
-    getCommunityConversationByCommunityId,
-    addMemberToConversation,
-    updateCommunityConversation,
-    updateConversation,
-    moderateConversation,
-    moderateMessage,
-    removeMemberFromConversation,
-    findConversation,
-    createMessage,
-    createConversation,
-    getConversation,
-    getChannels,
-    deleteConversation,
-    updateTopic,
-    makeAllMessageReadedForAnUser,
-    countMessages,
-    listConversation,
-    listMessage
-  };
 };

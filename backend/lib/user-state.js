@@ -1,7 +1,7 @@
 'use strict';
 
-let Q = require('q');
-let _ = require('lodash');
+const Q = require('q');
+const _ = require('lodash');
 const CONSTANTS = require('../lib/constants');
 const USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 const USER_CONNECTION = CONSTANTS.NOTIFICATIONS.USER_CONNECTION;
@@ -13,13 +13,21 @@ const DISCONNECTION_DELAY = CONSTANTS.STATUS.DISCONNECTION_DELAY;
 
 module.exports = function(dependencies) {
 
-  let redisPromise = Q.ninvoke(dependencies('db').redis, 'getClient');
-  let pubsubLocal = dependencies('pubsub').local;
-  let pubsubGlobal = dependencies('pubsub').global;
-  let userStateTopic = pubsubGlobal.topic(USER_STATE);
-  let userConnectionTopic = pubsubLocal.topic(USER_CONNECTION);
-  let userDisconnectionTopic = pubsubLocal.topic(USER_DISCONNECTION);
+  const redisPromise = Q.ninvoke(dependencies('db').redis, 'getClient');
+  const pubsubLocal = dependencies('pubsub').local;
+  const pubsubGlobal = dependencies('pubsub').global;
+  const userStateTopic = pubsubGlobal.topic(USER_STATE);
+  const userConnectionTopic = pubsubLocal.topic(USER_CONNECTION);
+  const userDisconnectionTopic = pubsubLocal.topic(USER_DISCONNECTION);
   let delayedStateChanges = {};
+
+  return {
+    get,
+    getAll,
+    init,
+    restorePreviousState,
+    set
+  };
 
   function set(userId, state, delay) {
     return redisPromise.then(redis => {
@@ -83,12 +91,4 @@ module.exports = function(dependencies) {
     userConnectionTopic.subscribe(restorePreviousState);
     userDisconnectionTopic.subscribe(_.partialRight(set, DISCONNECTED, DISCONNECTION_DELAY));
   }
-
-  return {
-    set,
-    get,
-    init,
-    restorePreviousState,
-    getAll
-  };
 };

@@ -65,7 +65,7 @@
 
       function fetchAllConversation() {
         return $q.all({
-          conversations: ChatRestangular.one('me').all('conversation').getList(),
+          conversations: ChatRestangular.one('user').all('conversations').getList(),
           session: session.ready
         }).then(function(resolved) {
           var conversations = resolved.conversations.data;

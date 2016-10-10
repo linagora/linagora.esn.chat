@@ -18,28 +18,22 @@ describe('The conversation controller', function() {
 
     lib = {
       conversation: {
-        getMessage: sinon.spy(function(id, callback) {
-          return callback(err, result);
-        }),
-        getCommunityConversationByCommunityId: sinon.spy(function(id, callback) {
-          return callback(err, result);
-        }),
-        getMessages: sinon.spy(function(channel, options, callback) {
+        getConversationByCommunityId: sinon.spy(function(id, callback) {
           return callback(err, result);
         }),
         getChannels: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        createConversation: sinon.spy(function(options, callback) {
+        create: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        findConversation: sinon.spy(function(options, callback) {
+        find: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
-        removeMemberFromConversation: sinon.spy(function(channelId, userId, callback) {
+        removeMember: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
         }),
-        addMemberToConversation: sinon.spy(function(channelId, userId, callback) {
+        addMember: sinon.spy(function(channelId, userId, callback) {
           return callback(err, result);
         }),
         updateTopic: sinon.spy(function(channelId, topic, callback) {
@@ -64,7 +58,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.called;
+              expect(lib.conversation.find).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -83,7 +77,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: 'type', ignoreMemberFilterForChannel: true, members: ['id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: 'type', ignoreMemberFilterForChannel: true, members: ['id']});
               expect(json).to.equal(result);
               done();
             }
@@ -104,7 +98,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.called;
+              expect(lib.conversation.find).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -123,7 +117,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, members: ['id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, members: ['id']});
               expect(json).to.equal(result);
               done();
             }
@@ -144,7 +138,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.removeMemberFromConversation).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.removeMember).to.have.been.calledWith('channelId', 'id');
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -162,7 +156,7 @@ describe('The conversation controller', function() {
 
           return {
             end: function() {
-              expect(lib.conversation.removeMemberFromConversation).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.removeMember).to.have.been.calledWith('channelId', 'id');
               done();
             }
           };
@@ -182,7 +176,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.addMemberToConversation).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.addMember).to.have.been.calledWith('channelId', 'id');
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -200,7 +194,7 @@ describe('The conversation controller', function() {
 
           return {
             end: function() {
-              expect(lib.conversation.addMemberToConversation).to.have.been.calledWith('channelId', 'id');
+              expect(lib.conversation.addMember).to.have.been.calledWith('channelId', 'id');
               done();
             }
           };
@@ -209,18 +203,18 @@ describe('The conversation controller', function() {
     });
   });
 
-  describe('The findPrivateByMembers', function() {
+  describe('The list', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.called;
+              expect(lib.conversation.find).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -233,13 +227,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
               expect(json).to.equal(result);
               done();
             }
@@ -252,13 +246,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function() {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({
+              expect(lib.conversation.find).to.have.been.calledWith({
                 type: CONVERSATION_TYPE.PRIVATE,
                 ignoreMemberFilterForChannel: true,
                 exactMembersMatch: true,
@@ -274,14 +268,14 @@ describe('The conversation controller', function() {
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
-      controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: '1'}, user: {_id: 'id'}}, {
 
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function() {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
               done();
             }
           };
@@ -293,13 +287,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function() {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: ['1', 'id']});
               done();
             }
           };
@@ -308,18 +302,18 @@ describe('The conversation controller', function() {
     });
   });
 
-  describe('The findPrivateByMembers', function() {
+  describe('The list', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: 'id'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.called;
+              expect(lib.conversation.find).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500}});
               done();
             }
@@ -332,13 +326,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function(json) {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: [1, 2, 'id']});
               expect(json).to.equal(result);
               done();
             }
@@ -351,13 +345,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', '2']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function() {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', '2', 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', '2', 'id']});
               done();
             }
           };
@@ -369,13 +363,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: '1'}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: '1'}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function() {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
               done();
             }
           };
@@ -387,13 +381,13 @@ describe('The conversation controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findPrivateByMembers({query: {members: ['1', 'id']}, user: {_id: 'id'}}, {
+      controller.list({query: {type: 'private', members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function() {
-              expect(lib.conversation.findConversation).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.PRIVATE, exactMembersMatch: true, ignoreMemberFilterForChannel: true, members: ['1', 'id']});
               done();
             }
           };
@@ -402,7 +396,7 @@ describe('The conversation controller', function() {
     });
   });
 
-  describe('The createConversation function', function() {
+  describe('The create function', function() {
 
     it('should call the api with right parameters', function(done) {
       let name = 'MyChannel';
@@ -411,7 +405,7 @@ describe('The conversation controller', function() {
       let avatar = 'avatar';
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.createConversation({
+      controller.create({
         user: user,
         query: {},
         body: {
@@ -423,7 +417,7 @@ describe('The conversation controller', function() {
         }
       }, {
         status: _.constant({json: function() {
-            expect(lib.conversation.createConversation).to.have.been.calledWith({
+            expect(lib.conversation.create).to.have.been.calledWith({
               name: name,
               type: 'type',
               creator: user,
@@ -449,7 +443,7 @@ describe('The conversation controller', function() {
       let purpose = 'MyPurpose';
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.createConversation({
+      controller.create({
         user: user,
         body: {
           name: name,
@@ -460,7 +454,7 @@ describe('The conversation controller', function() {
         }
       }, {
         status: _.constant({json: function() {
-            expect(lib.conversation.createConversation).to.have.been.calledWith(sinon.match({
+            expect(lib.conversation.create).to.have.been.calledWith(sinon.match({
               members: ['2', '3', '1']
             }));
             done();
@@ -473,7 +467,7 @@ describe('The conversation controller', function() {
       let req = {body: {}, query: {}, user: user};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.createConversation(req, {
+      controller.create(req, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -492,7 +486,7 @@ describe('The conversation controller', function() {
       let req = {body: {type: CONVERSATION_TYPE.COMMUNITY}, query: {}, user: user};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.createConversation(req, {
+      controller.create(req, {
         status: function(code) {
           expect(code).to.equal(403);
 
@@ -512,7 +506,7 @@ describe('The conversation controller', function() {
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = channel;
-      controller.createConversation(req, {
+      controller.create(req, {
         status: function(code) {
           expect(code).to.equal(201);
 
@@ -537,7 +531,7 @@ describe('The conversation controller', function() {
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = [channel, {id: 2}];
-      controller.createConversation(req, {
+      controller.create(req, {
         status: function(code) {
           expect(code).to.equal(201);
 

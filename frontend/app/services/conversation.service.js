@@ -17,7 +17,7 @@
       return service;
 
       function fetchMessages(conversation, options) {
-        return ChatRestangular.one(conversation).all('messages').getList(options).then(function(response) {
+        return ChatRestangular.all('conversations').one(conversation).all('messages').getList(options).then(function(response) {
           return ChatRestangular.stripRestangular(response.data);
         });
       }
