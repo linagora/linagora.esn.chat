@@ -19,7 +19,7 @@ module.exports = function(dependencies, lib, router) {
 
   router.get('/conversations/:id/messages', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, messageController.getForConversation);
 
-  router.put('/conversations/:id/topic', authorizationMW.requiresAPILogin, controller.updateTopic);
+  router.put('/conversations/:id/topic', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.updateTopic);
 
   router.post('/conversations/:id/readed', authorizationMW.requiresAPILogin, controller.markAllMessageOfAConversationReaded);
 

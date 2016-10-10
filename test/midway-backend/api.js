@@ -286,6 +286,95 @@ describe('The chat API', function() {
     });
   });
 
+  describe('PUT /api/conversations/:id/topic', function() {
+
+    it('should 403 when conversation is collaboration', function(done) {
+      app.lib.conversation.create({
+        name: 'foo',
+        type: CONVERSATION_TYPE.COLLABORATION
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + conversation._id + '/topic')
+          .send({value: 'My Topic'})
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not update conversation/);
+            done();
+          });
+      });
+    });
+
+    it('should not update the private conversation when user is not member', function(done) {
+      const name = 'bar';
+
+      app.lib.conversation.create({
+        name: 'foo',
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: []
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + conversation._id + '/topic')
+          .send({value: 'My Topic'})
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not update conversation/);
+            done();
+          });
+      });
+    });
+
+    it('should update the private conversation when user is member', function(done) {
+      const name = 'bar';
+
+      app.lib.conversation.create({
+        name: 'foo',
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId]
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + conversation._id + '/topic')
+          .send({value: 'My Topic'})
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            done();
+          });
+      });
+    });
+
+    it('should update the channel conversation', function(done) {
+      const name = 'bar';
+
+      app.lib.conversation.create({
+        name: 'foo',
+        type: CONVERSATION_TYPE.CHANNEL
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + conversation._id + '/topic')
+          .send({value: 'My Topic'})
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            done();
+          });
+      });
+    });
+  });
+
   describe('GET /api/conversations/:id/messages', function() {
 
     it('should 404 when conversation does not exist', function(done) {
