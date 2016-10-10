@@ -11,8 +11,15 @@ module.exports = function(dependencies) {
     collaboration: userCanReadCollaboration
   };
 
+  let updatePermissions = {
+    channel: userCanUpdateChannel,
+    private: userCanUpdatePrivate,
+    collaboration: userCanUpdateCollaboration
+  };
+
   return {
-    userCanRead
+    userCanRead,
+    userCanUpdate
   };
 
   function userCanRead(user, conversation) {
@@ -31,12 +38,39 @@ module.exports = function(dependencies) {
   }
 
   function userCanReadPrivate(user, conversation) {
-    let member = _.find(conversation.members, element => element._id.equals(user._id));
-
-    return Q.when(!!member);
+    return userIsInConversationMemberList(user, conversation);
   }
 
   function userCanReadCollaboration(user, conversation) {
     return Q.when(false);
   }
+
+  function userCanUpdate(user, conversation) {
+    const updatePermission = updatePermissions[conversation.type];
+
+    if (!updatePermission) {
+      return Q.reject(new Error(`Can not find update permission checked for type ${conversation.type}`));
+    }
+
+    return updatePermission(user, conversation);
+  }
+
+  function userCanUpdateChannel(user, conversation) {
+    return Q.when(true);
+  }
+
+  function userCanUpdatePrivate(user, conversation) {
+    return userIsInConversationMemberList(user, conversation);
+  }
+
+  function userCanUpdateCollaboration(user, conversation) {
+    return Q.when(false);
+  }
+
+  function userIsInConversationMemberList(user, conversation) {
+    let member = _.find(conversation.members, element => element._id.equals(user._id));
+
+    return Q.when(!!member);
+  }
+
 };

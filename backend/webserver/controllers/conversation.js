@@ -301,17 +301,8 @@ module.exports = function(dependencies, lib) {
   }
 
   function update(req, res) {
-    if (!req.body.conversation) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'You should provide the conversation id'
-        }
-      });
-    }
-
-    if (!req.body.modifications) {
+    console.log('req', req.body)
+    if (!req.body) {
       return res.status(400).json({
         error: {
           code: 400,
@@ -321,7 +312,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.update(req.body.conversation, req.body.modifications, (err, conversation) => {
+    lib.conversation.update(req.conversation._id, req.body, (err, conversation) => {
       if (err) {
         logger.error('Error while updating conversation', err);
 
@@ -329,7 +320,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while update the conversation ' + req.body.id
+            details: err.message || 'Error while updating the conversation ' + req.body.id
           }
         });
       }

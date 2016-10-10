@@ -63,8 +63,33 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function canUpdate() {
+  function canUpdate(req, res, next) {
+    lib.conversation.permission.userCanUpdate(req.user, req.conversation).then(updatable => {
+      if (updatable) {
+        return next();
+      }
 
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: `Can not update conversation ${req.conversation.id}`
+        }
+      });
+
+    }, err => {
+      const msg = `Error while checkcing update rights on conversation ${req.conversation.id}`;
+
+      logger.error(msg, err);
+
+      return res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: msg
+        }
+      });
+    });
   }
 
   function canWrite() {
