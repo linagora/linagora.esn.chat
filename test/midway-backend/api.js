@@ -441,6 +441,14 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/messages/:id', function() {
+    it('should 404 when message does not exist', function(done) {
+      request(app.express)
+        .get('/api/messages/' + new mongoose.Types.ObjectId())
+        .expect('Content-Type', /json/)
+        .expect(404)
+        .end(done);
+    });
+
     it('should return the message', function(done) {
       var channelId;
 
