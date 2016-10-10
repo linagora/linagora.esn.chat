@@ -10,9 +10,9 @@ module.exports = function(dependencies, lib) {
   };
 
   function getForConversation(req, res) {
-    lib.message.getForConversation(req.params.id, {}, (err, results) => {
+    lib.message.getForConversation(req.conversation._id, {}, (err, results) => {
       if (err) {
-        logger.error('Error while getting messages for conversation %s', req.params.id, err);
+        logger.error('Error while getting messages for conversation %s', req.conversation._id, err);
 
         return res.status(500).json({
           error: {

@@ -286,14 +286,122 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/conversations/:channel/messages', function() {
-    it('should return an array of messages that are not moderated from a conversation', function(done) {
+  describe('GET /api/conversations/:id/messages', function() {
+
+    it('should 404 when conversation does not exist', function(done) {
+      request(app.express)
+        .get('/api/conversations/' + new mongoose.Types.ObjectId() + '/messages')
+        .expect('Content-Type', /json/)
+        .expect(404)
+        .end(done);
+    });
+
+    it('should 403 when private conversation and user is not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId()]
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .get('/api/conversations/' + conversation._id + '/messages')
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+        });
+    });
+
+    it('should 200 with the message list when private conversation and user is member', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId]
+      }).then(function(channels) {
+        channelId = channels._id;
+        return Q.denodeify(app.lib.message.create)({
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function() {
+        return Q.denodeify(app.lib.message.create)({
+          channel: channelId,
+          text: 'Foo bar',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function() {
+        request(app.express)
+          .get('/api/conversations/' + channelId + '/messages')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.length).to.equal(2);
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should 403 when collaboration conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .get('/api/conversations/' + conversation._id + '/messages')
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+        });
+    });
+
+    it('should 200 with messages', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL
       }).then(function(channels) {
         channelId = channels._id;
+        return Q.denodeify(app.lib.message.create)({
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function() {
+        return Q.denodeify(app.lib.message.create)({
+          channel: channelId,
+          text: 'Foo bar',
+          type: 'text',
+          creator: userId
+        });
+      }).then(function() {
+        request(app.express)
+          .get('/api/conversations/' + channelId + '/messages')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.length).to.equal(2);
+            done();
+          });
+      }).catch(done);
+    });
+
+    it('should 200 with messages which are not moderated', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.CHANNEL
+      }).then(function(channels) {
+        channelId = channels._id;
+
         return Q.denodeify(app.lib.message.create)({
           channel: channelId,
           text: 'hello world',
@@ -319,6 +427,7 @@ describe('The chat API', function() {
             }
 
             var expected = JSON.parse(JSON.stringify(mongoResult));
+
             expected.creator = {
               username: user.username,
               _id: user._id + '',
