@@ -11,6 +11,7 @@ module.exports = function(dependencies, lib) {
   const logger = dependencies('logger');
 
   return {
+    get,
     getById,
     markAllMessageOfAConversationReaded,
     findMyConversationByType,
@@ -26,6 +27,10 @@ module.exports = function(dependencies, lib) {
     updateTopic,
     update
   };
+
+  function get(req, res) {
+    res.status(200).json(req.conversation);
+  }
 
   function getById(req, res) {
     lib.conversation.getById(req.params.id, (err, result) => {

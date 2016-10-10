@@ -103,6 +103,20 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/conversations/:id', function() {
+    it('should 404 when conversation does not exist', function(done) {
+      request(app.express)
+        .get('/api/conversations/' + new mongoose.Types.ObjectId())
+        .expect('Content-Type', /json/)
+        .expect(404)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body.error.details).to.match(/No such conversation/);
+          done();
+        });
+    });
+
     it('should return the given conversation', function(done) {
       app.lib.conversation.create({
         type: CONVERSATION_TYPE.CHANNEL

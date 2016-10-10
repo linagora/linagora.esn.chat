@@ -4,12 +4,13 @@ module.exports = function(dependencies, lib, router) {
 
   const authorizationMW = dependencies('authorizationMW');
   const controller = require('../controllers/conversation')(dependencies, lib);
+  const middleware = require('../middlewares/conversation')(dependencies, lib);
   const messageController = require('../controllers/message')(dependencies, lib);
 
   router.get('/conversations', authorizationMW.requiresAPILogin, controller.list);
   router.post('/conversations', authorizationMW.requiresAPILogin, controller.create);
 
-  router.get('/conversations/:id', authorizationMW.requiresAPILogin, controller.getById);
+  router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, controller.get);
   router.put('/conversations/:id', authorizationMW.requiresAPILogin, controller.update);
   router.delete('/conversations/:id', authorizationMW.requiresAPILogin, controller.remove);
 
