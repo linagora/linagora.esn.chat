@@ -1,11 +1,10 @@
 'use strict';
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var _ = require('lodash');
+const _ = require('lodash');
+const expect = require('chai').expect;
+const sinon = require('sinon');
 
-describe('The message controller', function() {
+describe('The message middleware', function() {
 
   var lib, err, result;
 
@@ -25,15 +24,16 @@ describe('The message controller', function() {
     };
   });
 
-  function getController(dependencies, lib) {
-    return require('../../../../backend/webserver/controllers/message')(dependencies, lib);
+  function getMiddleware(dependencies, lib) {
+    return require('../../../../backend/webserver/middlewares/message')(dependencies, lib);
   }
 
-  describe('The getForConversation function', function() {
+  describe('The load function', function() {
 
     function createMessage(base, timestamp) {
       var msg = _.cloneDeep(base);
       var jsonMsg = _.cloneDeep(base);
+
       msg.creator = {
         password: 'yolo'
       };
@@ -53,45 +53,46 @@ describe('The message controller', function() {
 
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      var channelId = 1;
-      var req = {conversation: {_id: channelId}};
-      var controller = getController(this.moduleHelpers.dependencies, lib);
+      var messageId = 1;
+      var req = {params: {id: messageId}};
+      var middleware = getMiddleware(this.moduleHelpers.dependencies, lib);
 
-      controller.getForConversation(req, {
+      middleware.load(req, {
         status: function(code) {
           expect(code).to.equal(500);
 
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.message.getForConversation).to.have.been.calledWith(channelId);
+              expect(lib.message.getById).to.have.been.calledWith(messageId);
               done();
             }
           };
         }
+      }, function() {
+        done(new Error('Should not be called'));
       });
     });
 
-    it('should send back HTTP 200 with the lib.getForConversation result', function(done) {
-      var channelId = 1;
+    it('should call next with the lib.getById result in req.message', function(done) {
+      var messageId = 1;
       var msg1 = createMessage({text: 'foo'}, 156789);
-      var msg2 = createMessage({text: 'bar'}, 2345677);
-      var req = {conversation: {_id: channelId}};
-      var controller = getController(this.moduleHelpers.dependencies, lib);
+      var req = {params: {id: messageId}};
+      var middleware = getMiddleware(this.moduleHelpers.dependencies, lib);
 
-      result = [msg1.dest, msg2.dest];
-      controller.getForConversation(req, {
-        status: function(code) {
-          expect(code).to.equal(200);
-
+      result = msg1.dest;
+      middleware.load(req, {
+        status: function() {
           return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
-              expect(lib.message.getForConversation).to.have.been.calledWith(channelId);
-              done();
+            json: function() {
+              done(new Error('Should not be called'));
             }
           };
         }
+      }, function() {
+        expect(req.message).to.shallowDeepEqual(msg1.dest);
+        expect(lib.message.getById).to.have.been.calledWith(messageId);
+        done();
       });
     });
   });

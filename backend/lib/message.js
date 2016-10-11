@@ -66,6 +66,10 @@ module.exports = function(dependencies) {
     }
 
     function markAsRead(message, conversation, callback) {
+      if (!conversation) {
+        return callback(null, message);
+      }
+
       markAllAsRead(message.creator, conversation, err => {
         callback(err, message);
       });

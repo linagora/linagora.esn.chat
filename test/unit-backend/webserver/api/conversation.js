@@ -132,7 +132,7 @@ describe('The conversation controller', function() {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -150,7 +150,7 @@ describe('The conversation controller', function() {
     it('shoud send back HTTP 204 when lib.leaveConversation success', function(done) {
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
 
@@ -170,7 +170,7 @@ describe('The conversation controller', function() {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -188,7 +188,7 @@ describe('The conversation controller', function() {
     it('shoud send back HTTP 204 when lib.joinConversation success', function(done) {
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
 
@@ -474,25 +474,6 @@ describe('The conversation controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
-              done();
-            }
-          };
-        }
-      });
-    });
-
-    it('should send back HTTP 403 if request try to create a commnity conversation', function(done) {
-      err = new Error('failed');
-      let req = {body: {type: CONVERSATION_TYPE.COLLABORATION}, query: {}, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
-
-      controller.create(req, {
-        status: function(code) {
-          expect(code).to.equal(403);
-
-          return {
-            json: function(json) {
-              expect(json).to.shallowDeepEqual({error: {code: 403}});
               done();
             }
           };

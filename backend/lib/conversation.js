@@ -25,6 +25,7 @@ module.exports = function(dependencies) {
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
   const messageLib = require('./message')(dependencies);
+  const permission = require('./permission/conversation')(dependencies);
 
   return {
     addMember,
@@ -34,6 +35,7 @@ module.exports = function(dependencies) {
     getChannels,
     list,
     moderate,
+    permission,
     remove,
     removeMember,
     update,
@@ -59,8 +61,8 @@ module.exports = function(dependencies) {
     Conversation.findById(channelId).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function remove(userId, channelId, callback) {
-    Conversation.findOneAndRemove({_id: channelId, members: userId}, (err, result) => {
+  function remove(channelId, callback) {
+    Conversation.findOneAndRemove({_id: channelId}, (err, result) => {
       if (err) {
         return callback(err);
       }

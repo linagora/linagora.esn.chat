@@ -11,6 +11,7 @@ module.exports = function(dependencies, lib) {
   const logger = dependencies('logger');
 
   return {
+    get,
     getById,
     markAllMessageOfAConversationReaded,
     findMyConversationByType,
@@ -26,6 +27,10 @@ module.exports = function(dependencies, lib) {
     updateTopic,
     update
   };
+
+  function get(req, res) {
+    res.status(200).json(req.conversation);
+  }
 
   function getById(req, res) {
     lib.conversation.getById(req.params.id, (err, result) => {
@@ -46,19 +51,9 @@ module.exports = function(dependencies, lib) {
   }
 
   function remove(req, res) {
-    if (!req.params.id) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'You should provide the conversation id'
-        }
-      });
-    }
-
-    lib.conversation.remove(req.user._id, req.params.id, (err, numDeleted) => {
+    lib.conversation.remove(req.conversation._id, err => {
       if (err) {
-        logger.error('Error while deleting conversation %s', req.params.id, err);
+        logger.error('Error while deleting conversation %s', req.conversation._id, err);
 
         return res.status(500).json({
           error: {
@@ -68,18 +63,7 @@ module.exports = function(dependencies, lib) {
           }
         });
       }
-
-      if (!numDeleted) {
-        return res.status(404).json({
-          error: {
-            code: 500,
-            message: 'Not found',
-            details: 'Conversation not found'
-          }
-        });
-      }
-
-      res.status(200).end();
+      res.status(204).end();
     });
   }
 
@@ -96,16 +80,6 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    if (req.body.type === CONVERSATION_TYPE.COLLABORATION) {
-      return res.status(403).json({
-        error: {
-          code: 403,
-          message: 'Forbidden',
-          details: 'You can not create a collaboration conversation'
-        }
-      });
-    }
-
     lib.conversation.find({type: CONSTANTS.PRIVATE, exactMembersMatch: true, name: req.body.name ? req.body.name : null, members: members}, (err, conversations) => {
       if (err) {
         logger.error('Error while searching conversation', err);
@@ -120,45 +94,45 @@ module.exports = function(dependencies, lib) {
       }
 
       if (conversations && conversations.length > 0) {
-        res.status(201).json(conversations[0]);
-      } else {
-        let conversation = {
-          name: req.body.name,
-          type: req.body.type,
-          creator: req.user,
-          topic: {
-            value: req.body.topic,
-            creator: req.user
-          },
-          avatar: req.body.avatar,
-          members: members,
-          purpose: {
-            value: req.body.purpose,
-            creator: req.user
-          }
-        };
-
-        lib.conversation.create(conversation, (err, result) => {
-          logger.error('Error while creating conversation', err);
-
-          if (err) {
-            return res.status(500).json({
-              error: {
-                code: 500,
-                message: 'Server Error',
-                details: err.message || 'Error while creating channel'
-              }
-            });
-          }
-
-          res.status(201).json(result);
-        });
+        return res.status(201).json(conversations[0]);
       }
+
+      let conversation = {
+        name: req.body.name,
+        type: req.body.type,
+        creator: req.user,
+        topic: {
+          value: req.body.topic,
+          creator: req.user
+        },
+        avatar: req.body.avatar,
+        members: members,
+        purpose: {
+          value: req.body.purpose,
+          creator: req.user
+        }
+      };
+
+      lib.conversation.create(conversation, (err, result) => {
+        logger.error('Error while creating conversation', err);
+
+        if (err) {
+          return res.status(500).json({
+            error: {
+              code: 500,
+              message: 'Server Error',
+              details: err.message || 'Error while creating channel'
+            }
+          });
+        }
+
+        res.status(201).json(result);
+      });
     });
   }
 
   function markAllMessageOfAConversationReaded(req, res) {
-    lib.message.markAllAsReadById(req.user._id, req.params.id, err => {
+    lib.message.markAllAsReadById(req.user._id, req.conversation._id, err => {
       if (err) {
         logger.error('Error while marking messages as read', err);
 
@@ -176,15 +150,15 @@ module.exports = function(dependencies, lib) {
   }
 
   function joinConversation(req, res) {
-    lib.conversation.addMember(req.params.id, req.user._id, err => {
+    lib.conversation.addMember(req.conversation._id, req.additionalUser._id, err => {
       if (err) {
-        logger.error('Error while joining conversation %s', req.params.id, err);
+        logger.error('Error while joining conversation %s', req.conversation._id, err);
 
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while joining channel'
+            details: 'Error while joining channel'
           }
         });
       }
@@ -194,15 +168,15 @@ module.exports = function(dependencies, lib) {
   }
 
   function leaveConversation(req, res) {
-    lib.conversation.removeMember(req.params.id, req.user._id, err => {
-      logger.error('Error while leaving conversation %s', req.params.id, err);
+    lib.conversation.removeMember(req.conversation._id, req.additionalUser._id, err => {
+      logger.error('Error while leaving conversation %s', req.conversation._id, err);
 
       if (err) {
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while leaving channel'
+            details: 'Error while leaving channel'
           }
         });
       }
@@ -306,17 +280,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function update(req, res) {
-    if (!req.body.conversation) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'You should provide the conversation id'
-        }
-      });
-    }
-
-    if (!req.body.modifications) {
+    if (!req.body) {
       return res.status(400).json({
         error: {
           code: 400,
@@ -326,7 +290,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.conversation.update(req.body.conversation, req.body.modifications, (err, conversation) => {
+    lib.conversation.update(req.conversation._id, req.body, (err, conversation) => {
       if (err) {
         logger.error('Error while updating conversation', err);
 
@@ -334,7 +298,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while update the conversation ' + req.body.id
+            details: err.message || 'Error while updating the conversation ' + req.body.id
           }
         });
       }

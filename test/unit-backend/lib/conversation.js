@@ -527,8 +527,8 @@ describe('The linagora.esn.chat conversation lib', function() {
         })
       };
 
-      require('../../../backend/lib/conversation')(dependencies, lib).remove('userId', 'channelId', function() {
-        expect(modelsMock.ChatConversation.findOneAndRemove).to.have.been.calledWith({_id: 'channelId', members: 'userId'});
+      require('../../../backend/lib/conversation')(dependencies, lib).remove('channelId', function() {
+        expect(modelsMock.ChatConversation.findOneAndRemove).to.have.been.calledWith({_id: 'channelId'});
         expect(modelsMock.ChatMessage.remove).to.have.been.calledWith({channel: 'channelId'});
         expect(channelDeletionTopic.publish).to.have.been.calledWith(deleteResult);
       });
