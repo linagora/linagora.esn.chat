@@ -6,17 +6,20 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies) {
 
-  let mongoose = dependencies('db').mongo.mongoose;
-  let ObjectId = mongoose.Schema.ObjectId;
+  const mongoose = dependencies('db').mongo.mongoose;
+  const ObjectId = mongoose.Schema.ObjectId;
 
   let ConversationSchema = new mongoose.Schema({
     name: {type: String},
-    type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COMMUNITY], required: true, index: true},
+    type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COLLABORATION], required: true, index: true},
     creator: {type: ObjectId, ref: 'User'},
     avatar: ObjectId,
     isNotRead: {type: Boolean},
     members: [{type: ObjectId, ref: 'User', index: true}],
-    community: {type: ObjectId, ref: 'Community', index: true, unique: true, sparse: true},
+    collaboration: {
+      id: {type: String},
+      objectType: {type: String}
+    },
     moderate: {type: Boolean, default: false},
     topic: {
       value: {type: String},

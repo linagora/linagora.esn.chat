@@ -192,7 +192,7 @@ describe('The Chat WS server', function() {
       return _.isFunction(callback);
     }));
 
-    var data = {conversation: {type: 'community', members: [{_id: 'memberId'}]}, deleteMembers: [{_id: 'deleteId'}]};
+    var data = {conversation: {type: 'collaboration', members: [{_id: 'memberId'}]}, deleteMembers: [{_id: 'deleteId'}]};
     callbackOnConversationUpdateTopic(data);
 
     expect(socketOne.emit).to.have.been.calledWith(CONVERSATION_UPDATE, data.conversation);

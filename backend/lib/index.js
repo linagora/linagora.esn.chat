@@ -12,7 +12,7 @@ module.exports = function(dependencies) {
   const utils = require('./utils')(dependencies);
   const message = require('./message')(dependencies);
   const conversation = require('./conversation')(dependencies);
-  const community = require('./community')(dependencies);
+  const collaboration = require('./collaboration')(dependencies);
   const userState = require('./user-state')(dependencies);
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies);
@@ -25,7 +25,7 @@ module.exports = function(dependencies) {
   }
 
   return {
-    community,
+    collaboration,
     constants,
     conversation,
     listener,

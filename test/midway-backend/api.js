@@ -237,12 +237,12 @@ describe('The chat API', function() {
         });
     });
 
-    it('should fail with a 403 if it is a community conversation', function(done) {
+    it('should fail with a 403 if it is a collabotation conversation', function(done) {
       request(app.express)
         .post('/api/conversations')
         .type('json')
         .send({
-          type: CONVERSATION_TYPE.COMMUNITY,
+          type: CONVERSATION_TYPE.COLLABORATION,
           name: 'name',
           topic: 'topic',
           purpose: 'purpose'
@@ -561,25 +561,25 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/community', function() {
-    it('should return non moderated community conversations with given participants parameters', function(done) {
+  describe('GET /api/collaboration', function() {
+    it('should return non moderated collaboration conversations with given participants parameters', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
       var channel;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
         moderate: true,
         members: [userId, otherMember1, otherMember2]
       }).then(function() {
         return Q.denodeify(app.lib.conversation.create)({
-          type: CONVERSATION_TYPE.COMMUNITY,
+          type: CONVERSATION_TYPE.COLLABORATION,
           members: [userId, otherMember1, otherMember2]
         });
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/community?members=' + otherMember1.toString() + '&members=' + otherMember2.toString())
+          .get('/api/collaboration?members=' + otherMember1.toString() + '&members=' + otherMember2.toString())
           .expect(200)
           .end(function(err, res) {
 
@@ -592,16 +592,16 @@ describe('The chat API', function() {
       }).catch(done);
     });
 
-    it('should return community conversations with the given id is provided', function(done) {
+    it('should return collaboration conversations with the given id is provided', function(done) {
       var channel;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
         members: [userId],
-        community: new mongoose.Types.ObjectId()
+        collaboration: {id: '1', objectType: 'community'}
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/community?id=' + channel.community)
+          .get('/api/collaboration?id=' + channel.collaboration.id + '&objectType=' + channel.collaboration.objectType)
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -615,45 +615,47 @@ describe('The chat API', function() {
 
     it('should fail if no id neither members attribute are provided', function() {
       request(app.express)
-        .get('/api/community')
+        .get('/api/collaboration')
         .expect(400);
     });
 
     it('should fail if both members and id attibute are provided', function() {
       request(app.express)
-        .get('/api/community?members=babla&id=id')
+        .get('/api/collaboration?members=babla&id=id')
         .expect(400);
     });
 
-    it('should return 404 if user try to obtain a community where he is not present', function(done) {
+    it('should return 404 if user try to obtain a collaboration where he is not present', function(done) {
       var channel;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: []
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/community?id=' + channel._id)
+          .get('/api/collaboration?id=' + channel.collaboration.id + '&objectType=' + channel.collaboration.objectType)
           .expect(404, done);
       }).catch(done);
     });
 
-    it('should 404 if the community does not exist', function() {
+    it('should 404 if the collaboration does not exist', function() {
       request(app.express)
-        .get('/api/community?id=idonotexist')
+        .get('/api/collaboration?id=idonotexist&objectType=notatype')
         .expect(404);
     });
 
-    it('not return community conversations with more than given participants parameters', function(done) {
+    it('not return collaboration conversations with more than given participants parameters', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [userId, otherMember1, otherMember2]
-      }).then(function(mongoResponse) {
+      }).then(function() {
         request(app.express)
-          .get('/api/community?members=' + otherMember1.toString())
+          .get('/api/collaboration?members=' + otherMember1.toString())
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -670,26 +672,28 @@ describe('The chat API', function() {
       var otherMember2 = new mongoose.Types.ObjectId();
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [userId, otherMember1, otherMember2]
-      }).then(function(mongoResponse) {
+      }).then(function() {
         request(app.express)
-          .get('/api/community')
+          .get('/api/collaboration')
           .expect(400, done);
       }).catch(done);
     });
 
-    it('should not return community conversations without the current user', function(done) {
+    it('should not return collaboration conversations without the current user', function(done) {
       var otherMember = new mongoose.Types.ObjectId();
 
       var channel;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [otherMember]
       }).then(function(mongoResponse) {
         channel = mongoResponse[0];
         request(app.express)
-          .get('/api/community?members=' + otherMember.toString())
+          .get('/api/collaboration?members=' + otherMember.toString())
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -833,7 +837,8 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [userId, otherMember1, otherMember2],
         timestamps: {creation: new Date(2e6)}
       }).then(function(mongoResponse) {
@@ -895,7 +900,8 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [userId, otherMember1, otherMember2],
         last_message: {date: new Date(1469605336000)}
       }).then(function(mongoResponse) {
@@ -926,7 +932,8 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [userId, otherMember1, otherMember2]
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
@@ -973,11 +980,12 @@ describe('The chat API', function() {
       }).then(function(mongoResponse) {
         channel2 = mongoResponse;
         return Q.denodeify(app.lib.conversation.create)({
-          type: CONVERSATION_TYPE.COMMUNITY,
+          type: CONVERSATION_TYPE.COLLABORATION,
+          collaboration: {id: '1', objectType: 'community'},
           members: [userId, otherMember1, otherMember2],
           timestamps: {creation: new Date(3e6)}
         });
-      }).then(function(mongoResponse) {
+      }).then(function() {
         request(app.express)
           .get('/api/user/conversations?type=private&type=channel')
           .expect(200)
@@ -992,33 +1000,36 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/user/conversations/community', function() {
-    it('should return all community conversations with me inside that are not moderated', function(done) {
+  describe('GET /api/user/conversations/collaboration', function() {
+    it('should return all collaboration conversations with me inside that are not moderated', function(done) {
       var otherMember1 = new mongoose.Types.ObjectId();
       var otherMember2 = new mongoose.Types.ObjectId();
 
       var channel;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COMMUNITY,
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: '1', objectType: 'community'},
         members: [otherMember1, otherMember2]
       })
       .then(function(mongoResponse) {
         return Q.denodeify(app.lib.conversation.create)({
-          type: CONVERSATION_TYPE.COMMUNITY,
+          type: CONVERSATION_TYPE.COLLABORATION,
+          collaboration: {id: '2', objectType: 'community'},
           moderate: true,
           members: [userId, otherMember1, otherMember2]
         });
       })
       .then(function(mongoResponse) {
         return Q.denodeify(app.lib.conversation.create)({
-          type: CONVERSATION_TYPE.COMMUNITY,
+          type: CONVERSATION_TYPE.COLLABORATION,
+          collaboration: {id: '3', objectType: 'community'},
           members: [userId, otherMember1, otherMember2]
         });
       })
       .then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/user/conversations/community')
+          .get('/api/user/conversations/collaboration')
           .expect(200)
           .end(function(err, res) {
             if (err) {

@@ -16,9 +16,6 @@ describe('The community controller', function() {
 
     lib = {
       conversation: {
-        getConversationByCommunityId: sinon.spy(function(id, callback) {
-          return callback(err, result);
-        }),
         getChannels: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
@@ -42,15 +39,15 @@ describe('The community controller', function() {
   });
 
   function getController(dependencies, lib) {
-    return require('../../../../backend/webserver/controllers/community')(dependencies, lib);
+    return require('../../../../backend/webserver/controllers/collaboration')(dependencies, lib);
   }
 
-  describe('The findMyCommunityConversations', function() {
+  describe('The findMyCollaborationConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findMyCommunityConversations({user: {_id: 'id'}}, {
+      controller.findMyCollaborationConversations({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -69,13 +66,13 @@ describe('The community controller', function() {
       result = {};
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findMyCommunityConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.findMyCollaborationConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function(json) {
-              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.COMMUNITY, ignoreMemberFilterForChannel: true, members: ['id']});
+              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.COLLABORATION, ignoreMemberFilterForChannel: true, members: ['id']});
               expect(json).to.equal(result);
               done();
             }

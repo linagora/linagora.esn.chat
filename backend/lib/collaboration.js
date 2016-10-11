@@ -11,15 +11,15 @@ module.exports = function(dependencies, lib) {
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
 
   return {
-    getConversationByCommunityId,
+    getConversationByCollaboration,
     updateConversation
   };
 
-  function getConversationByCommunityId(communityId, callback) {
-    Conversation.findOne({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}).populate('members', SKIP_FIELDS.USER).exec(callback);
+  function getConversationByCollaboration(collaborationTuple, callback) {
+    Conversation.findOne({type: CONVERSATION_TYPE.COLLABORATION, collaboration: collaborationTuple}).populate('members', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function updateConversation(communityId, modifications, callback) {
+  function updateConversation(collaborationTuple, modifications, callback) {
 
     let mongoModifications = {};
 
@@ -41,7 +41,7 @@ module.exports = function(dependencies, lib) {
       mongoModifications.$set = {name: modifications.title};
     }
 
-    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COMMUNITY, community: communityId}, mongoModifications, (err, conversation) => {
+    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COLLABORATION, collaboration: collaborationTuple}, mongoModifications, (err, conversation) => {
       if (err) {
         return callback(err);
       }

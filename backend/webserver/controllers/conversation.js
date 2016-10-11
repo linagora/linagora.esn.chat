@@ -96,12 +96,12 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    if (req.body.type === CONVERSATION_TYPE.COMMUNITY) {
+    if (req.body.type === CONVERSATION_TYPE.COLLABORATION) {
       return res.status(403).json({
         error: {
           code: 403,
           message: 'Forbidden',
-          details: 'You can not create a community conversation'
+          details: 'You can not create a collaboration conversation'
         }
       });
     }
