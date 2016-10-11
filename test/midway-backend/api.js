@@ -13,7 +13,7 @@ var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The chat API', function() {
 
-  var deps, mongoose, userId, user, app, redisClient;
+  var deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient;
 
   function dependencies(name) {
     return deps[name];
@@ -26,12 +26,16 @@ describe('The chat API', function() {
     mongoose.Promise = Q.Promise;
     mongoose.connect(this.testEnv.mongoUrl);
     userId = mongoose.Types.ObjectId();
+    anotherUserId = mongoose.Types.ObjectId();
     redisClient = redis.createClient(this.testEnv.redisPort);
 
     deps = {
       logger: require('../fixtures/logger'),
       user: {
-        moderation: {registerHandler: _.constant()}
+        moderation: {registerHandler: _.constant()},
+        get: function(id, callback) {
+          mongoose.model('User').findOne({_id: id}, callback);
+        }
       },
       pubsub: pubsub,
       db: {
@@ -51,7 +55,7 @@ describe('The chat API', function() {
           };
           next();
         }
-      },
+      }
     };
 
     app = this.helpers.loadApplication(dependencies);
@@ -64,7 +68,16 @@ describe('The chat API', function() {
       lastname: 'Cartman'
     });
 
-    user.save(done);
+    anotherUser = new UserSchema({
+      _id: anotherUserId,
+      firstname: 'Chuck',
+      username: 'Chuck Norris',
+      lastname: 'Norris'
+    });
+
+    Q.all([user.save(), anotherUser.save()]).then(() => {
+      done();
+    }, done);
   });
 
   afterEach(function(done) {
@@ -1038,21 +1051,48 @@ describe('The chat API', function() {
     });
   });
 
-  describe('PUT /api/conversations/:id/members', function() {
-    it('should add the user in members of the conversation', function(done) {
+  describe('PUT /api/conversations/:id/members/:user_id', function() {
+    it('should 404 when conversation is not found', function(done) {
+      request(app.express)
+        .put('/api/conversations/' + new mongoose.Types.ObjectId() + '/members')
+        .expect(404)
+        .end(done);
+    });
+
+    it('should 404 when given user is not found', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.CHANNEL
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + result._id + '/members/' + new mongoose.Types.ObjectId())
+          .expect(404)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.error.details).to.match(/Can not find user/);
+            done();
+          });
+      });
+    });
+
+    it('should be able to add himself to channel conversation', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL
-      }).then(function(mongoResponse) {
-        channelId = mongoResponse._id;
+      }).then(function(result) {
+        channelId = result._id;
+
         return Q.denodeify(function(callback) {
           request(app.express)
-            .put('/api/conversations/' + channelId + '/members')
+            .put('/api/conversations/' + channelId + '/members/' + userId)
             .expect(204)
             .end(callback);
         })();
-      }).then(function(res) {
+      }).then(function() {
         return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
         expect(channel.members).to.shallowDeepEqual({
@@ -1062,31 +1102,295 @@ describe('The chat API', function() {
         done();
       }).catch(done);
     });
-  });
 
-  describe('DELETE /api/conversations/:id/members', function() {
+    it('should not be able to add another member to a channel conversation when not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.CHANNEL
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + result._id + '/members/' + anotherUserId)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not join conversation/);
+            done();
+          });
+        });
+    });
 
-    it('it should delete the user in members of the conversation', function(done) {
+    it('should be able to add another member to a channel conversation when member', function(done) {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.CHANNEL,
         members: [userId]
-      }).then(function(mongoResponse) {
-        channelId = mongoResponse._id;
+      }).then(function(result) {
+        channelId = result._id;
         return Q.denodeify(function(callback) {
           request(app.express)
-            .delete('/api/conversations/' + channelId + '/members')
+            .put('/api/conversations/' + channelId + '/members/' + anotherUserId)
             .expect(204)
             .end(callback);
         })();
       }).then(function(res) {
         return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
-        expect(channel.members.length).to.deep.equal(0);
+        expect(channel.members).to.shallowDeepEqual({
+          0: {_id: String(userId)},
+          1: {_id: String(anotherUserId)},
+          length: 2
+        });
         done();
       }).catch(done);
+    });
 
+    it('should 404 when given user is not found and private conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + result._id + '/members/' + new mongoose.Types.ObjectId())
+          .expect(404)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.error.details).to.match(/Can not find user/);
+            done();
+          });
+      });
+    });
+
+    it('should not be able to add another member to a private conversation when not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: []
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + result._id + '/members/' + anotherUserId)
+          //.expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not join conversation/);
+            done();
+          });
+        });
+    });
+
+    it('should be able to add another member to a private conversation when member', function(done) {
+      var channelId;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId]
+      }).then(function(result) {
+        channelId = result._id;
+        return Q.denodeify(function(callback) {
+          request(app.express)
+            .put('/api/conversations/' + channelId + '/members/' + anotherUserId)
+            .expect(204)
+            .end(callback);
+        })();
+      }).then(function(res) {
+        return Q.denodeify(app.lib.conversation.getById)(channelId);
+      }).then(function(channel) {
+        expect(channel.members).to.shallowDeepEqual({
+          0: {_id: String(userId)},
+          1: {_id: String(anotherUserId)},
+          length: 2
+        });
+        done();
+      }).catch(done);
+    });
+
+    it('should not be able to join a collaboration conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .put('/api/conversations/' + result._id + '/members/' + userId)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not join conversation/);
+            done();
+          });
+      });
+    });
+  });
+
+  describe('DELETE /api/conversations/:id/members/:user_id', function() {
+
+    it('should 404 when conversation is not found', function(done) {
+      request(app.express)
+        .delete('/api/conversations/' + new mongoose.Types.ObjectId() + '/members/' + new mongoose.Types.ObjectId())
+        .expect(404)
+        .end(done);
+    });
+
+    it('should not be able to remove a member when not member of a channel conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [anotherUserId]
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + anotherUserId)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.error.details).to.match(/Can not leave conversation/);
+            done();
+          });
+      });
+    });
+
+    it('should be able to remove another member when member of a channel conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [userId, anotherUserId]
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + anotherUserId)
+          .expect(204)
+          .end(function(err) {
+            if (err) {
+              return done(err);
+            }
+            Q.denodeify(app.lib.conversation.getById)(result._id).then(function(channel) {
+              expect(channel.members).to.shallowDeepEqual({
+                0: {_id: String(userId)},
+                length: 1
+              });
+              done();
+            }, done);
+          });
+        });
+    });
+
+    it('should be able to remove himself when member of a channel conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [userId, anotherUserId]
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + userId)
+          .expect(204)
+          .end(function(err) {
+            if (err) {
+              return done(err);
+            }
+            Q.denodeify(app.lib.conversation.getById)(result._id).then(function(channel) {
+              expect(channel.members).to.shallowDeepEqual({
+                0: {_id: String(anotherUserId)},
+                length: 1
+              });
+              done();
+            }, done);
+          });
+        });
+    });
+
+    it('should be able to remove a user when creator of a private conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        creator: userId,
+        members: [userId, anotherUserId]
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + anotherUserId)
+          .expect(204)
+          .end(function(err) {
+            if (err) {
+              return done(err);
+            }
+            Q.denodeify(app.lib.conversation.getById)(result._id).then(function(channel) {
+              expect(channel.members).to.shallowDeepEqual({
+                0: {_id: String(userId)},
+                length: 1
+              });
+              done();
+            }, done);
+          });
+        });
+    });
+
+    it('should not be able to remove a user when not creator of a private conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId, anotherUserId]
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + anotherUserId)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not leave conversation/);
+            done();
+          });
+        });
+    });
+
+    it('should be able to leave a private conversation by himself', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [userId, anotherUserId]
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + userId)
+          .expect(204)
+          .end(function(err) {
+            if (err) {
+              return done(err);
+            }
+            Q.denodeify(app.lib.conversation.getById)(result._id).then(function(channel) {
+              expect(channel.members).to.shallowDeepEqual({
+                0: {_id: String(anotherUserId)},
+                length: 1
+              });
+              done();
+            }, done);
+          });
+        });
+    });
+
+    it('should not be able to leave a collaboration conversation', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION,
+      }, function(err, result) {
+        err && done(err);
+        request(app.express)
+          .delete('/api/conversations/' + result._id + '/members/' + userId)
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not leave conversation/);
+            done();
+          });
+        });
     });
   });
 

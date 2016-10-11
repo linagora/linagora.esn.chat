@@ -132,7 +132,7 @@ describe('The conversation controller', function() {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -150,7 +150,7 @@ describe('The conversation controller', function() {
     it('shoud send back HTTP 204 when lib.leaveConversation success', function(done) {
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.leaveConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.leaveConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
 
@@ -170,7 +170,7 @@ describe('The conversation controller', function() {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -188,7 +188,7 @@ describe('The conversation controller', function() {
     it('shoud send back HTTP 204 when lib.joinConversation success', function(done) {
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.joinConversation({params: {id: 'channelId'}, user: {_id: 'id'}}, {
+      controller.joinConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(204);
 

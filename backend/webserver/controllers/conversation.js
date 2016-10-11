@@ -150,15 +150,15 @@ module.exports = function(dependencies, lib) {
   }
 
   function joinConversation(req, res) {
-    lib.conversation.addMember(req.params.id, req.user._id, err => {
+    lib.conversation.addMember(req.conversation._id, req.additionalUser._id, err => {
       if (err) {
-        logger.error('Error while joining conversation %s', req.params.id, err);
+        logger.error('Error while joining conversation %s', req.conversation._id, err);
 
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while joining channel'
+            details: 'Error while joining channel'
           }
         });
       }
@@ -168,15 +168,15 @@ module.exports = function(dependencies, lib) {
   }
 
   function leaveConversation(req, res) {
-    lib.conversation.removeMember(req.params.id, req.user._id, err => {
-      logger.error('Error while leaving conversation %s', req.params.id, err);
+    lib.conversation.removeMember(req.conversation._id, req.additionalUser._id, err => {
+      logger.error('Error while leaving conversation %s', req.conversation._id, err);
 
       if (err) {
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while leaving channel'
+            details: 'Error while leaving channel'
           }
         });
       }

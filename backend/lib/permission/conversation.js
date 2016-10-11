@@ -23,11 +23,88 @@ module.exports = function(dependencies) {
     collaboration: userCanRemoveCollaboration
   };
 
+  let joinPermissions = {
+    channel: userCanJoinChannel,
+    private: userCanJoinPrivate,
+    collaboration: userCanJoinCollaboration
+  };
+
+  let leavePermissions = {
+    channel: userCanLeaveChannel,
+    private: userCanLeavePrivate,
+    collaboration: userCanLeaveCollaboration
+  };
+
   return {
+    userCanJoin,
+    userCanLeave,
     userCanRead,
     userCanRemove,
     userCanUpdate
   };
+
+  function userCanJoin(actor, user, conversation) {
+    const joinPermission = joinPermissions[conversation.type];
+
+    if (!joinPermission) {
+      return Q.reject(new Error(`Can not find permission checked for type ${conversation.type}`));
+    }
+
+    return joinPermission(actor, user, conversation);
+  }
+
+  function userCanJoinChannel(actor, user, conversation) {
+    // 1. A user can add himself
+    if (actor._id.equals(user._id)) {
+      return Q.when(true);
+    }
+
+    // 2. anyone who is member of the channel can add anyone to the conversation
+    return userIsInConversationMemberList(actor, conversation);
+  }
+
+  function userCanJoinPrivate(actor, user, conversation) {
+    // only a member can add another user to a private conversation
+    return userIsInConversationMemberList(actor, conversation);
+  }
+
+  function userCanJoinCollaboration(actor, user, conversation) {
+    return Q.when(false);
+  }
+
+  function userCanLeave(actor, user, conversation) {
+    const leavePermission = leavePermissions[conversation.type];
+
+    if (!leavePermission) {
+      return Q.reject(new Error(`Can not find permission checked for type ${conversation.type}`));
+    }
+
+    return leavePermission(actor, user, conversation);
+  }
+
+  function userCanLeaveChannel(actor, user, conversation) {
+    // 1. A user can leave himself
+    if (actor._id.equals(user._id)) {
+      return Q.when(true);
+    }
+
+    // 2. any member can kick away anyone
+    return userIsInConversationMemberList(actor, conversation);
+  }
+
+  function userCanLeavePrivate(actor, user, conversation) {
+    // 1. conversation creator can remove any user
+    if (actor._id.equals(conversation.creator)) {
+      return Q.when(true);
+    }
+
+    // 2. member can remove himself
+    return Q.when(actor._id.equals(user._id));
+  }
+
+  function userCanLeaveCollaboration(actor, user, conversation) {
+    return Q.when(false);
+  }
 
   function userCanRead(user, conversation) {
     const readPermission = readPermissions[conversation.type];
