@@ -5,13 +5,14 @@
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
+  const utils = require('./utils')(dependencies, lib);
 
   return {
     getChannels
   };
 
   function getChannels(req, res) {
-    lib.conversation.getChannels({}, (err, result) => {
+    lib.conversation.getChannels(req.query, (err, result) => {
       if (err) {
         logger.error('Error while getting conversations', err);
 
@@ -24,7 +25,7 @@ module.exports = function(dependencies, lib) {
         });
       }
 
-      res.status(200).json(result);
+      utils.sendConversationResult(result, res);
     });
   }
 };

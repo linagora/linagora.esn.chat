@@ -53,7 +53,7 @@ describe('The channel controller', function() {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.getChannels({}, {
+      controller.getChannels({query: {}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -72,7 +72,7 @@ describe('The channel controller', function() {
       result = [{id: 1}, {id: 2}];
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.getChannels({}, {
+      controller.getChannels({query: {}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
