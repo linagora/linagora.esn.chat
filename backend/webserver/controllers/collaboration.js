@@ -8,10 +8,11 @@ module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
   const conversationController = require('./conversation')(dependencies, lib);
+  const utils = require('./utils')(dependencies, lib);
 
   return {
     findCollaboration,
-    findMyCollaborationConversations: conversationController.findMyConversationByType.bind(null, CONVERSATION_TYPE.COLLABORATION),
+    findMyCollaborationConversations
   };
 
   function findCollaboration(req, res) {
@@ -75,4 +76,23 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function findMyCollaborationConversations(req, res) {
+    lib.collaboration.getForUser(req.user, (err, conversations) => {
+      if (err) {
+        const msg = 'Error while getting conversations for collaborations';
+
+        logger.error(msg, err);
+
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: msg
+          }
+        });
+      }
+
+      utils.sendConversationsResult(conversations, res);
+    });
+  }
 };

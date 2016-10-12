@@ -3,10 +3,8 @@
 
 let expect = require('chai').expect;
 let sinon = require('sinon');
-let CONSTANTS = require('../../../../backend/lib/constants');
-let CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
-describe('The community controller', function() {
+describe('The collaboration controller', function() {
 
   let lib, err, result;
 
@@ -15,6 +13,11 @@ describe('The community controller', function() {
     result = undefined;
 
     lib = {
+      collaboration: {
+        getForUser: sinon.spy(function(user, callback) {
+          return callback(err, result);
+        })
+      },
       conversation: {
         getChannels: sinon.spy(function(options, callback) {
           return callback(err, result);
@@ -53,8 +56,8 @@ describe('The community controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.find).to.have.been.called;
-              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              expect(lib.collaboration.getForUser).to.have.been.called;
+              expect(json).to.shallowDeepEqual({error: {code: 500, details: 'Error while getting conversations for collaborations'}});
               done();
             }
           };
@@ -62,18 +65,18 @@ describe('The community controller', function() {
       });
     });
 
-    it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
-      result = {};
+    it('should send back HTTP 200 with the lib.collaboration.getForUser result', function(done) {
+      result = [];
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findMyCollaborationConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
+      controller.findMyCollaborationConversations({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function(json) {
-              expect(lib.conversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.COLLABORATION, ignoreMemberFilterForChannel: true, members: ['id']});
-              expect(json).to.equal(result);
+              expect(lib.collaboration.getForUser).to.have.been.calledWith({_id: 'id'});
+              expect(json).to.deep.equal(result);
               done();
             }
           };

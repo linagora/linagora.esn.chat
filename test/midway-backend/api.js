@@ -13,7 +13,7 @@ var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The chat API', function() {
 
-  var deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient;
+  var deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient, collaborations;
 
   function dependencies(name) {
     return deps[name];
@@ -28,6 +28,7 @@ describe('The chat API', function() {
     userId = mongoose.Types.ObjectId();
     anotherUserId = mongoose.Types.ObjectId();
     redisClient = redis.createClient(this.testEnv.redisPort);
+    collaborations = [];
 
     deps = {
       logger: require('../fixtures/logger'),
@@ -35,6 +36,11 @@ describe('The chat API', function() {
         moderation: {registerHandler: _.constant()},
         get: function(id, callback) {
           mongoose.model('User').findOne({_id: id}, callback);
+        }
+      },
+      collaboration: {
+        getCollaborationsForUser: function(user, options, callback) {
+          callback(null, collaborations);
         }
       },
       pubsub: pubsub,
@@ -1834,33 +1840,30 @@ describe('The chat API', function() {
   });
 
   describe('GET /api/user/conversations/collaboration', function() {
-    it('should return all collaboration conversations with me inside that are not moderated', function(done) {
-      var otherMember1 = new mongoose.Types.ObjectId();
-      var otherMember2 = new mongoose.Types.ObjectId();
+    it('should return all collaboration conversations where current user is member', function(done) {
+      collaborations = [{_id: '1', objectType: 'community'}, {_id: '2', objectType: 'project'}, {_id: '3', objectType: 'issue'}];
+      var conversation1, conversation2;
 
-      var channel;
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [otherMember1, otherMember2]
+        collaboration: {id: collaborations[0]._id, objectType: collaborations[0].objectType}
       })
-      .then(function(mongoResponse) {
+      .then(function(result) {
+        conversation1 = result;
         return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COLLABORATION,
           collaboration: {id: '2', objectType: 'community'},
-          moderate: true,
-          members: [userId, otherMember1, otherMember2]
+          moderate: true
         });
       })
-      .then(function(mongoResponse) {
+      .then(function() {
         return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COLLABORATION,
-          collaboration: {id: '3', objectType: 'community'},
-          members: [userId, otherMember1, otherMember2]
+          collaboration: {id: collaborations[1]._id, objectType: collaborations[1].objectType}
         });
       })
-      .then(function(mongoResponse) {
-        channel = mongoResponse;
+      .then(function(result) {
+        conversation2 = result;
         request(app.express)
           .get('/api/user/conversations/collaboration')
           .expect(200)
@@ -1868,7 +1871,11 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
-            expect(res.body).to.deep.equal([jsonnify(channel)]);
+            expect(res.body).to.shallowDeepEqual({
+              0: jsonnify(conversation1),
+              1: jsonnify(conversation2),
+              length: 2
+            });
             done();
           });
       }).catch(done);
