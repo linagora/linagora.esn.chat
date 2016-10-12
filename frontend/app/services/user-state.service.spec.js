@@ -138,7 +138,7 @@ describe('The user-state service', function() {
     it('should get /chat/api/status/userId to get the data the first time and cache it for the second time', function() {
       var state = 'state';
       var callback = sinon.spy();
-      $httpBackend.expectGET('/chat/api/chat/state/userId').respond({state: state});
+      $httpBackend.expectGET('/chat/api/state/userId').respond({state: state});
       chatUserState.get('userId').then(callback);
       $rootScope.$digest();
       $httpBackend.flush();

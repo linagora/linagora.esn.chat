@@ -51,7 +51,7 @@ let chatModule = new AwesomeModule(MODULE_NAME, {
       _.pull(frontendModules, APP_ENTRY_POINT);
       frontendModules = [APP_ENTRY_POINT].concat(frontendModules);
 
-      app.use('/api/chat', this.api.chat);
+      app.use('/api', this.api.chat);
       webserverWrapper.injectAngularAppModules(NAME, frontendModules, MODULE_NAME, ['esn']);
       webserverWrapper.injectLess(NAME, [lessFile], 'esn');
       webserverWrapper.addApp(NAME, app);
