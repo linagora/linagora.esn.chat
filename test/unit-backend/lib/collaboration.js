@@ -140,11 +140,10 @@ describe('The linagora.esn.chat collaboration lib', function() {
     };
   });
 
-  describe('The getConversationByCollaboration', function() {
-    it('should call ChatConversation.find with the correct param', function(done) {
+  describe('The getConversation function', function() {
+    it('should call ChatConversation.findOne with the correct parameters', function(done) {
       var tuple = {id: 'id', objectType: 'community'};
       var callback = 'callback';
-      var populateMock;
 
       var exec = function(_callback_) {
         expect(modelsMock.ChatConversation.findOne).to.have.been.calledWith({
@@ -152,55 +151,14 @@ describe('The linagora.esn.chat collaboration lib', function() {
           collaboration: tuple
         });
 
-        expect(populateMock).to.have.been.calledWith('members');
-
         expect(_callback_).to.be.equals(callback);
         done();
       };
 
-      populateMock = sinon.stub().returns({exec: exec});
-      modelsMock.ChatConversation.findOne = sinon.stub().returns({populate: populateMock});
+      modelsMock.ChatConversation.findOne = sinon.stub().returns({exec: exec});
 
-      require('../../../backend/lib/collaboration')(dependencies, lib).getConversationByCollaboration(tuple, callback);
+      require('../../../backend/lib/collaboration')(dependencies, lib).getConversation(tuple, callback);
 
     });
   });
-
-  describe('The updateConversation function', function() {
-    it('should update correctly the conversation', function(done) {
-      var newConversation = {};
-      var tuple = {id: 'communityId', objectType: 'community'};
-      var modification = {newMembers: [1], deleteMembers: [2], title: 'title'};
-
-      ObjectIdMock = sinon.spy(function(id) {
-        this.id = id;
-      });
-
-      modelsMock.ChatConversation.findByIdAndUpdate = function(id, modification, callback) {
-        callback(null, newConversation);
-      };
-
-      modelsMock.ChatConversation.findOneAndUpdate = function(id, modification, cb) {
-        cb(null, newConversation);
-        expect(modification).to.deep.equals({
-          $addToSet: {
-            members: {
-              $each: [{id: 1}]
-            }
-          },
-          $pullAll: {
-            members: [{id: 2}]
-          },
-          $set: {name: 'title'}
-        });
-      };
-
-      require('../../../backend/lib/collaboration')(dependencies, lib).updateConversation(tuple, modification, function(err, conv) {
-        expect(conv).to.equal(newConversation);
-        expect(err).to.be.null;
-        done();
-      });
-    });
-  });
-
 });

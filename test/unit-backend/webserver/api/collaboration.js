@@ -16,6 +16,9 @@ describe('The collaboration controller', function() {
       collaboration: {
         getForUser: sinon.spy(function(user, callback) {
           return callback(err, result);
+        }),
+        listForUser: sinon.spy(function(user, callback) {
+          return callback(err, result);
         })
       },
       conversation: {
@@ -45,18 +48,18 @@ describe('The collaboration controller', function() {
     return require('../../../../backend/webserver/controllers/collaboration')(dependencies, lib);
   }
 
-  describe('The findMyCollaborationConversations', function() {
+  describe('The listConversationsForUser', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findMyCollaborationConversations({user: {_id: 'id'}}, {
+      controller.listConversationsForUser({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(500);
 
           return {
             json: function(json) {
-              expect(lib.collaboration.getForUser).to.have.been.called;
+              expect(lib.collaboration.listForUser).to.have.been.called;
               expect(json).to.shallowDeepEqual({error: {code: 500, details: 'Error while getting conversations for collaborations'}});
               done();
             }
@@ -69,13 +72,13 @@ describe('The collaboration controller', function() {
       result = [];
       let controller = getController(this.moduleHelpers.dependencies, lib);
 
-      controller.findMyCollaborationConversations({user: {_id: 'id'}}, {
+      controller.listConversationsForUser({user: {_id: 'id'}}, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function(json) {
-              expect(lib.collaboration.getForUser).to.have.been.calledWith({_id: 'id'});
+              expect(lib.collaboration.listForUser).to.have.been.calledWith({_id: 'id'});
               expect(json).to.deep.equal(result);
               done();
             }
