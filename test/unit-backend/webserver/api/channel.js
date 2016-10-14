@@ -1,8 +1,9 @@
 'use strict';
 /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
-let expect = require('chai').expect;
-let sinon = require('sinon');
+const expect = require('chai').expect;
+const sinon = require('sinon');
+const Q = require('q');
 
 describe('The channel controller', function() {
 
@@ -12,6 +13,11 @@ describe('The channel controller', function() {
     err = undefined;
     result = undefined;
     lib = {
+      members: {
+        getMembers: sinon.spy(function(collaboration) {
+          return Q.when(collaboration.members || []);
+        })
+      },
       conversation: {
         getById: sinon.spy(function(id, callback) {
           return callback(err, result);

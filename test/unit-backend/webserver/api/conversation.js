@@ -1,11 +1,12 @@
 'use strict';
 /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
-let expect = require('chai').expect;
-let sinon = require('sinon');
-let _ = require('lodash');
-let CONSTANTS = require('../../../../backend/lib/constants');
-let CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const expect = require('chai').expect;
+const sinon = require('sinon');
+const _ = require('lodash');
+const Q = require('q');
+const CONSTANTS = require('../../../../backend/lib/constants');
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The conversation controller', function() {
 
@@ -17,6 +18,11 @@ describe('The conversation controller', function() {
     user = {_id: 1};
 
     lib = {
+      members: {
+        getMembers: sinon.spy(function(collaboration) {
+          return Q.when(collaboration.members || []);
+        })
+      },
       conversation: {
         getConversationByCommunityId: sinon.spy(function(id, callback) {
           return callback(err, result);

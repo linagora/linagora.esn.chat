@@ -13,6 +13,7 @@ module.exports = function(dependencies) {
   const message = require('./message')(dependencies);
   const conversation = require('./conversation')(dependencies);
   const collaboration = require('./collaboration')(dependencies);
+  const members = require('./members')(dependencies);
   const userState = require('./user-state')(dependencies);
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies);
@@ -29,10 +30,12 @@ module.exports = function(dependencies) {
     constants,
     conversation,
     listener,
+    members,
     message,
     moderate,
     models,
     start,
-    userState
+    userState,
+    utils
   };
 };

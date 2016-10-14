@@ -12,13 +12,17 @@ var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATIO
 
 describe('The linagora.esn.chat collaboration lib', function() {
 
-  var deps, lib, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  var deps, lib, logger, err, user, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, collaboration;
 
   function dependencies(name) {
     return deps[name];
   }
 
   beforeEach(function() {
+
+    collaboration = {};
+    user = {};
+    err = null;
 
     channelCreationTopic = {
       publish: sinon.spy()
@@ -107,6 +111,16 @@ describe('The linagora.esn.chat collaboration lib', function() {
           }
         }
       },
+      collaboration: {
+        queryOne: function(type, tuple, callback) {
+          return callback(err, collaboration);
+        }
+      },
+      user: {
+        get: function(id, callback) {
+          callback(null, user);
+        }
+      },
       pubsub: {
         global: {
           topic: function(name) {
@@ -159,6 +173,49 @@ describe('The linagora.esn.chat collaboration lib', function() {
 
       require('../../../backend/lib/collaboration')(dependencies, lib).getConversation(tuple, callback);
 
+    });
+  });
+
+  describe('The getMembers function', function() {
+    const collaborationTuple = {id: 1, objectType: 'community'};
+
+    it('should reject when getCollaboration fails', function(done) {
+      err = new Error();
+
+      require('../../../backend/lib/collaboration')(dependencies, lib).getMembers({collaboration: collaborationTuple}).then(function() {
+        done(new Error('Should not occur'));
+      }, function(err) {
+        expect(err.message).to.match(/Error while getting collaboration from conversation/);
+        done();
+      });
+    });
+
+    it('should reject when collaboration is not found', function(done) {
+      collaboration = null;
+
+      require('../../../backend/lib/collaboration')(dependencies, lib).getMembers({collaboration: collaborationTuple}).then(function() {
+        done(new Error('Should not occur'));
+      }, function(err) {
+        expect(err.message).to.match(/Can not find collaboration from conversation/);
+        done();
+      });
+    });
+
+    it('should return only user members who joined', function(done) {
+      user = {id: 1, objectType: 'user'};
+
+      collaboration = {
+        members: [
+          {member: user, status: 'joined'},
+          {member: {objectType: 'notuser'}, status: 'joined'},
+          {member: {id: 2, objectType: 'user'}, status: 'notjoined'}
+        ]
+      };
+
+      require('../../../backend/lib/collaboration')(dependencies, lib).getMembers({collaboration: collaborationTuple}).then(function(members) {
+        expect(members).to.shallowDeepEqual([user]);
+        done();
+      }, done);
     });
   });
 });

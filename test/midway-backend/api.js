@@ -72,6 +72,11 @@ describe('The chat API', function() {
           };
           next();
         }
+      },
+      denormalizeUser: {
+        denormalize: function(member) {
+          return Q.when(member);
+        }
       }
     };
 
@@ -1593,10 +1598,9 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [userId, otherMember1, otherMember2],
-        timestamps: {creation: new Date(2e6)}
+        type: CONVERSATION_TYPE.PRIVATE,
+        timestamps: {creation: new Date(2e6)},
+        members: [userId, otherMember2],
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
         return Q.denodeify(app.lib.conversation.create)({
@@ -1656,8 +1660,7 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
+        type: CONVERSATION_TYPE.PRIVATE,
         members: [userId, otherMember1, otherMember2],
         last_message: {date: new Date(1469605336000)}
       }).then(function(mongoResponse) {
@@ -1796,6 +1799,43 @@ describe('The chat API', function() {
             done();
           });
       }).catch(done);
+    });
+
+    it('should set conversation members from the collaboration members', function(done) {
+      collaborations = [{
+        _id: '1',
+        objectType: 'community',
+        members: [
+          {member: {id: String(userId), objectType: 'user'}, status: 'joined'},
+          {member: {id: '3', objectType: 'user'}, status: 'foobar'},
+          {member: {id: '4', objectType: 'notuser'}, status: 'joined'}
+        ]
+      }];
+      collaboration = collaborations[0];
+
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: collaborations[0]._id, objectType: collaborations[0].objectType}
+      }, function() {
+        request(app.express)
+          .get('/api/user/collaborations/conversations')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.shallowDeepEqual([
+              {
+                type: CONVERSATION_TYPE.COLLABORATION,
+                collaboration: {id: collaborations[0]._id, objectType: collaborations[0].objectType},
+                members: [
+                  {_id: String(userId)}
+                ]
+              }
+            ]);
+            done();
+          });
+        });
     });
   });
 
