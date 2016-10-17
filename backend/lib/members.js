@@ -5,7 +5,7 @@ const Q = require('q');
 module.exports = function(dependencies) {
 
   let providers = {
-    'collaboration': require('./collaboration')(dependencies).getMembers
+    collaboration: require('./collaboration')(dependencies).getMembers
   };
 
   return {

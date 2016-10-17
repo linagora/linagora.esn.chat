@@ -17,7 +17,6 @@ module.exports = function(dependencies, lib) {
     markAllMessageOfAConversationReaded,
     findMyConversationByType,
     findConversationByTypeAndByMembers,
-    //findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyConversations,
     joinConversation,
@@ -95,7 +94,7 @@ module.exports = function(dependencies, lib) {
       }
 
       if (conversations && conversations.length > 0) {
-        utils.sendConversationResult(conversations[0], res, 201);
+        return utils.sendConversationResult(conversations[0], res, 201);
       }
 
       let conversation = {
