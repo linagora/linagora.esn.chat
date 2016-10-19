@@ -10,7 +10,7 @@
 
     function ChatRestangular(Restangular) {
       return Restangular.withConfig(function(RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl('/chat/api/chat');
+        RestangularConfigurer.setBaseUrl('/chat/api');
         RestangularConfigurer.setFullResponse(true);
       });
     }

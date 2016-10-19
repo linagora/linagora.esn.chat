@@ -1,57 +1,72 @@
 'use strict';
 
+const Q = require('q');
 const CONSTANTS = require('../lib/constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
-module.exports = function(dependencies, lib) {
+module.exports = function(dependencies) {
 
+  const logger = dependencies('logger');
+  const collaborationModule = dependencies('collaboration');
+  const userModule = dependencies('user');
   const mongoose = dependencies('db').mongo.mongoose;
   const Conversation = mongoose.model('ChatConversation');
-  const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
 
   return {
-    getConversationByCollaboration,
-    updateConversation
+    getConversation,
+    getCollaboration,
+    getMembers,
+    listForUser,
+    userCanWrite
   };
 
-  function getConversationByCollaboration(collaborationTuple, callback) {
-    Conversation.findOne({type: CONVERSATION_TYPE.COLLABORATION, collaboration: collaborationTuple}).populate('members', SKIP_FIELDS.USER).exec(callback);
+  function getMembers(conversation) {
+    let defer = Q.defer();
+
+    getCollaboration(conversation.collaboration, (err, collaboration) => {
+      if (err) {
+        logger.error('Error while getting collaboration', err);
+
+        return defer.reject(new Error('Error while getting collaboration from conversation'));
+      }
+
+      if (!collaboration) {
+        logger.error('Error while getting collaboration', err);
+
+        return defer.reject(new Error('Can not find collaboration from conversation'));
+      }
+
+      let promises = (collaboration.members || [])
+        .filter(member => member.member.objectType === 'user' && member.status === 'joined')
+        .map(member => Q.nfapply(userModule.get, [member.member.id]));
+
+      Q.all(promises).then(defer.resolve);
+    });
+
+    return defer.promise;
   }
 
-  function updateConversation(collaborationTuple, modifications, callback) {
+  function getConversation(collaborationTuple, callback) {
+    Conversation.findOne({type: CONVERSATION_TYPE.COLLABORATION, collaboration: collaborationTuple}).exec(callback);
+  }
 
-    let mongoModifications = {};
+  function getCollaboration(collaborationTuple, callback) {
+    collaborationModule.queryOne(collaborationTuple.objectType, {_id: collaborationTuple.id}, callback);
+  }
 
-    if (modifications.newMembers) {
-      mongoModifications.$addToSet = {
-        members: {
-          $each: modifications.newMembers.map(ensureObjectId)
-        }
-      };
-    }
-
-    if (modifications.deleteMembers) {
-      mongoModifications.$pullAll = {
-        members: modifications.deleteMembers.map(ensureObjectId)
-      };
-    }
-
-    if (modifications.title) {
-      mongoModifications.$set = {name: modifications.title};
-    }
-
-    Conversation.findOneAndUpdate({type: CONVERSATION_TYPE.COLLABORATION, collaboration: collaborationTuple}, mongoModifications, (err, conversation) => {
+  function listForUser(user, callback) {
+    collaborationModule.getCollaborationsForUser(user._id, {member: true}, (err, collaborations) => {
       if (err) {
         return callback(err);
       }
 
-      if (mongoModifications.$addToSet) {
-        lib.conversation.markAllAsRead(mongoModifications.$addToSet.$each, conversation, callback);
-      } else {
-        callback(err, conversation);
-      }
+      const query = collaborations.map(collaboration => ({'collaboration.objectType': collaboration.objectType, 'collaboration.id': String(collaboration._id)}));
+
+      Conversation.find({type: CONVERSATION_TYPE.COLLABORATION, $or: query}).exec(callback);
     });
   }
 
+  function userCanWrite(user, collaboration, callback) {
+    collaborationModule.permission.canWrite(collaboration, {id: String(user._id), objectType: 'user'}, callback);
+  }
 };

@@ -9,6 +9,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
+  const utils = require('./utils')(dependencies, lib);
 
   return {
     get,
@@ -16,7 +17,6 @@ module.exports = function(dependencies, lib) {
     markAllMessageOfAConversationReaded,
     findMyConversationByType,
     findConversationByTypeAndByMembers,
-    //findPrivateByMembers: findConversationByTypeAndByMembers.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyPrivateConversations: findMyConversationByType.bind(null, CONVERSATION_TYPE.PRIVATE),
     findMyConversations,
     joinConversation,
@@ -29,24 +29,24 @@ module.exports = function(dependencies, lib) {
   };
 
   function get(req, res) {
-    res.status(200).json(req.conversation);
+    utils.sendConversationResult(req.conversation, res);
   }
 
   function getById(req, res) {
     lib.conversation.getById(req.params.id, (err, result) => {
       if (err) {
-        logger.error('Error while getting conversation %s', req.params.id, err);
+        logger.error(`Error while getting conversation ${req.params.id}`, err);
 
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while getting channel'
+            details: 'Error while getting conversation'
           }
         });
       }
 
-      res.status(200).json(result);
+      utils.sendConversationResult(result, res);
     });
   }
 
@@ -59,7 +59,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while deleting channel'
+            details: 'Error while deleting conversation'
           }
         });
       }
@@ -88,13 +88,13 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while finding groups with users' + members.join(', ')
+            details: 'Error while finding conversations with users' + members.join(', ')
           }
         });
       }
 
       if (conversations && conversations.length > 0) {
-        return res.status(201).json(conversations[0]);
+        return utils.sendConversationResult(conversations[0], res, 201);
       }
 
       let conversation = {
@@ -117,16 +117,18 @@ module.exports = function(dependencies, lib) {
         logger.error('Error while creating conversation', err);
 
         if (err) {
+          logger.error('Errror while creating conversation', err);
+
           return res.status(500).json({
             error: {
               code: 500,
               message: 'Server Error',
-              details: err.message || 'Error while creating channel'
+              details: 'Error while creating conversation'
             }
           });
         }
 
-        res.status(201).json(result);
+        utils.sendConversationResult(result, res, 201);
       });
     });
   }
@@ -140,7 +142,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while marking all messages of channel readed'
+            details: 'Error while marking all messages as read'
           }
         });
       }
@@ -158,7 +160,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: 'Error while joining channel'
+            details: 'Error while joining conversation'
           }
         });
       }
@@ -176,7 +178,7 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: 'Error while leaving channel'
+            details: 'Error while leaving conversation'
           }
         });
       }
@@ -202,7 +204,7 @@ module.exports = function(dependencies, lib) {
       members.push(String(req.user._id));
     }
 
-    lib.conversation.find({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, (err, userGroups) => {
+    lib.conversation.find({type: type, ignoreMemberFilterForChannel: true, exactMembersMatch: true, members: members}, (err, result) => {
       if (err) {
         logger.error('Error while searching conversations', err);
 
@@ -210,35 +212,35 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while finding groups with users' + members.join(', ')
+            details: 'Error while searching conversations for members ' + members.join(', ')
           }
         });
       }
 
-      res.status(200).json(userGroups);
+      utils.sendConversationsResult(result, res);
     });
   }
 
   function findMyConversationByType(type, req, res) {
-    lib.conversation.find({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
+    lib.conversation.find({type: type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, result) => {
       if (err) {
-        logger.error('Error while searching conversation by type', err);
+        logger.error(`Error while searching conversations by type ${type} for user ${req.user._id}`, err);
 
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while finding groups of user ' + req.user._id
+            details: `Error while searching conversations of type ${type}`
           }
         });
       }
 
-      res.status(200).json(usersGroups);
+      utils.sendConversationResult(result, res);
     });
   }
 
   function findMyConversations(req, res)  {
-    lib.conversation.find({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, usersGroups) => {
+    lib.conversation.find({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, result) => {
       if (err) {
         logger.error('Error while getting user %s conversations', req.user._id, err);
 
@@ -246,12 +248,12 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while finding groups of user ' + req.user._id
+            details: `Error while finding conversations of user ${req.user._id}`
           }
         });
       }
 
-      res.status(200).json(usersGroups);
+      utils.sendConversationResult(result, res);
     });
   }
 
@@ -270,12 +272,12 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while update the topic for channel' + req.params.id
+            details: `Error while update the topic for conversation ${req.params.id}`
           }
         });
       }
 
-      res.status(200).json(conversation);
+      utils.sendConversationResult(conversation, res);
     });
   }
 
@@ -298,12 +300,12 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while updating the conversation ' + req.body.id
+            details: `Error while updating the conversation ${req.conversation._id}`
           }
         });
       }
 
-      res.status(200).json(conversation);
+      utils.sendConversationResult(conversation, res);
     });
   }
 

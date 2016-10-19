@@ -12,13 +12,17 @@ var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATIO
 
 describe('The linagora.esn.chat collaboration lib', function() {
 
-  var deps, lib, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  var deps, lib, logger, err, user, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, collaboration;
 
   function dependencies(name) {
     return deps[name];
   }
 
   beforeEach(function() {
+
+    collaboration = {};
+    user = {};
+    err = null;
 
     channelCreationTopic = {
       publish: sinon.spy()
@@ -107,6 +111,16 @@ describe('The linagora.esn.chat collaboration lib', function() {
           }
         }
       },
+      collaboration: {
+        queryOne: function(type, tuple, callback) {
+          return callback(err, collaboration);
+        }
+      },
+      user: {
+        get: function(id, callback) {
+          callback(null, user);
+        }
+      },
       pubsub: {
         global: {
           topic: function(name) {
@@ -140,11 +154,10 @@ describe('The linagora.esn.chat collaboration lib', function() {
     };
   });
 
-  describe('The getConversationByCollaboration', function() {
-    it('should call ChatConversation.find with the correct param', function(done) {
+  describe('The getConversation function', function() {
+    it('should call ChatConversation.findOne with the correct parameters', function(done) {
       var tuple = {id: 'id', objectType: 'community'};
       var callback = 'callback';
-      var populateMock;
 
       var exec = function(_callback_) {
         expect(modelsMock.ChatConversation.findOne).to.have.been.calledWith({
@@ -152,55 +165,57 @@ describe('The linagora.esn.chat collaboration lib', function() {
           collaboration: tuple
         });
 
-        expect(populateMock).to.have.been.calledWith('members');
-
         expect(_callback_).to.be.equals(callback);
         done();
       };
 
-      populateMock = sinon.stub().returns({exec: exec});
-      modelsMock.ChatConversation.findOne = sinon.stub().returns({populate: populateMock});
+      modelsMock.ChatConversation.findOne = sinon.stub().returns({exec: exec});
 
-      require('../../../backend/lib/collaboration')(dependencies, lib).getConversationByCollaboration(tuple, callback);
+      require('../../../backend/lib/collaboration')(dependencies, lib).getConversation(tuple, callback);
 
     });
   });
 
-  describe('The updateConversation function', function() {
-    it('should update correctly the conversation', function(done) {
-      var newConversation = {};
-      var tuple = {id: 'communityId', objectType: 'community'};
-      var modification = {newMembers: [1], deleteMembers: [2], title: 'title'};
+  describe('The getMembers function', function() {
+    const collaborationTuple = {id: 1, objectType: 'community'};
 
-      ObjectIdMock = sinon.spy(function(id) {
-        this.id = id;
-      });
+    it('should reject when getCollaboration fails', function(done) {
+      err = new Error();
 
-      modelsMock.ChatConversation.findByIdAndUpdate = function(id, modification, callback) {
-        callback(null, newConversation);
-      };
-
-      modelsMock.ChatConversation.findOneAndUpdate = function(id, modification, cb) {
-        cb(null, newConversation);
-        expect(modification).to.deep.equals({
-          $addToSet: {
-            members: {
-              $each: [{id: 1}]
-            }
-          },
-          $pullAll: {
-            members: [{id: 2}]
-          },
-          $set: {name: 'title'}
-        });
-      };
-
-      require('../../../backend/lib/collaboration')(dependencies, lib).updateConversation(tuple, modification, function(err, conv) {
-        expect(conv).to.equal(newConversation);
-        expect(err).to.be.null;
+      require('../../../backend/lib/collaboration')(dependencies, lib).getMembers({collaboration: collaborationTuple}).then(function() {
+        done(new Error('Should not occur'));
+      }, function(err) {
+        expect(err.message).to.match(/Error while getting collaboration from conversation/);
         done();
       });
     });
-  });
 
+    it('should reject when collaboration is not found', function(done) {
+      collaboration = null;
+
+      require('../../../backend/lib/collaboration')(dependencies, lib).getMembers({collaboration: collaborationTuple}).then(function() {
+        done(new Error('Should not occur'));
+      }, function(err) {
+        expect(err.message).to.match(/Can not find collaboration from conversation/);
+        done();
+      });
+    });
+
+    it('should return only user members who joined', function(done) {
+      user = {id: 1, objectType: 'user'};
+
+      collaboration = {
+        members: [
+          {member: user, status: 'joined'},
+          {member: {objectType: 'notuser'}, status: 'joined'},
+          {member: {id: 2, objectType: 'user'}, status: 'notjoined'}
+        ]
+      };
+
+      require('../../../backend/lib/collaboration')(dependencies, lib).getMembers({collaboration: collaborationTuple}).then(function(members) {
+        expect(members).to.shallowDeepEqual([user]);
+        done();
+      }, done);
+    });
+  });
 });

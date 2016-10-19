@@ -13,7 +13,7 @@ var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The chat API', function() {
 
-  var deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient;
+  var deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient, collaborations, collaboration, conversation, writable;
 
   function dependencies(name) {
     return deps[name];
@@ -28,6 +28,10 @@ describe('The chat API', function() {
     userId = mongoose.Types.ObjectId();
     anotherUserId = mongoose.Types.ObjectId();
     redisClient = redis.createClient(this.testEnv.redisPort);
+    collaborations = [];
+    collaboration = {};
+    conversation = {};
+    writable = true;
 
     deps = {
       logger: require('../fixtures/logger'),
@@ -35,6 +39,19 @@ describe('The chat API', function() {
         moderation: {registerHandler: _.constant()},
         get: function(id, callback) {
           mongoose.model('User').findOne({_id: id}, callback);
+        }
+      },
+      collaboration: {
+        getCollaborationsForUser: function(user, options, callback) {
+          callback(null, collaborations);
+        },
+        queryOne: function(tuple, query, callback) {
+          callback(null, collaboration);
+        },
+        permission: {
+          canWrite: function(collaboration, tuple, callback) {
+            callback(null, writable);
+          }
         }
       },
       pubsub: pubsub,
@@ -54,6 +71,11 @@ describe('The chat API', function() {
             _id: userId
           };
           next();
+        }
+      },
+      denormalizeUser: {
+        denormalize: function(member) {
+          return Q.when(member);
         }
       }
     };
@@ -1394,47 +1416,18 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/collaboration', function() {
-    it('should return non moderated collaboration conversations with given participants parameters', function(done) {
-      var otherMember1 = new mongoose.Types.ObjectId();
-      var otherMember2 = new mongoose.Types.ObjectId();
+  describe('GET /api/collaborations/conversations/:objectType/:id', function() {
+    it('should return collaboration conversation with the given collaboration tuple is provided', function(done) {
       var channel;
+      const collaboration = {id: '1', objectType: 'community'};
 
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COLLABORATION,
-        moderate: true,
-        members: [userId, otherMember1, otherMember2]
-      }).then(function() {
-        return Q.denodeify(app.lib.conversation.create)({
-          type: CONVERSATION_TYPE.COLLABORATION,
-          members: [userId, otherMember1, otherMember2]
-        });
-      }).then(function(mongoResponse) {
-        channel = mongoResponse;
+        collaboration: collaboration
+      }).then(function(result) {
+        channel = result;
         request(app.express)
-          .get('/api/collaboration?members=' + otherMember1.toString() + '&members=' + otherMember2.toString())
-          .expect(200)
-          .end(function(err, res) {
-
-            if (err) {
-              return done(err);
-            }
-            expect(res.body).to.deep.equal([jsonnify(channel)]);
-            done();
-          });
-      }).catch(done);
-    });
-
-    it('should return collaboration conversations with the given id is provided', function(done) {
-      var channel;
-      Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        members: [userId],
-        collaboration: {id: '1', objectType: 'community'}
-      }).then(function(mongoResponse) {
-        channel = mongoResponse;
-        request(app.express)
-          .get('/api/collaboration?id=' + channel.collaboration.id + '&objectType=' + channel.collaboration.objectType)
+          .get(`/api/collaborations/conversations/${collaboration.objectType}/${collaboration.id}`)
           .expect(200)
           .end(function(err, res) {
             if (err) {
@@ -1446,96 +1439,31 @@ describe('The chat API', function() {
       }).catch(done);
     });
 
-    it('should fail if no id neither members attribute are provided', function() {
-      request(app.express)
-        .get('/api/collaboration')
-        .expect(400);
-    });
+    it('should return 403 if user try to get a collaboration where he is not member', function(done) {
+      const tuple = {id: '1', objectType: 'community'};
+      let channel;
 
-    it('should fail if both members and id attibute are provided', function() {
-      request(app.express)
-        .get('/api/collaboration?members=babla&id=id')
-        .expect(400);
-    });
+      collaboration = {};
+      writable = false;
 
-    it('should return 404 if user try to obtain a collaboration where he is not present', function(done) {
-      var channel;
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: []
+        collaboration: collaboration
       }).then(function(mongoResponse) {
         channel = mongoResponse;
         request(app.express)
-          .get('/api/collaboration?id=' + channel.collaboration.id + '&objectType=' + channel.collaboration.objectType)
-          .expect(404, done);
+          .get(`/api/collaborations/conversations/${tuple.objectType}/${tuple.id}`)
+          .expect(403, done);
       }).catch(done);
     });
 
     it('should 404 if the collaboration does not exist', function() {
+      const tuple = {id: '1', objectType: 'community'};
+      collaboration = null;
+
       request(app.express)
-        .get('/api/collaboration?id=idonotexist&objectType=notatype')
+        .get(`/api/collaborations/conversations/${tuple.objectType}/${tuple.id}`)
         .expect(404);
-    });
-
-    it('not return collaboration conversations with more than given participants parameters', function(done) {
-      var otherMember1 = new mongoose.Types.ObjectId();
-      var otherMember2 = new mongoose.Types.ObjectId();
-
-      Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [userId, otherMember1, otherMember2]
-      }).then(function() {
-        request(app.express)
-          .get('/api/collaboration?members=' + otherMember1.toString())
-          .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            expect(res.body).to.deep.equal([]);
-            done();
-          });
-      }).catch(done);
-    });
-
-    it('it fail with 400 if no participant', function(done) {
-      var otherMember1 = new mongoose.Types.ObjectId();
-      var otherMember2 = new mongoose.Types.ObjectId();
-
-      Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [userId, otherMember1, otherMember2]
-      }).then(function() {
-        request(app.express)
-          .get('/api/collaboration')
-          .expect(400, done);
-      }).catch(done);
-    });
-
-    it('should not return collaboration conversations without the current user', function(done) {
-      var otherMember = new mongoose.Types.ObjectId();
-
-      var channel;
-      Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [otherMember]
-      }).then(function(mongoResponse) {
-        channel = mongoResponse[0];
-        request(app.express)
-          .get('/api/collaboration?members=' + otherMember.toString())
-          .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            expect(res.body).to.deep.equal([]);
-            done();
-          });
-      }).catch(done);
     });
   });
 
@@ -1670,10 +1598,9 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [userId, otherMember1, otherMember2],
-        timestamps: {creation: new Date(2e6)}
+        type: CONVERSATION_TYPE.PRIVATE,
+        timestamps: {creation: new Date(2e6)},
+        members: [userId, otherMember2],
       }).then(function(mongoResponse) {
         channel1 = mongoResponse;
         return Q.denodeify(app.lib.conversation.create)({
@@ -1733,8 +1660,7 @@ describe('The chat API', function() {
 
       var channel1, channel2;
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
+        type: CONVERSATION_TYPE.PRIVATE,
         members: [userId, otherMember1, otherMember2],
         last_message: {date: new Date(1469605336000)}
       }).then(function(mongoResponse) {
@@ -1833,45 +1759,83 @@ describe('The chat API', function() {
     });
   });
 
-  describe('GET /api/user/conversations/collaboration', function() {
-    it('should return all collaboration conversations with me inside that are not moderated', function(done) {
-      var otherMember1 = new mongoose.Types.ObjectId();
-      var otherMember2 = new mongoose.Types.ObjectId();
+  describe('GET /api/user/collaborations/conversations', function() {
+    it('should return all collaboration conversations where current user is member', function(done) {
+      collaborations = [{_id: '1', objectType: 'community'}, {_id: '2', objectType: 'project'}, {_id: '3', objectType: 'issue'}];
+      var conversation1, conversation2;
 
-      var channel;
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {id: '1', objectType: 'community'},
-        members: [otherMember1, otherMember2]
+        collaboration: {id: collaborations[0]._id, objectType: collaborations[0].objectType}
       })
-      .then(function(mongoResponse) {
+      .then(function(result) {
+        conversation1 = result;
         return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COLLABORATION,
           collaboration: {id: '2', objectType: 'community'},
-          moderate: true,
-          members: [userId, otherMember1, otherMember2]
+          moderate: true
         });
       })
-      .then(function(mongoResponse) {
+      .then(function() {
         return Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.COLLABORATION,
-          collaboration: {id: '3', objectType: 'community'},
-          members: [userId, otherMember1, otherMember2]
+          collaboration: {id: collaborations[1]._id, objectType: collaborations[1].objectType}
         });
       })
-      .then(function(mongoResponse) {
-        channel = mongoResponse;
+      .then(function(result) {
+        conversation2 = result;
         request(app.express)
-          .get('/api/user/conversations/collaboration')
+          .get('/api/user/collaborations/conversations')
           .expect(200)
           .end(function(err, res) {
             if (err) {
               return done(err);
             }
-            expect(res.body).to.deep.equal([jsonnify(channel)]);
+            expect(res.body).to.shallowDeepEqual({
+              0: jsonnify(conversation1),
+              1: jsonnify(conversation2),
+              length: 2
+            });
             done();
           });
       }).catch(done);
+    });
+
+    it('should set conversation members from the collaboration members', function(done) {
+      collaborations = [{
+        _id: '1',
+        objectType: 'community',
+        members: [
+          {member: {id: String(userId), objectType: 'user'}, status: 'joined'},
+          {member: {id: '3', objectType: 'user'}, status: 'foobar'},
+          {member: {id: '4', objectType: 'notuser'}, status: 'joined'}
+        ]
+      }];
+      collaboration = collaborations[0];
+
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.COLLABORATION,
+        collaboration: {id: collaborations[0]._id, objectType: collaborations[0].objectType}
+      }, function() {
+        request(app.express)
+          .get('/api/user/collaborations/conversations')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.shallowDeepEqual([
+              {
+                type: CONVERSATION_TYPE.COLLABORATION,
+                collaboration: {id: collaborations[0]._id, objectType: collaborations[0].objectType},
+                members: [
+                  {_id: String(userId)}
+                ]
+              }
+            ]);
+            done();
+          });
+        });
     });
   });
 
