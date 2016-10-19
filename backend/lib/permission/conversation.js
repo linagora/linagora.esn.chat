@@ -5,6 +5,8 @@ const _ = require('lodash');
 
 module.exports = function(dependencies) {
 
+  const collaborationModule = dependencies('collaboration');
+
   let readPermissions = {
     channel: userCanReadChannel,
     private: userCanReadPrivate,
@@ -35,12 +37,19 @@ module.exports = function(dependencies) {
     collaboration: userCanLeaveCollaboration
   };
 
+  let writePermissions = {
+    channel: userCanWriteChannel,
+    private: userCanWritePrivate,
+    collaboration: userCanWriteCollaboration
+  };
+
   return {
     userCanJoin,
     userCanLeave,
     userCanRead,
     userCanRemove,
-    userCanUpdate
+    userCanUpdate,
+    userCanWrite
   };
 
   function userCanJoin(actor, user, conversation) {
@@ -172,6 +181,43 @@ module.exports = function(dependencies) {
 
   function userCanUpdateCollaboration(user, conversation) {
     return Q.when(false);
+  }
+
+  function userCanWrite(user, conversation) {
+    const writePermission = writePermissions[conversation.type];
+
+    if (!writePermission) {
+      return Q.reject(new Error(`Can not find write permission checked for type ${conversation.type}`));
+    }
+
+    return writePermission(user, conversation);
+  }
+
+  function userCanWriteChannel(user, conversation) {
+    return userIsInConversationMemberList(user, conversation);
+  }
+
+  function userCanWritePrivate(user, conversation) {
+    return userIsInConversationMemberList(user, conversation);
+  }
+
+  function userCanWriteCollaboration(user, conversation) {
+
+    return getCollaboration().then(canWrite);
+
+    function canWrite(collaboration) {
+      return Q.denodeify(collaborationModule.permission.canWrite)(collaboration, {id: String(user._id), objectType: 'user'});
+    }
+
+    function getCollaboration() {
+      return Q.denodeify(collaborationModule.queryOne)(conversation.collaboration.objectType, {_id: conversation.collaboration.id}).then(collaboration => {
+        if (!collaboration) {
+          return Q.reject(new Error('Collaboration not found'));
+        }
+
+        return collaboration;
+      });
+    }
   }
 
   function userIsInConversationMemberList(user, conversation) {
