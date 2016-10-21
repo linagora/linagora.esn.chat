@@ -4,16 +4,20 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var mockery = require('mockery');
 var _ = require('lodash');
+var Q = require('Q');
 var CONSTANTS = require('../../../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib message listener module', function() {
 
-  var deps, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, communityCreatedListener, memberAddedListener, comunityUpdateListener;
+  var deps, err, user, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, communityCreatedListener, memberAddedListener, comunityUpdateListener;
 
   beforeEach(function() {
     dependencies = function(name) {
       return deps[name];
     };
+
+    err = null;
+    user = null;
 
     ChatMessageMock = sinon.spy(function() {
       this.populate = ChatMessageMock.populate;
@@ -67,6 +71,11 @@ describe('The linagora.esn.chat lib message listener module', function() {
             };
           })
         }
+      },
+      user: {
+        get: sinon.spy(function(id, callback) {
+          callback(err, user);
+        })
       }
     };
   });
@@ -85,175 +94,256 @@ describe('The linagora.esn.chat lib message listener module', function() {
     });
 
     it('should not save when message is forwardable', function(done) {
-      var type = 'forwardable_type';
-      var data = {
+      const type = 'forwardable_type';
+      const data = {
         message: {
           type: type
         },
         room: 'room'
       };
-
-      var channel = {
+      const channel = {
         createMessage: function() {
           return done(new Error());
         }
       };
-
-      var handler = function(message) {
+      const handler = function(message) {
         expect(message).to.deep.equals(data.message);
         done();
       };
-
-      var module = require('../../../../../backend/lib/listener/message')(dependencies);
+      const module = require('../../../../../backend/lib/listener/message')(dependencies);
 
       module.addForwardHandler(type, handler);
       module.start(channel);
       messageReceivedListener(data);
     });
 
-    it('should save the message and broadcast to globalpubsub the saved message and if the message is from someone in the channel', function(done) {
-      var type = 'text';
-      var text = 'yolo';
-      var date = '0405';
-      var creator = '1';
-      var conversation = 'general';
-      var attachments = [1, 2, 3];
-      var data = {
-        message: {
-          type: type,
-          text: text,
-          date: date,
-          creator: creator,
-          channel: conversation,
-          attachments: attachments
-        },
-        room: 'room'
-      };
+    describe('When message is not forwardable', function() {
+      const type = 'text';
+      const text = 'yolo';
+      const date = '0405';
+      const creator = '1';
+      const conversation = 'general';
+      const attachments = [1, 2, 3];
+      const room = 'room';
+      let data;
 
-      var createMessageResult = 'createMessageResult';
+      beforeEach(function() {
+        data = {
+          message: {
+            type: type,
+            text: text,
+            date: date,
+            creator: creator,
+            channel: conversation,
+            attachments: attachments
+          },
+          room: room
+        };
+      });
 
-      var conversationMock = {
-        getById: sinon.spy(function(id, callback) {
-          return callback(null, {members: [{_id: creator}]});
-        })
-      };
+      it('should save the message and broadcast the saved message to globalpubsub if user can write in conversation', function(done) {
+        user = {_id: 1};
+        const createMessageResult = 'createMessageResult';
+        const conversationMock = {
+          getById: sinon.spy(function(id, callback) {
+            return callback(null, {members: [{_id: creator}]});
+          }),
+          permission: {
+            userCanWrite: function(user, conversation) {
+              return Q.when(true);
+            }
+          }
+        };
+        const messageMock = {
+          create: sinon.spy(function(_m, callback) {
+            callback(null, createMessageResult);
+          })
+        };
+        const module = require('../../../../../backend/lib/listener/message')(dependencies);
 
-      var messageMock = {
-        create: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-        })
-      };
+        module.start({conversation: conversationMock, message: messageMock});
 
-      var module = require('../../../../../backend/lib/listener/message')(dependencies);
+        globalPublish = function(data) {
+          expect(messageMock.create).to.have.been.calledWith({
+            type: type,
+            text: text,
+            date: date,
+            creator: creator,
+            channel: conversation,
+            attachments: attachments
+          });
 
-      module.start({conversation: conversationMock, message: messageMock});
+          expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
+          expect(data).to.be.deep.equals({room: data.room, message: createMessageResult});
+          expect(conversationMock.getById).to.have.been.calledWith(conversation);
+          done();
+        };
 
-      globalPublish = function(data) {
-        expect(messageMock.create).to.have.been.calledWith({
-          type: type,
-          text: text,
-          date: date,
-          creator: creator,
-          channel: conversation,
-          attachments: attachments
-        });
+        messageReceivedListener(data);
+      });
 
-        expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
-        expect(data).to.be.deep.equals({room: data.room, message: createMessageResult});
-        expect(conversationMock.getById).to.have.been.calledWith(conversation);
-        done();
-      };
+      it('should not save the message if user is not allowed to write to conversation', function(done) {
+        user = {_id: 1};
+        globalPublish = sinon.spy();
+        const createMessageResult = 'createMessageResult';
+        const messageMock = {
+          create: sinon.spy(function(_m, callback) {
+            callback(null, createMessageResult);
+          })
+        };
+        const conversationMock = {
+          getById: sinon.spy(function(id, callback) {
+            expect(id).to.be.equal(conversation);
+            callback(null, {members: [{_id: 'id'}], type: 'channel'});
+          }),
+          permission: {
+            userCanWrite: function() {
+              return Q.when(false);
+            }
+          }
+        };
+        const module = require('../../../../../backend/lib/listener/message')(dependencies);
 
-      messageReceivedListener(data);
-    });
+        module.start({conversation: conversationMock, message: messageMock});
 
-    it('should not save the message and broadcast to globalpubsub the saved message and if the message is not from someone in the conversation', function(done) {
-      var type = 'text';
-      var text = 'yolo';
-      var date = '0405';
-      var creator = '1';
-      var conversation = 'general';
-      var attachments = [1, 2, 3];
-      var data = {
-        message: {
-          type: type,
-          text: text,
-          date: date,
-          creator: creator,
-          channel: conversation,
-          attachments: attachments
-        },
-        room: 'room'
-      };
-
-      var createMessageResult = 'createMessageResult';
-
-      var conversationMock = {
-        createMessage: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-        }),
-        getById: sinon.spy(function(id, callback) {
-          expect(id).to.be.equal(conversation);
-          callback(null, {members: [{_id: 'id'}]});
+        messageReceivedListener(data).then(done, function(err) {
           expect(globalPublish).to.not.have.been.called;
-          expect(conversationMock.createMessage).to.not.have.been.called;
+          expect(messageMock.create).to.not.have.been.called;
+          expect(err.message).to.match(/can not write message in the conversation/);
           done();
-        })
-      };
-      var messageMock = {
-        create: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-        })
-      };
+        });
+      });
 
-      var module = require('../../../../../backend/lib/listener/message')(dependencies);
-      module.start({conversation: conversationMock, message: messageMock});
+      it('should not save the message when conversation is not found', function(done) {
+        user = {_id: 1};
+        globalPublish = sinon.spy();
+        const createMessageResult = 'createMessageResult';
+        const messageMock = {
+          create: sinon.spy(function(_m, callback) {
+            callback(null, createMessageResult);
+          })
+        };
+        const conversationMock = {
+          getById: sinon.spy(function(id, callback) {
+            expect(id).to.be.equal(conversation);
+            callback();
+          }),
+          permission: {
+            userCanWrite: function() {
+              return Q.when(false);
+            }
+          }
+        };
+        const module = require('../../../../../backend/lib/listener/message')(dependencies);
 
-      globalPublish = sinon.spy();
-      messageReceivedListener(data);
-    });
+        module.start({conversation: conversationMock, message: messageMock});
 
-    it('should save the message and broadcast to globalpubsub the saved message if the conversation is a channel even if the message is not from someone in the channel', function(done) {
-      var type = 'text';
-      var text = 'yolo';
-      var date = '0405';
-      var creator = '1';
-      var conversation = 'general';
-      var attachments = [1, 2, 3];
-      var data = {
-        message: {
-          type: type,
-          text: text,
-          date: date,
-          creator: creator,
-          channel: conversation,
-          attachments: attachments
-        },
-        room: 'room'
-      };
-
-      var createMessageResult = 'createMessageResult';
-      var messageMock = {
-        create: sinon.spy(function(_m, callback) {
-          callback(null, createMessageResult);
-        })
-      };
-
-      var conversationMock = {
-        getById: sinon.spy(function(id, callback) {
-          expect(id).to.be.equal(conversation);
-          callback(null, {members: [{_id: 'id'}], type: 'channel'});
-          expect(globalPublish).to.have.been.called;
-          expect(messageMock.create).to.have.been.called;
+        messageReceivedListener(data).then(done, function(err) {
+          expect(globalPublish).to.not.have.been.called;
+          expect(messageMock.create).to.not.have.been.called;
+          expect(err.message).to.match(/No such conversation/);
           done();
-        })
-      };
+        });
+      });
 
-      var module = require('../../../../../backend/lib/listener/message')(dependencies);
-      module.start({conversation: conversationMock, message: messageMock});
+      it('should not save the message when conversation.getById fails', function(done) {
+        user = {_id: 1};
+        globalPublish = sinon.spy();
+        const msg = 'conversation.getById failed';
+        const createMessageResult = 'createMessageResult';
+        const messageMock = {
+          create: sinon.spy(function(_m, callback) {
+            callback(null, createMessageResult);
+          })
+        };
+        const conversationMock = {
+          getById: sinon.spy(function(id, callback) {
+            expect(id).to.be.equal(conversation);
+            callback(new Error(msg));
+          }),
+          permission: {
+            userCanWrite: function() {
+              return Q.when(false);
+            }
+          }
+        };
+        const module = require('../../../../../backend/lib/listener/message')(dependencies);
 
-      globalPublish = sinon.spy();
-      messageReceivedListener(data);
+        module.start({conversation: conversationMock, message: messageMock});
+
+        messageReceivedListener(data).then(done, function(err) {
+          expect(globalPublish).to.not.have.been.called;
+          expect(messageMock.create).to.not.have.been.called;
+          expect(err.message).to.equal(msg);
+          done();
+        });
+      });
+
+      it('should not save the message when user is not found', function(done) {
+        globalPublish = sinon.spy();
+        const createMessageResult = 'createMessageResult';
+        const messageMock = {
+          create: sinon.spy(function(_m, callback) {
+            callback(null, createMessageResult);
+          })
+        };
+        const conversationMock = {
+          getById: sinon.spy(function(id, callback) {
+            expect(id).to.be.equal(conversation);
+            callback(null, {members: [{_id: 'id'}], type: 'channel'});
+          }),
+          permission: {
+            userCanWrite: function() {
+              return Q.when(false);
+            }
+          }
+        };
+        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+
+        module.start({conversation: conversationMock, message: messageMock});
+
+        messageReceivedListener(data).then(done, function(err) {
+          expect(globalPublish).to.not.have.been.called;
+          expect(messageMock.create).to.not.have.been.called;
+          expect(err.message).to.match(/No such user/);
+          done();
+        });
+      });
+
+      it('should not save the message when user.get fails', function(done) {
+        const msg = 'user.get error';
+
+        err = new Error(msg);
+        globalPublish = sinon.spy();
+
+        const createMessageResult = 'createMessageResult';
+        const messageMock = {
+          create: sinon.spy(function(_m, callback) {
+            callback(null, createMessageResult);
+          })
+        };
+        const conversationMock = {
+          getById: sinon.spy(function(id, callback) {
+            expect(id).to.be.equal(conversation);
+            callback(null, {members: [{_id: 'id'}], type: 'channel'});
+          }),
+          permission: {
+            userCanWrite: function() {
+              return Q.when(false);
+            }
+          }
+        };
+        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+
+        module.start({conversation: conversationMock, message: messageMock});
+
+        messageReceivedListener(data).then(done, function(err) {
+          expect(globalPublish).to.not.have.been.called;
+          expect(messageMock.create).to.not.have.been.called;
+          expect(err.message).to.equal(msg);
+          done();
+        });
+      });
     });
   });
 
