@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var mockery = require('mockery');
 var _ = require('lodash');
-var Q = require('Q');
+var Q = require('q');
 var CONSTANTS = require('../../../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib message listener module', function() {
