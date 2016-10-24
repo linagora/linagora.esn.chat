@@ -30,6 +30,7 @@ module.exports = function(dependencies) {
   function start(conversationLib) {
     addHandler(require('./handlers/first')(dependencies));
     addHandler(require('./handlers/mentions')(dependencies));
+    addHandler(require('./handlers/publish_to_member')(dependencies));
 
     function saveAsChatMessage(data, callback) {
       conversationLib.getConversation(data.message.channel._id || data.message.channel, function(err, conversation) {

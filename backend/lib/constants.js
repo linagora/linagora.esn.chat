@@ -25,7 +25,8 @@ module.exports = {
     CONVERSATION_UPDATE: 'chat:conversation:update',
     USERS_MENTION: 'chat:users_mention',
     CONVERSATION_INITIALIZED: 'chat:conversation:initialized',
-    MEMBER_ADDED_IN_CONVERSATION: 'chat:conversation:members:add'
+    MEMBER_ADDED_IN_CONVERSATION: 'chat:conversation:members:add',
+    NEW_CHAT_MESSAGE: 'chat:message:new'
   },
   DEFAULT_CHANNEL: {
     name: 'general',
