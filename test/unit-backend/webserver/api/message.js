@@ -54,7 +54,8 @@ describe('The message controller', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       var channelId = 1;
-      var req = {conversation: {_id: channelId}};
+      var query = 'myquery';
+      var req = {conversation: {_id: channelId}, query: query};
       var controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.getForConversation(req, {
@@ -64,7 +65,7 @@ describe('The message controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 500}});
-              expect(lib.message.getForConversation).to.have.been.calledWith(channelId);
+              expect(lib.message.getForConversation).to.have.been.calledWith(channelId, query);
               done();
             }
           };
@@ -74,9 +75,10 @@ describe('The message controller', function() {
 
     it('should send back HTTP 200 with the lib.getForConversation result', function(done) {
       var channelId = 1;
+      var query = 'MyQuery';
       var msg1 = createMessage({text: 'foo'}, 156789);
       var msg2 = createMessage({text: 'bar'}, 2345677);
-      var req = {conversation: {_id: channelId}};
+      var req = {conversation: {_id: channelId}, query: query};
       var controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = [msg1.dest, msg2.dest];
@@ -87,7 +89,7 @@ describe('The message controller', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
-              expect(lib.message.getForConversation).to.have.been.calledWith(channelId);
+              expect(lib.message.getForConversation).to.have.been.calledWith(channelId, query);
               done();
             }
           };

@@ -84,8 +84,16 @@ module.exports = function(dependencies) {
     ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
   }
 
-  function getForConversation(conversation, query, callback) {
-    query = query || {};
+  function getForConversation(conversation, query = {limit: CONSTANTS.DEFAULT_LIMIT, offset: CONSTANTS.DEFAULT_OFFSET}, callback) {
+
+    function getMessages(mongoQuery, callback) {
+      mongoQuery.exec((err, result) => {
+        if (!err) {
+          result.reverse();
+        }
+        callback(err, result);
+      });
+    }
 
     if (!query.moderate) {
       query.moderate = false;
@@ -93,20 +101,34 @@ module.exports = function(dependencies) {
 
     let conversationId = conversation._id || conversation;
     let q = {channel: conversationId, moderate: false};
+
     let mq = ChatMessage.find(q);
 
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);
-    mq.limit(+query.limit || 20);
-    mq.skip(+query.offset || 0);
+    mq.limit(+query.limit);
+    mq.skip(+query.offset);
     mq.sort('-timestamps.creation');
-    mq.exec((err, result) => {
-      if (!err) {
-        result.reverse();
-      }
 
-      callback(err, result);
-    });
+    if (query.before) {
+      ChatMessage.findById(query.before).exec((err, before) => {
+        if (err) {
+          logger.error('Error while searching message %s', query.before, err);
+
+          return callback(err);
+        }
+
+        if (!before) {
+          return getMessages(mq, callback);
+        }
+
+        mq.where({'timestamps.creation': {$lt: before.timestamps.creation}});
+
+        return getMessages(mq, callback);
+      });
+    } else {
+      return getMessages(mq, callback);
+    }
   }
 
   function list(options, callback) {
