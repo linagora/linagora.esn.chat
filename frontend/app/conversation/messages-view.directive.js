@@ -13,7 +13,8 @@
       restrict: 'E',
       scope: {
         conversation: '=',
-        messages: '='
+        messages: '=',
+        loadPreviousMessages: '&'
       },
       templateUrl: '/chat/app/conversation/messages-view.html',
       link: link

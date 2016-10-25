@@ -46,6 +46,7 @@ let chatModule = new AwesomeModule(MODULE_NAME, {
       let webserverWrapper = dependencies('webserver-wrapper');
       let app = require('./backend/webserver/application')(this, dependencies);
       let lessFile = path.resolve(__dirname, './frontend/app/style.less');
+      let resources = ['../components/zInfiniteScroll/zInfiniteScroll.js']
       let frontendModules = glob.sync([
         FRONTEND_JS_PATH + '**/!(*spec).js'
       ]).map(filepath => filepath.replace(FRONTEND_JS_PATH, ''));
@@ -55,6 +56,7 @@ let chatModule = new AwesomeModule(MODULE_NAME, {
 
       app.use('/api', this.api.chat);
       webserverWrapper.injectAngularAppModules(NAME, frontendModules, MODULE_NAME, ['esn']);
+      webserverWrapper.injectJS(NAME, [resources], 'esn');
       webserverWrapper.injectLess(NAME, [lessFile], 'esn');
       webserverWrapper.addApp(NAME, app);
 

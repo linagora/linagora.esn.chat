@@ -26,6 +26,7 @@ module.exports = function(config) {
       'frontend/components/angular-file-upload/dist/angular-file-upload-all.js',
       'frontend/components/angular-xeditable/dist/js/xeditable.js',
       'frontend/components/angular-sanitize/angular-sanitize.min.js',
+      'frontend/components/zInfiniteScroll/zInfiniteScroll.js',
       'test/config/module.js',
       'frontend/app/chat.app.js',
       'frontend/app/**/*.js',
