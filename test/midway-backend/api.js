@@ -562,6 +562,80 @@ describe('The chat API', function() {
           });
       }).catch(done);
     });
+
+    it('should 200 with messages before the given one', function(done) {
+      let channelId;
+      let before;
+      const date = Date.now();
+      const limit = 5;
+      const size = 100;
+
+      function createMessages() {
+
+        function create(i) {
+          return Q.denodeify(app.lib.message.create)({
+            channel: channelId,
+            text: String(i),
+            type: 'text',
+            timestamps: {
+              creation: date + i
+            },
+            creator: userId
+          }).then(function(message) {
+            if (i === size / 2) {
+              before = message;
+            }
+
+            return message;
+          });
+        }
+
+        let promises = [];
+
+        for (var i = 0; i < size; i++) {
+          promises.push(create(i));
+        }
+
+        return Q.all(promises);
+      }
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.CHANNEL
+      }).then(function(channel) {
+        channelId = channel._id;
+
+        return createMessages();
+      }).then(function() {
+        request(app.express)
+          .get(`/api/conversations/${channelId}/messages?before=${before._id}&limit=${limit}`)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body).to.shallowDeepEqual([
+              {
+                text: '45'
+              },
+              {
+                text: '46'
+              },
+              {
+                text: '47'
+              },
+              {
+                text: '48'
+              },
+              {
+                text: '49'
+              }
+            ]);
+            done();
+          });
+      }).catch(done);
+    });
   });
 
   describe('GET /api/messages/:id', function() {

@@ -9,7 +9,7 @@ module.exports = {
     DISCONNECTED: 'disconnected',
     DEFAULT_CONNECTED_STATE: 'connected'
   },
-  DEFAULT_LIMIT: 10,
+  DEFAULT_LIMIT: 25,
   DEFAULT_OFFSET: 0,
   NOTIFICATIONS: {
     MESSAGE_RECEIVED: 'chat:message:received',

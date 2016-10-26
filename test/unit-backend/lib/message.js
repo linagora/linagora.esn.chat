@@ -274,6 +274,63 @@ describe('The linagora.esn.chat message lib', function() {
         done();
       });
     });
+
+    it('should call ChatMessage.find with the before parameter', function(done) {
+      var id = 1;
+      var beforeId = 'beforeId';
+      var beforeTimestamp = 'beforeTimestamp';
+      var before = {_id: beforeId, timestamps: {creation: beforeTimestamp}};
+      var options = {_id: id};
+      var limit = 2;
+      var offset = 3;
+      var query = {_id: 1, foo: 'bar', limit: limit, offset: offset, before: beforeId};
+
+      var populateMock = sinon.spy();
+      var limitMock = sinon.spy();
+      var skipMock = sinon.spy();
+      var sortMock = sinon.spy();
+      var whereMock = sinon.spy();
+      var result = [1, 2];
+
+      modelsMock.ChatMessage = {
+        findById: function(id) {
+          expect(id).to.equal(beforeId);
+
+          return {
+            exec: function(callback) {
+              callback(null, before);
+            }
+          };
+        },
+        find: function(q) {
+          expect(q).to.deep.equal({channel: id, moderate: false});
+
+          return {
+            populate: populateMock,
+            limit: limitMock,
+            skip: skipMock,
+            sort: sortMock,
+            where: whereMock,
+            exec: function(callback) {
+              expect(populateMock).to.have.been.calledWith('creator');
+              expect(populateMock).to.have.been.calledWith('user_mentions');
+              expect(limitMock).to.have.been.calledWith(limit);
+              expect(skipMock).to.have.been.calledWith(offset);
+              expect(sortMock).to.have.been.calledWith('-timestamps.creation');
+              expect(whereMock).to.have.been.calledWith({'timestamps.creation': {$lt: beforeTimestamp}});
+              callback(null, result.slice(0).reverse());
+            }
+          };
+        }
+      };
+
+      require('../../../backend/lib/message')(dependencies).getForConversation(options, query, function(err, _result) {
+        expect(err).to.be.null;
+        expect(_result).to.be.deep.equal(result);
+        done();
+      });
+    });
+
   });
 
   describe('The markAllMessageOfAConversationReaded function', function() {
