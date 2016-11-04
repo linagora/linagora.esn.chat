@@ -13,7 +13,7 @@ sub-header
   form(name='addGroupForm', ng-submit="vm.addGroup()")
     .form-group.fg-line
       .row
-        attendees-autocomplete-input(original-attendees='vm.members', mutable-attendees='vm.members')
+        users-autocomplete-input(original-users='vm.members', mutable-users='vm.members')
     .button-bar.actions.hidden-xs.flex-end
       input.btn.btn-default(type="button", value="#{__('Cancel')}", ui-sref="chat.channels-views")
       input.btn.btn-primary(type="submit", value="#{__('Create')}", ng-disabled="addGroupForm.$invalid")
