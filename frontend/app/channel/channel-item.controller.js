@@ -11,6 +11,7 @@
   function ChatChannelItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationsService) {
     var self = this;
 
+    self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     self.channelState = self.channelState || 'chat.channels-views';
     self.allUsersConnected = true;
 
@@ -26,7 +27,7 @@
       self.getConversationName = getConversationName;
     });
 
-    session.ready.then(sessionReady);
+    session.ready.then(init);
 
     function calcNumberOfDays(last_message) {
       var d1 = moment().startOf('day');
@@ -47,7 +48,7 @@
       }
     }
 
-    function sessionReady(session) {
+    function init() {
       self.otherUsers = _.reject(self.item.members, {_id: session.user._id});
       if (self.otherUsers.length > 1) {
         self.conversationName = self.item.name || _.map(self.otherUsers, 'firstname').join(', ');
@@ -79,7 +80,6 @@
       });
 
       $scope.$on('$destroy', unbind);
-      self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     }
   }
 })();
