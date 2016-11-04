@@ -7,39 +7,70 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  ChatConversationViewController.$inject = ['$scope', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'chatScrollService', 'chatLocalStateService', '$stateParams'];
+  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams'];
 
-  function ChatConversationViewController($scope, session, chatConversationService, chatConversationsService, CHAT_EVENTS, chatScrollService, chatLocalStateService, $stateParams) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams) {
     var self = this;
 
     self.chatLocalStateService = chatLocalStateService;
     self.user = session.user;
     self.messages = [];
     self.glued = true;
+    self.loadPreviousMessages = loadPreviousMessages;
     self.newMessage = newMessage;
     self.updateTopic = updateTopic;
-    self.chatLocalStateService.ready.then(whenReady);
+    self.chatLocalStateService.ready.then(init);
 
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
     }
 
-    function insertMessage(messages, message) {
+    function getConversationId() {
+      return $stateParams.id || (self.chatLocalStateService.channels && self.chatLocalStateService.channels[0] && self.chatLocalStateService.channels[0]._id);
+    }
+
+    function getOlderMessageId() {
+      return self.messages && self.messages[0] && self.messages[0]._id;
+    }
+
+    function newMessage(message) {
       addUniqId(message);
       // chances are, the new message is the most recent
       // So we traverse the array starting by the end
-      for (var i = messages.length - 1; i > -1; i--) {
-        if (messages[i].timestamps.creation < message.timestamps.creation) {
-          messages.splice(i + 1, 0, message);
+      for (var i = self.messages.length - 1; i > -1; i--) {
+        if (self.messages[i].timestamps.creation < message.timestamps.creation) {
+          self.messages.splice(i + 1, 0, message);
 
           return;
         }
       }
-      messages.unshift(message);
+      self.messages.unshift(message);
     }
 
-    function newMessage(message) {
-      insertMessage(self.messages, message);
+    function olderMessages(messages) {
+      messages.forEach(function(message) {
+        addUniqId(message);
+        self.messages.unshift(message);
+      });
+    }
+
+    function loadPreviousMessages() {
+      var conversationId = getConversationId();
+      var options = {limit: CHAT.DEFAULT_FETCH_SIZE};
+      var older = getOlderMessageId();
+
+      if (older) {
+        options.before = older;
+      }
+
+      return chatConversationService.fetchMessages(conversationId, options).then(function(result) {
+        olderMessages(result);
+
+        return self.messages;
+      });
+    }
+
+    function scrollDown() {
       chatScrollService.scrollDown();
     }
 
@@ -47,20 +78,16 @@
       chatConversationsService.updateConversationTopic($data, self.chatLocalStateService.activeRoom._id);
     }
 
-    function whenReady() {
-      var channelId = $stateParams.id || self.chatLocalStateService.channels[0] && self.chatLocalStateService.channels[0]._id;
+    function init() {
+      var conversationId = getConversationId();
 
-      if (channelId) {
-        self.chatLocalStateService.setActive(channelId);
-        chatConversationService.fetchMessages(channelId, {}).then(function(result) {
-          result.forEach(addUniqId);
-          self.messages = result || [];
-          chatScrollService.scrollDown();
-        });
+      if (conversationId) {
+        self.chatLocalStateService.setActive(conversationId);
+        loadPreviousMessages().then(scrollDown);
       }
 
       $scope.$on('$destroy', function() {
-        if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === channelId) {
+        if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId) {
           self.chatLocalStateService.unsetActive();
         }
       });
@@ -68,8 +95,9 @@
 
     [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
       $scope.$on(eventReceived, function(event, message) {
-        if (message.channel === self.chatLocalStateService.activeRoom._id) {
+        if (message.channel && message.channel === self.chatLocalStateService.activeRoom._id) {
           self.newMessage(message);
+          scrollDown();
         }
       });
     });

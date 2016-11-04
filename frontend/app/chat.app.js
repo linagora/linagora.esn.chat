@@ -27,6 +27,7 @@
     'angularMoment',
     'ngSanitize',
     'esn.file-preview',
-    'luegg.directives'
+    'luegg.directives',
+    'zInfiniteScroll'
   ]);
 })();
