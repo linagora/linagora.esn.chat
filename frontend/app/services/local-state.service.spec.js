@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatLocalState service', function() {
-  var chatLocalStateService, chatConversationService, chatConversationMock, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
+  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q, $httpBackend;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -26,6 +26,10 @@ describe('The chatLocalState service', function() {
           return callback({user: user});
         }
       }
+    };
+
+    chatUsernameMock = {
+      generate: angular.noop
     };
 
     chatNamespace = {on: sinon.spy()};
@@ -71,6 +75,7 @@ describe('The chatLocalState service', function() {
       $provide.factory('livenotification', livenotificationFactory);
       $provide.factory('chatConversationsService', conversationsServiceFactory);
       $provide.constant('chatConversationService', chatConversationMock);
+      $provide.value('chatUsername', chatUsernameMock);
     });
 
   });

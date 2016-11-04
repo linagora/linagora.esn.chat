@@ -40,6 +40,7 @@ describe('the chatMentionChooser component', function() {
     });
     $provide.value('chatSearchMessagesProviderService', {});
     $provide.value('domainAPI', domainAPIMock);
+    $provide.value('chatUsername', {generate: function() {}});
     $provide.value('ChatTextEntitySelector', ChatTextEntitySelectorMock);
     $provide.factory('session', function(_$q_) {
       $q = _$q_;
@@ -101,16 +102,8 @@ describe('the chatMentionChooser component', function() {
     });
   });
 
-  describe('The toHumanValue method given to ChatTextEntitySelector', function() {
-    it('shoud concat firstname and lastname with _', function() {
-      expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.func.and(sinon.match(function(toHumanValue) {
-        return toHumanValue({firstname: 'firstname', lastname: 'lastname'}) === 'firstname_lastname';
-      })));
-    });
-  });
-
   describe('The toRealValue method given to ChatTextEntitySelector', function() {
-    it('shoud concat firstname and lastname with _', function() {
+    it('shoud return the user._id', function() {
       expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.func.and(sinon.match(function(toRealValue) {
         return toRealValue({_id: 'entity'}) === 'entity';
       })));

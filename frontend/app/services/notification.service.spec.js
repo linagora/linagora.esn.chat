@@ -15,6 +15,7 @@ describe('The linagora.esn.chat services', function() {
     chatNotificationService,
     CHAT_CONVERSATION_TYPE,
     conversationsServiceMock,
+    chatUsernameMock,
     groups,
     channels,
     localStorageService,
@@ -36,6 +37,10 @@ describe('The linagora.esn.chat services', function() {
     user = {_id: 'userId'};
 
     chatNamespace = {on: sinon.spy()};
+
+    chatUsernameMock = {
+      generate: angular.noop
+    };
 
     sessionMock = {
       user: user,
@@ -87,6 +92,7 @@ describe('The linagora.esn.chat services', function() {
       $provide.factory('livenotification', livenotificationFactory);
       $provide.value('chatConversationsService', conversationsServiceMock);
       $provide.value('localStorageService', localStorageService);
+      $provide.value('chatUsername', chatUsernameMock);
     });
   });
 

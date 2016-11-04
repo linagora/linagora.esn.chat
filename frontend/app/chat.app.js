@@ -12,6 +12,7 @@
     'esn.header',
     'esn.highlight',
     'esn.sidebar',
+    'esn.user',
     'op.dynamicDirective',
     'esn.url',
     'angularMoment',

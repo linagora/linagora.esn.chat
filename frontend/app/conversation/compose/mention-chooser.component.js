@@ -9,12 +9,10 @@
       controller: ChatMentionsChooserController
     });
 
-  function ChatMentionsChooserController($scope, ChatTextEntitySelector, session, domainAPI, _, MENTION_CHOOSER_MAX_RESULT) {
+  function ChatMentionsChooserController($scope, ChatTextEntitySelector, chatUsername, session, domainAPI, _, MENTION_CHOOSER_MAX_RESULT, CHAT_MENTION_CHAR) {
     var self = this;
 
-    self.entitySelector = new ChatTextEntitySelector(membersResolver, '@', null, function(user) {
-      return user.firstname + '_' + user.lastname;
-    }, _.property('_id'));
+    self.entitySelector = new ChatTextEntitySelector(membersResolver, CHAT_MENTION_CHAR, null, chatUsername.generate, _.property('_id'));
 
     function membersResolver(string) {
       return session.ready.then(function(session) {
