@@ -12,10 +12,12 @@
             i.menu-icon.mdi.mdi-plus
 
         chat-channel-item(ng-repeat="item in root.chatLocalStateService.channels" item="item", ng-click='$hide()')
+
         .lv-item.clickable.menu-heading
           .title(ui-sref='chat.channels-views')
             i.menu-icon.mdi.mdi-facebook-messenger
             .text #{__('Direct Message')}
           .add-folder(ui-sref='chat.groups-add')
             i.menu-icon.mdi.mdi-plus
+
         chat-channel-item(ng-repeat="item in root.chatLocalStateService.privateConversations" item="item", ng-click='$hide()')
