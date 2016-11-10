@@ -57,6 +57,7 @@ module.exports = function(grunt) {
       }
     },
     shell: {
+      elasticsearch: shell.newShell(command.elasticsearch, /started/, 'Elasticsearch server is started.'),
       mongo: shell.newShell(command.mongo(false), new RegExp('connections on port ' + servers.mongodb.port), 'MongoDB server is started.'),
       redis: shell.newShell(command.redis, /on port/, 'Redis server is started')
     },
@@ -91,11 +92,12 @@ module.exports = function(grunt) {
 
   grunt.registerTask('linters', 'Check code for lint', ['eslint:all', 'lint_pattern:all']);
   grunt.registerTask('linters-dev', 'Check changed files for lint', ['prepare-quick-lint', 'jshint:quick', 'jscs:quick', 'lint_pattern:quick']);
-  grunt.registerTask('spawn-servers', 'spawn servers', ['shell:mongo', 'shell:redis']);
-  grunt.registerTask('kill-servers', 'kill servers', ['shell:mongo:kill', 'shell:redis:kill']);
+  grunt.registerTask('spawn-servers', 'spawn servers', ['shell:mongo', 'shell:redis', 'shell:elasticsearch']);
+  grunt.registerTask('kill-servers', 'kill servers', ['shell:mongo:kill', 'shell:redis:kill', 'shell:elasticsearch:kill']);
   grunt.registerTask('setup-environment', 'create temp folders and files for tests', gruntfileUtils.setupEnvironment());
+  grunt.registerTask('setupElasticsearchIndex', 'setup elasticsearch index', gruntfileUtils.setupElasticsearchIndex());
   grunt.registerTask('clean-environment', 'remove temp folder for tests', gruntfileUtils.cleanEnvironment());
-  grunt.registerTask('setup-servers', ['spawn-servers', 'continue:on']);
+  grunt.registerTask('setup-servers', ['spawn-servers', 'continue:on', 'setupElasticsearchIndex']);
   grunt.registerTask('test-midway-backend', ['setup-environment', 'setup-servers', 'run_grunt:midway_backend', 'kill-servers', 'clean-environment']);
   grunt.registerTask('test-unit-backend', 'Test backend code', ['mochacli:backend']);
   grunt.registerTask('test-unit-frontend', 'Test frontend code', ['karma:unit']);

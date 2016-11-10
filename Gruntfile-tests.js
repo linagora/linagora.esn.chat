@@ -54,7 +54,11 @@ module.exports = function(grunt) {
       },
       midway: {
         options: {
-          files: ['test/midway-backend/all.js', grunt.option('test') || 'test/midway-backend/**/*.js']
+          common: ['test/midway-backend/all.js'],
+          target: 'mochacli:midway'
+        },
+        files: {
+          src: ['test/midway-backend/**/*.js']
         }
       }
     },

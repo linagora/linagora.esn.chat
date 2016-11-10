@@ -6,6 +6,7 @@ var path = require('path');
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
 var Server = require('mongodb').Server;
+var EsnConfig = require('esn-elasticsearch-configuration');
 
 function _args(grunt) {
   var opts = ['test', 'chunk', 'ci', 'reporter'];
@@ -20,13 +21,18 @@ function _args(grunt) {
 }
 
 function _taskSuccessIfMatch(grunt, regex, info) {
-  return function(chunk) {
-    var done = grunt.task.current.async();
-    var out = '' + chunk;
-    var started = regex;
-    if (started.test(out)) {
-      grunt.log.write(info);
-      done(true);
+  var taskIsDone = false;
+
+  return function(chunk, done) {
+    if (taskIsDone) { return; }
+
+    if (regex) {
+      done = done || grunt.task.current.async();
+      if (regex.test('' + chunk)) {
+        taskIsDone = true;
+        grunt.log.oklns(info);
+        done(true);
+      }
     }
   };
 }
@@ -58,6 +64,15 @@ GruntfileUtils.prototype.command = function command() {
       (servers.mongodb.port ? servers.mongodb.port : '23456'),
       replset);
   };
+
+  commandObject.elasticsearch = servers.elasticsearch.cmd +
+  ' -Des.http.port=' + servers.elasticsearch.port +
+  ' -Des.transport.tcp.port=' + servers.elasticsearch.communication_port +
+  ' -Des.cluster.name=' + servers.elasticsearch.cluster_name +
+  ' -Des.path.data=' + servers.elasticsearch.data_path +
+  ' -Des.path.work=' + servers.elasticsearch.work_path +
+  ' -Des.path.logs=' + servers.elasticsearch.logs_path +
+  ' -Des.discovery.zen.ping.multicast.enabled=false';
 
   return commandObject;
 };
@@ -249,6 +264,22 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
     };
 
     _doReplSet();
+  };
+};
+
+GruntfileUtils.prototype.setupElasticsearchIndex = function() {
+  var grunt = this.grunt;
+  var servers = this.servers;
+  var p = path.normalize(__dirname + '/../../config/elasticsearch/');
+
+  return function() {
+    var done = this.async();
+    var esnConf = new EsnConfig({host: servers.host, port: servers.elasticsearch.port, path: p});
+
+    esnConf.createIndex('chat.messages').then(function() {
+      grunt.log.write('Elasticsearch settings are successfully added');
+      done(true);
+    }, done);
   };
 };
 
