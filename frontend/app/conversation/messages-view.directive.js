@@ -14,7 +14,8 @@
       scope: {
         conversation: '=',
         messages: '=',
-        loadPreviousMessages: '&'
+        loadPreviousMessages: '&',
+        spinnerKey: '='
       },
       templateUrl: '/chat/app/conversation/messages-view.html',
       link: link

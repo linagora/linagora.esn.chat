@@ -20,6 +20,8 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     chatLocalStateService,
     chatLocalStateServiceMock,
     $stateParams,
+    usSpinnerService,
+    usSpinnerServiceMock,
     $rootScope,
     $controller,
     user,
@@ -28,6 +30,10 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
   beforeEach(function() {
 
     chatConversationServiceMock = {};
+
+    usSpinnerServiceMock = {
+      spin: function() {}
+    };
 
     chatConversationsServiceMock = {
       getChannels: sinon.spy(function() {
@@ -67,6 +73,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
       $provide.value('chatConversationService', chatConversationServiceMock);
+      $provide.value('usSpinnerService', usSpinnerServiceMock);
       $provide.value('chatConversationsService', chatConversationsServiceMock);
       $provide.value('chatScrollService', chatScrollServiceMock);
       $provide.value('$stateParams', $stateParams);
@@ -77,7 +84,8 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatLocalStateService_, _chatConversationService_, _chatConversationsService_, _chatScrollService_, _CHAT_EVENTS_, _CHAT_, _$stateParams_, _MESSAGE_GROUP_TIMESPAN_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatLocalStateService_, _chatConversationService_, _chatConversationsService_, _chatScrollService_, _CHAT_EVENTS_, _CHAT_, _$stateParams_, _usSpinnerService_, _MESSAGE_GROUP_TIMESPAN_) {
+
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
@@ -91,6 +99,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     chatScrollService = _chatScrollService_;
     chatLocalStateService = _chatLocalStateService_;
     $stateParams = _$stateParams_;
+    usSpinnerService = _usSpinnerService_;
   }));
 
   function initController(ctrl) {

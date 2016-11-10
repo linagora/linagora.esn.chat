@@ -7,11 +7,12 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams', 'MESSAGE_GROUP_TIMESPAN'];
+  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams', 'usSpinnerService', 'MESSAGE_GROUP_TIMESPAN'];
 
-  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, MESSAGE_GROUP_TIMESPAN) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN) {
     var self = this;
 
+    self.spinnerKey = 'ChatConversationSpinner';
     self.chatLocalStateService = chatLocalStateService;
     self.user = session.user;
     self.messages = [];
@@ -73,6 +74,8 @@
         options.before = older;
       }
 
+      usSpinnerService.spin(self.spinnerKey);
+
       return chatConversationService.fetchMessages(conversationId, options)
       .then(checkMessagesOfSameUser)
       .then(function(result) {
@@ -84,8 +87,10 @@
         }
 
         return self.messages;
+      })
+      .finally(function() {
+        usSpinnerService.stop(self.spinnerKey);
       });
-
     }
 
     function checkMessagesOfSameUser(messages) {
