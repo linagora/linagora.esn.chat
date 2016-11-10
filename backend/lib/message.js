@@ -8,6 +8,7 @@ const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 module.exports = function(dependencies) {
 
   const logger = dependencies('logger');
+  const pubsub = dependencies('pubsub').local;
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Types.ObjectId;
   const Conversation = mongoose.model('ChatConversation');
@@ -22,7 +23,8 @@ module.exports = function(dependencies) {
     markAllAsReadById,
     markAllAsRead,
     moderate,
-    parseMention
+    parseMention,
+    save
   };
 
   function count(conversationId, callback) {
@@ -31,20 +33,19 @@ module.exports = function(dependencies) {
 
   function create(message, callback) {
     parseMention(message);
-    let chatMessage = new ChatMessage(message);
 
     async.waterfall([
-      save, updateLastMessage, markAsRead, populate,
+      saveMessage, updateLastMessage, markAsRead, populate,
       function(message, callback) {
         callback(null, message.toJSON());
       }
     ], callback);
 
-    function save(callback) {
-      chatMessage.save(callback);
+    function saveMessage(callback) {
+      save(message, callback);
     }
 
-    function updateLastMessage(message, _num, callback) {
+    function updateLastMessage(message, callback) {
       Conversation.findByIdAndUpdate(message.channel, {
         $set: {
           last_message: {
@@ -205,6 +206,15 @@ module.exports = function(dependencies) {
   function parseMention(message) {
     message.user_mentions = _.uniq(message.text.match(/@[a-fA-F0-9]{24}/g)).map(function(mention) {
       return new ObjectId(mention.replace(/^@/, ''));
+    });
+  }
+
+  function save(message, callback) {
+    ChatMessage.create(message, (err, created) => {
+      if (!err) {
+        pubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_SAVED).publish(created);
+      }
+      callback(err, created);
     });
   }
 

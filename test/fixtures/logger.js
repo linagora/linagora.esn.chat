@@ -1,6 +1,6 @@
 'use strict';
 
-var log = console.log;
+const log = console.log;
 
 module.exports = {
   log: log,

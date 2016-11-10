@@ -54,6 +54,11 @@ describe('The chat API', function() {
           }
         }
       },
+      elasticsearch: {
+        listeners: {
+          addListener: function() {}
+        }
+      },
       pubsub: pubsub,
       db: {
         mongo: {
