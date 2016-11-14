@@ -8,8 +8,9 @@ const commandsPath = path.resolve(__dirname + '/commands');
 const readdir = Q.denodeify(fs.readdir);
 
 readdir(commandsPath).then(items => {
+
   items.forEach(item => {
-    const filePath = path.resolve(item);
+    const filePath = path.resolve(`${commandsPath}/${item}`);
 
     if (fs.statSync(filePath).isFile()) {
       const parsed = path.parse(filePath);
@@ -19,10 +20,10 @@ readdir(commandsPath).then(items => {
       try {
         require('./commands/' + commandName).createCommand(command);
       } catch (err) {
-        console.error('Failed to create command from %s', item);
+        console.error(`Failed to create command from ${item}`);
       }
     } else {
-      console.log('%s is not a file and can not be used to create a command', item);
+      console.log(`${item} is not a file and can not be used to create a command`);
     }
   });
   commander.parse(process.argv);
