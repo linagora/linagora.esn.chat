@@ -129,8 +129,9 @@
 
         // hack to reset autoSize
         $('textarea')[0].style.height = '56px';
-        chatScrollService.scrollDown();
-
+        if (chatScrollService.canScrollDown(message.channel)) {
+          chatScrollService.scrollDown();
+        }
         chatMessageService.sendMessage(message).then(function(result) {
           $log.debug('Message ACK', result);
         }, function(err) {

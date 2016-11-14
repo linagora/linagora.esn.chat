@@ -15,7 +15,8 @@
         messages: '=',
         loadPreviousMessages: '&',
         spinnerKey: '=',
-        topOfConversation: '='
+        topOfConversation: '=',
+        setLastLineInView: '='
       },
       templateUrl: '/chat/app/conversation/messages-view.html',
       link: link

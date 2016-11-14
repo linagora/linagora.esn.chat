@@ -47,9 +47,6 @@
 
       function sessionReady(session) {
         self.user = session.user;
-        $timeout(function() {
-          chatScrollService.scrollDown();
-        });
       }
 
       function setConversationName(getConversationName) {

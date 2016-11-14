@@ -29,6 +29,7 @@
     'ngSanitize',
     'esn.file-preview',
     'luegg.directives',
-    'zInfiniteScroll'
+    'zInfiniteScroll',
+    'angular-inview'
   ]);
 })();

@@ -20,6 +20,8 @@
     self.updateTopic = updateTopic;
     self.topOfConversation = false;
     self.chatLocalStateService.ready.then(init);
+    self.setLastLineInView = setLastLineInView;
+    self.inview = false;
 
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation + '' + message.text;
@@ -113,8 +115,17 @@
       return messages;
     }
 
-    function scrollDown() {
-      chatScrollService.scrollDown();
+    function scrollDown(isOwnerOfmessage, messageChannel) {
+      if (isOwnerOfmessage || self.inview) {
+        chatScrollService.setCanScrollDown(messageChannel, true);
+        chatScrollService.scrollDown();
+      } else {
+        chatScrollService.setCanScrollDown(messageChannel, false);
+      }
+    }
+
+    function setLastLineInView(inview) {
+      self.inview = inview;
     }
 
     function updateTopic($data) {
@@ -145,7 +156,7 @@
       $scope.$on(eventReceived, function(event, message) {
         if (message.channel && message.channel === self.chatLocalStateService.activeRoom._id) {
           self.newMessage(message);
-          scrollDown();
+          scrollDown(message.creator._id === session.user._id, message.channel);
         }
       });
     });

@@ -19,6 +19,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     usSpinnerServiceMock,
     $rootScope,
     $controller,
+    user,
     searchProviders;
 
   beforeEach(function() {
@@ -39,14 +40,22 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     };
 
     chatScrollServiceMock = {
-      scrollDown: function() {}
+      scrollDown: function() {},
+      setCanScrollDown: sinon.spy(function() {
+        return $q.when([]);
+      }),
+      canScrollDown: sinon.spy(function() {
+        return $q.when([]);
+      })
     };
 
     $stateParams = {
       id: '123'
     };
 
-    sessionMock = {};
+    user = {_id: 'userId'};
+
+    sessionMock = {user: user};
 
     chatLocalStateServiceMock = {
       activeRoom: {},
@@ -108,7 +117,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
 
     beforeEach(function() {
       $stateParams.id = null;
-      message = {_id: 1, creator: 2, timestamps: {creation: 3}};
+      message = {_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}};
     });
 
     it('should not add the message if message does not have a channel', function() {
@@ -140,6 +149,19 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       $rootScope.$digest();
       expect(scope.vm.messages).to.be.empty;
     });
+
+    it('should call scrollDown after adding the message', function() {
+      var channel = 1;
+
+      chatLocalStateServiceMock.activeRoom._id = channel;
+      message.channel = channel;
+      initCtrl();
+
+      scope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+      $rootScope.$digest();
+      expect(scope.vm.messages).to.shallowDeepEqual([message]);
+      expect(chatScrollServiceMock.setCanScrollDown).to.be.called;
+    });
   });
 
   describe('on $scope chat:message:file event', function() {
@@ -148,7 +170,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
 
     beforeEach(function() {
       $stateParams.id = null;
-      message = {_id: 1, creator: 2, timestamps: {creation: 3}};
+      message = {_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}};
     });
 
     it('should not add the message if message does not have a channel', function() {
