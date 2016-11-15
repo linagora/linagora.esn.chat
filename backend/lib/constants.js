@@ -13,6 +13,9 @@ module.exports = {
   DEFAULT_OFFSET: 0,
   NOTIFICATIONS: {
     MESSAGE_RECEIVED: 'chat:message:received',
+    MESSAGE_REMOVED: 'chat:message:removed',
+    MESSAGE_SAVED: 'chat:message:saved',
+    MESSAGE_UPDATED: 'chat:message:updated',
     USER_STATE: 'user:state',
     USER_CONNECTION: 'user:connection',
     USER_DISCONNECTION: 'user:disconnection',
@@ -41,5 +44,11 @@ module.exports = {
   },
   SKIP_FIELDS: {
     USER: '-password -accounts'
+  },
+  SEARCH: {
+    MESSAGES: {
+      TYPE_NAME: 'chat.messages',
+      INDEX_NAME: 'chat.messages.idx'
+    }
   }
 };
