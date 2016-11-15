@@ -2,6 +2,8 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var Q = require('q');
+
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
@@ -9,7 +11,6 @@ var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var _ = require('lodash');
 
 describe('The linagora.esn.chat conversation lib', function() {
 
@@ -48,7 +49,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     logger = {
       error: console.log,
       info: console.log,
-      debug: console.log
+      debug: console.log,
+      warn: console.log
     };
 
     mq = {
@@ -531,6 +533,43 @@ describe('The linagora.esn.chat conversation lib', function() {
         expect(modelsMock.ChatConversation.findOneAndRemove).to.have.been.calledWith({_id: 'channelId'});
         expect(modelsMock.ChatMessage.remove).to.have.been.calledWith({channel: 'channelId'});
         expect(channelDeletionTopic.publish).to.have.been.calledWith(deleteResult);
+      });
+    });
+  });
+
+  describe('The getAllForUser function', function() {
+    it('should send back conversations from all the finders', function(done) {
+      const user = {_id: 1};
+      const options = {foo: 'bar'};
+      const conversationLib = require('../../../backend/lib/conversation')(dependencies, lib);
+      const finder1 = sinon.spy(function() {return Q.when([1, 2, 3]);});
+      const finder2 = sinon.spy(function() {return Q.when([4, 5]);});
+
+      conversationLib.registerUserConversationFinder(finder1);
+      conversationLib.registerUserConversationFinder(finder2);
+      conversationLib.getAllForUser(user, options).then(function(result) {
+        expect(result.length).to.equals(5);
+        expect(finder1).to.have.been.calledWith(user, options);
+        expect(finder2).to.have.been.calledWith(user, options);
+        done();
+      });
+    });
+
+    it('should not fail when a finder fails', function(done) {
+      const user = {_id: 1};
+      const conversations = [1, 2, 3];
+      const options = {foo: 'bar'};
+      const conversationLib = require('../../../backend/lib/conversation')(dependencies, lib);
+      const finder1 = sinon.spy(function() {return Q.when(conversations);});
+      const finder2 = sinon.spy(function() {return Q.reject(new Error('I failed'));});
+
+      conversationLib.registerUserConversationFinder(finder1);
+      conversationLib.registerUserConversationFinder(finder2);
+      conversationLib.getAllForUser(user, options).then(function(result) {
+        expect(result).to.deep.equals(conversations);
+        expect(finder1).to.have.been.calledWith(user, options);
+        expect(finder2).to.have.been.calledWith(user, options);
+        done();
       });
     });
   });

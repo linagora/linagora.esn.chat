@@ -2,7 +2,9 @@
 
 const async = require('async');
 const _ = require('lodash');
+const Q = require('q');
 const CONSTANTS = require('../lib/constants');
+
 const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 const CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
@@ -13,6 +15,7 @@ const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
 
+  const logger = dependencies('logger');
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Types.ObjectId;
   const Conversation = mongoose.model('ChatConversation');
@@ -26,18 +29,22 @@ module.exports = function(dependencies) {
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
   const messageLib = require('./message')(dependencies);
   const permission = require('./permission/conversation')(dependencies);
+  const userConversationsFinders = [];
 
   return {
     addMember,
     create,
     find,
+    getAllForUser,
     getById,
     getChannels,
     list,
+    listForUser,
     moderate,
     permission,
     remove,
     removeMember,
+    registerUserConversationFinder,
     update,
     updateTopic
   };
@@ -137,6 +144,22 @@ module.exports = function(dependencies) {
     }
 
     Conversation.find(request).populate('members', SKIP_FIELDS.USER).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
+  }
+
+  function getAllForUser(user, options = {}) {
+    function wrap(finder) {
+      return finder(user, options).catch(err => {
+        logger.warn('Failed to find conversations', err);
+
+        return [];
+      });
+    }
+
+    return Q.all(userConversationsFinders.map(finder => wrap(finder))).then(result => [].concat.apply([], result));
+  }
+
+  function listForUser(user, options, callback) {
+    Conversation.find({type: {$in: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE]}, members: {$in: [user._id]}}).exec(callback);
   }
 
   function list(options, callback) {
@@ -292,6 +315,10 @@ module.exports = function(dependencies) {
     }, {
       new: true
     }, callback);
+  }
+
+  function registerUserConversationFinder(finder) {
+    finder && userConversationsFinders.push(finder);
   }
 
   function removeMember(conversationId, userId, callback) {

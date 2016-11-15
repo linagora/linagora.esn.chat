@@ -10,7 +10,7 @@ module.exports = function(dependencies, lib) {
   };
 
   function listConversationsForUser(req, res) {
-    lib.collaboration.listForUser(req.user, (err, conversations) => {
+    lib.collaboration.listForUser(req.user, {}, (err, conversations) => {
       if (err) {
         const msg = 'Error while getting conversations for collaborations';
 

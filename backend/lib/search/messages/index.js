@@ -4,12 +4,14 @@ module.exports = function(dependencies) {
 
   const logger = dependencies('logger');
   const listener = require('./listener')(dependencies);
+  const search = require('./search')(dependencies);
   let searchHandler;
 
   return {
     indexMessage,
     registerListener,
-    removeMessageFromIndex
+    removeMessageFromIndex,
+    search
   };
 
   function indexMessage(message, callback) {

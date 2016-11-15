@@ -1,12 +1,15 @@
 'use strict';
 
+const Q = require('q');
+
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
 
   return {
     get,
-    getForConversation
+    getForConversation,
+    search
   };
 
   function get(req, res) {
@@ -28,6 +31,33 @@ module.exports = function(dependencies, lib) {
       }
 
       return res.status(200).json(results);
+    });
+  }
+
+  function search(req, res) {
+
+    function hydrateMessage(message) {
+      return Q.denodeify(lib.message.getById)(message._id);
+    }
+
+    function sendError(err) {
+      logger.error('Error while searching messages', err);
+      res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: err.message || 'Error while searching messages'
+        }
+      });
+    }
+
+    lib.message.searchForUser(req.user, {search: req.query.search}, (err, result) => {
+      if (err) {
+        return sendError(err);
+      }
+
+      res.header('X-ESN-Items-Count', result.total_count || 0);
+      Q.all(result.list.map(hydrateMessage)).then(messages => res.status(200).json(messages), sendError);
     });
   }
 };

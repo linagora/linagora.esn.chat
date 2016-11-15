@@ -1,0 +1,59 @@
+'use strict';
+
+const CONSTANTS = require('../../constants');
+const SEARCH = CONSTANTS.SEARCH;
+
+module.exports = function(dependencies) {
+
+  const elasticsearch = dependencies('elasticsearch');
+  const logger = dependencies('logger');
+
+  return {
+    searchInConversations
+  };
+
+  function searchInConversations(query = {}, conversationIds = [], callback) {
+
+    const offset = +query.offset || 0;
+    const limit = +query.limit || CONSTANTS.DEFAULT_LIMIT;
+
+    var elasticsearchQuery = {
+      query: {
+        bool: {
+          filter: {
+            or: conversationIds.map(id => ({term: {channel: id}}))
+          },
+          must: {
+            match: {
+              text: query.search
+            }
+          }
+        }
+      }
+    };
+
+    logger.debug('Searching chat messages with options', {
+      search: query.search,
+      offset: offset,
+      limit: limit,
+      elasticsearchQuery: elasticsearchQuery
+    });
+
+    elasticsearch.searchDocuments({
+      index: SEARCH.MESSAGES.INDEX_NAME,
+      type: SEARCH.MESSAGES.TYPE_NAME,
+      from: offset,
+      size: limit,
+      body: elasticsearchQuery
+    }, (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+
+      return callback(null, {
+        total_count: result.hits.total,
+        list: result.hits.hits
+      });
+    });
+  }
+};
