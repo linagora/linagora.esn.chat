@@ -7,6 +7,7 @@
     'esn.router',
     'restangular',
     'esn.search',
+    'esn.provider',
     'esn.scroll',
     'esn.attendee',
     'esn.header',
