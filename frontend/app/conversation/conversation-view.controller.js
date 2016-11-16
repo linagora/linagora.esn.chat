@@ -7,9 +7,9 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams'];
+  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams', 'MESSAGE_GROUP_TIMESPAN'];
 
-  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, MESSAGE_GROUP_TIMESPAN) {
     var self = this;
 
     self.chatLocalStateService = chatLocalStateService;
@@ -40,10 +40,12 @@
       for (var i = self.messages.length - 1; i > -1; i--) {
         if (self.messages[i].timestamps.creation < message.timestamps.creation) {
           self.messages.splice(i + 1, 0, message);
+          message.sameUser = isSameUser(message, self.messages[i]);
 
           return;
         }
       }
+      message.sameUser = false;
       self.messages.unshift(message);
     }
 
@@ -71,11 +73,35 @@
         options.before = older;
       }
 
-      return chatConversationService.fetchMessages(conversationId, options).then(function(result) {
+      return chatConversationService.fetchMessages(conversationId, options)
+      .then(checkMessagesOfSameUser)
+      .then(function(result) {
+        var lastLoaded = result.length - 1;
+
         queueOlderMessages(result, isFirstLoad);
+        if (!isFirstLoad && lastLoaded > 0) {
+          self.messages[lastLoaded + 1].sameUser = isSameUser(self.messages[lastLoaded], self.messages[lastLoaded + 1]);
+        }
 
         return self.messages;
       });
+
+    }
+
+    function checkMessagesOfSameUser(messages) {
+      var previousMessage;
+
+      messages.forEach(function(message) {
+        if (!previousMessage) {
+          previousMessage = message;
+          message.sameUser = false;
+        } else {
+          message.sameUser = isSameUser(previousMessage, message);
+          previousMessage = message;
+        }
+      });
+
+      return messages;
     }
 
     function scrollDown() {
@@ -86,11 +112,15 @@
       chatConversationsService.updateConversationTopic($data, self.chatLocalStateService.activeRoom._id);
     }
 
+    function isSameUser(previousMessage, nextMessage) {
+      return previousMessage.creator._id === nextMessage.creator._id &&
+      nextMessage.timestamps.creation - previousMessage.timestamps.creation < MESSAGE_GROUP_TIMESPAN;
+    }
+
     function init() {
       var conversationId = getConversationId();
 
       if (conversationId) {
-        console.log('inside init');
         self.chatLocalStateService.setActive(conversationId);
         loadPreviousMessages(true).then(scrollDown);
       }
