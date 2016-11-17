@@ -20,6 +20,7 @@
     self.newMessage = newMessage;
     self.updateTopic = updateTopic;
     self.chatLocalStateService.ready.then(init);
+    self.initLoading = true;
 
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
@@ -47,11 +48,20 @@
       self.messages.unshift(message);
     }
 
-    function olderMessages(messages) {
-      messages.forEach(function(message) {
-        addUniqId(message);
-        self.messages.unshift(message);
-      });
+    function queueOlderMessages(messages) {
+      if (self.initLoading) {
+        messages.forEach(function(message) {
+          addUniqId(message);
+          self.messages.push(message);
+        });
+        self.initLoading = false;
+      }
+      else {
+        messages.reverse().forEach(function(message) {
+          addUniqId(message);
+          self.messages.unshift(message);
+        });
+      }
     }
 
     function loadPreviousMessages() {
@@ -64,7 +74,7 @@
       }
 
       return chatConversationService.fetchMessages(conversationId, options).then(function(result) {
-        olderMessages(result);
+        queueOlderMessages(result);
 
         return self.messages;
       });
