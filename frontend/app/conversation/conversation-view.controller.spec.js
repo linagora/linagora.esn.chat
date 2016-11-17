@@ -246,5 +246,48 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       expect(chatConversationServiceMock.fetchMessages).to.be.called;
       expect(scope.vm.messages.length).to.equal(messages.length);
     });
+
+    it('should load messages in correct order when init directive', function() {
+      var messages = [
+        {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 3, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+      ];
+      chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+        return $q.when(messages);
+      });
+
+      initCtrl();
+
+      expect(scope.vm.messages).to.deep.equal(messages);
+    });
+
+    it('should load messages in correct order when older messages are loaded', function() {
+      var olderMessages = [
+        {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+      ];
+
+      var currentMessages = [
+        {_id: 3, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 4, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+      ];
+
+      chatConversationServiceMock.fetchMessages = sinon.stub();
+      chatConversationServiceMock.fetchMessages.onCall(0).returns($q.when(currentMessages));
+      chatConversationServiceMock.fetchMessages.onCall(1).returns($q.when(olderMessages));
+
+      initCtrl();
+      scope.vm.loadPreviousMessages();
+      scope.$digest();
+
+      expect(chatConversationServiceMock.fetchMessages).to.have.been.calledTwice;
+      expect(scope.vm.messages).to.shallowDeepEqual([
+        {_id: 1},
+        {_id: 2},
+        {_id: 3},
+        {_id: 4}
+      ]);
+    });
   });
 });
