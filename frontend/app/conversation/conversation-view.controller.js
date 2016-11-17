@@ -90,6 +90,7 @@
       var conversationId = getConversationId();
 
       if (conversationId) {
+        console.log('inside init');
         self.chatLocalStateService.setActive(conversationId);
         loadPreviousMessages(true).then(scrollDown);
       }
