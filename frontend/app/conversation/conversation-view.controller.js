@@ -47,14 +47,22 @@
       self.messages.unshift(message);
     }
 
-    function olderMessages(messages) {
-      messages.forEach(function(message) {
+    function queueOlderMessages(messages, isFirstLoad) {
+      if (isFirstLoad) {
+        return messages.forEach(function(message) {
+          addUniqId(message);
+          self.messages.push(message);
+        });
+      }
+
+      messages.reverse().forEach(function(message) {
         addUniqId(message);
         self.messages.unshift(message);
       });
     }
 
-    function loadPreviousMessages() {
+    function loadPreviousMessages(isFirstLoad) {
+      isFirstLoad = isFirstLoad || false;
       var conversationId = getConversationId();
       var options = {limit: CHAT.DEFAULT_FETCH_SIZE};
       var older = getOlderMessageId();
@@ -64,7 +72,7 @@
       }
 
       return chatConversationService.fetchMessages(conversationId, options).then(function(result) {
-        olderMessages(result);
+        queueOlderMessages(result, isFirstLoad);
 
         return self.messages;
       });
@@ -83,7 +91,7 @@
 
       if (conversationId) {
         self.chatLocalStateService.setActive(conversationId);
-        loadPreviousMessages().then(scrollDown);
+        loadPreviousMessages(true).then(scrollDown);
       }
 
       $scope.$on('$destroy', function() {
