@@ -5,7 +5,7 @@ const _ = require('lodash');
 const CONSTANTS = require('../lib/constants');
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
-module.exports = function(dependencies) {
+module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
   const pubsub = dependencies('pubsub').local;
@@ -24,7 +24,8 @@ module.exports = function(dependencies) {
     markAllAsRead,
     moderate,
     parseMention,
-    save
+    save,
+    searchForUser
   };
 
   function count(conversationId, callback) {
@@ -218,4 +219,12 @@ module.exports = function(dependencies) {
     });
   }
 
+  function searchForUser(user, query, callback) {
+    lib.conversation.getAllForUser(user).then(conversations => {
+      lib.search.messages.search.searchInConversations(query, conversations.map(conversation => String(conversation._id)), callback);
+    }, err => {
+      logger.error('Can not search messages for user', err);
+      callback(err);
+    });
+  }
 };

@@ -17,7 +17,7 @@ describe('The collaboration controller', function() {
         getForUser: sinon.spy(function(user, callback) {
           return callback(err, result);
         }),
-        listForUser: sinon.spy(function(user, callback) {
+        listForUser: sinon.spy(function(user, options, callback) {
           return callback(err, result);
         })
       },

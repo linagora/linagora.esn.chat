@@ -1,5 +1,6 @@
 'use strict';
 
+const Q = require('q');
 const constants = require('./constants');
 
 module.exports = function(dependencies) {
@@ -10,20 +11,22 @@ module.exports = function(dependencies) {
   };
 
   const utils = require('./utils')(dependencies);
-  const message = require('./message')(dependencies);
+  const search = require('./search')(dependencies);
   const conversation = require('./conversation')(dependencies);
+  const message = require('./message')(dependencies, {conversation, search});
   const collaboration = require('./collaboration')(dependencies);
   const members = require('./members')(dependencies);
   const userState = require('./user-state')(dependencies);
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies);
-  const search = require('./search')(dependencies);
 
   function start(callback) {
     listener.start({conversation, message});
     userState.init();
     moderate.start();
     search.init();
+    conversation.registerUserConversationFinder(Q.denodeify(conversation.listForUser));
+    conversation.registerUserConversationFinder(Q.denodeify(collaboration.listForUser));
     callback();
   }
 

@@ -54,7 +54,7 @@ module.exports = function(dependencies) {
     collaborationModule.queryOne(collaborationTuple.objectType, {_id: collaborationTuple.id}, callback);
   }
 
-  function listForUser(user, callback) {
+  function listForUser(user, options, callback) {
     collaborationModule.getCollaborationsForUser(user._id, {member: true}, (err, collaborations) => {
       if (err) {
         return callback(err);

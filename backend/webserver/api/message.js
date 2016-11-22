@@ -13,4 +13,8 @@ module.exports = function(dependencies, lib, router) {
     middleware.loadMessageConversation,
     conversationMiddleware.canRead,
     controller.get);
+
+  router.get('/messages',
+    authorizationMW.requiresAPILogin,
+    controller.search);
 };

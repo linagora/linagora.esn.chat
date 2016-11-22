@@ -5,7 +5,8 @@ module.exports = function(dependencies) {
   const messages = require('./messages')(dependencies);
 
   return {
-    init
+    init,
+    messages
   };
 
   function init() {
