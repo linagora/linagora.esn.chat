@@ -14,6 +14,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     chatConversationsServiceMock,
     CHAT_EVENTS,
     CHAT,
+    MESSAGE_GROUP_TIMESPAN,
     chatScrollService,
     chatScrollServiceMock,
     chatLocalStateService,
@@ -69,7 +70,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatLocalStateService_, _chatConversationService_, _chatConversationsService_, _chatScrollService_, _CHAT_EVENTS_, _CHAT_, _$stateParams_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatLocalStateService_, _chatConversationService_, _chatConversationsService_, _chatScrollService_, _CHAT_EVENTS_, _CHAT_, _$stateParams_, _MESSAGE_GROUP_TIMESPAN_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
@@ -79,6 +80,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     chatConversationsService = _chatConversationsService_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     CHAT = _CHAT_;
+    MESSAGE_GROUP_TIMESPAN = _MESSAGE_GROUP_TIMESPAN_;
     chatScrollService = _chatScrollService_;
     chatLocalStateService = _chatLocalStateService_;
     $stateParams = _$stateParams_;
@@ -229,7 +231,6 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     });
 
     it('should populate controller messages', function() {
-      $stateParams.id = null;
       var messages = [
         {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
         {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}},
@@ -241,8 +242,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       });
 
       initCtrl();
-      scope.vm.loadPreviousMessages();
-      $rootScope.$digest();
+
       expect(chatConversationServiceMock.fetchMessages).to.be.called;
       expect(scope.vm.messages.length).to.equal(messages.length);
     });
@@ -288,6 +288,58 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
         {_id: 3},
         {_id: 4}
       ]);
+    });
+
+    describe('Group messages by sameUser variable', function() {
+      var messages;
+
+      it('should set `sameUser` to true when message is created by same user and in timespan', function() {
+        messages = [
+          {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+          {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+        ];
+
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        initCtrl();
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.true;
+      });
+
+      it('should set `sameUser` to false when message is created by different user', function() {
+        messages = [
+          {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+          {_id: 2, creator: {_id: 2}, timestamps: {creation: Date.now()}}
+        ];
+
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        initCtrl();
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.false;
+      });
+
+      it('should set `sameUser` to false when messages creation timestamps spread too far', function() {
+        var creationTime = new Date(2015, 4, 29).getTime();
+
+        messages = [
+          {_id: 1, creator: {_id: 1}, timestamps: {creation: creationTime}},
+          {_id: 2, creator: {_id: 1}, timestamps: {creation: creationTime + MESSAGE_GROUP_TIMESPAN}}
+        ];
+
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        initCtrl();
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.false;
+      });
+
     });
   });
 });

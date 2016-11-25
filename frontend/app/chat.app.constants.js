@@ -46,6 +46,7 @@
       TYPING: 'user_typing',
       TEXT: 'text'
     })
+    .constant('MESSAGE_GROUP_TIMESPAN', 60000)
     .constant('KEY_CODE', {
       ENTER: 13,
       TAB: 9,

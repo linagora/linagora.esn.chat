@@ -23,8 +23,33 @@ body {
 }
 
 .chat-message {
+  &.highlight {
+    background-color: @darkenBgColor;
+  }
+
+  .lv-avatar, .message-time {
+    display: block;
+    margin-right: 0;
+    min-width: 55px;
+  }
+
   .lv-avatar > img {
     border-radius: 2px;
+  }
+
+  .pull-left {
+    padding-right: 10px;
+  }
+
+  .message-time {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s linear;
+
+    &.show {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   .chat-message-title {

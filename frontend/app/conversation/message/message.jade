@@ -1,8 +1,12 @@
-.lv-item.media.chat-message
-    a.lv-avatar.pull-left
+.lv-item.media.chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
+    a.lv-avatar.pull-left(ng-if='!vm.message.sameUser')
       img(ng-src='/api/users/{{::vm.message.creator._id}}/profile/avatar', alt='')
+
+    .message-time.pull-left(ng-if='vm.message.sameUser', ng-class='{"show": isHover && vm.message.sameUser}')
+        small.date {{::vm.message.timestamps.creation | amDateFormat:'h:mm A'}}
+
     .media-body
-      .chat-message-title
+      .chat-message-title(ng-if='!vm.message.sameUser')
         user-profile-link.displayname(user="vm.message.creator")
         small.date {{::vm.message.timestamps.creation | amDateFormat:'h:mm A'}}
       .chat-message-text(ng-if='vm.message.type === "text"', ng-bind-html="vm.parsed.text", ng-class='(vm.user._id === vm.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
