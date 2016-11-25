@@ -35,6 +35,10 @@ describe('the chatMentionChooser component', function() {
   });
 
   beforeEach(module('linagora.esn.chat', function($provide) {
+    $provide.value('searchProviders', {
+      add: sinon.spy()
+    });
+    $provide.value('chatSearchMessagesProviderService', {});
     $provide.value('domainAPI', domainAPIMock);
     $provide.value('ChatTextEntitySelector', ChatTextEntitySelectorMock);
     $provide.factory('session', function(_$q_) {

@@ -56,6 +56,10 @@ describe('The linagora.esn.chat messages services', function() {
       DEFAULT_FILE_TYPE = 'DEFAULT_FILE_TYPE';
 
       module('linagora.esn.chat', function($provide) {
+        $provide.value('searchProviders', {
+          add: sinon.spy()
+        });
+        $provide.value('chatSearchMessagesProviderService', {});
         $provide.factory('session', sessionFactory);
         $provide.value('ChatTransportService', ChatTransportMock);
         $provide.value('backgroundProcessorService', backgroundProcessorServiceMock);
@@ -192,6 +196,10 @@ describe('The linagora.esn.chat messages services', function() {
       DEFAULT_FILE_TYPE = 'DEFAULT_FILE_TYPE';
 
       module('linagora.esn.chat', function($provide) {
+        $provide.value('searchProviders', {
+          add: sinon.spy()
+        });
+        $provide.value('chatSearchMessagesProviderService', {});
         $provide.factory('session', sessionFactory);
         $provide.factory('livenotification', livenotificationFactory);
       });

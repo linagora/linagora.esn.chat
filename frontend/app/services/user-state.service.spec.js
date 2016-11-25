@@ -29,7 +29,12 @@ describe('The user-state service', function() {
     getItemResult;
 
   beforeEach(
-    angular.mock.module('linagora.esn.chat')
+    angular.mock.module('linagora.esn.chat', function($provide) {
+      $provide.value('searchProviders', {
+        add: sinon.spy()
+      });
+      $provide.value('chatSearchMessagesProviderService', {});
+    })
   );
 
   beforeEach(function() {

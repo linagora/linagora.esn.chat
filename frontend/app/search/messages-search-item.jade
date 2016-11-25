@@ -1,2 +1,10 @@
-div
-  {{item | json}}
+.message-container
+  a(ng-href='/#/profile/{{::item.creator._id}}').pull-left.p-r-15
+    img.members-avatar(src='/images/user.png', ng-src='/api/users/{{::item.creator._id}}/profile/avatar', alt='#{__("Member Avatar")}')
+    
+  .message-title
+      h4.media-heading {{::item.creator.firstname}} {{::item.creator.lastname}}
+      .date {{ ::item.timestamps.creation | date: "MM/dd/yyyy h:mma" }}
+
+  a(ng-href='/#/chat/channels/view/{{::item.channel}}').message-text
+    {{::item.text}}

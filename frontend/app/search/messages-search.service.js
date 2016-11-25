@@ -8,6 +8,8 @@
 
     chatSearchMessageService.$inject = ['ChatRestangular'];
 
+    ////////////
+
     function chatSearchMessageService(ChatRestangular) {
       var service = {
         searchMessages: searchMessages

@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai: false */
+/* global chai, sinon, _: false */
 
 var expect = chai.expect;
 
@@ -15,7 +15,12 @@ describe('The linagora.esn.chat conversation-view directive', function() {
     session = {};
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.emoticon');
-    angular.mock.module('linagora.esn.chat');
+    angular.mock.module('linagora.esn.chat', function($provide) {
+      $provide.value('searchProviders', {
+        add: sinon.spy()
+      });
+      $provide.value('chatSearchMessagesProviderService', {});
+    });
   });
 
   beforeEach(angular.mock.inject(function(_$rootScope_, _$compile_, _moment_, _$timeout_) {

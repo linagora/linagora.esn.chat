@@ -8,7 +8,12 @@ describe('The chatLocalState service', function() {
   var chatLocalStateService, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q, $httpBackend;
 
   beforeEach(
-    angular.mock.module('linagora.esn.chat')
+    angular.mock.module('linagora.esn.chat', function($provide) {
+      $provide.value('searchProviders', {
+        add: sinon.spy()
+      });
+      $provide.value('chatSearchMessagesProviderService', {});
+    })
   );
 
   beforeEach(function() {
@@ -59,6 +64,7 @@ describe('The chatLocalState service', function() {
     }
 
     angular.mock.module(function($provide) {
+
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
       $provide.factory('chatConversationsService', conversationsServiceFactory);

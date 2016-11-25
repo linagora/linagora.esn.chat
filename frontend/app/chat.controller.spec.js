@@ -30,7 +30,8 @@ describe('The linagora.esn.chat ChatController controller', function() {
     localStorageService,
     chatConversationsService,
     chatLocalStateService,
-    chatLocalStateServiceMock;
+    chatLocalStateServiceMock,
+    searchProviders;
 
   beforeEach(function() {
     $state = {
@@ -87,10 +88,16 @@ describe('The linagora.esn.chat ChatController controller', function() {
       setActive: sinon.spy()
     };
 
+    searchProviders = {
+      add: sinon.spy()
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.decorator('$window', function($delegate) {
         return angular.extend($delegate, windowMock);
       });
+      $provide.value('searchProviders', searchProviders);
+      $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('$stateParams', $stateParams);
       $provide.value('$stateProvider', $stateProvider);
       $provide.value('chatConversationsService', chatConversationsService);

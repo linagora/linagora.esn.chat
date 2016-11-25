@@ -1,13 +1,18 @@
 'use strict';
 
-describe.only('The linagora.esn.chat chatSearchMessageService', function() {
+/* global chai, sinon, _: false */
+
+describe('The linagora.esn.chat chatSearchMessageService', function() {
   var chatSearchMessageService, $httpBackend, $rootScope;
 
-  beforeEach(
-    angular.mock.module('linagora.esn.chat')
-  );
+  beforeEach(module('linagora.esn.chat', function($provide) {
+      $provide.value('searchProviders', {
+        add: sinon.spy()
+      });
+      $provide.value('chatSearchMessagesProviderService', {});
+  }));
 
-  beforeEach(angular.mock.inject(function(_chatSearchMessageService_, _$rootScope_, _$httpBackend_) {
+  beforeEach(inject(function(_chatSearchMessageService_, _$rootScope_, _$httpBackend_) {
     chatSearchMessageService = _chatSearchMessageService_;
     $httpBackend =  _$httpBackend_;
     $rootScope = _$rootScope_;
