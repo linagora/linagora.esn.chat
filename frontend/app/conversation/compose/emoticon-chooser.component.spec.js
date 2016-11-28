@@ -34,6 +34,10 @@ describe('the chatEmoticonChooser component', function() {
   });
 
   beforeEach(module('linagora.esn.chat', function($provide) {
+    $provide.value('searchProviders', {
+      add: sinon.spy()
+    });
+    $provide.value('chatSearchMessagesProviderService', {});
     $provide.value('ChatTextEntitySelector', ChatTextEntitySelectorMock);
     $provide.value('esnEmoticonRegistry', esnEmoticonRegistryMock);
   }));

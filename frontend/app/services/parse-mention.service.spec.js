@@ -1,13 +1,18 @@
 'use strict';
 
-/* global chai: false */
+/* global chai, sinon, _: false */
 
 var expect = chai.expect;
 
 describe('The chatParseMention service', function() {
   var chatParseMention;
 
-  beforeEach(angular.mock.module('linagora.esn.chat'));
+  beforeEach(angular.mock.module('linagora.esn.chat', function($provide) {
+    $provide.value('searchProviders', {
+      add: sinon.spy()
+    });
+    $provide.value('chatSearchMessagesProviderService', {});
+  }));
 
   beforeEach(angular.mock.inject(function(_chatParseMention_) {
     chatParseMention = _chatParseMention_;

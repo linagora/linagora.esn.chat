@@ -22,7 +22,8 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     $stateParams,
     $rootScope,
     $controller,
-    user;
+    user,
+    searchProviders;
 
   beforeEach(function() {
 
@@ -59,6 +60,10 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       }
     };
 
+    searchProviders = {
+      add: sinon.spy()
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
       $provide.value('chatConversationService', chatConversationServiceMock);
@@ -67,6 +72,8 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       $provide.value('$stateParams', $stateParams);
       $provide.value('chatScrollService', chatScrollServiceMock);
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
+      $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('searchProviders', searchProviders);
     });
   });
 

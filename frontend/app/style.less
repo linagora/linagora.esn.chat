@@ -1,4 +1,4 @@
-@import '@{components}/material-admin/less/inc/chat';
+  @import '@{components}/material-admin/less/inc/chat';
 @import '@{components}/material-admin/less/inc/messages';
 @import './aside/aside.less';
 @import './conversation/footer/footer.less';
@@ -97,6 +97,16 @@ body {
         max-height: 250px;
       }
     }
+  }
+}
+
+.message-container {
+  .message-title {
+    .flex-space-between;
+  }
+
+  .message-text {
+    color: @text-color;
   }
 }
 

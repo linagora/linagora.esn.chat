@@ -16,7 +16,8 @@ describe('The chat-channel-item directive', function() {
   CHAT_EVENTS,
   userUtils,
   getConversationNameMock,
-  conversationNameResult;
+  conversationNameResult,
+  searchProviders;
 
   beforeEach(function() {
     chatUserState = {
@@ -44,8 +45,14 @@ describe('The chat-channel-item directive', function() {
         _id: 'userId'
       }
     };
+
+    searchProviders = {
+      add: sinon.spy()
+    };
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
+      $provide.value('searchProviders', searchProviders);
+      $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatUserState', chatUserState);
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
