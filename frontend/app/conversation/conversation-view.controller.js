@@ -39,8 +39,8 @@
       // So we traverse the array starting by the end
       for (var i = self.messages.length - 1; i > -1; i--) {
         if (self.messages[i].timestamps.creation < message.timestamps.creation) {
-          self.messages.splice(i + 1, 0, message);
           message.sameUser = isSameUser(message, self.messages[i]);
+          self.messages.splice(i + 1, 0, message);
 
           return;
         }
@@ -114,7 +114,7 @@
 
     function isSameUser(previousMessage, nextMessage) {
       return previousMessage.creator._id === nextMessage.creator._id &&
-      nextMessage.timestamps.creation - previousMessage.timestamps.creation < MESSAGE_GROUP_TIMESPAN;
+      Math.abs(nextMessage.timestamps.creation - previousMessage.timestamps.creation) < MESSAGE_GROUP_TIMESPAN;
     }
 
     function init() {
