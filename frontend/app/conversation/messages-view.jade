@@ -31,6 +31,7 @@
             a(href='')
               i.mdi.mdi-information-outline
       .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true", scroll-glue="glued", z-infinite-scroll="loadPreviousMessages()", inverse="true")
+        .throbber(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.3', spinner-key='{{::spinnerKey}}')
         div(ng-repeat="message in messages track by message._uniqId")
           chat-message-separator(prev-message="$first ? null : messages[$index - 1]", current-message="message")
           chat-message(message="message")
