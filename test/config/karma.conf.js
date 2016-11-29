@@ -22,7 +22,7 @@ module.exports = function(config) {
       'frontend/components/lodash/dist/lodash.js',
       'frontend/components/angular-moment/angular-moment.js',
       'frontend/components/angular-web-notification/angular-web-notification.js',
-      'frontend/components/HTML5-Desktop-Notifications2/desktop-notify.js',
+      'frontend/components/html5-desktop-notifications2/dist/Notification.min.js',
       'frontend/components/angular-file-upload/dist/angular-file-upload-all.js',
       'frontend/components/angular-xeditable/dist/js/xeditable.js',
       'frontend/components/angular-sanitize/angular-sanitize.min.js',
