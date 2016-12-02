@@ -19,11 +19,20 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     usSpinnerServiceMock,
     $rootScope,
     $controller,
-    searchProviders;
+    searchProviders,
+    localStorageService,
+    getItemResult,
+    getItem,
+    setItem,
+    chatComposerState;
 
   beforeEach(function() {
 
-    chatConversationServiceMock = {};
+    chatConversationServiceMock = {
+      fetchMessages: sinon.spy(function() {
+        return $q.when([]);
+      })
+    };
 
     usSpinnerServiceMock = {
       spin: function() {}
@@ -51,6 +60,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     chatLocalStateServiceMock = {
       activeRoom: {},
       setActive: sinon.spy(),
+      unsetActive: sinon.spy(),
       ready: {
         then: function(callback) {
           callback();
@@ -60,6 +70,29 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
 
     searchProviders = {
       add: sinon.spy()
+    };
+
+    getItemResult = 'test';
+
+    getItem = sinon.spy(function(key) {
+      return $q.when(({
+        text: getItemResult
+      })[key]);
+    });
+
+    setItem = sinon.spy(function() {
+      return $q.when({});
+    });
+
+    localStorageService = {
+      getOrCreateInstance: sinon.stub().returns({
+        getItem: getItem,
+        setItem: setItem
+      })
+    };
+
+    chatComposerState = {
+      saveMessage: sinon.spy()
     };
 
     module('linagora.esn.chat', function($provide) {
@@ -73,6 +106,8 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('searchProviders', searchProviders);
+      $provide.value('localStorageService', localStorageService);
+      $provide.value('chatComposerState', chatComposerState);
     });
   });
 
@@ -342,6 +377,25 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
         expect(scope.vm.messages[1].sameUser).to.be.false;
       });
 
+    });
+  });
+
+  describe('on $scope $destroy event', function() {
+
+    it('should save current composing message', function() {
+      scope.text = 'test';
+      initCtrl();
+
+      scope.$broadcast('$destroy');
+      expect(chatComposerState.saveMessage).to.have.been.calledWith($stateParams.id, {text: scope.text});
+    });
+
+    it('should unsetActive current active room', function() {
+      chatLocalStateServiceMock.activeRoom._id = $stateParams.id;
+      initCtrl();
+
+      scope.$broadcast('$destroy');
+      expect(chatLocalStateServiceMock.unsetActive).to.have.been.called;
     });
   });
 });
