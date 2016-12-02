@@ -146,12 +146,5 @@ describe('The linagora.esn.chat ChatController controller', function() {
       $rootScope.$digest();
       expect(chatLocalStateService.setActive).to.be.calledWith(channels[0]._id);
     });
-
-    it('should set the isNotificationEnabled value from chatNotificationService service', function() {
-      initCtrl();
-      chatNotificationService.setNotificationStatus(true);
-      expect(scope.vm.isEnabled()).to.be.true;
-    });
   });
-
 });
