@@ -11,7 +11,6 @@ describe('The chat-channel-item directive', function() {
   userStateResult,
   $compile,
   session,
-  chatNamespace,
   user,
   CHAT_EVENTS,
   userUtils,
@@ -25,8 +24,6 @@ describe('The chat-channel-item directive', function() {
         return $q.when(userStateResult(id));
       })
     };
-
-    chatNamespace = {on: sinon.spy()};
 
     userUtils = {
       displayNameOf: sinon.spy(function(user) {
@@ -170,12 +167,14 @@ describe('The chat-channel-item directive', function() {
 
     describe('listen to CHAT_EVENTS.USER_CHANGE_STATE', function() {
       var callback, destroy;
+
       beforeEach(function() {
         destroy = sinon.spy();
         $rootScope.$on = sinon.stub().returns(destroy);
         initDirective();
         expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(_callback) {
           callback = _callback;
+
           return true;
         }));
       });

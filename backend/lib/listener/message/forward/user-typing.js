@@ -12,7 +12,7 @@ module.exports = function(dependencies) {
       if (err) {
         return callback(err);
       }
-      let result = message.toJSON();
+      const result = message.toJSON();
 
       result.state = data.state;
       callback(null, result);

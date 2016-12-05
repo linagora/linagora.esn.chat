@@ -4,13 +4,13 @@ const Q = require('q');
 
 module.exports = function(dependencies) {
 
-  let providers = {
+  const providers = {
     collaboration: require('./collaboration')(dependencies).getMembers
   };
 
   return {
     addProvider,
-    getMembers,
+    getMembers
   };
 
   function addProvider(type, provider) {

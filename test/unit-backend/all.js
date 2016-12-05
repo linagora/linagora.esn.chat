@@ -1,8 +1,7 @@
 'use strict';
 
-let mockery = require('mockery');
-let chai = require('chai');
-let sinon = require('sinon');
+const mockery = require('mockery');
+const chai = require('chai');
 
 before(function() {
   chai.use(require('chai-shallow-deep-equal'));
@@ -13,14 +12,14 @@ before(function() {
 
 beforeEach(function() {
   mockery.enable({warnOnReplace: false, warnOnUnregistered: false, useCleanCache: true});
-  let depsStore = {
+  const depsStore = {
     logger: require('./fixtures/logger-noop'),
     errors: require('./fixtures/errors')
   };
-  let dependencies = function(name) {
+  const dependencies = function(name) {
     return depsStore[name];
   };
-  let addDep = function(name, dep) {
+  const addDep = function(name, dep) {
     depsStore[name] = dep;
   };
 

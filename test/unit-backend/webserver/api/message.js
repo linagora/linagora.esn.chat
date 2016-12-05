@@ -1,5 +1,4 @@
 'use strict';
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
 var expect = require('chai').expect;
 var sinon = require('sinon');
@@ -34,6 +33,7 @@ describe('The message controller', function() {
     function createMessage(base, timestamp) {
       var msg = _.cloneDeep(base);
       var jsonMsg = _.cloneDeep(base);
+
       msg.creator = {
         password: 'yolo'
       };

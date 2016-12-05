@@ -19,7 +19,7 @@ module.exports = function(dependencies) {
   const userStateTopic = pubsubGlobal.topic(USER_STATE);
   const userConnectionTopic = pubsubLocal.topic(USER_CONNECTION);
   const userDisconnectionTopic = pubsubLocal.topic(USER_DISCONNECTION);
-  let delayedStateChanges = {};
+  const delayedStateChanges = {};
 
   return {
     get,
@@ -31,10 +31,10 @@ module.exports = function(dependencies) {
 
   function set(userId, state, delay) {
     return redisPromise.then(redis => {
-      let key = USER_STATE_KEY_PREFIX + userId;
+      const key = USER_STATE_KEY_PREFIX + userId;
 
       return Q.ninvoke(redis, 'hgetall', key).then(function(previousData) {
-        let data = {
+        const data = {
           state: state,
           since: Date.now(),
           delay: delay || 0

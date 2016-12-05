@@ -1,7 +1,5 @@
 'use strict';
 
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
-
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');

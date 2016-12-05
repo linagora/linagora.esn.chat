@@ -18,7 +18,7 @@ module.exports = function(dependencies) {
 
   function switchConversationModerate(value) {
     return function(user) {
-      let defer = q.defer();
+      const defer = q.defer();
 
       Conversation.update({creator: user._id}, {$set: {moderate: value}}, {multi: true}).exec((err, updated) => {
         if (err) {
@@ -35,7 +35,7 @@ module.exports = function(dependencies) {
 
   function switchMessageModerate(value) {
     return function(user) {
-      let defer = q.defer();
+      const defer = q.defer();
 
       Message.update({creator: user._id}, {$set: {moderate: value}}, {multi: true}).exec((err, updated) => {
         if (err) {

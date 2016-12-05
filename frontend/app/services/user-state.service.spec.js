@@ -6,19 +6,14 @@ var expect = chai.expect;
 
 describe('The user-state service', function() {
   var $q,
-    chatConversationService,
-    CHAT_NAMESPACE,
     CHAT_EVENTS,
     sessionMock,
     user,
     livenotificationMock,
     $rootScope,
-    scope,
     chatUserState,
     chatNamespace,
     $httpBackend,
-    chatNotificationService,
-    chatLocalStateService,
     CHAT_CONVERSATION_TYPE,
     conversationsServiceMock,
     groups,
@@ -73,7 +68,7 @@ describe('The user-state service', function() {
     localStorageService = {
       getOrCreateInstance: sinon.stub().returns({
         getItem: getItem,
-        setItem:  setItem
+        setItem: setItem
       })
     };
 
@@ -81,10 +76,10 @@ describe('The user-state service', function() {
       livenotificationMock = function(name) {
         if (name === CHAT_NAMESPACE) {
           return chatNamespace;
-        } else {
-          throw new Error(name + 'namespace has not been mocked');
         }
+        throw new Error(name + 'namespace has not been mocked');
       };
+
       return livenotificationMock;
     }
 
@@ -96,17 +91,12 @@ describe('The user-state service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _chatConversationService_, _chatNotificationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
-    chatConversationService = _chatConversationService_;
-    chatNotificationService = _chatNotificationService_;
-    CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
-    scope = $rootScope.$new();
     chatUserState = _chatUserState_;
-    $httpBackend =  _$httpBackend_;
-    chatLocalStateService = _chatLocalStateService_;
+    $httpBackend = _$httpBackend_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
@@ -118,8 +108,10 @@ describe('The user-state service', function() {
       $rootScope.$broadcast = sinon.spy();
       expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(callback) {
         var data = {};
+
         callback(data);
         expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, data);
+
         return true;
       }));
     });
@@ -128,14 +120,17 @@ describe('The user-state service', function() {
       $rootScope.$broadcast = sinon.spy();
       expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(callback) {
         var state = 'of alabama';
+
         callback({
           userId: 'userId',
           state: state
         });
         var promiseCallback = sinon.spy();
+
         chatUserState.get('userId').then(promiseCallback);
         $rootScope.$digest();
         expect(promiseCallback).to.have.been.calledWith(state);
+
         return true;
       }));
     });
@@ -143,6 +138,7 @@ describe('The user-state service', function() {
     it('should get /chat/api/status/userId to get the data the first time and cache it for the second time', function() {
       var state = 'state';
       var callback = sinon.spy();
+
       $httpBackend.expectGET('/chat/api/state/userId').respond({state: state});
       chatUserState.get('userId').then(callback);
       $rootScope.$digest();

@@ -1,6 +1,6 @@
 'use strict';
 
-let cleanUser = require('./utils').cleanUser;
+const cleanUser = require('./utils').cleanUser;
 const CONSTANTS = require('../constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
@@ -9,7 +9,7 @@ module.exports = function(dependencies) {
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Schema.ObjectId;
 
-  let ConversationSchema = new mongoose.Schema({
+  const ConversationSchema = new mongoose.Schema({
     name: {type: String},
     type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COLLABORATION], required: true, index: true},
     creator: {type: ObjectId, ref: 'User'},

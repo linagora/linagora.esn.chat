@@ -17,7 +17,7 @@
  * @param {string=} ident Override the property name to use when attaching the controller to the scope.
  * @return {Object} Instance of requested controller.
  */
-angular.mock.$ComponentControllerProvider = ['$compileProvider', function($compileProvider) {
+angular.mock.$ComponentControllerProvider = [function() {
   this.$get = ['$controller', '$injector', '$rootScope', function($controller, $injector, $rootScope) {
     return function $componentController(componentName, locals, bindings, ident) {
       // get all directives associated to the component name
@@ -27,6 +27,7 @@ angular.mock.$ComponentControllerProvider = ['$compileProvider', function($compi
         // components have controller, controllerAs and restrict:'E'
         return directiveInfo.controller && directiveInfo.controllerAs && directiveInfo.restrict === 'E';
       });
+
       // check if valid directives found
       if (candidateDirectives.length === 0) {
         throw new Error('No component found');
@@ -36,9 +37,11 @@ angular.mock.$ComponentControllerProvider = ['$compileProvider', function($compi
       }
       // get the info of the component
       var directiveInfo = candidateDirectives[0];
+
       // create a scope if needed
       locals = locals || {};
       locals.$scope = locals.$scope || $rootScope.$new(true);
+
       return $controller(directiveInfo.controller, locals, bindings, ident || directiveInfo.controllerAs);
     };
   }];

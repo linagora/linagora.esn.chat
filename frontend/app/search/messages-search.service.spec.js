@@ -1,9 +1,9 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global sinon: false */
 
 describe('The linagora.esn.chat chatSearchMessageService', function() {
-  var chatSearchMessageService, $httpBackend, $rootScope;
+  var chatSearchMessageService, $httpBackend;
 
   beforeEach(module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {
@@ -12,10 +12,9 @@ describe('The linagora.esn.chat chatSearchMessageService', function() {
       $provide.value('chatSearchMessagesProviderService', {});
   }));
 
-  beforeEach(inject(function(_chatSearchMessageService_, _$rootScope_, _$httpBackend_) {
+  beforeEach(inject(function(_chatSearchMessageService_, _$httpBackend_) {
     chatSearchMessageService = _chatSearchMessageService_;
-    $httpBackend =  _$httpBackend_;
-    $rootScope = _$rootScope_;
+    $httpBackend = _$httpBackend_;
   }));
 
   it('should call the search API endpoint', function() {

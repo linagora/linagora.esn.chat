@@ -1,12 +1,12 @@
 'use strict';
 
 module.exports = function(grunt) {
-  grunt.registerTask('prepare-quick-lint', function(arg) {
+  grunt.registerTask('prepare-quick-lint', function() {
     var done = this.async();
     var spawn = require('child_process').spawn;
-
     var revision = grunt.option('r');
     var gitopts;
+
     if (revision) {
       gitopts = ['diff-tree', '--no-commit-id', '--name-only', '-r', revision];
     } else {
@@ -15,12 +15,15 @@ module.exports = function(grunt) {
     var child = spawn('git', gitopts);
 
     var output = '';
+
     child.stdout.on('data', function(data) { output += data; });
     child.stdout.on('end', function() {
       var files = [];
+
       output.split('\n').forEach(function(line) {
         var filename = revision ? line : line.substr(3);
         var status = revision ? '' : line.substr(0, 3).trim();
+
         if (status !== 'D' && filename.substr(-3, 3) === '.js') {
           files.push(filename);
         }

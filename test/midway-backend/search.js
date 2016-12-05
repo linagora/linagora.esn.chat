@@ -149,7 +149,7 @@ describe('The Chat search API', function() {
 
   describe('on message creation', function() {
     it('should index in elasticsearch', function(done) {
-      let self = this;
+      const self = this;
       const message = {
         text: 'This is the message content',
         type: 'text'
@@ -161,7 +161,7 @@ describe('The Chat search API', function() {
 
       Q.all([
         Q.nfapply(app.lib.message.create, [message]),
-        Q.nfapply(app.lib.message.create, [message2]),
+        Q.nfapply(app.lib.message.create, [message2])
       ]).then(test, done);
 
       function checkMessagesIndexed(messages) {
@@ -184,7 +184,7 @@ describe('The Chat search API', function() {
 
   describe('GET /api/messages?search=', function() {
     it('should return messages from public conversations where current user is member', function(done) {
-      let self = this;
+      const self = this;
       const search = 'searchme';
 
       const publicChannel1 = {
@@ -245,7 +245,7 @@ describe('The Chat search API', function() {
         Q.nfapply(app.lib.conversation.create, [publicChannel1]),
         Q.nfapply(app.lib.conversation.create, [publicChannel2]),
         Q.nfapply(app.lib.conversation.create, [privateChannel1]),
-        Q.nfapply(app.lib.conversation.create, [privateChannel2]),
+        Q.nfapply(app.lib.conversation.create, [privateChannel2])
       ], (channel1, channel2, channel3, channel4) => {
 
         message.channel = channel1._id;
@@ -261,7 +261,7 @@ describe('The Chat search API', function() {
           Q.nfapply(app.lib.message.create, [message3]),
           Q.nfapply(app.lib.message.create, [message4]),
           Q.nfapply(app.lib.message.create, [message5]),
-          Q.nfapply(app.lib.message.create, [message6]),
+          Q.nfapply(app.lib.message.create, [message6])
         ]);
 
       }).then(waitForMessagesToBeIndexed)
@@ -295,8 +295,8 @@ describe('The Chat search API', function() {
     });
 
     it('should return messages from collaboration conversations where current user is member', function(done) {
-      let self = this;
-      let collaboration = {
+      const self = this;
+      const collaboration = {
         objectType: 'community',
         _id: mongoose.Types.ObjectId()
       };

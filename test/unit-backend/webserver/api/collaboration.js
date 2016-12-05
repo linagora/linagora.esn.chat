@@ -1,8 +1,7 @@
 'use strict';
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
-let expect = require('chai').expect;
-let sinon = require('sinon');
+const expect = require('chai').expect;
+const sinon = require('sinon');
 
 describe('The collaboration controller', function() {
 
@@ -51,7 +50,7 @@ describe('The collaboration controller', function() {
   describe('The listConversationsForUser', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.listConversationsForUser({user: {_id: 'id'}}, {
         status: function(code) {
@@ -70,7 +69,7 @@ describe('The collaboration controller', function() {
 
     it('should send back HTTP 200 with the lib.collaboration.getForUser result', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.listConversationsForUser({user: {_id: 'id'}}, {
         status: function(code) {

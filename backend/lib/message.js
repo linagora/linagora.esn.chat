@@ -101,10 +101,9 @@ module.exports = function(dependencies, lib) {
       query.moderate = false;
     }
 
-    let conversationId = conversation._id || conversation;
-    let q = {channel: conversationId, moderate: false};
-
-    let mq = ChatMessage.find(q);
+    const conversationId = conversation._id || conversation;
+    const q = {channel: conversationId, moderate: false};
+    const mq = ChatMessage.find(q);
 
     mq.populate('creator', SKIP_FIELDS.USER);
     mq.populate('user_mentions', SKIP_FIELDS.USER);
@@ -135,7 +134,7 @@ module.exports = function(dependencies, lib) {
 
   function list(options, callback) {
     let query;
-    let sort = 'timestamps.creation';
+    const sort = 'timestamps.creation';
 
     options = options || {};
     options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
@@ -146,7 +145,7 @@ module.exports = function(dependencies, lib) {
       query.creator = options.creator;
     }
 
-    let messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
+    const messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
 
     ChatMessage.find(messageQuery).count().exec((err, count) => {
       if (err) {
@@ -175,7 +174,7 @@ module.exports = function(dependencies, lib) {
 
   function markAllAsRead(userIds, conversation, callback) {
     userIds = _.isArray(userIds) ? userIds : [userIds];
-    let updateMaxOperation = {};
+    const updateMaxOperation = {};
 
     userIds.forEach(function(userId) {
       updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;

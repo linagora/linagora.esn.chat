@@ -1,5 +1,4 @@
 (function() {
-  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular
@@ -22,9 +21,9 @@
     function isEventPrevented(event) {
       if ('isDefaultPrevented' in event) {
         return event.isDefaultPrevented();
-      } else {
-        return event.defaultPrevented;
       }
+
+      return event.defaultPrevented;
     }
 
     function link(scope, element) {

@@ -4,7 +4,7 @@
 var expect = chai.expect;
 
 describe('the ChatTextEntitySelector constructor', function() {
-  var scope, entityList, $rootScope, KEY_CODE, ChatTextEntitySelector, entitySelector, chatHumanizeEntitiesLabelMock, addHumanRepresentationResult;
+  var entityList, $rootScope, KEY_CODE, ChatTextEntitySelector, entitySelector, chatHumanizeEntitiesLabelMock, addHumanRepresentationResult;
 
   beforeEach(module('linagora.esn.chat', function($provide) {
     addHumanRepresentationResult = 'addHumanRepresentationResult';
@@ -22,7 +22,6 @@ describe('the ChatTextEntitySelector constructor', function() {
 
   beforeEach(inject(function(_$rootScope_, _ChatTextEntitySelector_, _KEY_CODE_) {
     $rootScope = _$rootScope_;
-    scope = $rootScope.$new();
     KEY_CODE = _KEY_CODE_;
     ChatTextEntitySelector = _ChatTextEntitySelector_;
     entityList = ['smile_a', 'smile_b', 'smile_c', 'smile_ko', 'smile_ok'];
@@ -104,6 +103,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should update the message correctly if it sent with a space at the end', function() {
       var adapter = getTextAreaAdapter(5, 5, 'toto');
+
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
 
@@ -113,6 +113,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should update the message by adding the spaces if the message is empty', function() {
       var adapter = getTextAreaAdapter(5, 5, '');
+
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
 
@@ -127,6 +128,7 @@ describe('the ChatTextEntitySelector constructor', function() {
         selectionStart: 0,
         selectionEnd: 0
       };
+
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
 
@@ -136,6 +138,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should update the message event if the message is empty', function() {
       var adapter = getTextAreaAdapter(0, 0, '');
+
       ChatTextEntitySelector.prototype._resetState = sinon.spy();
       entitySelector.textChanged(adapter, 2);
       $rootScope.$digest();
@@ -145,6 +148,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should update the message by adding the spaces if the message is empty', function() {
       var adapter = getTextAreaAdapter(0, 0, ':qsdf', false);
+
       ChatTextEntitySelector.prototype._resetState = sinon.spy();
       entitySelector.textChanged(adapter, 0);
       $rootScope.$digest();
@@ -154,6 +158,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should update the message by adding the spaces if the message is empty', function() {
       var adapter = getTextAreaAdapter(5, 5, ':qsdf', true);
+
       entitySelector._resetState = sinon.spy();
       entitySelector.textChanged(adapter, 0);
       $rootScope.$digest();
@@ -192,7 +197,7 @@ describe('the ChatTextEntitySelector constructor', function() {
           { event: getEvt(KEY_CODE.ARROW_UP), expected: 4 },
           { event: getEvt(KEY_CODE.ARROW_UP), expected: 3 },
           { event: getEvt(KEY_CODE.ARROW_LEFT), expected: 2 },
-          { event: getEvt(KEY_CODE.ARROW_LEFT), expected: 1 },
+          { event: getEvt(KEY_CODE.ARROW_LEFT), expected: 1 }
         ].forEach(function(testSpec) {
           entitySelector.keyDown(testSpec.event);
           expect(entitySelector.focusIndex).to.equal(testSpec.expected);
@@ -259,6 +264,7 @@ describe('the ChatTextEntitySelector constructor', function() {
   describe('select() method', function() {
     it('should update the textarea text', function() {
       var adapter = getTextAreaAdapter(6, 6, ':smile');
+
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
@@ -267,6 +273,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should update the textarea text in the middle of text', function() {
       var adapter = getTextAreaAdapter(20, 20, ':smile_a# test :smil test');
+
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
@@ -275,6 +282,7 @@ describe('the ChatTextEntitySelector constructor', function() {
 
     it('should not be confused when there is two times the same emoji start', function() {
       var adapter = getTextAreaAdapter(18, 18, ':smile test :smile test');
+
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
@@ -294,6 +302,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       entitySelector.select('smile_c');
 
       var size = addHumanRepresentationResult.length;
+
       expect(toRealValue).to.have.been.calledWith('smile_c');
       expect(toHumanLabel).to.have.been.calledWith('smile_c');
       expect(chatHumanizeEntitiesLabelMock.addHumanRepresentation).to.have.been.calledWith(':' + toHumanLabelResult + '#', ':' + toRealValueResult + '#');

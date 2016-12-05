@@ -7,37 +7,37 @@ module.exports = function(dependencies) {
 
   const collaborationModule = dependencies('collaboration');
 
-  let readPermissions = {
+  const readPermissions = {
     channel: userCanReadChannel,
     private: userCanReadPrivate,
     collaboration: userCanReadCollaboration
   };
 
-  let updatePermissions = {
+  const updatePermissions = {
     channel: userCanUpdateChannel,
     private: userCanUpdatePrivate,
     collaboration: userCanUpdateCollaboration
   };
 
-  let removePermissions = {
+  const removePermissions = {
     channel: userCanRemoveChannel,
     private: userCanRemovePrivate,
     collaboration: userCanRemoveCollaboration
   };
 
-  let joinPermissions = {
+  const joinPermissions = {
     channel: userCanJoinChannel,
     private: userCanJoinPrivate,
     collaboration: userCanJoinCollaboration
   };
 
-  let leavePermissions = {
+  const leavePermissions = {
     channel: userCanLeaveChannel,
     private: userCanLeavePrivate,
     collaboration: userCanLeaveCollaboration
   };
 
-  let writePermissions = {
+  const writePermissions = {
     channel: userCanWriteChannel,
     private: userCanWritePrivate,
     collaboration: userCanWriteCollaboration
@@ -77,7 +77,7 @@ module.exports = function(dependencies) {
     return userIsInConversationMemberList(actor, conversation);
   }
 
-  function userCanJoinCollaboration(actor, user, conversation) {
+  function userCanJoinCollaboration() {
     return Q.when(false);
   }
 
@@ -111,7 +111,7 @@ module.exports = function(dependencies) {
     return Q.when(actor._id.equals(user._id));
   }
 
-  function userCanLeaveCollaboration(actor, user, conversation) {
+  function userCanLeaveCollaboration() {
     return Q.when(false);
   }
 
@@ -125,7 +125,7 @@ module.exports = function(dependencies) {
     return readPermission(user, conversation);
   }
 
-  function userCanReadChannel(user, conversation) {
+  function userCanReadChannel() {
     // a user can read a channel in all the cases
     return Q.when(true);
   }
@@ -134,7 +134,7 @@ module.exports = function(dependencies) {
     return userIsInConversationMemberList(user, conversation);
   }
 
-  function userCanReadCollaboration(user, conversation) {
+  function userCanReadCollaboration() {
     return Q.when(false);
   }
 
@@ -148,7 +148,7 @@ module.exports = function(dependencies) {
     return removePermission(user, conversation);
   }
 
-  function userCanRemoveChannel(user, conversation) {
+  function userCanRemoveChannel() {
     // TBD
     return Q.when(false);
   }
@@ -157,7 +157,7 @@ module.exports = function(dependencies) {
     return userIsInConversationMemberList(user, conversation);
   }
 
-  function userCanRemoveCollaboration(user, conversation) {
+  function userCanRemoveCollaboration() {
     return Q.when(false);
   }
 
@@ -171,7 +171,7 @@ module.exports = function(dependencies) {
     return updatePermission(user, conversation);
   }
 
-  function userCanUpdateChannel(user, conversation) {
+  function userCanUpdateChannel() {
     return Q.when(true);
   }
 
@@ -179,7 +179,7 @@ module.exports = function(dependencies) {
     return userIsInConversationMemberList(user, conversation);
   }
 
-  function userCanUpdateCollaboration(user, conversation) {
+  function userCanUpdateCollaboration() {
     return Q.when(false);
   }
 
@@ -221,7 +221,7 @@ module.exports = function(dependencies) {
   }
 
   function userIsInConversationMemberList(user, conversation) {
-    let member = _.find(conversation.members, element => element._id.equals(user._id));
+    const member = _.find(conversation.members, element => element._id.equals(user._id));
 
     return Q.when(!!member);
   }

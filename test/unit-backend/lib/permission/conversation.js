@@ -12,6 +12,7 @@ describe('The collaboration permission module', function() {
     };
 
     logger = {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       error: console.log,
       info: console.log,
       debug: console.log,
@@ -19,7 +20,7 @@ describe('The collaboration permission module', function() {
     };
 
     deps = {
-      logger: logger,
+      logger: logger
     };
   });
 

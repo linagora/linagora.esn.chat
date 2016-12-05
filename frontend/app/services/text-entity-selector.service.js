@@ -1,5 +1,4 @@
 (function() {
-  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular.module('linagora.esn.chat')
@@ -97,10 +96,8 @@
         if (self.entityList.length) {
           self.entityStart = inEdition;
           self.visible = true;
-        } else {
-          if (self.hideForNoResults) {
-            self._resetState();
-          }
+        } else if (self.hideForNoResults) {
+          self._resetState();
         }
       });
     };
@@ -155,7 +152,7 @@
 
       var newValueStart = valueStart.substr(0, valueStart.length - distanceToColon) + humanLabel;
 
-      this.textarea.replaceText(newValueStart  + valueEnd, newValueStart.length, newValueStart.length);
+      this.textarea.replaceText(newValueStart + valueEnd, newValueStart.length, newValueStart.length);
     };
 
     ChatTextEntitySelector.prototype._entityInEdition = function(text, cursorNextChar) {

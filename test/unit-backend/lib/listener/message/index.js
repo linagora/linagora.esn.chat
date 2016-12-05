@@ -9,7 +9,7 @@ var CONSTANTS = require('../../../../../backend/lib/constants');
 
 describe('The linagora.esn.chat lib message listener module', function() {
 
-  var deps, err, user, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger, communityCreatedListener, memberAddedListener, comunityUpdateListener;
+  var deps, err, user, messageReceivedListener, globalPublish, ChatMessageMock, dependencies, logger;
 
   beforeEach(function() {
     dependencies = function(name) {
@@ -24,6 +24,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
     });
 
     logger = {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       error: console.log,
       info: console.log,
       debug: console.log,
@@ -53,12 +54,6 @@ describe('The linagora.esn.chat lib message listener module', function() {
               subscribe: function(cb) {
                 if (topic === CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED) {
                   messageReceivedListener = cb;
-                } else if (topic === CONSTANTS.NOTIFICATIONS.COMMUNITY_CREATED) {
-                  communityCreatedListener = cb;
-                } else if (topic === CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_COMMUNITY) {
-                  memberAddedListener = cb;
-                } else if (topic === CONSTANTS.NOTIFICATIONS.COMMUNITY_UPDATE) {
-                  comunityUpdateListener = cb;
                 }
               }
             };
@@ -149,7 +144,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
             return callback(null, {members: [{_id: creator}]});
           }),
           permission: {
-            userCanWrite: function(user, conversation) {
+            userCanWrite: function() {
               return Q.when(true);
             }
           }

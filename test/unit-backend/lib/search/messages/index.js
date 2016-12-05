@@ -18,6 +18,7 @@ describe('The search messages listener', function() {
 
   beforeEach(function() {
     logger = {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       error: console.log,
       info: console.log,
       debug: console.log
