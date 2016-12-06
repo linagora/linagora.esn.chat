@@ -8,22 +8,41 @@
 
     function chatConversationService(ChatRestangular) {
       var service = {
+        fetchMessages: fetchMessages,
+        get: get,
         getMessage: getMessage,
-        fetchMessages: fetchMessages
+        join: join,
+        leave: leave
       };
 
       return service;
 
-      function fetchMessages(conversation, options) {
-        return ChatRestangular.all('conversations').one(conversation).all('messages').getList(options).then(function(response) {
-          return ChatRestangular.stripRestangular(response.data);
-        });
+      function _getBase(id) {
+        return ChatRestangular.all('conversations').one(id);
+      }
+
+      function _stripResponse(response) {
+        return ChatRestangular.stripRestangular(response.data);
+      }
+
+      function fetchMessages(id, options) {
+        return _getBase(id).all('messages').getList(options).then(_stripResponse);
+      }
+
+      function get(id) {
+        return _getBase(id).get().then(_stripResponse);
       }
 
       function getMessage(id) {
-        return ChatRestangular.all('messages').one(id).get().then(function(response) {
-          return ChatRestangular.stripRestangular(response.data);
-        });
+        return _getBase(id).get().then(_stripResponse);
+      }
+
+      function join(id, userId) {
+        return _getBase(id).all('members').one(userId).customPUT().then(_stripResponse);
+      }
+
+      function leave(id) {
+        return _getBase(id).one('members').doDELETE();
       }
     }
 })();
