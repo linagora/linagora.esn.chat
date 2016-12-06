@@ -13,7 +13,7 @@ var _ = require('lodash');
 
 describe('The linagora.esn.chat message lib', function() {
 
-  var deps, lib, logger, messageSavedTopic, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  var deps, logger, messageSavedTopic, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -50,6 +50,7 @@ describe('The linagora.esn.chat message lib', function() {
     };
 
     logger = {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       error: console.log,
       info: console.log,
       debug: console.log
@@ -62,7 +63,7 @@ describe('The linagora.esn.chat message lib', function() {
       exec: sinon.spy(function(cb) {
         cb();
       }),
-      sort: sinon.spy(function(type, cb) {
+      sort: sinon.spy(function() {
         return mq;
       })
     };
@@ -71,10 +72,12 @@ describe('The linagora.esn.chat message lib', function() {
       ChatConversation: {
         find: sinon.spy(function(options, cb) {
           cb && cb();
+
           return mq;
         }),
         findById: sinon.spy(function(options, cb) {
           cb && cb();
+
           return mq;
         }),
         findByIdAndRemove: sinon.spy(function(channel, cb) {
@@ -82,10 +85,12 @@ describe('The linagora.esn.chat message lib', function() {
         }),
         findByIdAndUpdate: sinon.spy(function(id, action, cb) {
           cb && cb(null, mq);
+
           return mq;
         }),
         findOneAndUpdate: sinon.spy(function(query, action, cb) {
           cb && cb(null, mq);
+
           return mq;
         }),
         update: sinon.spy(function(query, action, cb) {
@@ -141,16 +146,13 @@ describe('The linagora.esn.chat message lib', function() {
         }
       }
     };
-
-    lib = {
-      utils: require('../../../backend/lib/utils')(dependencies)
-    };
   });
 
   describe('The createMessage function', function() {
 
     it('should call ChatMessage.create and populate correctly the creator and user_mentions', function(done) {
       var message = {id: 1, text: '', timestamps: {creation: '0405'}};
+
       function ChannelMessage(msg) {
         expect(msg).to.deep.equal(message);
       }
@@ -186,6 +188,7 @@ describe('The linagora.esn.chat message lib', function() {
       });
 
       var message = {id: 1, text: 'This is a message with @' + id1 + ' and @' + id2};
+
       function ChannelMessage() {
       }
 
@@ -262,6 +265,7 @@ describe('The linagora.esn.chat message lib', function() {
       modelsMock.ChatMessage = {
         find: function(q) {
           expect(q).to.deep.equal({channel: id, moderate: false});
+
           return {
             populate: populateMock,
             limit: limitMock,

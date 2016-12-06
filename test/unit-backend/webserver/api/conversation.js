@@ -1,5 +1,4 @@
 'use strict';
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
@@ -56,7 +55,7 @@ describe('The conversation controller', function() {
   describe('The findMyConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.findMyPrivateConversations({user: {_id: 'id'}}, {
         status: function(code) {
@@ -75,7 +74,7 @@ describe('The conversation controller', function() {
 
     it('should send back HTTP 200 with the lib.findConversationByTypeAndByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.findMyConversations({query: {type: 'type'}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -96,7 +95,7 @@ describe('The conversation controller', function() {
   describe('The findMyPrivateConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.findMyPrivateConversations({user: {_id: 'id'}}, {
         status: function(code) {
@@ -115,7 +114,7 @@ describe('The conversation controller', function() {
 
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === false and authenticated user as a member', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.findMyPrivateConversations({query: {members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -136,7 +135,7 @@ describe('The conversation controller', function() {
   describe('leaveConversation', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.leaveConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
@@ -154,7 +153,7 @@ describe('The conversation controller', function() {
     });
 
     it('shoud send back HTTP 204 when lib.leaveConversation success', function(done) {
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.leaveConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
@@ -174,7 +173,7 @@ describe('The conversation controller', function() {
   describe('joinConversation', function() {
     it('shoud send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.joinConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
@@ -192,7 +191,7 @@ describe('The conversation controller', function() {
     });
 
     it('shoud send back HTTP 204 when lib.joinConversation success', function(done) {
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.joinConversation({conversation: {_id: 'channelId'}, additionalUser: {_id: 'id'}}, {
         status: function(code) {
@@ -212,7 +211,7 @@ describe('The conversation controller', function() {
   describe('The list', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -231,7 +230,7 @@ describe('The conversation controller', function() {
 
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === true', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -250,7 +249,7 @@ describe('The conversation controller', function() {
 
     it('should handle query with more than one member and add auth user as a member', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -273,7 +272,8 @@ describe('The conversation controller', function() {
 
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
       controller.list({query: {type: 'private', members: '1'}, user: {_id: 'id'}}, {
 
         status: function(code) {
@@ -291,7 +291,7 @@ describe('The conversation controller', function() {
 
     it('should not add auth user if already passed as membres arguments', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -311,7 +311,7 @@ describe('The conversation controller', function() {
   describe('The list', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: 'id'}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -330,7 +330,7 @@ describe('The conversation controller', function() {
 
     it('should send back HTTP 200 with the lib.findPrivateByMembers result calledWith exactMatch === true', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: [1, 2]}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -349,7 +349,7 @@ describe('The conversation controller', function() {
 
     it('should handle query with more than one member and add auth user as a member', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: ['1', '2']}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -367,7 +367,7 @@ describe('The conversation controller', function() {
 
     it('should handle query with just one member and add auth user as a member', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: '1'}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -385,7 +385,7 @@ describe('The conversation controller', function() {
 
     it('should not add auth user if already passed as members arguments', function(done) {
       result = [];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.list({query: {type: 'private', members: ['1', 'id']}, user: {_id: 'id'}}, {
         status: function(code) {
@@ -405,11 +405,11 @@ describe('The conversation controller', function() {
   describe('The create function', function() {
 
     it('should call the api with right parameters', function(done) {
-      let name = 'MyChannel';
-      let topic = 'MyTopic';
-      let purpose = 'MyPurpose';
-      let avatar = 'avatar';
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const name = 'MyChannel';
+      const topic = 'MyTopic';
+      const purpose = 'MyPurpose';
+      const avatar = 'avatar';
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.create({
         user: user,
@@ -444,10 +444,10 @@ describe('The conversation controller', function() {
     });
 
     it('should take into consideration extras members', function(done) {
-      let name = 'MyChannel';
-      let topic = 'MyTopic';
-      let purpose = 'MyPurpose';
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const name = 'MyChannel';
+      const topic = 'MyTopic';
+      const purpose = 'MyPurpose';
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.create({
         user: user,
@@ -470,8 +470,8 @@ describe('The conversation controller', function() {
 
     it('should send back HTTP 500 with error when channel can not be created', function(done) {
       err = new Error('failed');
-      let req = {body: {}, query: {}, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = {body: {}, query: {}, user: user};
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.create(req, {
         status: function(code) {
@@ -488,9 +488,9 @@ describe('The conversation controller', function() {
     });
 
     it('should send back HTTP 201 when channel has been created', function(done) {
-      let channel = {id: 1};
-      let req = {body: {}, query: {}, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const channel = {id: 1};
+      const req = {body: {}, query: {}, user: user};
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = channel;
       controller.create(req, {
@@ -508,14 +508,14 @@ describe('The conversation controller', function() {
     });
 
     it('should send back previous channel if channel existed', function(done) {
-      let channel = {id: 1, members: ['user1']};
-      let query = {
+      const channel = {id: 1, members: ['user1']};
+      const query = {
         body: {
           members: ['user1']
         }
       };
-      let req = {body: {}, query: query, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = {body: {}, query: query, user: user};
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = [channel, {id: 2}];
       controller.create(req, {
@@ -536,8 +536,8 @@ describe('The conversation controller', function() {
   describe('The updateTopic function', function() {
     it('should send back HTTP 500 with error when channel can not be updated', function(done) {
       err = new Error('failed');
-      let req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.updateTopic(req, {
         status: function(code) {
@@ -554,14 +554,14 @@ describe('The conversation controller', function() {
     });
 
     it('should send back HTTP 200 when channel has been updated', function(done) {
-      let channel = {id: 1};
-      let topic = {
+      const channel = {id: 1};
+      const topic = {
         value: 'topic',
         creator: user._id,
         last: new Date()
       };
-      let req = {body: topic, params: {id: channel.id}, query: {}, user: user};
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = {body: topic, params: {id: channel.id}, query: {}, user: user};
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       result = topic;
       controller.updateTopic(req, {

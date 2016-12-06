@@ -49,6 +49,7 @@ describe('The linagora.esn.chat collaboration lib', function() {
     };
 
     logger = {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       error: console.log,
       info: console.log,
       debug: console.log
@@ -61,7 +62,7 @@ describe('The linagora.esn.chat collaboration lib', function() {
       exec: sinon.spy(function(cb) {
         cb();
       }),
-      sort: sinon.spy(function(type, cb) {
+      sort: sinon.spy(function() {
         return mq;
       })
     };
@@ -70,10 +71,12 @@ describe('The linagora.esn.chat collaboration lib', function() {
       ChatConversation: {
         find: sinon.spy(function(options, cb) {
           cb && cb();
+
           return mq;
         }),
         findById: sinon.spy(function(options, cb) {
           cb && cb();
+
           return mq;
         }),
         findByIdAndRemove: sinon.spy(function(channel, cb) {
@@ -81,10 +84,12 @@ describe('The linagora.esn.chat collaboration lib', function() {
         }),
         findByIdAndUpdate: sinon.spy(function(id, action, cb) {
           cb && cb(null, mq);
+
           return mq;
         }),
         findOneAndUpdate: sinon.spy(function(query, action, cb) {
           cb && cb(null, mq);
+
           return mq;
         }),
         update: sinon.spy(function(query, action, cb) {

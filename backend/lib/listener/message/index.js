@@ -9,8 +9,8 @@ module.exports = function(dependencies) {
   const globalPubsub = dependencies('pubsub').global;
   const logger = dependencies('logger');
   const userModule = dependencies('user');
-  let forwardHandlers = {};
-  let messageHandlers = [];
+  const forwardHandlers = {};
+  const messageHandlers = [];
 
   return {
     addForwardHandler,
@@ -28,7 +28,7 @@ module.exports = function(dependencies) {
   }
 
   function forwardMessage(room, message) {
-    let handler = getForwardHandler(message.type);
+    const handler = getForwardHandler(message.type);
 
     if (!handler) {
       return logger.error('Can not find a valid forward handler for message of type %s', message.type);
@@ -124,7 +124,7 @@ module.exports = function(dependencies) {
             return defer.reject(new Error(`User ${user._id} can not write message in the conversation ${conversation._id}`));
           }
 
-          let chatMessage = {
+          const chatMessage = {
             type: data.message.type,
             text: data.message.text,
             date: data.message.date,

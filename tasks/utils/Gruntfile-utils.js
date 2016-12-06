@@ -11,12 +11,15 @@ var EsnConfig = require('esn-elasticsearch-configuration');
 function _args(grunt) {
   var opts = ['test', 'chunk', 'ci', 'reporter'];
   var args = {};
+
   opts.forEach(function(optName) {
     var opt = grunt.option(optName);
+
     if (opt) {
       args[optName] = '' + opt;
     }
   });
+
   return args;
 }
 
@@ -108,6 +111,7 @@ GruntfileUtils.prototype.runGrunt = function runGrunt() {
       grunt.log.writeln('succeeded');
     }
   }
+
   return {
     newProcess: function(task) {
       return {
@@ -145,6 +149,7 @@ GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
   return function() {
     function _removeAllFilesInDirectory(directory) {
       var files;
+
       try {
         files = fs.readdirSync(directory);
       } catch (e) {
@@ -153,6 +158,7 @@ GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
       if (files.length > 0) {
         for (var i = 0; i < files.length; i++) {
           var filePath = directory + '/' + files[i];
+
           if (fs.statSync(filePath).isFile()) {
             fs.unlinkSync(filePath);
           } else {
@@ -181,6 +187,7 @@ GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
     }
 
     var done = this.async();
+
     done(true);
   };
 };
@@ -195,9 +202,11 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
 
     var _doReplSet = function() {
       var client = new MongoClient(new Server(servers.host, servers.mongodb.port), {native_parser: true});
-      client.open(function(err, mongoClient) {
+
+      client.open(function(err) {
         if (err) {
           grunt.log.error('MongoDB - Error when open a mongodb connection : ' + err);
+
           return done(false);
         }
         var db = client.db('admin');
@@ -207,6 +216,7 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
             {_id: 0, host: ('127.0.0.1:' + servers.mongodb.port)}
           ]
         };
+
         // Use replica set default config if run inside a docker container
         if (command === 'docker') {
           replSetCommand = null;
@@ -216,6 +226,7 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
         }, function(err, response) {
           if (err) {
             grunt.log.error('MongoDB - Error when executing rs.initiate() : ' + err);
+
             return done(false);
           }
           if (response && response.ok === 1) {
@@ -223,16 +234,19 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
 
             var nbExecuted = 0;
             var finish = false;
+
             async.doWhilst(function(callback) {
               setTimeout(function() {
 
                 db.command({isMaster: 1}, function(err, response) {
                   if (err) {
                     grunt.log.error('MongoDB - Error when executing db.isMaster() : ' + err);
+
                     return done(false);
                   }
                   if (response.ismaster) {
                     finish = true;
+
                     return callback();
                   }
                   nbExecuted++;
@@ -241,6 +255,7 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
                       'Number of tries of check if the replica set is launch and have a master reached the maximum allowed. ' +
                       'Increase the number of tries or check if the mongodb "rs.initiate()" works'));
                   }
+
                   return callback();
                 });
               }, servers.mongodb.interval_replica_set);

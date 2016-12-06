@@ -28,7 +28,7 @@ module.exports = {
     port: process.env.PORT_REDIS || DEFAULT_PORTS.redis,
     conf_file: '',
     log_path: '',
-    pwd: '',
+    pwd: ''
   },
 
   mongodb: {

@@ -4,7 +4,7 @@
 var expect = chai.expect;
 
 describe('the chatMentionChooser component', function() {
-  var scope, $componentController, $rootScope, KEY_CODE, controller, MENTION_CHOOSER_MAX_RESULT, domainAPIMock, sessionMock, members, $q, ChatTextEntitySelectorMock, textEntitySelectorMockInstance;
+  var scope, $componentController, $rootScope, MENTION_CHOOSER_MAX_RESULT, domainAPIMock, sessionMock, members, $q, ChatTextEntitySelectorMock, textEntitySelectorMockInstance;
 
   beforeEach(function() {
 
@@ -16,10 +16,10 @@ describe('the chatMentionChooser component', function() {
       this.textChanged = sinon.spy();
     });
 
-    members = {data: [{firstname: 'John', lastname:'Doe', _id: '42'}, {_id: '_userId'}]};
+    members = {data: [{firstname: 'John', lastname: 'Doe', _id: '42'}, {_id: '_userId'}]};
 
     domainAPIMock = {
-      getMembers: sinon.spy(function(a, b) {
+      getMembers: sinon.spy(function() {
         return $q.when(members);
       })
     };
@@ -44,20 +44,20 @@ describe('the chatMentionChooser component', function() {
     $provide.factory('session', function(_$q_) {
       $q = _$q_;
       sessionMock.ready = $q.when(sessionMock);
+
       return sessionMock;
     });
   }));
 
-  beforeEach(inject(function(_$rootScope_, _$componentController_, _KEY_CODE_, _MENTION_CHOOSER_MAX_RESULT_) {
+  beforeEach(inject(function(_$rootScope_, _$componentController_, _MENTION_CHOOSER_MAX_RESULT_) {
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     $componentController = _$componentController_;
-    KEY_CODE = _KEY_CODE_;
     MENTION_CHOOSER_MAX_RESULT = _MENTION_CHOOSER_MAX_RESULT_;
   }));
 
   beforeEach(function() {
-    controller = getController();
+    getController();
   });
 
   function getController() {
@@ -67,6 +67,7 @@ describe('the chatMentionChooser component', function() {
       },
       {}
     );
+
     return component;
   }
 
@@ -111,13 +112,14 @@ describe('the chatMentionChooser component', function() {
   describe('The toRealValue method given to ChatTextEntitySelector', function() {
     it('shoud concat firstname and lastname with _', function() {
       expect(ChatTextEntitySelectorMock).to.have.been.calledWith(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.func.and(sinon.match(function(toRealValue) {
-        return toRealValue({_id:'entity'}) === 'entity';
+        return toRealValue({_id: 'entity'}) === 'entity';
       })));
     });
   });
 
   it('should listen to the chat:message:compose:textChanged and pass the textAreaAdaptor to the entitySelector\'s textChanged method', function() {
     var textAreaAdaptor = {};
+
     $rootScope.$broadcast('chat:message:compose:textChanged', textAreaAdaptor);
     $rootScope.$digest();
     expect(textEntitySelectorMockInstance.textChanged).to.have.been.calledWith(sinon.match.same(textAreaAdaptor));
@@ -125,6 +127,7 @@ describe('the chatMentionChooser component', function() {
 
   it('should listen to the chat:message:compose:keydown and pass the event to the entitySelector\'s keyDown method', function() {
     var event = {};
+
     $rootScope.$broadcast('chat:message:compose:keydown', event);
     $rootScope.$digest();
     expect(textEntitySelectorMockInstance.keyDown).to.have.been.calledWith(sinon.match.same(event));

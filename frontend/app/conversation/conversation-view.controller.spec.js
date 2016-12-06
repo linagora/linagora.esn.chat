@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
@@ -8,23 +8,17 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
   var scope,
     $q,
     sessionMock,
-    chatConversationService,
     chatConversationServiceMock,
-    chatConversationsService,
     chatConversationsServiceMock,
     CHAT_EVENTS,
     CHAT,
     MESSAGE_GROUP_TIMESPAN,
-    chatScrollService,
     chatScrollServiceMock,
-    chatLocalStateService,
     chatLocalStateServiceMock,
     $stateParams,
-    usSpinnerService,
     usSpinnerServiceMock,
     $rootScope,
     $controller,
-    user,
     searchProviders;
 
   beforeEach(function() {
@@ -51,8 +45,6 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     $stateParams = {
       id: '123'
     };
-
-    user = {_id: 'userId'};
 
     sessionMock = {};
 
@@ -90,16 +82,10 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
-    chatLocalStateService = _chatLocalStateService_;
-    chatConversationService = _chatConversationService_;
-    chatConversationsService = _chatConversationsService_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     CHAT = _CHAT_;
     MESSAGE_GROUP_TIMESPAN = _MESSAGE_GROUP_TIMESPAN_;
-    chatScrollService = _chatScrollService_;
-    chatLocalStateService = _chatLocalStateService_;
     $stateParams = _$stateParams_;
-    usSpinnerService = _usSpinnerService_;
   }));
 
   function initController(ctrl) {
@@ -269,12 +255,12 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
         {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}},
         {_id: 3, creator: {_id: 1}, timestamps: {creation: Date.now()}}
       ];
+
       chatConversationServiceMock.fetchMessages = sinon.spy(function() {
         return $q.when(messages);
       });
 
       initCtrl();
-
       expect(scope.vm.messages).to.deep.equal(messages);
     });
 

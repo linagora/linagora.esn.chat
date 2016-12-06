@@ -58,7 +58,7 @@ function init(dependencies, lib) {
   globalPubsub.topic(MESSAGE_RECEIVED).subscribe(data => sendMessage(data.room, data.message));
   globalPubsub.topic(ADD_MEMBERS_TO_CHANNEL).subscribe(data => sendDataToConversation(data, ADD_MEMBERS_TO_CHANNEL, data));
   globalPubsub.topic(CONVERSATION_UPDATE).subscribe(data => {
-    let conversation = data.conversation;
+    const conversation = data.conversation;
 
     sendDataToConversation(conversation, CONVERSATION_UPDATE, conversation);
     if (data.deleteMembers) {
@@ -68,7 +68,7 @@ function init(dependencies, lib) {
 
   function sendDataToUsers(users, type, data) {
     users.forEach(user => {
-      let sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
+      const sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
 
       sockets.forEach(socket => socket.emit(type, data));
     });

@@ -4,7 +4,7 @@ const CONSTANTS = require('../../../constants');
 
 module.exports = function(dependencies) {
 
-  let pubsub = dependencies('pubsub').global;
+  const pubsub = dependencies('pubsub').global;
 
   return function(data) {
     data.message.user_mentions && data.message.user_mentions.forEach(mention => {

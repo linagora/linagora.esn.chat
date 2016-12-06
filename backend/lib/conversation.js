@@ -92,12 +92,12 @@ module.exports = function(dependencies) {
    * @return {[Conversation]}
    */
   function find(options, callback) {
-    let type = options.type;
-    let ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
-    let exactMembersMatch = options.exactMembersMatch;
-    let members = options.members;
-    let name = options.name;
-    let moderate = Boolean(options.moderate);
+    const type = options.type;
+    const ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
+    const exactMembersMatch = options.exactMembersMatch;
+    const members = options.members;
+    const name = options.name;
+    const moderate = Boolean(options.moderate);
 
     if (exactMembersMatch && !members) {
       throw new Error('Could not set exactMembersMatch to true without providing members');
@@ -118,7 +118,7 @@ module.exports = function(dependencies) {
     }
 
     if (type) {
-      request.type = {$in:  _.isArray(type) ? type : [type]};
+      request.type = {$in: _.isArray(type) ? type : [type]};
     }
 
     if (name) {
@@ -126,7 +126,7 @@ module.exports = function(dependencies) {
     }
 
     if (name === null) {
-      request.$or = [{name:  {$exists: false}}, {name: null}];
+      request.$or = [{name: {$exists: false}}, {name: null}];
     }
 
     if (ignoreMemberFilterForChannel && (!type || type.indexOf(CONVERSATION_TYPE.CHANNEL) > -1)) {
@@ -164,7 +164,7 @@ module.exports = function(dependencies) {
 
   function list(options, callback) {
     let query;
-    let sort = 'timestamps.creation';
+    const sort = 'timestamps.creation';
 
     options = options || {};
     options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
@@ -203,7 +203,7 @@ module.exports = function(dependencies) {
   function create(options, callback) {
     async.waterfall([
         function(callback) {
-          let conversation = new Conversation(options);
+          const conversation = new Conversation(options);
 
           conversation.last_message = {
             date: conversation.timestamps && conversation.timestamps.creation || new Date(),
@@ -225,7 +225,7 @@ module.exports = function(dependencies) {
   }
 
   function addMember(conversationId, userId, callback) {
-    let userObjectId = ensureObjectId(userId);
+    const userObjectId = ensureObjectId(userId);
 
     Conversation.findByIdAndUpdate(conversationId, {
       $addToSet: {members: userObjectId}
@@ -241,7 +241,7 @@ module.exports = function(dependencies) {
 
   function update(conversationId, modifications, callback) {
 
-    let mongoModifications = {};
+    const mongoModifications = {};
     let nextMongoModification = null;
 
     if (modifications.newMembers && modifications.newMembers.length) {
@@ -322,7 +322,7 @@ module.exports = function(dependencies) {
   }
 
   function removeMember(conversationId, userId, callback) {
-    let unsetOperation = {};
+    const unsetOperation = {};
 
     unsetOperation['numOfReadedMessage.' + userId] = '';
     Conversation.findByIdAndUpdate(conversationId, {
@@ -349,7 +349,7 @@ module.exports = function(dependencies) {
         }
       }
     }, function(err, conversation) {
-      let message = {
+      const message = {
         type: 'text',
         subtype: 'channel:topic',
         date: Date.now(),

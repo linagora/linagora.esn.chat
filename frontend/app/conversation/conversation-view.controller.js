@@ -1,6 +1,4 @@
 (function() {
-  /*eslint strict: [2, "function"]*/
-  /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
   'use strict';
 
   angular
@@ -23,7 +21,7 @@
     self.chatLocalStateService.ready.then(init);
 
     function addUniqId(message) {
-      message._uniqId = message.creator._id + ':' + message.timestamps.creation  + '' + message.text;
+      message._uniqId = message.creator._id + ':' + message.timestamps.creation + '' + message.text;
     }
 
     function getConversationId() {

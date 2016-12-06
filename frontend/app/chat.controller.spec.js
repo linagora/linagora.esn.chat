@@ -15,7 +15,6 @@ describe('The linagora.esn.chat ChatController controller', function() {
     $controller,
     groups,
     channels,
-    routeResolver,
     sessionMock,
     user,
     livenotificationMock,
@@ -23,7 +22,6 @@ describe('The linagora.esn.chat ChatController controller', function() {
     ChatMessageAdapter,
     chatNotificationService,
     chatScrollService,
-    CHAT_EVENTS,
     getItemResult,
     getItem,
     setItem,
@@ -50,7 +48,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
     localStorageService = {
       getOrCreateInstance: sinon.stub().returns({
         getItem: getItem,
-        setItem:  setItem
+        setItem: setItem
       })
     };
 
@@ -68,10 +66,6 @@ describe('The linagora.esn.chat ChatController controller', function() {
     };
     $stateParams = {
       emailId: '4'
-    };
-
-    routeResolver = {
-      session: angular.noop
     };
 
     user = {_id: 'userId'};
@@ -111,12 +105,11 @@ describe('The linagora.esn.chat ChatController controller', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _chatNotificationService_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatNotificationService_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
-    CHAT_EVENTS = _CHAT_EVENTS_;
     chatNotificationService = _chatNotificationService_;
     chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;

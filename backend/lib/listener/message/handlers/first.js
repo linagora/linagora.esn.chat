@@ -4,13 +4,13 @@ const CONSTANTS = require('../../../constants');
 
 module.exports = function(dependencies) {
 
-  let pubsub = dependencies('pubsub').global;
-  let logger = dependencies('logger');
-  let conversationLib = require('../../../conversation')(dependencies);
-  let messageLib = require('../../../message')(dependencies);
+  const pubsub = dependencies('pubsub').global;
+  const logger = dependencies('logger');
+  const conversationLib = require('../../../conversation')(dependencies);
+  const messageLib = require('../../../message')(dependencies);
 
   return function(data) {
-    let channel = data.message.channel;
+    const channel = data.message.channel;
 
     messageLib.count(channel, (err, count) => {
       if (err) {

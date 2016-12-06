@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 
 describe('The first channel message handler', function() {
 
-  var deps, listener, globalPublish, dependencies, data;
+  var deps, globalPublish, dependencies, data;
   var channelId = '1234';
   var creator = {_id: '5678'};
 
@@ -25,6 +25,7 @@ describe('The first channel message handler', function() {
     globalPublish = sinon.spy();
     deps = {
       logger: {
+        /*eslint no-console: ["error", { allow: ["log"] }] */
         error: console.log,
         info: console.log,
         debug: console.log
@@ -33,8 +34,7 @@ describe('The first channel message handler', function() {
         local: {
           topic: function() {
             return {
-              subscribe: function(cb) {
-                listener = cb;
+              subscribe: function() {
               }
             };
           }

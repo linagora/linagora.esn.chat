@@ -47,6 +47,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
 
     logger = {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       error: console.log,
       info: console.log,
       debug: console.log,
@@ -60,7 +61,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       exec: sinon.spy(function(cb) {
         cb();
       }),
-      sort: sinon.spy(function(type, cb) {
+      sort: sinon.spy(function() {
         return mq;
       })
     };
@@ -69,10 +70,12 @@ describe('The linagora.esn.chat conversation lib', function() {
       ChatConversation: {
         find: sinon.spy(function(options, cb) {
           cb && cb();
+
           return mq;
         }),
         findById: sinon.spy(function(options, cb) {
           cb && cb();
+
           return mq;
         }),
         findByIdAndRemove: sinon.spy(function(channel, cb) {
@@ -80,10 +83,12 @@ describe('The linagora.esn.chat conversation lib', function() {
         }),
         findByIdAndUpdate: sinon.spy(function(id, action, cb) {
           cb && cb(null, mq);
+
           return mq;
         }),
         findOneAndUpdate: sinon.spy(function(query, action, cb) {
           cb && cb(null, mq);
+
           return mq;
         }),
         update: sinon.spy(function(query, action, cb) {
@@ -144,6 +149,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       modelsMock.ChatConversation = sinon.spy();
       modelsMock.ChatConversation.find = sinon.spy(function(options, cb) {
         cb && cb();
+
         return mq;
       });
 
@@ -171,6 +177,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
     it('should return the default channel', function(done) {
       var module = require('../../../backend/lib/conversation')(dependencies, lib);
+
       module.getChannels({}, function(err, channels) {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.CHANNEL, moderate: false});
         expect(mq.populate).to.have.been.calledWith('members');
@@ -188,6 +195,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
     it('should call ChatConversation.findById', function(done) {
       var channelId = 1;
+
       require('../../../backend/lib/conversation')(dependencies, lib).getById(channelId, function() {
         expect(modelsMock.ChatConversation.findById).to.have.been.calledWith(1);
         expect(mq.populate).to.have.been.calledWith('members');
@@ -200,6 +208,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
     it('should call ChatConversation.save', function(done) {
       var options = {id: 1};
+
       function ChatConversation(opts) {
         expect(opts).to.deep.equal(options);
       }
@@ -225,7 +234,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         isAChannel: true
       };
 
-      function ChatConversation(opts) {
+      function ChatConversation() {
       }
 
       ChatConversation.prototype.save = function(cb) {
@@ -255,6 +264,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should call Channel.find with correct parameters when exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
+
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
       require('../../../backend/lib/conversation')(dependencies, lib).find({type: type, exactMembersMatch: true, members: members}, function() {
@@ -263,7 +273,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  {$in: [type]},
+          type: {$in: [type]},
           moderate: false,
           members: {
             $all: [anObjectId],
@@ -309,6 +319,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should call Channel.find with correct parameters when not exactMatch', function(done) {
       var members = ['one'];
       var anObjectId = {};
+
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
       require('../../../backend/lib/conversation')(dependencies, lib).find({type: type, members: members}, function() {
@@ -317,7 +328,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
 
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  {$in: [type]},
+          type: {$in: [type]},
           members: {
             $all: [anObjectId]
           },
@@ -338,7 +349,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
       require('../../../backend/lib/conversation')(dependencies, lib).find({type: [type, type2], members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          type:  {$in: [type, type2]},
+          type: {$in: [type, type2]},
           members: {
             $all: [anObjectId]
           },
@@ -368,7 +379,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should handle no members', function(done) {
       require('../../../backend/lib/conversation')(dependencies, lib).find({}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
-          moderate: false,
+          moderate: false
         });
 
         done();
@@ -401,7 +412,8 @@ describe('The linagora.esn.chat conversation lib', function() {
       var conversationId = 'channelId';
       var userId = 'userId';
       var anObjectId = {};
-      ObjectIdMock = sinon.spy(function(id) {
+
+      ObjectIdMock = sinon.spy(function() {
         this.id;
       });
 
@@ -423,6 +435,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       var userId = 'userId';
       var anObjectId = {};
       var numOfMessage = 42;
+
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
       modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
@@ -446,6 +459,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       var channelId = 'channelId';
       var userId = 'userId';
       var anObjectId = {};
+
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
       modelsMock.ChatConversation.update = function(query, options, cb) {
@@ -467,10 +481,12 @@ describe('The linagora.esn.chat conversation lib', function() {
       var channelId = 'channelId';
       var userId = 'userId';
       var anObjectId = {};
+
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
       modelsMock.ChatConversation.update = function(query, options, cb) {
         var conversation = 'conversation';
+
         cb(null, conversation);
         expect(channelUpdateTopic).to.have.been.calledWith({
           conversation: conversation,
@@ -507,6 +523,7 @@ describe('The linagora.esn.chat conversation lib', function() {
           topic: topic
         }
       };
+
       modelsMock.ChatConversation.findByIdAndUpdate = function(_channelId, _topic, cb) {
         expect(_channelId).to.deep.equals({_id: channelId});
         expect(_topic).to.deep.equals(setTopic);
@@ -520,6 +537,7 @@ describe('The linagora.esn.chat conversation lib', function() {
   describe('The remove function', function() {
     it('should delete the conversation and its messages', function() {
       var deleteResult = {_id: 'channelId'};
+
       modelsMock.ChatConversation.findOneAndRemove = sinon.spy(function(query, cb) {
         cb(null, deleteResult);
       });

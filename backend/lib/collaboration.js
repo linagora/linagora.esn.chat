@@ -21,7 +21,7 @@ module.exports = function(dependencies) {
   };
 
   function getMembers(conversation) {
-    let defer = Q.defer();
+    const defer = Q.defer();
 
     getCollaboration(conversation.collaboration, (err, collaboration) => {
       if (err) {
@@ -36,7 +36,7 @@ module.exports = function(dependencies) {
         return defer.reject(new Error('Can not find collaboration from conversation'));
       }
 
-      let promises = (collaboration.members || [])
+      const promises = (collaboration.members || [])
         .filter(member => member.member.objectType === 'user' && member.status === 'joined')
         .map(member => Q.nfapply(userModule.get, [member.member.id]));
 

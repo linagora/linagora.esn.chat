@@ -1,6 +1,7 @@
 'use strict';
 
-var noop = function() {};
+const noop = function() {};
+
 /**
  *
  * @return {{log: Function, warn: Function, error: Function, debug: Function, info: Function}}

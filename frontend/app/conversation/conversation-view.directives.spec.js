@@ -1,18 +1,13 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
 describe('The linagora.esn.chat conversation-view directive', function() {
-  var $compile,
-      $rootScope,
-      $timeout,
-      session,
-      moment;
+  var $compile, $rootScope, moment;
 
   beforeEach(function() {
-    session = {};
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.emoticon');
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -23,11 +18,10 @@ describe('The linagora.esn.chat conversation-view directive', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$compile_, _moment_, _$timeout_) {
+  beforeEach(angular.mock.inject(function(_$rootScope_, _$compile_, _moment_) {
     $rootScope = _$rootScope_;
     moment = _moment_;
     $compile = _$compile_;
-    $timeout = _$timeout_;
   }));
 
   describe('The messageSeparation directive', function() {
@@ -48,7 +42,7 @@ describe('The linagora.esn.chat conversation-view directive', function() {
     it('should create a message separation with value Today', function() {
       currentMessage = {
         timestamps: {
-          creation:  moment().format('x')
+          creation: moment().format('x')
         }
       };
       initDirective();

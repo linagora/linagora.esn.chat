@@ -1,8 +1,6 @@
 'use strict';
 
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
-
-let _ = require('lodash');
+const _ = require('lodash');
 const CONSTANTS = require('../../lib/constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
@@ -97,7 +95,7 @@ module.exports = function(dependencies, lib) {
         return utils.sendConversationResult(conversations[0], res, 201);
       }
 
-      let conversation = {
+      const conversation = {
         name: req.body.name,
         type: req.body.type,
         creator: req.user,
@@ -198,7 +196,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    let members = _.isArray(req.query.members) ? req.query.members : [req.query.members];
+    const members = _.isArray(req.query.members) ? req.query.members : [req.query.members];
 
     if (members.indexOf(String(req.user._id)) === -1) {
       members.push(String(req.user._id));
@@ -239,7 +237,7 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function findMyConversations(req, res)  {
+  function findMyConversations(req, res) {
     lib.conversation.find({type: req.query.type, ignoreMemberFilterForChannel: true, members: [String(req.user._id)]}, (err, result) => {
       if (err) {
         logger.error('Error while getting user %s conversations', req.user._id, err);
@@ -258,7 +256,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function updateTopic(req, res) {
-    let topic = {
+    const topic = {
       value: req.body.value,
       creator: req.user._id,
       last_set: new Date()

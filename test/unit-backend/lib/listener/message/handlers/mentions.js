@@ -7,7 +7,7 @@ var CONSTANTS = require('../../../../../../backend/lib/constants');
 
 describe('The chat mentions handler', function() {
 
-  var deps, listener, globalPublish, ChatMessageMock, dependencies;
+  var deps, globalPublish, ChatMessageMock, dependencies;
 
   beforeEach(function() {
     dependencies = function(name) {
@@ -26,8 +26,7 @@ describe('The chat mentions handler', function() {
         local: {
           topic: function() {
             return {
-              subscribe: function(cb) {
-                listener = cb;
+              subscribe: function() {
               }
             };
           }
@@ -46,6 +45,7 @@ describe('The chat mentions handler', function() {
   it('should broadcast users_mention', function() {
     var message = {user_mentions: ['user']};
     var room = 1;
+
     require('../../../../../../backend/lib/listener/message/handlers/mentions')(dependencies)({room: room, message: message});
     expect(globalPublish).to.have.been.calledWith({room: room, message: message, for: 'user'});
     expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.USERS_MENTION);

@@ -39,7 +39,7 @@ module.exports = function(dependencies, lib) {
   }
 
   function loadMessageConversation(req, res, next) {
-    let message = req.message;
+    const message = req.message;
 
     lib.conversation.getById(message.channel, (err, conversation) => {
       if (err) {

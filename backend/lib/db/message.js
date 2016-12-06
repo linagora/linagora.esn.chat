@@ -1,20 +1,20 @@
 'use strict';
 
-let cleanUser = require('./utils').cleanUser;
+const cleanUser = require('./utils').cleanUser;
 
 module.exports = function(dependencies) {
 
-  let mongoose = dependencies('db').mongo.mongoose;
-  let ObjectId = mongoose.Schema.ObjectId;
+  const mongoose = dependencies('db').mongo.mongoose;
+  const ObjectId = mongoose.Schema.ObjectId;
 
-  let AttachmentSchema = new mongoose.Schema({
+  const AttachmentSchema = new mongoose.Schema({
     _id: {type: ObjectId, required: true},
     name: {type: String, required: true},
     contentType: {type: String, required: true},
     length: {type: Number, required: true}
   });
 
-  let ChatMessageSchema = new mongoose.Schema({
+  const ChatMessageSchema = new mongoose.Schema({
     text: {type: String},
     type: {type: String, required: true},
     creator: {type: ObjectId, ref: 'User'},

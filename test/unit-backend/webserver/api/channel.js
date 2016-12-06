@@ -1,5 +1,4 @@
 'use strict';
-/*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
@@ -57,7 +56,7 @@ describe('The channel controller', function() {
   describe('The getChannels function', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.getChannels({query: {}}, {
         status: function(code) {
@@ -76,7 +75,7 @@ describe('The channel controller', function() {
 
     it('should send back HTTP 200 with the lib.getChannels result', function(done) {
       result = [{id: 1}, {id: 2}];
-      let controller = getController(this.moduleHelpers.dependencies, lib);
+      const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.getChannels({query: {}}, {
         status: function(code) {

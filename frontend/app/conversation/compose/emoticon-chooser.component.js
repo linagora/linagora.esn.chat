@@ -1,5 +1,4 @@
 (function() {
-  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular.module('linagora.esn.chat').component('chatEmoticonChooser', {
@@ -43,7 +42,7 @@
         textArea: self.text,
         value: ':' + self.textInput.toLowerCase(),
         selectionStart: self.textInput.length + 1,
-        selectionEnd: self.textInput.length + 1,
+        selectionEnd: self.textInput.length + 1
       };
 
       self.entitySelector.textChanged(adapter, 0, false);

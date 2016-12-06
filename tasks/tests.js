@@ -10,6 +10,7 @@ module.exports = function(grunt) {
 
     if (!options.target) {
       grunt.fatal.fail('Missing target in options');
+
       return;
     }
 
@@ -17,19 +18,21 @@ module.exports = function(grunt) {
       return a.concat(b.src);
     }, []);
     var totalFiles = files.length;
-
     var chunkSize = grunt.option('chunk');
+
     if (chunkSize === true) {
       chunkSize = options.chunk;
     } else if (typeof chunkSize === 'undefined') {
       chunkSize = totalFiles;
     }
-    var commonFiles = grunt.file.expand(options.common);
 
+    var commonFiles = grunt.file.expand(options.common);
     var targets = [];
     var configBase = options.target.replace(/:/g, '.');
+
     for (var chunkId = 1; files.length; chunkId++) {
       var chunkFiles = commonFiles.concat(files.splice(0, chunkSize));
+
       grunt.config.set(configBase + chunkId + '.options.files', chunkFiles);
       targets.push(options.target + chunkId);
     }

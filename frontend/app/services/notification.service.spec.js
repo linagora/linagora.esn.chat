@@ -6,19 +6,13 @@ var expect = chai.expect;
 
 describe('The linagora.esn.chat services', function() {
   var $q,
-    chatConversationService,
-    CHAT_NAMESPACE,
     CHAT_EVENTS,
     sessionMock,
     user,
     livenotificationMock,
     $rootScope,
-    scope,
-    chatUserState,
     chatNamespace,
-    $httpBackend,
     chatNotificationService,
-    chatLocalStateService,
     CHAT_CONVERSATION_TYPE,
     conversationsServiceMock,
     groups,
@@ -73,7 +67,7 @@ describe('The linagora.esn.chat services', function() {
     localStorageService = {
       getOrCreateInstance: sinon.stub().returns({
         getItem: getItem,
-        setItem:  setItem
+        setItem: setItem
       })
     };
 
@@ -81,10 +75,10 @@ describe('The linagora.esn.chat services', function() {
       livenotificationMock = function(name) {
         if (name === CHAT_NAMESPACE) {
           return chatNamespace;
-        } else {
-          throw new Error(name + 'namespace has not been mocked');
         }
+        throw new Error(name + 'namespace has not been mocked');
       };
+
       return livenotificationMock;
     }
 
@@ -96,17 +90,11 @@ describe('The linagora.esn.chat services', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _chatConversationService_, _chatNotificationService_, _CHAT_NAMESPACE_, _CHAT_EVENTS_, _$rootScope_, _chatUserState_, _$httpBackend_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _chatNotificationService_, _CHAT_EVENTS_, _$rootScope_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
-    chatConversationService = _chatConversationService_;
     chatNotificationService = _chatNotificationService_;
-    CHAT_NAMESPACE = _CHAT_NAMESPACE_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
-    scope = $rootScope.$new();
-    chatUserState = _chatUserState_;
-    $httpBackend =  _$httpBackend_;
-    chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];

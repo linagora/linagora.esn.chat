@@ -4,13 +4,13 @@
 var expect = chai.expect;
 
 describe('the chatEmoticonChooser component', function() {
-  var scope, $componentController, esnEmoticonRegistryMock, $rootScope, KEY_CODE, ChatTextEntitySelectorMock, textEntitySelectorMockInstance, controller, entityListResolverFromListResult;
+  var scope, $componentController, esnEmoticonRegistryMock, $rootScope, ChatTextEntitySelectorMock, textEntitySelectorMockInstance, controller, entityListResolverFromListResult;
 
   beforeEach(function() {
     ChatTextEntitySelectorMock = sinon.spy(function() {
       var self = this; //because of the linters
-      this.visible = false;
 
+      this.visible = false;
       textEntitySelectorMockInstance = self;
       this.keyDown = sinon.spy();
       this.textChanged = sinon.spy();
@@ -24,10 +24,12 @@ describe('the chatEmoticonChooser component', function() {
 
     ChatTextEntitySelectorMock.entityListResolverFromList = sinon.spy(function() {
       entityListResolverFromListResult = {};
+
       return entityListResolverFromListResult;
     });
 
     var shortNames = 'smile_a,smile_b,smile_c,smile_ko,smile_ok'.split(',');
+
     esnEmoticonRegistryMock = {
       getShortNames: sinon.stub().returns(shortNames)
     };
@@ -42,11 +44,10 @@ describe('the chatEmoticonChooser component', function() {
     $provide.value('esnEmoticonRegistry', esnEmoticonRegistryMock);
   }));
 
-  beforeEach(inject(function(_$rootScope_, _$componentController_, _KEY_CODE_) {
+  beforeEach(inject(function(_$rootScope_, _$componentController_) {
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     $componentController = _$componentController_;
-    KEY_CODE = _KEY_CODE_;
   }));
 
   beforeEach(function() {
@@ -61,6 +62,7 @@ describe('the chatEmoticonChooser component', function() {
       },
       {}
     );
+
     return component;
   }
 
@@ -72,6 +74,7 @@ describe('the chatEmoticonChooser component', function() {
 
   it('should listen to the chat:message:compose:textChanged and pass the textAreaAdaptor to the entitySelector\'s textChanged method', function() {
     var textAreaAdaptor = {};
+
     $rootScope.$broadcast('chat:message:compose:textChanged', textAreaAdaptor);
     $rootScope.$digest();
     expect(textEntitySelectorMockInstance.textChanged).to.have.been.calledWith(sinon.match.same(textAreaAdaptor));
@@ -79,6 +82,7 @@ describe('the chatEmoticonChooser component', function() {
 
   it('should listen to the chat:message:compose:keydown and pass the event to the entitySelector\'s keyDown method', function() {
     var event = {};
+
     $rootScope.$broadcast('chat:message:compose:keydown', event);
     $rootScope.$digest();
     expect(textEntitySelectorMockInstance.keyDown).to.have.been.calledWith(sinon.match.same(event));
@@ -94,6 +98,7 @@ describe('the chatEmoticonChooser component', function() {
 
   it('should listen to the chat:message:emoticon and pass the textAreaAdaptor to the entitySelector\'s show method', function() {
     var textAreaAdaptor = {};
+
     $rootScope.$broadcast('chat:message:emoticon', textAreaAdaptor);
     $rootScope.$digest();
     expect(textEntitySelectorMockInstance.show).to.have.been.calledWith(sinon.match.same(textAreaAdaptor));
@@ -102,6 +107,7 @@ describe('the chatEmoticonChooser component', function() {
 
   it('should listen to the chat:message:emoticon and call entitySelector\'s hide method if the receive the event twice', function() {
     var textAreaAdaptor = {};
+
     $rootScope.$broadcast('chat:message:emoticon', textAreaAdaptor);
     $rootScope.$broadcast('chat:message:emoticon', textAreaAdaptor);
     $rootScope.$digest();
@@ -120,6 +126,7 @@ describe('the chatEmoticonChooser component', function() {
         selectionStart: scope.ctlr.textInput.length + 1,
         selectionEnd: scope.ctlr.textInput.length + 1
       };
+
       expect(textEntitySelectorMockInstance.textChanged).to.have.been.calledWith(adapter, 0, false);
     });
   });

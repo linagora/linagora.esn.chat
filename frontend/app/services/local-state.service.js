@@ -1,5 +1,4 @@
 (function() {
-  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular.module('linagora.esn.chat')
@@ -193,7 +192,7 @@
         if (!findConversation(conversation._id)) {
           insertConversationInSortedArray(service.conversations, conversation);
           session.ready.then(function(session) {
-            conversation.unreadMessageCount = (conversation.numOfMessage  || 0) - ((conversation.numOfReadedMessage || {})[session.user._id] || 0);
+            conversation.unreadMessageCount = (conversation.numOfMessage || 0) - ((conversation.numOfReadedMessage || {})[session.user._id] || 0);
           });
           if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
             insertConversationInSortedArray(service.channels, conversation);

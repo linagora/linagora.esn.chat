@@ -1,5 +1,4 @@
 (function() {
-  /*eslint strict: [2, "function"]*/
   'use strict';
 
   angular.module('linagora.esn.chat')
@@ -117,27 +116,27 @@
             }, function(err) {
               $log.error('Message has not been sent', err);
             });
-          } else {
-            var defer = $q.defer();
-
-            $log.debug('Publishing message...');
-
-            var done = function(attachments) {
-              $log.debug('Upload complete');
-
-              return sendMessage(buildMessage(message, attachments)).then(function(response) {
-                $log.debug('Message has been sent');
-                defer.resolve(response);
-              }, function(err) {
-                defer.reject(err);
-                $log.error('Error while sending message', err);
-              });
-            };
-
-            backgroundProcessorService.add(uploadService.await(done));
-
-            return defer.promise;
           }
+
+          var defer = $q.defer();
+
+          $log.debug('Publishing message...');
+
+          var done = function(attachments) {
+            $log.debug('Upload complete');
+
+            return sendMessage(buildMessage(message, attachments)).then(function(response) {
+              $log.debug('Message has been sent');
+              defer.resolve(response);
+            }, function(err) {
+              defer.reject(err);
+              $log.error('Error while sending message', err);
+            });
+          };
+
+          backgroundProcessorService.add(uploadService.await(done));
+
+          return defer.promise;
         }
 
         return {
@@ -162,7 +161,7 @@
         connect: bindToPromiseResult(chatMessageServicePromise, 'connect'),
         sendMessage: bindToPromiseResult(chatMessageServicePromise, 'sendMessage'),
         sendUserTyping: bindToPromiseResult(chatMessageServicePromise, 'sendUserTyping'),
-        sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments'),
+        sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments')
       };
     });
 })();
