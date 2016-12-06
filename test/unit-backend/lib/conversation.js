@@ -152,6 +152,9 @@ describe('The linagora.esn.chat conversation lib', function() {
 
         return mq;
       });
+      modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
+        cb(null, CONSTANTS.DEFAULT_CHANNEL);
+      });
 
       modelsMock.ChatConversation.prototype.save = function(cb) {
         cb(null, CONSTANTS.DEFAULT_CHANNEL, 1);
