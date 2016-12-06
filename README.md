@@ -4,45 +4,64 @@ Chat component for OpenPaaS ESN.
 
 ## Install
 
-While waiting for a npm-based dependency injection handler, you have to install this component in OpenPaaS like this:
+*Note: The following instructions assumes that you have already installed OpenPaaS ESN in the path referenced by $ESN below.*
+
+While waiting for a npm-based dependency injection handler, you have to install the Chat and Emoticon components in OpenPaaS ESN like this:
 
 **1. Clone linagora.esn.chat and linagora.esn.emoticon**
 
-Clone somewhere, the three following git repository:
+Clone the `linagora.esn.chat` and `linagora.esn.emoticon` repositories.
 
- * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.rse/browse
- * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.emoticon/browse
- * https://ci.open-paas.org/stash/projects/OM/repos/linagora.esn.chat/browse
+```
+git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.emoticon.git
+git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.chat.git
+```
 
-Go inside linagora.esn.rse repo and run:
+Go inside OpenPaaS ESN repository:
 
-    npm install
-    npm link
+```
+cd $ESN
+npm install
+npm link
+```
 
-Go inside linagora.esn.emotion and run:
+Go inside `linagora.esn.emotion` folder and run:
 
-    npm install
+```
+npm install
+```
 
-Go inside linagora.esn.chat and run:
+Go inside `linagora.esn.chat` folder and run:
 
-    npm link linagora-rse
-    npm install
+```
+npm link linagora-rse
+npm install
+```
 
-**2. Add component in the configuration file**
+**2. Add the modules in the OpenPaaS ESN configuration file**
 
-Add "linagora.esn.chat" in config/default.json:
+You must add "linagora.esn.emoticon" and "linagora.esn.chat" in the modules section in `$ESN/config/default.NODE_ENV.json`. NODE_ENV is the environment variable used to define if the node application is running in 'production' or in 'development' (the default environment is 'development').
+Copy the 'modules' array from `$ESN/config/default.json` into `$ESN/config/default.NODE_ENV.json` (`$ESN/config/default.development.json` or `$ESN/config/default.production.json`) and add the "linagora.esn.emoticon" and "linagora.esn.chat" items:
 
-      "modules": [
-        "linagora.esn.core.webserver",
-        "linagora.esn.core.wsserver",
-        "linagora.esn.emoticon",
-        "linagora.esn.chat"
-      ],
+```
+"modules": [
+  "linagora.esn.core.webserver",
+  "linagora.esn.core.wsserver",
+  "linagora.esn.emoticon",
+  "linagora.esn.chat"
+],
+```
 
-**3. Create symlink**
+**3. Create symbolic links**
 
-In your OpenPaaS ESN directory
+The modules must be available in the `$ESN/modules` folder:
 
-    cd path_to_rse
-    ln -s path_to_emoticon modules/linagora.esn.emoticon
-    ln -s path_to_chat modules/linagora.esn.chat
+```
+cd $ESN
+ln -s path_to_emoticon modules/linagora.esn.emoticon
+ln -s path_to_chat modules/linagora.esn.chat
+```
+
+## Run
+
+Once installed, you can start OpenPaaS ESN as usual. The Chat module is available in the application grid menu.
