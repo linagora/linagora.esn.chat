@@ -38,6 +38,7 @@ module.exports = function(dependencies) {
     getAllForUser,
     getById,
     getChannels,
+    init,
     list,
     listForUser,
     moderate,
@@ -49,11 +50,22 @@ module.exports = function(dependencies) {
     updateTopic
   };
 
+  function createDefaultChannel(callback) {
+    Conversation.findOneAndUpdate(
+      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type },
+      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type },
+      { new: true, upsert: true, setDefaultsOnInsert: true}, callback);
+  }
+
+  function init(callback) {
+    createDefaultChannel(callback);
+  }
+
   function getChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
       channels = channels || [];
       if (channels.length === 0) {
-        return create(CONSTANTS.DEFAULT_CHANNEL, (err, channel) => {
+        return createDefaultChannel((err, channel) => {
           if (err) {
             return callback(new Error('Can not create the default channel'));
           }

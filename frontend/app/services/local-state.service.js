@@ -4,9 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatLocalStateService', chatLocalStateService);
 
-    chatLocalStateService.$inject = ['$rootScope', '$q', '$log', '_', 'session', 'livenotification', 'chatConversationsService', 'chatParseMention', 'CHAT_CONVERSATION_TYPE', 'CHAT_EVENTS', 'CHAT_NAMESPACE'];
-
-    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, chatConversationsService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
+    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, chatConversationsService, chatConversationService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
       var deferred = $q.defer();
       var activeRoom = {};
       var service = {
@@ -21,6 +19,7 @@
         addConversation: addConversation,
         deleteConversation: deleteConversation,
         leaveConversation: leaveConversation,
+        updateConversation: updateConversation,
         channels: [],
         privateConversations: [],
         communityConversations: [],
@@ -246,6 +245,23 @@
       function unsetActive() {
         activeRoom = {};
         $rootScope.$broadcast(CHAT_EVENTS.UNSET_ACTIVE_ROOM);
+      }
+
+      function updateConversation(id) {
+        var conv = findConversation(id);
+
+        if (!conv) {
+          return $q();
+        }
+
+        return chatConversationService.get(id).then(function(conversation) {
+          conv.name = conversation.name;
+          conv.members = conversation.members;
+          conv.avatar = conversation.avatar;
+          $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.UPDATE, conv);
+
+          return conv;
+        });
       }
     }
 })();

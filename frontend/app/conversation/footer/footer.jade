@@ -1,3 +1,4 @@
 .conversation-footer
-  chat-message-compose(channel-id="")
+  chat-join-conversation(ng-if="!ctrl.isMember", conversation="ctrl.conversation", on-join="ctrl.onJoin()")
+  chat-message-compose(ng-if="ctrl.isMember", channel-id="")
   chat-user-typing

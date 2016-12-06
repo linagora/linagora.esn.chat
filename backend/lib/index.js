@@ -27,7 +27,9 @@ module.exports = function(dependencies) {
     search.init();
     conversation.registerUserConversationFinder(Q.denodeify(conversation.listForUser));
     conversation.registerUserConversationFinder(Q.denodeify(collaboration.listForUser));
-    callback();
+    conversation.init(() => {
+      callback();
+    });
   }
 
   return {
