@@ -11,12 +11,11 @@
     var self = this;
 
     self.chatLocalStateService = chatLocalStateService;
+    self.$onInit = $onInit;
 
-    activate();
-
-    function activate() {
+    function $onInit() {
       chatConversationsService.getConversationNamePromise.then(function(getConversationName) {
-        $scope.getConversationName = getConversationName;
+        self.getConversationName = getConversationName;
       });
     }
   }
