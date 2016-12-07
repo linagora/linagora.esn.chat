@@ -8,7 +8,7 @@
     function chatConversationList() {
       var directive = {
         restrict: 'E',
-        templateUrl: '/chat/app/conversation/conversation-list.html',
+        templateUrl: '/chat/app/conversation/list/conversation-list.html',
         scope: {
           channelState: '@',
           types: '='

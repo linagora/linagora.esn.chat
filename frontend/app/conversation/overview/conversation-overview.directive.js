@@ -15,7 +15,7 @@
       controller: 'ChatConversationItemController',
       controllerAs: 'vm',
       bindToController: true,
-      templateUrl: '/chat/app/conversation/conversation-overview.html'
+      templateUrl: '/chat/app/conversation/overview/conversation-overview.html'
     };
 
     return directive;
