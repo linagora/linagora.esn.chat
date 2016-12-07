@@ -18,6 +18,7 @@
     self.loadPreviousMessages = loadPreviousMessages;
     self.newMessage = newMessage;
     self.updateTopic = updateTopic;
+    self.topOfConversation = false;
     self.chatLocalStateService.ready.then(init);
 
     function addUniqId(message) {
@@ -63,6 +64,10 @@
     }
 
     function loadPreviousMessages(isFirstLoad) {
+      if (self.topOfConversation) {
+        return $q.when([]);
+      }
+
       isFirstLoad = isFirstLoad || false;
       var conversationId = getConversationId();
       var options = {limit: CHAT.DEFAULT_FETCH_SIZE};
@@ -77,6 +82,7 @@
       return chatConversationService.fetchMessages(conversationId, options)
       .then(checkMessagesOfSameUser)
       .then(function(result) {
+        self.topOfConversation = result.length < CHAT.DEFAULT_FETCH_SIZE;
         var lastLoaded = result.length - 1;
 
         queueOlderMessages(result, isFirstLoad);
