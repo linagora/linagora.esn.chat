@@ -8,7 +8,6 @@
       var component = {
         templateUrl: '/chat/app/conversation/header/header.html',
         controllerAs: 'ctrl',
-        controller: 'ChatConversationHeaderController',
         bindings: {
           conversation: '='
         }
