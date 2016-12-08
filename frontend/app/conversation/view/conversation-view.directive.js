@@ -11,7 +11,7 @@
       controller: 'ChatConversationViewController',
       controllerAs: 'vm',
       bindToController: true,
-      templateUrl: '/chat/app/conversation/conversation-view.html',
+      templateUrl: '/chat/app/conversation/view/conversation-view.html',
       scope: {
         displayTopic: '='
       }

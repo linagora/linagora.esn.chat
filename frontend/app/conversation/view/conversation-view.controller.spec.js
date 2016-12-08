@@ -227,6 +227,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
 
       initCtrl();
       scope.vm.messages.push(message);
+      scope.vm.topOfConversation = false;
       scope.vm.loadPreviousMessages();
       $rootScope.$digest();
       expect(chatConversationServiceMock.fetchMessages).to.be.calledWith($stateParams.id, {before: message._id, limit: CHAT.DEFAULT_FETCH_SIZE});
@@ -280,6 +281,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       chatConversationServiceMock.fetchMessages.onCall(1).returns($q.when(olderMessages));
 
       initCtrl();
+      scope.vm.topOfConversation = false;
       scope.vm.loadPreviousMessages();
       scope.$digest();
 
@@ -290,6 +292,53 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
         {_id: 3},
         {_id: 4}
       ]);
+    });
+
+    it('should set the topOfConversation when fetchMessages sends back less than limit messages', function() {
+      var firstCall = [
+        {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 3, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 4, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 5, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 6, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 7, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 8, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 9, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 10, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+      ];
+
+      var secondCall = [
+        {_id: 11, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+        {_id: 12, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+      ];
+
+      chatConversationServiceMock.fetchMessages = sinon.stub();
+      chatConversationServiceMock.fetchMessages.onCall(0).returns($q.when(firstCall));
+      chatConversationServiceMock.fetchMessages.onCall(1).returns($q.when(secondCall));
+
+      initCtrl();
+      scope.vm.loadPreviousMessages();
+      scope.$digest();
+
+      expect(chatConversationServiceMock.fetchMessages).to.be.called;
+      expect(scope.vm.topOfConversation).to.be.true;
+    });
+
+    it('should not fetchMessages when topOfConversation is true', function() {
+      var firstCall = [
+        {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+      ];
+
+      chatConversationServiceMock.fetchMessages = sinon.stub();
+      chatConversationServiceMock.fetchMessages.onCall(0).returns($q.when(firstCall));
+
+      initCtrl();
+      scope.vm.loadPreviousMessages();
+      scope.$digest();
+
+      expect(chatConversationServiceMock.fetchMessages).to.have.been.calledOnce;
+      expect(scope.vm.topOfConversation).to.be.true;
     });
 
     describe('Group messages by sameUser variable', function() {

@@ -13,7 +13,7 @@
       },
       controller: ChatConversationImageController,
       controllerAs: 'vm',
-      templateUrl: '/chat/app/conversation/conversation-image.html',
+      templateUrl: '/chat/app/conversation/image/conversation-image.html',
       bindToController: true
     };
 
