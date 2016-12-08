@@ -2,6 +2,7 @@
 
 /* global _: false */
 
+angular.module('esn.highlight', []);
 angular.module('esn.router', []);
 angular.module('esn.search', []);
 angular.module('esn.scroll', []);
