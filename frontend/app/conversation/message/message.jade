@@ -13,11 +13,11 @@
       .oembeds.attachment-container
         oembeds(message="vm.message.text")
       .attachment-container(ng-if="vm.message.attachments.length > 0")
-        .chat-message-text(ng-repeat="attachment in vm.message.attachments track by $index")
-          span(ng-click='vm.toggleFile()')
+        .chat-message-attachment-text(ng-repeat="attachment in vm.message.attachments track by $index")
+          span.clickable(ng-click='vm.toggleFile()')
             | #{__('Uploaded an Image')} :
           a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
-          span(ng-click='vm.toggleFile()')
-            i(ng-class="vm.displayFile ? 'fa fa-caret-down' : 'fa fa-caret-right'")
+          span.clickable(ng-click='vm.toggleFile()')
+            i(ng-class="vm.displayFile ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
           .attachment
             file-preview(file="attachment", ng-show="vm.displayFile")
