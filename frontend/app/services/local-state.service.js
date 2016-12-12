@@ -251,7 +251,7 @@
         var conv = findConversation(id);
 
         if (!conv) {
-          return $q();
+          return $q.when();
         }
 
         return chatConversationService.get(id).then(function(conversation) {

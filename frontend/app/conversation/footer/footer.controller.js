@@ -7,8 +7,12 @@
   function ChatFooterController(_, session) {
     var self = this;
 
-    self.isMember = !!_.find(self.conversation.members, {_id: session.user._id});
     self.onJoin = onJoin;
+    self.$onInit = $onInit;
+
+    function $onInit() {
+      self.isMember = !!_.find(self.conversation.members, {_id: session.user._id});
+    }
 
     function onJoin() {
       self.isMember = true;

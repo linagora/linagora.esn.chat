@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatLocalState service', function() {
-  var chatLocalStateService, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
+  var chatLocalStateService, chatConversationService, chatConversationMock, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -62,17 +62,22 @@ describe('The chatLocalState service', function() {
       return conversationsServiceMock;
     }
 
-    angular.mock.module(function($provide) {
+    chatConversationMock = {
+      get: sinon.spy()
+    };
 
+    angular.mock.module(function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
       $provide.factory('chatConversationsService', conversationsServiceFactory);
+      $provide.constant('chatConversationService', chatConversationMock);
     });
 
   });
 
-  beforeEach(angular.mock.inject(function(_chatLocalStateService_, _CHAT_CONVERSATION_TYPE_, _$rootScope_, _CHAT_EVENTS_, _$q_) {
+  beforeEach(angular.mock.inject(function(_chatLocalStateService_, _chatConversationService_, _CHAT_CONVERSATION_TYPE_, _$rootScope_, _CHAT_EVENTS_, _$q_) {
     chatLocalStateService = _chatLocalStateService_;
+    chatConversationService = _chatConversationService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     $rootScope = _$rootScope_;
     CHAT_EVENTS = _CHAT_EVENTS_;
@@ -375,6 +380,44 @@ describe('The chatLocalState service', function() {
       callback(data);
       expect(chatLocalStateService.channels[0]).to.equals(data);
       expect(chatLocalStateService.conversations[0]).to.deep.equals(data);
+    });
+  });
+
+  describe('updateConversation function', function() {
+
+    function initCache() {
+      chatLocalStateService.initLocalState();
+    }
+
+    beforeEach(initCache);
+
+    it('should not fail when conversation does not exists', function() {
+      var thenSpy = sinon.spy();
+
+      chatLocalStateService.updateConversation().then(thenSpy);
+      $rootScope.$digest();
+      expect(thenSpy).to.have.been.calledOnce;
+    });
+
+    it('should update the conversation with chatConversationService.get data', function(done) {
+      var id = 'updateMe';
+      var conversation = {
+        _id: id,
+        name: 'My conversation',
+        members: [1, 2, 3],
+        avatar: 'image.png'
+      };
+
+      chatLocalStateService.conversations = [{_id: id}];
+      chatConversationService.get = sinon.spy(function() {
+        return $q.when(conversation);
+      });
+
+      chatLocalStateService.updateConversation(id).then(function(result) {
+        expect(result).to.shallowDeepEqual(conversation);
+        done();
+      }, done);
+      $rootScope.$digest();
     });
   });
 });

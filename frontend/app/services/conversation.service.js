@@ -41,8 +41,8 @@
         return _getBase(id).all('members').one(userId).customPUT().then(_stripResponse);
       }
 
-      function leave(id) {
-        return _getBase(id).one('members').doDELETE();
+      function leave(id, userId) {
+        return _getBase(id).one('members').one(userId).doDELETE();
       }
     }
 })();
