@@ -20,7 +20,6 @@ describe('The linagora.esn.chat ChatController controller', function() {
     livenotificationMock,
     CHAT_CONVERSATION_TYPE,
     ChatMessageAdapter,
-    chatNotificationService,
     chatScrollService,
     getItemResult,
     getItem,
@@ -105,12 +104,11 @@ describe('The linagora.esn.chat ChatController controller', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatNotificationService_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
-    chatNotificationService = _chatNotificationService_;
     chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
