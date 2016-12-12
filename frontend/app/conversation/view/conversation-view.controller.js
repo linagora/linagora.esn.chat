@@ -5,9 +5,9 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams', 'usSpinnerService', 'MESSAGE_GROUP_TIMESPAN', 'chatComposerState'];
+  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams', 'usSpinnerService', 'MESSAGE_GROUP_TIMESPAN'];
 
-  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatComposerState) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN) {
     var self = this;
 
     self.spinnerKey = 'ChatConversationSpinner';
@@ -126,14 +126,6 @@
       Math.abs(nextMessage.timestamps.creation - previousMessage.timestamps.creation) < MESSAGE_GROUP_TIMESPAN;
     }
 
-    function onDestroy(conversationId) {
-      chatComposerState.saveMessage(conversationId, {text: $scope.text});
-
-      if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId) {
-        self.chatLocalStateService.unsetActive();
-      }
-    }
-
     function init() {
       var conversationId = getConversationId();
 
@@ -142,7 +134,11 @@
         loadPreviousMessages(true).then(scrollDown);
       }
 
-      $scope.$on('$destroy', onDestroy(conversationId));
+      $scope.$on('$destroy', function() {
+        if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId) {
+          self.chatLocalStateService.unsetActive();
+        }
+      });
     }
 
     [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
