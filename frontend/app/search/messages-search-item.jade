@@ -1,10 +1,13 @@
-.message-container
-  a(ng-href='/#/profile/{{::item.creator._id}}').pull-left.p-r-15
-    img.members-avatar(src='/images/user.png', ng-src='/api/users/{{::item.creator._id}}/profile/avatar', alt='#{__("Member Avatar")}')
-    
-  .message-title
-      h4.media-heading {{::item.creator.firstname}} {{::item.creator.lastname}}
-      .date {{ ::item.timestamps.creation | date: "MM/dd/yyyy h:mma" }}
+.chat-messages-search
+  .message-avatar.pull-left.clickable(ui-sref='profile({user_id: item.creator._id})')
+    img(src='/images/user.png', ng-src='/api/users/{{::item.creator._id}}/profile/avatar', alt='#{__("Member Avatar")}')
+    i.mdi.mdi-facebook-messenger
 
-  a(ng-href='/#/chat/channels/view/{{::item.channel}}').message-text
-    {{::item.text}}
+  .message-title
+    .data
+      h4.clickable(ui-sref='profile({user_id: item.creator._id})') {{::item.creator.firstname}} {{::item.creator.lastname}}
+      .channel.clickable(ui-sref='chat.channels-views({id: item.channel._id})') {{::item.channel.name}}
+    .date {{::item.timestamps.creation | date: "MM/dd/yyyy h:mma"}}
+
+  a.message-content.clickable(ui-sref='chat.channels-views({id: item.channel._id})')
+    span(ng-bind-html="::item.text | esnHighlight: query")

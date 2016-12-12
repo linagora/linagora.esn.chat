@@ -1,6 +1,7 @@
 'use strict';
 
 const async = require('async');
+const Q = require('q');
 const _ = require('lodash');
 const CONSTANTS = require('../lib/constants');
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
@@ -18,6 +19,7 @@ module.exports = function(dependencies, lib) {
     count,
     create,
     getById,
+    getByIdAndPopulate,
     getForConversation,
     list,
     markAllAsReadById,
@@ -83,7 +85,11 @@ module.exports = function(dependencies, lib) {
   }
 
   function getById(messageId, callback) {
-    ChatMessage.findById(messageId).populate('creator user_mentions', SKIP_FIELDS.USER).exec(callback);
+    Q(getByIdAndPopulate(messageId, ['creator', 'user_mentions'])).nodeify(callback);
+  }
+
+  function getByIdAndPopulate(messageId, populateFields = []) {
+    return ChatMessage.findById(messageId).populate(populateFields.join(' '), SKIP_FIELDS.USER);
   }
 
   function getForConversation(conversation, query = {limit: CONSTANTS.DEFAULT_LIMIT, offset: CONSTANTS.DEFAULT_OFFSET}, callback) {

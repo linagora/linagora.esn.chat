@@ -37,7 +37,7 @@ module.exports = function(dependencies, lib) {
   function search(req, res) {
 
     function hydrateMessage(message) {
-      return Q.denodeify(lib.message.getById)(message._id);
+      return lib.message.getByIdAndPopulate(message._id, ['creator', 'channel']);
     }
 
     function sendError(err) {

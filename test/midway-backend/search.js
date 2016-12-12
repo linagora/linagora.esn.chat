@@ -279,6 +279,8 @@ describe('The Chat search API', function() {
           }
           expect(res.headers['x-esn-items-count']).to.equal('2');
           expect((res.body[0].text === message.text && res.body[1].text === message6.text) || (res.body[0].text === message6.text && res.body[1].text === message.text)).to.be.true;
+          expect(res.body[0].channel).to.be.an('object');
+          expect(res.body[1].channel).to.be.an('object');
           done();
         });
       }
@@ -365,7 +367,7 @@ describe('The Chat search API', function() {
             return done(err);
           }
           expect(res.headers['x-esn-items-count']).to.equal('1');
-          expect(res.body).to.shallowDeepEqual([{text: message2.text}]);
+          expect(res.body).to.shallowDeepEqual([{text: message2.text, channel: {_id: String(message2.channel)}}]);
           done();
         });
       }

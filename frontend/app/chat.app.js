@@ -10,6 +10,7 @@
     'esn.scroll',
     'esn.attendee',
     'esn.header',
+    'esn.highlight',
     'esn.sidebar',
     'op.dynamicDirective',
     'esn.url',
