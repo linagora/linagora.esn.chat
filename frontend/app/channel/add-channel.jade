@@ -1,11 +1,11 @@
 sub-header
-  .flex-space-between.flex-vertical-centered
+  .channel-add-form.flex-space-between.flex-vertical-centered
     .left
-      button.btn.btn-primary(ui-sref="chat.channels-views")
+      button.btn.btn-link(ui-sref="chat.channels-views")
         i.mdi.mdi-close
     .right
-      button.btn.btn-primary(ng-click='vm.addChannel()')
-        | #{__('Create')}
+      button.btn.btn-link(ng-click='vm.addChannel()')
+        span #{__('Create')}
         i.mdi.mdi-check
 .block-header.visible-md
   h2 #{__('Create a new channel')}
