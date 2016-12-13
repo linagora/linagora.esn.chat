@@ -5,9 +5,9 @@
     .module('linagora.esn.chat')
     .directive('chatMessageCompose', chatMessageCompose);
 
-  chatMessageCompose.$inject = ['$log', '$rootScope', 'deviceDetector', 'session', 'chatLocalStateService', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel'];
+  chatMessageCompose.$inject = ['$log', '$rootScope', 'deviceDetector', 'session', 'chatLocalStateService', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel', 'chatComposerState'];
 
-  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatLocalStateService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel) {
+  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatLocalStateService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel, chatComposerState) {
     var directive = {
       restrict: 'E',
       templateUrl: '/chat/app/conversation/compose/message-compose.html',
@@ -30,9 +30,18 @@
       chatMessageService.connect();
       var textarea = element.find('textarea').get(0);
       var timer = null;
+      var currentRoomId = chatLocalStateService.activeRoom._id;
 
       scope.typing = false;
       scope.text = '';
+
+      chatComposerState.getMessage(chatLocalStateService.activeRoom._id).then(function(message) {
+        scope.text = message && message.text ? message.text : '';
+      });
+
+      scope.$on('$destroy', function() {
+        chatComposerState.saveMessage(currentRoomId, {text: scope.text});
+      });
 
       function sendUserTyping(state) {
         var message = {
