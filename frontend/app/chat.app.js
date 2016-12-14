@@ -25,6 +25,7 @@
     'ui.router',
     'angularFileUpload',
     'linagora.esn.emoticon',
+    'linagora.esn.user-status',
     'xeditable',
     'angularMoment',
     'ngSanitize',

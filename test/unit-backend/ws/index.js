@@ -142,22 +142,6 @@ describe('The Chat WS server', function() {
     });
   });
 
-  it('should listen USER_STATE pubsub and emit it on ws', function() {
-    initWs();
-    var callbackOnUserStatePubsub;
-
-    expect(userStateTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
-      callbackOnUserStatePubsub = callback;
-
-      return _.isFunction(callback);
-    }));
-
-    var data = {};
-
-    callbackOnUserStatePubsub(data);
-    expect(chatNamespace.emit).to.have.been.calledWith(USER_STATE, data);
-  });
-
   it('should listen CREATION_CHANNEL pubsub and emit it on all the namespace if it is a channel', function() {
     initWs();
     var callbackOnCreationChannelPubsub;

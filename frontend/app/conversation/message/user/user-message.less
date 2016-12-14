@@ -1,3 +1,81 @@
+.chat-message {
+
+  &.highlight {
+    background-color: @darkenBgColor;
+  }
+
+  .lv-avatar, .message-time {
+    display: block;
+    margin-right: 0px;
+  }
+
+  .lv-avatar > img {
+    border-radius: 2px;
+  }
+
+  .pull-left {
+    padding-right: 0px;
+  }
+
+  .message-time {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s linear;
+
+    &.show {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  .chat-message-title {
+
+    a {
+      color: @text-color;
+    }
+
+    .displayname {
+      font-weight: 600;
+    }
+
+    .date {
+      color: #B3B3B3;
+      padding-left: 10px;
+      display: inline;
+    }
+  }
+
+  .chat-message-text {
+    white-space: pre-wrap;
+
+    .chat-emoji {
+      width: 1em;
+    }
+
+    span i {
+      margin-left: 5px;
+      font-size: 20px;
+      vertical-align: middle;
+    }
+  }
+
+  .attachment-container {
+
+    .attachment {
+      padding: 7px 10px 8px;
+      border-top: 1px solid #e8e8e8;
+      line-height: 100%;
+
+      img {
+        height: auto;
+        width: auto;
+        max-width: 100%;
+        max-height: 250px;
+      }
+    }
+  }
+}
+
 .chat-message-attachment-text {
   span {
     color: @secondaryTextColor;

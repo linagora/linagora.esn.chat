@@ -1,6 +1,5 @@
 .lv-item.media.chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
-    a.lv-avatar.pull-left(ng-if='!ctrl.message.sameUser')
-      img(ng-src='/api/users/{{::ctrl.message.creator._id}}/profile/avatar', alt='')
+    chat-avatar.pull-left(ng-if='!ctrl.message.sameUser', user-id="ctrl.message.creator._id")
 
     .message-time.pull-left(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
         small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}

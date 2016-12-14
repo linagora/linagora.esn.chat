@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The ChatConversationItemController controller', function() {
-  var chatUserState,
+  var userStatusService,
   $q,
   $rootScope,
   $scope,
@@ -20,8 +20,8 @@ describe('The ChatConversationItemController controller', function() {
   searchProviders;
 
   beforeEach(function() {
-    chatUserState = {
-      get: sinon.spy(function(id) {
+    userStatusService = {
+      getCurrentStatus: sinon.spy(function(id) {
         return $q.when(userStateResult(id));
       })
     };
@@ -51,7 +51,7 @@ describe('The ChatConversationItemController controller', function() {
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatUserState', chatUserState);
+      $provide.value('userStatusService', userStatusService);
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
       $provide.value('esnEmoticonifyFilter', sinon.spy());
@@ -106,8 +106,8 @@ describe('The ChatConversationItemController controller', function() {
 
       controller.$onInit();
       $rootScope.$digest();
-      expect(chatUserState.get).to.have.been.calledWith(2);
-      expect(chatUserState.get).to.have.been.calledWith(3);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(2);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(3);
       expect(controller.connected).to.be.true;
     });
 
@@ -119,8 +119,8 @@ describe('The ChatConversationItemController controller', function() {
 
       controller.$onInit();
       $rootScope.$digest();
-      expect(chatUserState.get).to.have.been.calledWith(2);
-      expect(chatUserState.get).to.have.been.calledWith(3);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(2);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(3);
       expect(controller.connected).to.be.false;
     });
 

@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationItemController', ChatConversationItemController);
 
-  function ChatConversationItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationNameService) {
+  function ChatConversationItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, userStatusService, session, moment, userUtils, chatConversationNameService) {
     var self = this;
     var userToConnected = {};
 
@@ -52,8 +52,8 @@
       }
 
       var statesPromises = self.otherUsers.map(function(member) {
-        return chatUserState.get(member._id).then(function(state) {
-          userToConnected[member._id] = state !== 'disconnected';
+        return userStatusService.getCurrentStatus(member._id).then(function(status) {
+          userToConnected[member._id] = status.status !== 'disconnected';
         });
       });
 
