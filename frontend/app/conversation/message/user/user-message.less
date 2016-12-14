@@ -1,4 +1,13 @@
 .chat-message {
+  .flex-row;
+
+  padding: 5px 20px 8px 20px;
+
+  .chat-message-left {
+    .flex;
+
+    min-width: 50px;
+  }
 
   &.highlight {
     background-color: @darkenBgColor;
@@ -6,7 +15,7 @@
 
   .lv-avatar, .message-time {
     display: block;
-    margin-right: 0px;
+    margin-right: 0;
   }
 
   .lv-avatar > img {
@@ -14,7 +23,7 @@
   }
 
   .pull-left {
-    padding-right: 0px;
+    padding-right: 0;
   }
 
   .message-time {
@@ -29,7 +38,6 @@
   }
 
   .chat-message-title {
-
     a {
       color: @text-color;
     }
@@ -39,7 +47,7 @@
     }
 
     .date {
-      color: #B3B3B3;
+      color: @chatDateTextColor;
       padding-left: 10px;
       display: inline;
     }
@@ -63,7 +71,7 @@
 
     .attachment {
       padding: 7px 10px 8px;
-      border-top: 1px solid #e8e8e8;
+      border-top: 1px solid @chatAttachmentBorderColor;
       line-height: 100%;
 
       img {

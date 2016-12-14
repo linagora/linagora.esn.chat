@@ -53,7 +53,7 @@
 
       var statesPromises = self.otherUsers.map(function(member) {
         return userStatusService.getCurrentStatus(member._id).then(function(status) {
-          userToConnected[member._id] = status.status !== 'disconnected';
+          userToConnected[member._id] = status && (status.status !== 'disconnected');
         });
       });
 

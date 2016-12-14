@@ -1,22 +1,24 @@
-.lv-item.media.chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
-    chat-avatar.pull-left(ng-if='!ctrl.message.sameUser', user-id="ctrl.message.creator._id")
+.chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
 
-    .message-time.pull-left(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
-        small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+  .chat-message-left
+    chat-avatar(ng-if='!ctrl.message.sameUser', user-id="ctrl.message.creator._id")
 
-    .media-body
-      .chat-message-title(ng-if='!ctrl.message.sameUser')
-        user-profile-link.displayname(user="ctrl.message.creator")
-        small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
-      .chat-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text", ng-class='(ctrl.user._id === ctrl.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
-      .oembeds.attachment-container
-        oembeds(message="ctrl.message.text")
-      .attachment-container(ng-if="ctrl.message.attachments.length > 0")
-        .chat-message-attachment-text(ng-repeat="attachment in ctrl.message.attachments track by $index")
-          span.clickable(ng-click='ctrl.toggleFile()')
-            | #{__('Uploaded an Image')} :
-          a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
-          span.clickable(ng-click='ctrl.toggleFile()')
-            i(ng-class="ctrl.displayFile ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
-          .attachment
-            file-preview(file="attachment", ng-show="ctrl.displayFile")
+    .message-time(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
+      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+
+  .media-body
+    .chat-message-title(ng-if='!ctrl.message.sameUser')
+      user-profile-link.displayname(user="ctrl.message.creator")
+      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+    .chat-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text", ng-class='(ctrl.user._id === ctrl.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
+    .oembeds.attachment-container
+      oembeds(message="ctrl.message.text")
+    .attachment-container(ng-if="ctrl.message.attachments.length > 0")
+      .chat-message-attachment-text(ng-repeat="attachment in ctrl.message.attachments track by $index")
+        span.clickable(ng-click='ctrl.toggleFile()')
+          | #{__('Uploaded an Image')} :
+        a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
+        span.clickable(ng-click='ctrl.toggleFile()')
+          i(ng-class="ctrl.displayFile ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
+        .attachment
+          file-preview(file="attachment", ng-show="ctrl.displayFile")
