@@ -27,6 +27,7 @@ module.exports = function(config) {
       'frontend/components/angular-xeditable/dist/js/xeditable.js',
       'frontend/components/angular-sanitize/angular-sanitize.min.js',
       'frontend/components/zInfiniteScroll/zInfiniteScroll.js',
+      'frontend/components/angular-inview/angular-inview.js',
       'test/config/module.js',
       'frontend/app/chat.app.js',
       'frontend/app/**/*.js',

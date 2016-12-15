@@ -109,6 +109,7 @@
             creator: message.creator,
             user_mentions: message.user_mentions
           };
+          conversation.canScrollDown = true;
 
           replaceConversationInSortedArray(service.conversations, conversation);
 
