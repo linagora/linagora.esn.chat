@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatUserState', chatUserState);
 
-    chatUserState.$inject = ['$q', '$rootScope', 'CHAT_EVENTS', 'CHAT_NAMESPACE', 'ChatRestangular', 'session', 'livenotification'];
-
     function chatUserState($q, $rootScope, CHAT_EVENTS, CHAT_NAMESPACE, ChatRestangular, session, livenotification) {
       var cache = {};
 

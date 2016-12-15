@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .controller('ChatAddGroupController', ChatAddGroupController);
 
-  ChatAddGroupController.$inject = ['$state', 'chatConversationsService', 'chatLocalStateService'];
-
   function ChatAddGroupController($state, chatConversationsService, chatLocalStateService) {
     var self = this;
 

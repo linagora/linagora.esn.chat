@@ -5,8 +5,6 @@
   angular.module('linagora.esn.chat')
   .factory('chatComposerState', chatComposerStateService);
 
-  chatComposerStateService.$inject = ['$log', 'localStorageService'];
-
   function chatComposerStateService($log, localStorageService) {
     var storage = localStorageService.getOrCreateInstance('chat-message');
     var service = {

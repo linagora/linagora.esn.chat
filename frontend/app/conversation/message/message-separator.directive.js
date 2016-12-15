@@ -21,8 +21,6 @@
     return directive;
   }
 
-  chatMessageSeparatorController.$inject = ['moment'];
-
   function chatMessageSeparatorController(moment) {
     var self = this;
 

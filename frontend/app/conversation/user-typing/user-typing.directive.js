@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .directive('chatUserTyping', chatUserTyping);
 
-    chatUserTyping.$inject = ['_', 'session', 'userUtils', 'chatLocalStateService'];
-
     function chatUserTyping(_, session, userUtils, chatLocalStateService) {
       var directive = {
         restrict: 'E',

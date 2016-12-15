@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .run(runBlock);
 
-  runBlock.$inject = ['searchProviders', 'chatSearchMessagesProviderService'];
-
   function runBlock(searchProviders, chatSearchMessagesProviderService) {
     searchProviders.add(chatSearchMessagesProviderService);
   }

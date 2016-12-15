@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .run(runBlock);
 
-  runBlock.$inject = ['chatNotificationService', 'chatMessageService', 'chatLocalStateService', 'editableOptions'];
-
   function runBlock(chatNotificationService, chatMessageService, chatLocalStateService, editableOptions) {
     chatLocalStateService.initLocalState();
     chatMessageService.connect();

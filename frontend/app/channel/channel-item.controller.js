@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .controller('ChatChannelItemController', ChatChannelItemController);
 
-  ChatChannelItemController.$inject = ['$scope', '$rootScope', '$q', '$filter', '_', 'CHAT_EVENTS', 'CHAT_CONVERSATION_TYPE', 'chatParseMention', 'chatUserState', 'session', 'moment', 'userUtils', 'chatConversationsService'];
-
   function ChatChannelItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationsService) {
     var self = this;
 

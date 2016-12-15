@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .directive('chatMessagesView', chatMessagesViewDirective);
 
-  chatMessagesViewDirective.$inject = ['chatConversationsService'];
-
   function chatMessagesViewDirective(chatConversationsService) {
     var directive = {
       restrict: 'E',

@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatNotificationService', chatNotificationService);
 
-    chatNotificationService.$inject = ['$rootScope', '$window', '$log', 'session', 'webNotification', 'localStorageService', 'CHAT_EVENTS', 'CHAT_NOTIF', 'chatConversationsService', 'chatParseMention'];
-
     function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, chatConversationsService, chatParseMention) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
