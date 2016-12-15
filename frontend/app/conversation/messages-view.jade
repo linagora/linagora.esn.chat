@@ -14,7 +14,7 @@
               a(href="#")
                 | Edit
                 i.mdi.mdi-pencil
-      .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true", scroll-glue="glued", z-infinite-scroll="loadPreviousMessages()", inverse="true")
+      .lv-body(scroll-glue="glued", z-infinite-scroll="loadPreviousMessages()", inverse="true")
         .throbber(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.3', spinner-key='{{::spinnerKey}}')
         chat-conversation-header(ng-if="topOfConversation" conversation="conversation")
         div(ng-repeat="message in messages track by message._uniqId", in-view="$last && setLastLineInView($inview)")

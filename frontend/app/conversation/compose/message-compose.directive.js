@@ -136,15 +136,6 @@
           $log.error('Error while sending message', err);
         });
       };
-
-      scope.onFileSelect = function(files) {
-        $log.debug('Sending message with attachments', files);
-        chatMessageService.sendMessageWithAttachments(buildCurrentMessage(), files).then(function() {
-          scope.text = '';
-        }, function(err) {
-          $log.error('Error while uploading message', err);
-        });
-      };
     }
   }
 })();
