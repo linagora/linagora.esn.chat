@@ -21,6 +21,11 @@
         UPDATE: 'chat:conversation:update'
       }
     })
+    .constant('CHAT_MESSAGE_DISPLAYABLE_TYPES', {
+      USER: 'user',
+      SYSTEM: 'system'
+    })
+    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', [])
     .constant('CHAT_NAMESPACE', '/chat')
     .constant('CHAT_NOTIF', {
       CHAT_AUTO_CLOSE: 4000,
