@@ -409,6 +409,7 @@ describe('The conversation controller', function() {
       const topic = 'MyTopic';
       const purpose = 'MyPurpose';
       const avatar = 'avatar';
+      const domain = 'domain';
       const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.create({
@@ -417,6 +418,7 @@ describe('The conversation controller', function() {
         body: {
           name: name,
           type: 'type',
+          domain: domain,
           topic: topic,
           avatar: avatar,
           purpose: purpose
@@ -426,6 +428,7 @@ describe('The conversation controller', function() {
             expect(lib.conversation.create).to.have.been.calledWith({
               name: name,
               type: 'type',
+              domain: domain,
               creator: user,
               avatar: avatar,
               topic: {

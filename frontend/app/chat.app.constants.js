@@ -25,7 +25,7 @@
       USER: 'user',
       SYSTEM: 'system'
     })
-    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', [])
+    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join'])
     .constant('CHAT_NAMESPACE', '/chat')
     .constant('CHAT_NOTIF', {
       CHAT_AUTO_CLOSE: 4000,

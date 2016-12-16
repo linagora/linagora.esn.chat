@@ -12,6 +12,7 @@ const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CON
 const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
+const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 module.exports = function(dependencies) {
 
@@ -21,11 +22,13 @@ module.exports = function(dependencies) {
   const Conversation = mongoose.model('ChatConversation');
   const ChatMessage = mongoose.model('ChatMessage');
   const pubsubGlobal = dependencies('pubsub').global;
+  const pubsubLocal = dependencies('pubsub').local;
   const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
   const channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
   const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  const membershipTopic = pubsubLocal.topic(MEMBERSHIP_EVENTS);
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
   const messageLib = require('./message')(dependencies);
   const permission = require('./permission/conversation')(dependencies);
@@ -246,8 +249,9 @@ module.exports = function(dependencies) {
         return callback(err);
       }
 
-      messageLib.markAllAsRead(userId, conversation, callback);
       channelAddMember.publish(conversation);
+      membershipTopic.publish({type: CONSTANTS.MEMBERSHIP_ACTION.JOIN, conversationId: conversationId, userId: userId});
+      messageLib.markAllAsRead(userId, conversation, callback);
     });
   }
 
@@ -363,6 +367,7 @@ module.exports = function(dependencies) {
     }, function(err, conversation) {
       const message = {
         type: 'text',
+        // FIXME: This is a system message. TO be handled in system listener
         subtype: 'channel:topic',
         date: Date.now(),
         channel: String(conversation._id),

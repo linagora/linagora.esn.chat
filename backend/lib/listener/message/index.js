@@ -3,7 +3,7 @@
 const Q = require('q');
 const CONSTANTS = require('../../constants');
 
-module.exports = function(dependencies) {
+module.exports = function(dependencies, lib) {
 
   const localPubsub = dependencies('pubsub').local;
   const globalPubsub = dependencies('pubsub').global;
@@ -65,7 +65,7 @@ module.exports = function(dependencies) {
     globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish(data);
   }
 
-  function start(lib) {
+  function start() {
     addHandler(require('./handlers/first')(dependencies));
     addHandler(require('./handlers/mentions')(dependencies));
     addForwardHandler(CONSTANTS.MESSAGE_TYPE.USER_TYPING, require('./forward/user-typing')(dependencies));
@@ -126,6 +126,7 @@ module.exports = function(dependencies) {
 
           const chatMessage = {
             type: data.message.type,
+            subtype: data.message.subtype,
             text: data.message.text,
             date: data.message.date,
             creator: data.message.creator,
