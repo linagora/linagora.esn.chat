@@ -1,15 +1,3 @@
-.block-header.visible-md
-  h2 \#{{::getConversationName(conversation)}}
-  ul.actions
-    li
-      a(href='')
-        i.mdi.mdi-account-multiple-plus
-    li
-      a(href='')
-        i.mdi.mdi-message-outline
-    li
-      a(href='')
-        i.mdi.mdi-dots-vertical
 .card.m-b-0
   .ms-body
     .listview.lv-message
@@ -26,10 +14,6 @@
               a(href="#")
                 | Edit
                 i.mdi.mdi-pencil
-        ul.lv-actions.actions
-          li
-            a(href='')
-              i.mdi.mdi-information-outline
       .lv-body(ng-file-drop="onFileSelect($files)", ng-multiple="true", scroll-glue="glued", z-infinite-scroll="loadPreviousMessages()", inverse="true")
         .throbber(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.3', spinner-key='{{::spinnerKey}}')
         chat-conversation-header(ng-if="topOfConversation" conversation="conversation")
