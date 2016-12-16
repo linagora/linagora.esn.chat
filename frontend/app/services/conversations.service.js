@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationsService', chatConversationsService);
 
-    chatConversationsService.$inject = ['$rootScope', '$q', '$log', 'CHAT_CONVERSATION_TYPE', 'CHAT_NAMESPACE', 'CHAT_EVENTS', 'livenotification', 'session', 'ChatRestangular', '_'];
-
     function chatConversationsService($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
       var defer = $q.defer();
       var conversationsPromise = defer.promise;

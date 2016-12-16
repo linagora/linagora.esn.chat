@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationService', chatConversationService);
 
-    chatConversationService.$inject = ['ChatRestangular'];
-
     function chatConversationService(ChatRestangular) {
       var service = {
         fetchMessages: fetchMessages,

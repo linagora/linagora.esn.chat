@@ -20,8 +20,6 @@
     return directive;
   }
 
-  ChatConversationImageController.$inject = ['session', '_'];
-
   function ChatConversationImageController(session, _) {
     var self = this;
 

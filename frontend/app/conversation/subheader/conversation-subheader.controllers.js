@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationSubheaderController', ChatConversationSubheaderController);
 
-  ChatConversationSubheaderController.$inject = ['$scope', 'chatLocalStateService', 'chatConversationsService'];
-
   function ChatConversationSubheaderController($scope, chatLocalStateService, chatConversationsService) {
     var self = this;
 

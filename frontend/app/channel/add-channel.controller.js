@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .controller('ChatAddChannelController', ChatAddChannelController);
 
-  ChatAddChannelController.$inject = ['CHAT_CONVERSATION_TYPE', '$state', 'chatConversationsService', 'chatLocalStateService'];
-
   function ChatAddChannelController(CHAT_CONVERSATION_TYPE, $state, chatConversationsService, chatLocalStateService) {
     var self = this;
 

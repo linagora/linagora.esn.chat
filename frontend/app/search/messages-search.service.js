@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatSearchMessageService', chatSearchMessageService);
 
-    chatSearchMessageService.$inject = ['ChatRestangular'];
-
     ////////////
 
     function chatSearchMessageService(ChatRestangular) {

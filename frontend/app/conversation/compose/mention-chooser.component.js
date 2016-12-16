@@ -9,8 +9,6 @@
       controller: ChatMentionsChooserController
     });
 
-  ChatMentionsChooserController.$inject = ['$scope', 'ChatTextEntitySelector', 'session', 'domainAPI', '_', 'MENTION_CHOOSER_MAX_RESULT'];
-
   function ChatMentionsChooserController($scope, ChatTextEntitySelector, session, domainAPI, _, MENTION_CHOOSER_MAX_RESULT) {
     var self = this;
 

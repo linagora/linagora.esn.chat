@@ -21,8 +21,6 @@
       return directive;
     }
 
-    chatConversationListController.$inject = ['chatLocalStateService'];
-
     function chatConversationListController(chatLocalStateService) {
       var self = this;
 

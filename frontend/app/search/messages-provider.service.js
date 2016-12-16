@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatSearchMessagesProviderService', chatSearchMessagesProviderService);
 
-  chatSearchMessagesProviderService.$inject = ['$q', 'newProvider', 'chatSearchMessageService'];
-
   function chatSearchMessagesProviderService($q, newProvider, chatSearchMessageService, ELEMENTS_PER_REQUEST) {
     var name = 'Chat Messages';
     var type = 'chat.message';

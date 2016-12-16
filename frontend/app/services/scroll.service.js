@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatScrollService', chatScrollService);
 
-    chatScrollService.$inject = ['elementScrollService', 'chatLocalStateService'];
-
     function chatScrollService(elementScrollService, chatLocalStateService) {
 
       return {

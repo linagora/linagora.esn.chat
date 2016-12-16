@@ -20,8 +20,6 @@
       return directive;
     }
 
-    chatMessageController.$inject = ['$filter', '$timeout', 'chatParseMention', 'session', 'chatScrollService', 'chatConversationsService'];
-
     function chatMessageController($filter, $timeout, chatParseMention, session, chatScrollService, chatConversationsService) {
       var self = this;
       var parsedText = $filter('oembedImageFilter')(self.message.text);

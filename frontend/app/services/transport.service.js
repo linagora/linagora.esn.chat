@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('ChatTransportService', ChatTransportService);
 
-    ChatTransportService.$inject = ['$log', '$q', 'livenotification', 'CHAT_NAMESPACE', 'CHAT_EVENTS'];
-
     function ChatTransportService($log, $q, livenotification, CHAT_NAMESPACE, CHAT_EVENTS) {
 
       function ChatTransportService(options) {

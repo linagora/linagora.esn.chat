@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('chatHumanizeEntitiesLabel', chatHumanizeEntitiesLabel);
 
-  chatHumanizeEntitiesLabel.$inject = ['_'];
-
   function chatHumanizeEntitiesLabel(_) {
     var humanPresentation = {};
 

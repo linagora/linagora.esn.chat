@@ -4,8 +4,6 @@
   angular.module('linagora.esn.chat')
     .factory('ChatTextEntitySelector', ChatTextEntitySelector);
 
-  ChatTextEntitySelector.$inject = ['KEY_CODE', '$q', 'chatHumanizeEntitiesLabel', '_'];
-
   function ChatTextEntitySelector(KEY_CODE, $q, chatHumanizeEntitiesLabel, _) {
 
     function ChatTextEntitySelector(entityListResolver, startChar, endChar, toHumanLabel, toRealValue) {

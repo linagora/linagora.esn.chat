@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .directive('chatMessageCompose', chatMessageCompose);
 
-  chatMessageCompose.$inject = ['$log', '$rootScope', 'deviceDetector', 'session', 'chatLocalStateService', 'chatScrollService', 'chatMessageService', 'KEY_CODE', 'chatHumanizeEntitiesLabel', 'chatComposerState'];
-
   function chatMessageCompose($log, $rootScope, deviceDetector, session, chatLocalStateService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel, chatComposerState) {
     var directive = {
       restrict: 'E',

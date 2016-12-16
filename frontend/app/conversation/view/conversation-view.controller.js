@@ -5,8 +5,6 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  ChatConversationViewController.$inject = ['$scope', '$q', 'session', 'chatConversationService', 'chatConversationsService', 'CHAT_EVENTS', 'CHAT', 'chatScrollService', 'chatLocalStateService', '$stateParams', 'usSpinnerService', 'MESSAGE_GROUP_TIMESPAN'];
-
   function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN) {
     var self = this;
 
