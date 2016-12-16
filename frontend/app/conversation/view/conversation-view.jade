@@ -1,3 +1,7 @@
-#messages-main
+#messages-main(chat-file-upload, drag-over-class="show-overlay", ng-file-drop="ctrl.onFileSelect($files)", ng-multiple="true")
+  .file-overlay
+    .overlay-text
+      i.mdi.mdi-cloud-upload
+      | #{__('Drop files here to upload')}
   chat-messages-view(conversation='vm.chatLocalStateService.activeRoom', messages='vm.messages', header='true', load-previous-messages='vm.loadPreviousMessages', spinner-key='vm.spinnerKey', top-of-conversation='vm.topOfConversation')
   chat-footer(conversation='vm.chatLocalStateService.activeRoom')
