@@ -2,18 +2,16 @@
   .ms-body
     .listview.lv-message
       .lv-header.message-header
-        .lvh-label
-          a(href='') {{(conversation.members || []).length}} #{__('members')}
+        .lvh-label.ellipsis
+          a(href='') {{(ctrl.conversation.members || []).length}} #{__('members')}
           span
             span.divider |
             span(ng-if="!ctrl.conversation.topic.value" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
-              a(href="#" )
-                | Add a topic
-                i.mdi.mdi-plus
+              |#{__('Add a topic')}
+              i.mdi.mdi-plus
             span(ng-if="ctrl.conversation.topic.value" ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
-              a(href="#")
-                | Edit
-                i.mdi.mdi-pencil
+              |#{__('Edit')}
+              i.mdi.mdi-pencil
       .lv-body(scroll-glue="glued", z-infinite-scroll="ctrl.loadPreviousMessages()", inverse="true")
         .throbber(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.3', spinner-key='{{::ctrl.spinnerKey}}')
         chat-conversation-header(ng-if="ctrl.topOfConversation" conversation="ctrl.conversation")
