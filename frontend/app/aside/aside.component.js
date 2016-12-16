@@ -8,7 +8,7 @@
     var component = {
       templateUrl: '/chat/app/aside/aside.html',
       controller: 'chatAsideController',
-      controllerAs: 'vm'
+      controllerAs: 'ctrl'
     };
 
     return component;
