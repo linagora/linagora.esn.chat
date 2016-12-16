@@ -17,6 +17,7 @@ module.exports = function(dependencies) {
   const ChatMessageSchema = new mongoose.Schema({
     text: {type: String},
     type: {type: String, required: true},
+    subtype: {type: String},
     creator: {type: ObjectId, ref: 'User'},
     channel: {type: ObjectId, ref: 'ChatConversation', index: true},
     moderate: {type: Boolean, default: false},
