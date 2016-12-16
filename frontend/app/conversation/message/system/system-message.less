@@ -1,0 +1,47 @@
+.chat-system-message {
+  &.highlight {
+    background-color: @darkenBgColor;
+  }
+
+  .lv-avatar, .chat-system-message-time {
+    display: block;
+    margin-right: 0;
+    min-width: 55px;
+  }
+
+  .lv-avatar > img {
+    border-radius: 2px;
+  }
+
+  .pull-left {
+    padding-right: 10px;
+  }
+
+  .chat-system-message-time {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s linear;
+  }
+
+  .chat-system-message-title {
+
+    span {
+      color: @text-color;
+    }
+
+    .displayname {
+      font-weight: 600;
+    }
+
+    .date {
+      color: @secondaryTextColor;
+      padding-left: 10px;
+      display: inline;
+    }
+  }
+
+  .chat-system-message-text {
+    white-space: pre-wrap;
+    color: @secondaryTextColor;
+  }
+}

@@ -1,0 +1,9 @@
+.day-divider(ng-if="!ctrl.prevMessage || !ctrl.sameDay(ctrl.currentMessage.timestamps.creation, ctrl.prevMessage.timestamps.creation)")
+  .day-divider-line
+    .day-divider-label(ng-switch="ctrl.diffDate(ctrl.currentMessage.timestamps.creation)")
+      span(ng-switch-when="0")
+        | #{__('Today')}
+      span(ng-switch-when="1")
+        | #{__('Yesterday')}
+      span(ng-switch-default)
+        | {{ctrl.formatDate(ctrl.currentMessage.timestamps.creation)}}

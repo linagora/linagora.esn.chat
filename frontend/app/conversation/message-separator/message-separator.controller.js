@@ -1,32 +1,15 @@
 (function() {
   'use strict';
 
-  angular
-    .module('linagora.esn.chat')
-    .directive('chatMessageSeparator', chatMessageSeparator);
-
-  function chatMessageSeparator() {
-    var directive = {
-      restrict: 'E',
-      scope: {
-        prevMessage: '=?',
-        currentMessage: '='
-      },
-      templateUrl: '/chat/app/conversation/message/message-separator.html',
-      controller: chatMessageSeparatorController,
-      controllerAs: 'vm',
-      bindToController: true
-    };
-
-    return directive;
-  }
+  angular.module('linagora.esn.chat')
+    .controller('chatMessageSeparatorController', chatMessageSeparatorController);
 
   function chatMessageSeparatorController(moment) {
     var self = this;
 
-    self.sameDay = sameDay;
     self.diffDate = diffDate;
     self.formatDate = formatDate;
+    self.sameDay = sameDay;
 
     function diffDate(timestamp) {
       var messageDate = moment(timestamp, 'x');
@@ -42,6 +25,5 @@
     function sameDay(timestampDate1, timestampDate2) {
       return moment(timestampDate1, 'x').isSame(moment(timestampDate2, 'x'), 'day');
     }
-
   }
 })();
