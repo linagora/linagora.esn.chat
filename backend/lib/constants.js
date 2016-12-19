@@ -47,7 +47,8 @@ module.exports = {
     USER_TYPING: 'user_typing'
   },
   MESSAGE_SUBTYPE: {
-    CONVERSATION_JOIN: 'conversation_join'
+    CONVERSATION_JOIN: 'conversation_join',
+    TOPIC_UPDATE: 'topic_update'
   },
   SKIP_FIELDS: {
     USER: '-password -accounts'
