@@ -9,7 +9,7 @@
     var directive = {
       restrict: 'E',
       replace: true,
-      template: applicationMenuTemplateBuilder('/#/chat', 'mdi-facebook-messenger', 'Chat')
+      template: applicationMenuTemplateBuilder('/#/chat', 'chat', 'Chat')
     };
 
     return directive;
