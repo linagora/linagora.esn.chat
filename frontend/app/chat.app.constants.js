@@ -25,7 +25,7 @@
       USER: 'user',
       SYSTEM: 'system'
     })
-    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join'])
+    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'topic_update'])
     .constant('CHAT_NAMESPACE', '/chat')
     .constant('CHAT_NOTIF', {
       CHAT_AUTO_CLOSE: 4000,
@@ -46,9 +46,10 @@
       }
     })
     .constant('MENTION_CHOOSER_MAX_RESULT', 15)
-    .constant('MESSAGE_TYPE', {
-      TYPING: 'user_typing',
-      TEXT: 'text'
+    .constant('CHAT_MESSAGE_TYPE', {
+      USER_TYPING: 'user_typing',
+      TEXT: 'text',
+      FILE: 'file'
     })
     .constant('MESSAGE_GROUP_TIMESPAN', 60000)
     .constant('KEY_CODE', {
