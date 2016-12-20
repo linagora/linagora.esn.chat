@@ -37,7 +37,7 @@ module.exports = function(dependencies, lib) {
   function search(req, res) {
 
     function hydrateMessage(message) {
-      return lib.message.getByIdAndPopulate(message._id, ['creator', 'channel']);
+      return lib.message.getByIdAndPopulate(message._id, ['creator', 'user_mentions', 'channel']);
     }
 
     function sendError(err) {

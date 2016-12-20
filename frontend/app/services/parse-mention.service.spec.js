@@ -35,14 +35,14 @@ describe('The chatParseMention service', function() {
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '<a href="#/profile/abcd/details/view">@firstname.lastname</a>';
 
-      expect(chatParseMention.chatParseMention('Hi @abcd, how are you doing @abcd', user_mentions)).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+      expect(chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions)).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
     });
 
     it('should replace mention with the display name', function() {
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '@firstname.lastname';
 
-      expect(chatParseMention.chatParseMention('Hi @abcd, how are you doing @abcd', user_mentions, {skipLink: true})).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+      expect(chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions, {skipLink: true})).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
     });
   });
 

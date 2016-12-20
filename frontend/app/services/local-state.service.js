@@ -101,7 +101,7 @@
             chatConversationsService.markAllMessageReaded(conversation._id);
           }
 
-          var parsedText = chatParseMention.chatParseMention(message.text, message.user_mentions, {skipLink: true});
+          var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
 
           conversation.last_message = {
             text: parsedText,
