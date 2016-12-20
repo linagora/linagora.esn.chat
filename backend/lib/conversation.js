@@ -28,6 +28,7 @@ module.exports = function(dependencies) {
   const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
+  const topicUpdateTopic = pubsubLocal.topic(TOPIC_UPDATED);
   const membershipTopic = pubsubLocal.topic(MEMBERSHIP_EVENTS);
   const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
   const messageLib = require('./message')(dependencies);
@@ -365,22 +366,11 @@ module.exports = function(dependencies) {
         }
       }
     }, function(err, conversation) {
-      const message = {
-        type: 'text',
-        // FIXME: This is a system message. TO be handled in system listener
-        subtype: 'channel:topic',
-        date: Date.now(),
-        channel: String(conversation._id),
-        user: String(topic.creator),
-        topic: {
-          value: conversation.topic.value,
-          creator: String(conversation.topic.creator),
-          last_set: conversation.topic.last_set
-        },
-        text: 'set the channel topic: ' + topic.value
-      };
+      if (!err) {
+        channelTopicUpdateTopic.publish({conversationId: conversationId, topic: topic});
+        topicUpdateTopic.publish({conversationId: conversationId, userId: topic.creator, old_topic: conversation.topic.value, topic: topic.value});
+      }
 
-      channelTopicUpdateTopic.publish(message);
       callback(err, conversation);
     });
   }

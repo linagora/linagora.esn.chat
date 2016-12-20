@@ -15,7 +15,7 @@ var MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  var deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  var deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectIdMock, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -33,6 +33,11 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
 
     channelTopicUpdateTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    localChannelTopicUpdateTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -126,6 +131,9 @@ describe('The linagora.esn.chat conversation lib', function() {
           topic: function(name) {
             if (name === MEMBERSHIP_EVENTS) {
               return membershipTopic;
+            }
+            if (name === TOPIC_UPDATED) {
+              return localChannelTopicUpdateTopic;
             }
           }
         },

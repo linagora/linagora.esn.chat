@@ -2,33 +2,31 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
+    .factory('chatMessageService', chatMessageService);
 
-    .factory('chatMessageService', function(
-          $q,
-          $log,
-          $rootScope,
-          session,
-          ChatTransportService,
-          fileUploadService,
-          backgroundProcessorService,
-          MESSAGE_TYPE,
-          DEFAULT_FILE_TYPE) {
+    function chatMessageService($q, $log, $rootScope, session, ChatTransportService, fileUploadService, backgroundProcessorService, CHAT_MESSAGE_TYPE, DEFAULT_FILE_TYPE) {
 
       var chatMessageServicePromise = session.ready.then(function(session) {
         var userId = session.user._id;
         var domainId = session.domain._id;
-
         var transport = new ChatTransportService({
           room: domainId,
           user: userId
         });
 
+        return {
+          connect: connect,
+          sendMessage: sendTextMessage,
+          sendUserTyping: sendUserTyping,
+          sendMessageWithAttachments: sendMessageWithAttachments
+        };
+
         function isMeTyping(message) {
-          return message.creator && message.creator === userId && message.type === MESSAGE_TYPE.TYPING;
+          return message.creator && message.creator === userId && message.type === CHAT_MESSAGE_TYPE.USER_TYPING;
         }
 
         function receiveMessage(message) {
-          $log.debug('Got a message on chat service', message);
+          $log.debug('Received a message on chat service', message);
 
           if (!message.type) {
             $log.debug('Message does not have type, skipping');
@@ -42,17 +40,11 @@
             return;
           }
 
-          var eventName = 'chat:message:' + message.type;
-
-          $rootScope.$broadcast(eventName, message);
+          $rootScope.$broadcast('chat:message:' + message.type, message);
         }
 
-        var connected = false;
-
         function connect() {
-          if (!connected) {
-            transport.connect(receiveMessage);
-          }
+          transport.connect(receiveMessage);
         }
 
         function sendMessage(message) {
@@ -85,63 +77,46 @@
         }
 
         function sendUserTyping(message) {
-          message.type = 'user_typing';
+          message.type = CHAT_MESSAGE_TYPE.USER_TYPING;
 
           return sendMessage(message);
         }
 
         function sendTextMessage(message) {
-          message.type = 'text';
+          message.type = CHAT_MESSAGE_TYPE.TEXT;
 
           return sendMessage(message);
         }
 
         function sendMessageWithAttachments(message, files) {
-          message.type = 'file';
+          var filesUploadDefer = $q.defer();
           var uploadService = fileUploadService.get();
-          var attachments = [];
+          var attachments = files.map(function(file) {
+            return uploadService.addFile(file, true);
+          });
 
-          for (var i = 0; i < files.length; i++) {
-            attachments.push(uploadService.addFile(files[i], true));
-          }
+          message.type = CHAT_MESSAGE_TYPE.FILE;
 
-          if (uploadService.isComplete()) {
-            return sendMessage(buildMessage(message, attachments)).then(function(response) {
-              $log.info('Message has been sent');
-
-              return response;
-            }, function(err) {
-              $log.error('Message has not been sent', err);
-            });
-          }
-
-          var defer = $q.defer();
-
-          $log.debug('Publishing message...');
-
-          var done = function(attachments) {
+          function filesUploaded(attachments) {
             $log.debug('Upload complete');
 
             return sendMessage(buildMessage(message, attachments)).then(function(response) {
-              $log.debug('Message has been sent');
-              defer.resolve(response);
+              $log.debug('Message with files has been sent');
+              filesUploadDefer.resolve(response);
             }, function(err) {
-              defer.reject(err);
-              $log.error('Error while sending message', err);
+              filesUploadDefer.reject(err);
+              $log.error('Error while sending message with files', err);
             });
-          };
+          }
 
-          backgroundProcessorService.add(uploadService.await(done));
+          if (uploadService.isComplete()) {
+            filesUploaded(attachments);
+          } else {
+            backgroundProcessorService.add(uploadService.await(filesUploaded));
+          }
 
-          return defer.promise;
+          return filesUploadDefer.promise;
         }
-
-        return {
-          connect: connect,
-          sendMessage: sendTextMessage,
-          sendUserTyping: sendUserTyping,
-          sendMessageWithAttachments: sendMessageWithAttachments
-        };
       });
 
       function bindToPromiseResult(promise, methodName) {
@@ -160,5 +135,5 @@
         sendUserTyping: bindToPromiseResult(chatMessageServicePromise, 'sendUserTyping'),
         sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments')
       };
-    });
+    }
 })();
