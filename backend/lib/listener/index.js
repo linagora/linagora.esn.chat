@@ -1,17 +1,20 @@
 'use strict';
 
-module.exports = function(dependencies) {
+module.exports = function(dependencies, lib) {
 
-  const message = require('./message')(dependencies);
+  const message = require('./message')(dependencies, lib);
+  const system = require('./system')(dependencies, lib);
 
   return {
     listeners: {
-      message
+      message,
+      system
     },
     start
   };
 
-  function start(lib) {
-    message.start(lib);
+  function start() {
+    message.start();
+    system.start();
   }
 };

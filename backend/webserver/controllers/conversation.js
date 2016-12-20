@@ -99,6 +99,8 @@ module.exports = function(dependencies, lib) {
         name: req.body.name,
         type: req.body.type,
         creator: req.user,
+        // note: will have to update when current domain will be available in API
+        domain: req.body.domain,
         topic: {
           value: req.body.topic,
           creator: req.user

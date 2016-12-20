@@ -44,9 +44,6 @@
 
           var eventName = 'chat:message:' + message.type;
 
-          if (message.subtype) {
-            eventName += ':' + message.subtype;
-          }
           $rootScope.$broadcast(eventName, message);
         }
 

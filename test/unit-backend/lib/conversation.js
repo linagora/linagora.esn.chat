@@ -11,10 +11,11 @@ var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+var MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  var deps, lib, logger, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  var deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -42,6 +43,11 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
 
     channelDeletionTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    membershipTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -116,6 +122,13 @@ describe('The linagora.esn.chat conversation lib', function() {
         }
       },
       pubsub: {
+        local: {
+          topic: function(name) {
+            if (name === MEMBERSHIP_EVENTS) {
+              return membershipTopic;
+            }
+          }
+        },
         global: {
           topic: function(name) {
             if (name === CHANNEL_CREATION) {
@@ -410,7 +423,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
   });
 
-  describe('The addMembersToConversation function', function() {
+  describe('The addMember function', function() {
     it('should call ChatConversation.findByIdAndUpdate with the correct parameter', function(done) {
       var conversationId = 'channelId';
       var userId = 'userId';
@@ -454,6 +467,31 @@ describe('The linagora.esn.chat conversation lib', function() {
       };
 
       require('../../../backend/lib/conversation')(dependencies, lib).addMember(channelId, userId, done);
+    });
+
+    it('should publish events to members related topics', function(done) {
+      const channelId = 'channelId';
+      const userId = 'userId';
+      const numOfMessage = 42;
+      const conv = {numOfMessage: numOfMessage, _id: channelId};
+
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+        cb(null, conv);
+      };
+
+      modelsMock.ChatConversation.update = function(query, options, cb) {
+        cb();
+      };
+
+      require('../../../backend/lib/conversation')(dependencies, lib).addMember(channelId, userId, function(err) {
+        if (err) {
+          return done(err);
+        }
+
+        expect(channelAddMember.publish).to.have.been.calledWith(conv);
+        expect(membershipTopic.publish).to.have.been.calledWith({type: CONSTANTS.MEMBERSHIP_ACTION.JOIN, conversationId: channelId, userId: userId});
+        done();
+      });
     });
   });
 

@@ -114,6 +114,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
 
     describe('When message is not forwardable', function() {
       const type = 'text';
+      const subtype = 'subtype';
       const text = 'yolo';
       const date = '0405';
       const creator = '1';
@@ -126,6 +127,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
         data = {
           message: {
             type: type,
+            subtype: subtype,
             text: text,
             date: date,
             creator: creator,
@@ -154,13 +156,14 @@ describe('The linagora.esn.chat lib message listener module', function() {
             callback(null, createMessageResult);
           })
         };
-        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {conversation: conversationMock, message: messageMock});
 
-        module.start({conversation: conversationMock, message: messageMock});
+        module.start();
 
         globalPublish = function(data) {
           expect(messageMock.create).to.have.been.calledWith({
             type: type,
+            subtype: subtype,
             text: text,
             date: date,
             creator: creator,
@@ -197,9 +200,9 @@ describe('The linagora.esn.chat lib message listener module', function() {
             }
           }
         };
-        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {conversation: conversationMock, message: messageMock});
 
-        module.start({conversation: conversationMock, message: messageMock});
+        module.start();
 
         messageReceivedListener(data).then(done, function(err) {
           expect(globalPublish).to.not.have.been.called;
@@ -229,9 +232,9 @@ describe('The linagora.esn.chat lib message listener module', function() {
             }
           }
         };
-        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {conversation: conversationMock, message: messageMock});
 
-        module.start({conversation: conversationMock, message: messageMock});
+        module.start();
 
         messageReceivedListener(data).then(done, function(err) {
           expect(globalPublish).to.not.have.been.called;
@@ -262,9 +265,9 @@ describe('The linagora.esn.chat lib message listener module', function() {
             }
           }
         };
-        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {conversation: conversationMock, message: messageMock});
 
-        module.start({conversation: conversationMock, message: messageMock});
+        module.start();
 
         messageReceivedListener(data).then(done, function(err) {
           expect(globalPublish).to.not.have.been.called;
@@ -293,9 +296,9 @@ describe('The linagora.esn.chat lib message listener module', function() {
             }
           }
         };
-        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {conversation: conversationMock, message: messageMock});
 
-        module.start({conversation: conversationMock, message: messageMock});
+        module.start();
 
         messageReceivedListener(data).then(done, function(err) {
           expect(globalPublish).to.not.have.been.called;
@@ -328,9 +331,9 @@ describe('The linagora.esn.chat lib message listener module', function() {
             }
           }
         };
-        const module = require('../../../../../backend/lib/listener/message')(dependencies);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {conversation: conversationMock, message: messageMock});
 
-        module.start({conversation: conversationMock, message: messageMock});
+        module.start();
 
         messageReceivedListener(data).then(done, function(err) {
           expect(globalPublish).to.not.have.been.called;

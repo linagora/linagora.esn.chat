@@ -18,10 +18,10 @@ module.exports = function(dependencies) {
   const members = require('./members')(dependencies);
   const userState = require('./user-state')(dependencies);
   const moderate = require('./moderate')(dependencies);
-  const listener = require('./listener')(dependencies);
+  const listener = require('./listener')(dependencies, {conversation, message});
 
   function start(callback) {
-    listener.start({conversation, message});
+    listener.start();
     userState.init();
     moderate.start();
     search.init();

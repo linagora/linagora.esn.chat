@@ -40,6 +40,7 @@ module.exports = function(dependencies) {
       creator: {type: ObjectId, ref: 'User'},
       user_mentions: [{type: ObjectId, ref: 'User'}]
     },
+    domain: {type: ObjectId, ref: 'Domain'},
     schemaVersion: {type: Number, default: 1},
     numOfReadedMessage: mongoose.Schema.Types.Mixed, // this will be a map that associate a num of unread message to a userId (ie: { 'userId1': 0, 'userId2': 2, 'userId3': 3})
     numOfMessage: {type: Number, default: 0}
