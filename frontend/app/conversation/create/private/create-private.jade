@@ -1,0 +1,10 @@
+sub-header
+  chat-conversation-create-subheader(create="ctrl.create()", form="createPrivateForm")
+
+.block-header.visible-md
+  h2 #{__('Create a new direct conversation')}
+.chat-conversation-create.configuration.card
+  form(name='createPrivateForm', ng-submit="ctrl.create()")
+    .form-group.fg-line
+      .row
+        users-autocomplete-input(original-users='ctrl.members', mutable-users='ctrl.members')
