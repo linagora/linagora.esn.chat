@@ -94,11 +94,6 @@ describe('The chat-channel-item directive', function() {
       };
     });
 
-    it('should put getConversationName in the scope', function() {
-      initDirective();
-      expect(eleScope.vm.getConversationName).to.equal(getConversationNameMock);
-    });
-
     it('should initialize allUsersConnected to true only if all user other than me are not disconnected', function() {
       userStateResult = function(id) {
         ({userId: false, 2: 'connected', 3: 'connected'})[id];

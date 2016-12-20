@@ -1,6 +1,6 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
@@ -84,48 +84,6 @@ describe('The linagora.esn.chat conversationsServices', function() {
 
       return true;
     })));
-  });
-
-  describe('getConversationNamePromise', function() {
-    var getConversationName;
-
-    beforeEach(function() {
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(channels);
-      chatConversationsService.getConversationNamePromise.then(function(gcn) {
-        getConversationName = gcn;
-      });
-      $rootScope.$digest();
-      $httpBackend.flush();
-      expect(getConversationName).to.be.a.function;
-    });
-
-    it('should use firstname and lastname', function() {
-      expect(getConversationName({
-        members: [{_id: 'youId', firstname: 'you', lastname: 'YOU'}]
-      })).to.equal('you YOU');
-    });
-
-    it('should remove remove user which has the given id', function() {
-      expect(getConversationName({
-        members: [{_id: 'userId', firstname: 'me', lastname: 'ME'}, {_id: 'youId', firstname: 'you', lastname: 'YOU'}]
-      })).to.equal('you YOU');
-    });
-
-    it('should display all user if more than one', function() {
-      expect(getConversationName({
-        members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
-      })).to.equal('Eric Cartman, Stan Marsh, Kenny McCormick');
-    });
-
-    it('should keep conversation name if it is defined no matter the type of the conversation', function() {
-      _.map(CHAT_CONVERSATION_TYPE, function(type) {
-        expect(getConversationName({
-          name: 'name',
-          type: type,
-          members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
-        })).to.equal('name');
-      });
-    });
   });
 
   describe('the deleteConversation', function() {
