@@ -7,6 +7,7 @@
     function chatConversationBeginning() {
       var component = {
         templateUrl: '/chat/app/conversation/beginning/beginning.html',
+        controller: 'ChatConversationBeginningController',
         controllerAs: 'ctrl',
         bindings: {
           conversation: '='

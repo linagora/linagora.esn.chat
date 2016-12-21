@@ -1,5 +1,5 @@
 .chat-conversation-beginning
   .title
-    h3 #{__('Beginning of')} {{::ctrl.conversation.name}}
+    h3 #{__('Beginning of')} {{::ctrl.name}}
   .text
-    span #{__('This is the start of the')} {{::ctrl.conversation.name}} conversation #{__('created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}
+    span #{__('This is the start of the')} {{::ctrl.name}} conversation #{__('created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}

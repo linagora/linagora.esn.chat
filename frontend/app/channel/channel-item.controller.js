@@ -5,12 +5,13 @@
     .module('linagora.esn.chat')
     .controller('ChatChannelItemController', ChatChannelItemController);
 
-  function ChatChannelItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationsService) {
+  function ChatChannelItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, chatUserState, session, moment, userUtils, chatConversationNameService) {
     var self = this;
 
     self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     self.channelState = self.channelState || 'chat.channels-views';
     self.allUsersConnected = true;
+    self.name = chatConversationNameService.getName(self.item);
 
     var userToConnected = {};
 
@@ -19,10 +20,6 @@
       self.item.last_message.text = chatParseMention.chatParseMention(self.item.last_message.text, self.item.last_message.user_mentions, {skipLink: true});
       self.item.last_message.text = $filter('esnEmoticonify')(self.item.last_message.text, {class: 'chat-emoji'});
     }
-
-    chatConversationsService.getConversationNamePromise.then(function(getConversationName) {
-      self.getConversationName = getConversationName;
-    });
 
     session.ready.then(init);
 
@@ -70,7 +67,6 @@
         }
       });
 
-      /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
       $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         setLastMessageIsMe(message);
         self.numberOfDays = calcNumberOfDays(message);

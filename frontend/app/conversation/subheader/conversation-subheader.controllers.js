@@ -5,16 +5,14 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationSubheaderController', ChatConversationSubheaderController);
 
-  function ChatConversationSubheaderController($scope, chatLocalStateService, chatConversationsService) {
+  function ChatConversationSubheaderController($scope, chatLocalStateService, chatConversationNameService) {
     var self = this;
 
     self.chatLocalStateService = chatLocalStateService;
-    self.$onInit = $onInit;
+    self.getConversationName = getConversationName;
 
-    function $onInit() {
-      chatConversationsService.getConversationNamePromise.then(function(getConversationName) {
-        self.getConversationName = getConversationName;
-      });
+    function getConversationName(conversation) {
+      return chatConversationNameService.getName(conversation);
     }
   }
 })();
