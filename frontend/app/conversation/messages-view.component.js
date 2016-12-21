@@ -13,7 +13,8 @@
         loadPreviousMessages: '&',
         spinnerKey: '=',
         topOfConversation: '=',
-        setLastLineInView: '='
+        setLastLineInView: '=',
+        inview: '<'
       },
       controllerAs: 'ctrl',
       templateUrl: '/chat/app/conversation/messages-view.html'
