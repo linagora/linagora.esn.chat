@@ -11,7 +11,7 @@
           .add-folder(ui-sref='chat.channels-add')
             i.menu-icon.mdi.mdi-plus
 
-        chat-channel-item(ng-repeat="item in ctrl.chatLocalStateService.channels" item="item", ng-click='$hide()')
+        chat-conversation-item(ng-repeat="conversation in ctrl.chatLocalStateService.channels" conversation="conversation", ng-click='$hide()')
 
         .lv-item.clickable.menu-heading
           .title(ui-sref='chat.channels-views')
@@ -20,4 +20,4 @@
           .add-folder(ui-sref='chat.groups-add')
             i.menu-icon.mdi.mdi-plus
 
-        chat-channel-item(ng-repeat="item in ctrl.chatLocalStateService.privateConversations" item="item", ng-click='$hide()')
+        chat-conversation-item(ng-repeat="conversation in ctrl.chatLocalStateService.privateConversations" conversation="conversation", ng-click='$hide()')
