@@ -32,9 +32,7 @@
         url: '/groups/add',
         views: {
           'main@chat': {
-            templateUrl: '/chat/app/group/add-group.html',
-            controller: 'ChatAddGroupController',
-            controllerAs: 'vm'
+            template: '<chat-conversation-create-private/>'
           }
         }
       })
@@ -42,9 +40,7 @@
         url: '/channels/add',
         views: {
           'main@chat': {
-            templateUrl: '/chat/app/channel/add-channel.html',
-            controller: 'ChatAddChannelController',
-            controllerAs: 'vm'
+            template: '<chat-conversation-create-channel/>'
           }
         }
       });

@@ -1,0 +1,7 @@
+extends /modules/subheader/fullwidth-subheader
+
+block left
+  chat-subheader-button(ui-sref="chat.channels-views", chat-icon-class="mdi-close", chat-icon-text="Cancel")
+
+block right
+  chat-subheader-button(chat-click="ctrl.create()", chat-disabled="ctrl.form.$invalid", chat-icon-class="mdi-check", chat-icon-text="Create", chat-icon-position="right")
