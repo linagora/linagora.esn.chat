@@ -16,6 +16,7 @@ angular.module('esn.localstorage', []);
 angular.module('esn.file', []);
 angular.module('esn.lodash-wrapper', []);
 angular.module('esn.provider', []);
+angular.module('esn.user', []);
 angular.module('esn.core', [])
 .constant('_', _)
 .constant('routeResolver', {

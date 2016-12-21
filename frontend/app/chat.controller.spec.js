@@ -101,6 +101,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
       $provide.value('ChatMessageAdapter', ChatMessageAdapter);
       $provide.value('chatScrollService', chatScrollService);
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
+      $provide.value('chatParseMention', {});
     });
   });
 

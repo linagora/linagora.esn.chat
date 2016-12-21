@@ -4,10 +4,9 @@
   angular.module('linagora.esn.chat')
     .factory('chatParseMention', chatParseMention);
 
-    function chatParseMention() {
+    function chatParseMention(chatUsername, CHAT_MENTION_CHAR) {
       var service = {
         chatParseMention: chatParseMention,
-        generateDisplayName: generateDisplayName,
         generateProfileLink: generateProfileLink,
         userIsMentioned: userIsMentioned
       };
@@ -16,25 +15,21 @@
 
       ////////////
 
-      function generateDisplayName(user) {
-        return '@' + user.firstname + '.' + user.lastname;
-      }
-
       function generateProfileLink(user) {
-        return '<a href="#/profile/' + user._id + '/details/view">' + generateDisplayName(user) + '</a>';
+        return '<a href="#/profile/' + user._id + '/details/view">' + chatUsername.generateMention(user) + '</a>';
       }
 
       function chatParseMention(text, mentions, options) {
         options = options || {};
-        var replace = options.skipLink ? generateDisplayName : generateProfileLink;
+        var replace = options.skipLink ? chatUsername.generateMention : generateProfileLink;
 
         return (mentions || []).reduce(function(prev, user) {
-          return prev.replace(new RegExp('@' + user._id, 'g'), replace(user));
+          return prev.replace(new RegExp(CHAT_MENTION_CHAR + user._id, 'g'), replace(user));
         }, text);
       }
 
       function userIsMentioned(text, user) {
-        return new RegExp('@' + user._id, 'g').exec(text);
+        return new RegExp(CHAT_MENTION_CHAR + user._id, 'g').exec(text);
       }
     }
 })();

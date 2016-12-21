@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatParseMention service', function() {
-  var chatParseMention;
+  var chatParseMention, userUtilsMock;
 
   beforeEach(angular.mock.module('linagora.esn.chat', function($provide) {
     $provide.value('searchProviders', {
@@ -13,6 +13,18 @@ describe('The chatParseMention service', function() {
     });
     $provide.value('chatSearchMessagesProviderService', {});
   }));
+
+  beforeEach(function() {
+    userUtilsMock = {
+      displayNameOf: function(user) {
+        return user.firstname + '.' + user.lastname;
+      }
+    };
+
+    angular.mock.module(function($provide) {
+      $provide.value('userUtils', userUtilsMock);
+    });
+  });
 
   beforeEach(angular.mock.inject(function(_chatParseMention_) {
     chatParseMention = _chatParseMention_;

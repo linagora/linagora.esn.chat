@@ -88,6 +88,7 @@ describe('The user-state service', function() {
       $provide.factory('livenotification', livenotificationFactory);
       $provide.value('chatConversationsService', conversationsServiceMock);
       $provide.value('localStorageService', localStorageService);
+      $provide.value('chatParseMention', {});
     });
   });
 

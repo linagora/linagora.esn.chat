@@ -26,6 +26,7 @@
       SYSTEM: 'system'
     })
     .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'topic_update'])
+    .constant('CHAT_MENTION_CHAR', '@')
     .constant('CHAT_NAMESPACE', '/chat')
     .constant('CHAT_NOTIF', {
       CHAT_AUTO_CLOSE: 4000,
