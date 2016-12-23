@@ -10,6 +10,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
     $rootScope,
     $scope,
     $state,
+    session,
     chatConversationsService,
     chatLocalStateService,
     notificationFactory,
@@ -22,6 +23,11 @@ describe('The ChatConversationCreateChannelController controller', function() {
     notificationFactory = {};
     $state = {};
     form = {};
+    session = {
+      domain: {
+        _id: 123
+      }
+    };
 
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -32,6 +38,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
       $provide.value('chatLocalStateService', chatLocalStateService);
       $provide.value('notificationFactory', notificationFactory);
       $provide.value('$state', $state);
+      $provide.value('session', session);
     });
   });
 
@@ -95,7 +102,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
       controller.create();
       controller.conversation.name = name;
       $rootScope.$digest();
-      expect(chatConversationsService.addChannels).to.have.been.calledWith({type: CHAT_CONVERSATION_TYPE.CHANNEL, name: name});
+      expect(chatConversationsService.addChannels).to.have.been.calledWith({type: CHAT_CONVERSATION_TYPE.CHANNEL, name: name, domain: session.domain._id});
       expect(chatLocalStateService.addConversation).to.have.been.calledWith(result);
       expect(notificationFactory.weakSuccess).to.have.been.calledWith('success', 'Channel successfuly created');
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: result._id});

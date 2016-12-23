@@ -1,17 +1,7 @@
 .card.m-b-0
   .ms-body
     .listview.lv-message
-      .lv-header.message-header
-        .lvh-label.ellipsis
-          a(href='') {{(ctrl.conversation.members || []).length}} #{__('members')}
-          span
-            span.divider |
-            span(ng-if="!ctrl.conversation.topic.value" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
-              |#{__('Add a topic')}
-              i.mdi.mdi-plus
-            span(ng-if="ctrl.conversation.topic.value" ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
-              |#{__('Edit')}
-              i.mdi.mdi-pencil
+      chat-conversation-topbar(conversation="ctrl.conversation")
       .lv-body(scroll-glue="glued", z-infinite-scroll="ctrl.loadPreviousMessages()", inverse="true")
         .throbber(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.3', spinner-key='{{::ctrl.spinnerKey}}')
         chat-conversation-header(ng-if="ctrl.topOfConversation" conversation="ctrl.conversation")

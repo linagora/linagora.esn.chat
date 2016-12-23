@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatLocalState service', function() {
-  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, CHAT_DEFAULT_CHANNEL, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q, $httpBackend;
+  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
