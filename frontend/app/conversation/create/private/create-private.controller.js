@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationCreatePrivateController', ChatConversationCreatePrivateController);
 
-  function ChatConversationCreatePrivateController($log, $state, chatConversationsService, chatLocalStateService, notificationFactory) {
+  function ChatConversationCreatePrivateController($log, $state, chatConversationsService, chatLocalStateService, notificationFactory, session) {
     var self = this;
 
     self.create = create;
@@ -17,6 +17,7 @@
       }
 
       var group = {
+        domain: session.domain._id,
         members: self.members
       };
 

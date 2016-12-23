@@ -5,11 +5,12 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationCreateChannelController', ChatConversationCreateChannelController);
 
-  function ChatConversationCreateChannelController($log, $state, chatConversationsService, chatLocalStateService, CHAT_CONVERSATION_TYPE, notificationFactory) {
+  function ChatConversationCreateChannelController($log, $state, chatConversationsService, chatLocalStateService, CHAT_CONVERSATION_TYPE, notificationFactory, session) {
     var self = this;
 
     self.conversation = {
-      type: CHAT_CONVERSATION_TYPE.CHANNEL
+      type: CHAT_CONVERSATION_TYPE.CHANNEL,
+      domain: session.domain._id
     };
     self.create = create;
 

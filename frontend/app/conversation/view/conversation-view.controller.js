@@ -15,7 +15,6 @@
     self.glued = true;
     self.loadPreviousMessages = loadPreviousMessages;
     self.newMessage = newMessage;
-    self.updateTopic = updateTopic;
     self.topOfConversation = false;
     self.chatLocalStateService.ready.then(init);
     self.setLastLineInView = setLastLineInView;
@@ -124,10 +123,6 @@
 
     function setLastLineInView(inview) {
       self.inview = inview;
-    }
-
-    function updateTopic($data) {
-      chatConversationsService.updateConversationTopic($data, self.chatLocalStateService.activeRoom._id);
     }
 
     function isSameUser(previousMessage, nextMessage) {
