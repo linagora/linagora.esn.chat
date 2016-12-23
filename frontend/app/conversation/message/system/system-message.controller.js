@@ -17,6 +17,7 @@
         var parsedText = $filter('oembedImageFilter')(self.message.text);
 
         parsedText = $filter('linky')(parsedText, '_blank');
+        parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
         parsedText = chatParseMention.chatParseMention(parsedText, self.message.user_mentions);
         self.parsed = {
           text: parsedText
