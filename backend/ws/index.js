@@ -2,7 +2,6 @@
 
 const CONSTANTS = require('../lib/constants');
 const NAMESPACE = CONSTANTS.WEBSOCKET.NAMESPACE;
-const USER_STATE = CONSTANTS.NOTIFICATIONS.USER_STATE;
 const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
@@ -51,7 +50,6 @@ function init(dependencies, lib) {
     initialized = true;
   });
 
-  globalPubsub.topic(USER_STATE).subscribe(data => chatNamespace.emit(USER_STATE, data));
   globalPubsub.topic(CHANNEL_CREATION).subscribe(data => sendDataToConversation(data, CHANNEL_CREATION, data));
   globalPubsub.topic(CHANNEL_DELETION).subscribe(data => sendDataToConversation(data, CHANNEL_DELETION, data));
   globalPubsub.topic(TOPIC_UPDATED).subscribe(data => chatNamespace.emit(TOPIC_UPDATED, data));

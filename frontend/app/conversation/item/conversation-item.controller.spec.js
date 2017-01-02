@@ -1,11 +1,11 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
 describe('The ChatConversationItemController controller', function() {
-  var chatUserState,
+  var userStatusService,
   $q,
   $rootScope,
   $scope,
@@ -20,9 +20,9 @@ describe('The ChatConversationItemController controller', function() {
   searchProviders;
 
   beforeEach(function() {
-    chatUserState = {
-      get: sinon.spy(function(id) {
-        return $q.when(userStateResult(id));
+    userStatusService = {
+      getCurrentStatus: sinon.spy(function(id) {
+        return $q.when(userStateResult[id]);
       })
     };
 
@@ -51,7 +51,7 @@ describe('The ChatConversationItemController controller', function() {
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatUserState', chatUserState);
+      $provide.value('userStatusService', userStatusService);
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
       $provide.value('esnEmoticonifyFilter', sinon.spy());
@@ -66,7 +66,7 @@ describe('The ChatConversationItemController controller', function() {
   });
 
   beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _$controller_, _CHAT_EVENTS_) {
-    userStateResult = _.constant(true);
+    userStateResult = {};
     $q = _$q_;
     $rootScope = _$rootScope_;
     $scope = $rootScope.$new();
@@ -89,6 +89,7 @@ describe('The ChatConversationItemController controller', function() {
     }
 
     beforeEach(function() {
+      userStateResult = {2: {status: 'connected'}, 3: {status: 'connected'}};
       conversation = {
         _id: 1,
         members: [user, {_id: 2}, {_id: 3}],
@@ -99,28 +100,26 @@ describe('The ChatConversationItemController controller', function() {
     });
 
     it('should initialize ctrl.connected to true only if all users other than current one are not disconnected', function() {
-      userStateResult = function(id) {
-        ({userId: false, 2: 'connected', 3: 'connected'})[id];
-      };
+      userStateResult = {2: {status: 'connected'}, 3: {status: 'connected'}};
+      userStateResult[session.user._id] = {status: 'disconnected'};
       var controller = initController();
 
       controller.$onInit();
       $rootScope.$digest();
-      expect(chatUserState.get).to.have.been.calledWith(2);
-      expect(chatUserState.get).to.have.been.calledWith(3);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(2);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(3);
       expect(controller.connected).to.be.true;
     });
 
     it('should initialize ctrl.connected to false only if only one user other than current one is disconnected', function() {
-      userStateResult = function(id) {
-        return ({userId: false, 2: 'connected', 3: 'disconnected'})[id];
-      };
+      userStateResult = {2: {status: 'connected'}, 3: {status: 'disconnected'}};
+      userStateResult[session.user._id] = {status: 'disconnected'};
       var controller = initController();
 
       controller.$onInit();
       $rootScope.$digest();
-      expect(chatUserState.get).to.have.been.calledWith(2);
-      expect(chatUserState.get).to.have.been.calledWith(3);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(2);
+      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(3);
       expect(controller.connected).to.be.false;
     });
 
@@ -132,7 +131,7 @@ describe('The ChatConversationItemController controller', function() {
       expect(controller.lastMessageIsMe).to.be.equal(true);
     });
 
-    it('should set lastMessageIsMe to false if the last message is from current user', function() {
+    it('should set lastMessageIsMe to false if the last message is not from current user', function() {
       conversation.last_message.creator._id = 'userId2';
       var controller = initController();
 

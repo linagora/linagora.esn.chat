@@ -2013,34 +2013,4 @@ describe('The chat API', function() {
       });
     });
   });
-
-  describe('GET /api/state', function() {
-    it('should return disconnect for user which state is unknow', function(done) {
-      request(app.express)
-        .get('/api/state/unknowId')
-        .expect(200)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          expect(res.body).to.deep.equals({state: 'disconnected'});
-          done();
-        });
-    });
-
-    it('should return state of requested user state wich is known', function(done) {
-      app.lib.userState.set('user', 'state').then(function() {
-        request(app.express)
-          .get('/api/state/user')
-          .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            expect(res.body).to.deep.equals({state: 'state'});
-            done();
-          });
-      });
-    });
-  });
 });

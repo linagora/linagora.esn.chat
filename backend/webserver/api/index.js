@@ -10,7 +10,6 @@ module.exports = function(dependencies, lib) {
   require('./collaboration')(dependencies, lib, router);
   require('./conversation')(dependencies, lib, router);
   require('./message')(dependencies, lib, router);
-  require('./user-state')(dependencies, lib, router);
 
   return router;
 };
