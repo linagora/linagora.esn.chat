@@ -8,3 +8,4 @@
         div(ng-repeat="message in ctrl.messages track by message._uniqId", in-view="$last && ctrl.setLastLineInView($inview)")
           chat-message-separator(prev-message="$first ? null : ctrl.messages[$index - 1]", current-message="message")
           chat-message(message="message")
+      chat-message-indicator(inview = "ctrl.inview")
