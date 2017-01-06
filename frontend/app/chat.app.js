@@ -6,6 +6,8 @@
     'esn.router',
     'restangular',
     'esn.search',
+    'esn.attachment',
+    'esn.attachment-list',
     'esn.provider',
     'esn.scroll',
     'esn.attendee',

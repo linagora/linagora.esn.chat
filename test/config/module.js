@@ -3,6 +3,8 @@
 /* global _: false */
 
 angular.module('esn.highlight', []);
+angular.module('esn.attachment', []);
+angular.module('esn.attachment-list', []);
 angular.module('esn.router', []);
 angular.module('esn.search', []);
 angular.module('esn.scroll', []);
@@ -15,7 +17,8 @@ angular.module('esn.oembed.image', []);
 angular.module('esn.localstorage', []);
 angular.module('esn.file', []);
 angular.module('esn.lodash-wrapper', []);
-angular.module('esn.provider', []);
+angular.module('esn.provider', [])
+  .factory('newProvider', function() {});
 angular.module('esn.user', []);
 angular.module('esn.core', [])
 .constant('_', _)

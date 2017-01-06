@@ -7,6 +7,7 @@
     function chatConversationService(ChatRestangular) {
       var service = {
         fetchMessages: fetchMessages,
+        fetchAttachments: fetchAttachments,
         get: get,
         getMessage: getMessage,
         join: join,
@@ -25,6 +26,10 @@
 
       function fetchMessages(id, options) {
         return _getBase(id).all('messages').getList(options).then(_stripResponse);
+      }
+
+      function fetchAttachments(id, options) {
+        return _getBase(id).all('attachments').getList(options);
       }
 
       function get(id) {
