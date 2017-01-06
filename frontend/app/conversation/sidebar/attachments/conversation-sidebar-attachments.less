@@ -1,0 +1,22 @@
+.conversation-sidebar-attachments {
+  .flex-column;
+
+  max-width: @chatRightSidebarDefaultWidth;
+  min-width: @chatRightSidebarDefaultWidth;
+
+  .close {
+    .flex-end;
+
+    font-size: 24px;
+    padding: 15px;
+  }
+
+  .list {
+    padding: 10px;
+  }
+
+  @media(min-width: @screen-md-min) {
+    min-width: @chatRightSidebarDesktopWidth;
+    max-width: @chatRightSidebarDesktopWidth;
+  }
+}

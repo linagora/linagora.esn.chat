@@ -1,23 +1,39 @@
 .chat-conversation-topbar {
+  .flex-vertical-centered;
+  .flex-space-between;
+
   font-size: 14px;
-  padding: 10px 20px;
+  padding: 15px 20px;
 
-  span.divider {
-    margin: 0 10px;
-  }
+  .conversation-metadata {
+    .ellipsis;
+    .flex-start;
 
-  .editable-click {
-    border-bottom: 0;
-  }
+    span.divider {
+      margin: 0 10px;
+    }
 
-  span.members {
-    margin-left: 4px;
-  }
+    .editable-click {
+      border-bottom: 0;
+    }
 
-  span.editable {
-    cursor: pointer;
-    .label-emoji {
-      width: 1.4em;
+    span.members {
+      margin-left: 4px;
+    }
+
+    span.editable {
+      cursor: pointer;
+      .label-emoji {
+        width: 1.4em;
+      }
     }
   }
+
+  .conversation-actions {
+    .flex-end;
+
+    font-size: 20px;
+    color: @secondaryTextColor;
+  }
+
 }

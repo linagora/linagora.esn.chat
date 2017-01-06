@@ -28,6 +28,14 @@
           }
         }
       })
+      .state('chat.channels-views.attachments', {
+        url: '/attachments',
+        views: {
+          'sidebar@chat.channels-views': {
+            template: '<chat-conversation-sidebar-attachments/>'
+          }
+        }
+      })
       .state('chat.groups-add', {
         url: '/groups/add',
         views: {
