@@ -5,6 +5,9 @@
     .constant('CHAT', {
       DEFAULT_FETCH_SIZE: 20
     })
+    .constant('CHAT_ATTACHMENT_PROVIDER', {
+      conversation: 'chat.conversation'
+    })
     .constant('CHAT_EVENTS', {
       MESSAGE_RECEIVED: 'chat:message:received',
       USER_CHANGE_STATE: 'user:state',

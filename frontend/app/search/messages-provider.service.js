@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatSearchMessagesProviderService', chatSearchMessagesProviderService);
 
-  function chatSearchMessagesProviderService($q, newProvider, chatSearchMessageService, ELEMENTS_PER_REQUEST) {
+  function chatSearchMessagesProviderService($q, newProvider, chatSearchMessageService, CHAT) {
     var name = 'Chat Messages';
     var type = 'chat.message';
 
@@ -16,7 +16,7 @@
         return function() {
           return chatSearchMessageService.searchMessages(query, {
             offset: offset,
-            limit: ELEMENTS_PER_REQUEST
+            limit: CHAT.DEFAULT_FETCH_SIZE
           }).then(function(response) {
             offset += response.data.length;
 
