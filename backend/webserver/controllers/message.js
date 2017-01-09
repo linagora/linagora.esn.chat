@@ -8,6 +8,7 @@ module.exports = function(dependencies, lib) {
 
   return {
     get,
+    getAttachmentsForConversation,
     getForConversation,
     search
   };
@@ -26,6 +27,24 @@ module.exports = function(dependencies, lib) {
             code: 500,
             message: 'Server Error',
             details: err.message || 'Error while getting messages for conversation'
+          }
+        });
+      }
+
+      return res.status(200).json(results);
+    });
+  }
+
+  function getAttachmentsForConversation(req, res) {
+    lib.message.getAttachmentsForConversation(req.conversation._id, req.query, (err, results) => {
+      if (err) {
+        logger.error('Error while getting attachments of conversation %s', req.conversation._id, err);
+
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting attachments of conversation'
           }
         });
       }

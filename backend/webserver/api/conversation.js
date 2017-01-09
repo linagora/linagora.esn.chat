@@ -34,6 +34,12 @@ module.exports = function(dependencies, lib, router) {
 
   router.post('/conversations/:id/readed', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.markAllMessageOfAConversationReaded);
 
+  router.get('/conversations/:id/attachments',
+    authorizationMW.requiresAPILogin,
+    middleware.load,
+    middleware.canRead,
+    messageController.getAttachmentsForConversation);
+
   router.get('/user/conversations/private', authorizationMW.requiresAPILogin, controller.findMyPrivateConversations);
   router.get('/user/conversations', authorizationMW.requiresAPILogin, controller.findMyConversations);
 };

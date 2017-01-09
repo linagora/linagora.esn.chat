@@ -18,6 +18,7 @@ module.exports = function(dependencies, lib) {
   return {
     count,
     create,
+    getAttachmentsForConversation,
     getById,
     getByIdAndPopulate,
     getForConversation,
@@ -82,6 +83,43 @@ module.exports = function(dependencies, lib) {
     function populate(message, callback) {
       ChatMessage.populate(message, [{path: 'user_mentions'}, {path: 'creator'}], callback);
     }
+  }
+
+  function getAttachmentsForConversation(conversation, query, callback) {
+
+    if (!query.moderate) {
+      query.moderate = false;
+    }
+
+    const conversationId = conversation._id || conversation;
+    const offset = parseInt(query.offset, 10);
+    const limit = parseInt(query.limit, 10);
+
+    const mongoQuery = ChatMessage.aggregate([
+      { $match: {channel: conversationId, moderate: false, attachments: { $gt: [] }} },
+      { $unwind: '$attachments' },
+      { $skip: offset },
+      { $limit: limit },
+
+      { $group: {
+        _id: '$attachments._id',
+        message_id: { $first: '$_id' },
+        creator: { $first: '$creator' },
+        creation_date: { $first: '$timestamps.creation' },
+        name: { $first: '$attachments.name' },
+        contentType: { $first: '$attachments.contentType' },
+        length: { $first: '$attachments.length' }
+      }},
+
+      { $sort: { creation_date: -1, name: -1} }
+    ]);
+
+    mongoQuery.exec((err, result) => {
+      if (!err) {
+        result.reverse();
+      }
+      callback(err, result);
+    });
   }
 
   function getById(messageId, callback) {
