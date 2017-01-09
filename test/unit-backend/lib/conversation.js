@@ -1,21 +1,22 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Q = require('q');
+const sinon = require('sinon');
+const expect = require('chai').expect;
+const Q = require('q');
 
-var CONSTANTS = require('../../../backend/lib/constants');
-var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
+const CONSTANTS = require('../../../backend/lib/constants');
+const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
+const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
+const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
+const CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  var deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectIdMock, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  let deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectIdMock, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -48,6 +49,11 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
 
     channelDeletionTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    channelSavedTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -135,6 +141,9 @@ describe('The linagora.esn.chat conversation lib', function() {
             if (name === TOPIC_UPDATED) {
               return localChannelTopicUpdateTopic;
             }
+            if (name === CHANNEL_SAVED) {
+              return channelSavedTopic;
+            }
           }
         },
         global: {
@@ -200,7 +209,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should return the default channel', function(done) {
-      var module = require('../../../backend/lib/conversation')(dependencies, lib);
+      const module = require('../../../backend/lib/conversation')(dependencies, lib);
 
       module.getChannels({}, function(err, channels) {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.CHANNEL, moderate: false});
@@ -218,7 +227,7 @@ describe('The linagora.esn.chat conversation lib', function() {
   describe('The getById function', function() {
 
     it('should call ChatConversation.findById', function(done) {
-      var channelId = 1;
+      const channelId = 1;
 
       require('../../../backend/lib/conversation')(dependencies, lib).getById(channelId, function() {
         expect(modelsMock.ChatConversation.findById).to.have.been.calledWith(1);
@@ -231,12 +240,12 @@ describe('The linagora.esn.chat conversation lib', function() {
   describe('The create function', function() {
 
     it('should call ChatConversation.save', function(done) {
-      var options = {id: 1};
+      const options = {id: 1};
 
       function ChatConversation(opts) {
         expect(opts).to.deep.equal(options);
       }
-      var channel = {};
+      const channel = {};
 
       ChatConversation.prototype.save = function(cb) {
         cb(null, channel, 1);
@@ -254,7 +263,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should publish on the global CHANNEL_CREATION topic', function(done) {
-      var channel = {
+      const channel = {
         isAChannel: true
       };
 
@@ -279,15 +288,15 @@ describe('The linagora.esn.chat conversation lib', function() {
   });
 
   describe('The findConversationByTypeAndByMembers function', function() {
-    var type;
+    let type;
 
     beforeEach(function() {
       type = 'type';
     });
 
     it('should call Channel.find with correct parameters when exactMatch', function(done) {
-      var members = ['one'];
-      var anObjectId = {};
+      const members = ['one'];
+      const anObjectId = {};
 
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
@@ -341,8 +350,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should call Channel.find with correct parameters when not exactMatch', function(done) {
-      var members = ['one'];
-      var anObjectId = {};
+      const members = ['one'];
+      const anObjectId = {};
 
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
@@ -367,9 +376,9 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should also handle more than one type', function(done) {
-      var members = ['one'];
-      var anObjectId = {};
-      var type2 = 'type2';
+      const members = ['one'];
+      const anObjectId = {};
+      const type2 = 'type2';
 
       require('../../../backend/lib/conversation')(dependencies, lib).find({type: [type, type2], members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
@@ -385,8 +394,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should handle no type', function(done) {
-      var members = ['one'];
-      var anObjectId = {};
+      const members = ['one'];
+      const anObjectId = {};
 
       require('../../../backend/lib/conversation')(dependencies, lib).find({members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
@@ -411,8 +420,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should do not considere member when ignoreMemberFilterForChannel is true', function(done) {
-      var members = ['one'];
-      var anObjectId = {};
+      const members = ['one'];
+      const anObjectId = {};
 
       require('../../../backend/lib/conversation')(dependencies, lib).find({ignoreMemberFilterForChannel: true, members: members}, function() {
         expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
@@ -433,9 +442,9 @@ describe('The linagora.esn.chat conversation lib', function() {
 
   describe('The addMember function', function() {
     it('should call ChatConversation.findByIdAndUpdate with the correct parameter', function(done) {
-      var conversationId = 'channelId';
-      var userId = 'userId';
-      var anObjectId = {};
+      const conversationId = 'channelId';
+      const userId = 'userId';
+      const anObjectId = {};
 
       ObjectIdMock = sinon.spy(function() {
         this.id;
@@ -455,10 +464,10 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should set the number of readed message of the current user correctly', function(done) {
-      var channelId = 'channelId';
-      var userId = 'userId';
-      var anObjectId = {};
-      var numOfMessage = 42;
+      const channelId = 'channelId';
+      const userId = 'userId';
+      const anObjectId = {};
+      const numOfMessage = 42;
 
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
@@ -505,9 +514,9 @@ describe('The linagora.esn.chat conversation lib', function() {
 
   describe('The removeMembersFromChannel function', function() {
     it('should call Channel.update with the correct parameter', function(done) {
-      var channelId = 'channelId';
-      var userId = 'userId';
-      var anObjectId = {};
+      const channelId = 'channelId';
+      const userId = 'userId';
+      const anObjectId = {};
 
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
@@ -527,14 +536,14 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should publish the channel modification', function(done) {
-      var channelId = 'channelId';
-      var userId = 'userId';
-      var anObjectId = {};
+      const channelId = 'channelId';
+      const userId = 'userId';
+      const anObjectId = {};
 
       ObjectIdMock = sinon.stub().returns(anObjectId);
 
       modelsMock.ChatConversation.update = function(query, options, cb) {
-        var conversation = 'conversation';
+        const conversation = 'conversation';
 
         cb(null, conversation);
         expect(channelUpdateTopic).to.have.been.calledWith({
@@ -549,26 +558,26 @@ describe('The linagora.esn.chat conversation lib', function() {
 
   describe('The updateTopic function', function() {
     it('should call Channel.findByIdAndUpdate with the correct parameter', function(done) {
-      var now = new Date();
-      var clock = sinon.useFakeTimers(now.getTime());
-      var channelId = {
+      const now = new Date();
+      const clock = sinon.useFakeTimers(now.getTime());
+      const channelId = {
         _id: 'channelId',
         toHexString: function() {
           return this._id;
         }
       };
-      var userId = {
+      const userId = {
         _id: 'userId',
         toHexString: function() {
           return this._id;
         }
       };
-      var topic = {
+      const topic = {
         value: 'value',
         creator: userId,
         last_set: new Date(clock.now)
       };
-      var setTopic = {$set: {
+      const setTopic = {$set: {
           topic: topic
         }
       };
@@ -585,7 +594,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
   describe('The remove function', function() {
     it('should delete the conversation and its messages', function() {
-      var deleteResult = {_id: 'channelId'};
+      const deleteResult = {_id: 'channelId'};
 
       modelsMock.ChatConversation.findOneAndRemove = sinon.spy(function(query, cb) {
         cb(null, deleteResult);

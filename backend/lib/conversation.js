@@ -13,6 +13,7 @@ const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
+const CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
 
 module.exports = function(dependencies) {
 
@@ -24,6 +25,7 @@ module.exports = function(dependencies) {
   const pubsubGlobal = dependencies('pubsub').global;
   const pubsubLocal = dependencies('pubsub').local;
   const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  const channelSavedTopic = pubsubLocal.topic(CHANNEL_SAVED);
   const channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
   const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
   const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
@@ -231,6 +233,7 @@ module.exports = function(dependencies) {
         },
         /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
         function(conversation, _num, callback) {
+          channelSavedTopic.publish(conversation);
           Conversation.populate(conversation, 'members', callback);
         },
         function(conversation, callback) {

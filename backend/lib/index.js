@@ -41,6 +41,7 @@ module.exports = function(dependencies) {
     message,
     moderate,
     models,
+    search,
     start,
     userState,
     utils

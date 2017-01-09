@@ -114,8 +114,6 @@ module.exports = function(dependencies, lib) {
       };
 
       lib.conversation.create(conversation, (err, result) => {
-        logger.error('Error while creating conversation', err);
-
         if (err) {
           logger.error('Errror while creating conversation', err);
 
@@ -310,8 +308,11 @@ module.exports = function(dependencies, lib) {
   }
 
   function list(req, res) {
-    if (req.query.type === CONVERSATION_TYPE.PRIVATE) {
+    if (req.query.type === CONVERSATION_TYPE.PRIVATE && !req.query.search) {
       return findConversationByTypeAndByMembers(CONVERSATION_TYPE.PRIVATE, req, res);
+    }
+    if (req.query.search) {
+      return searchForPublicConversations(req.query.search, req, res);
     }
 
     res.status(400).json({
@@ -323,4 +324,24 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function searchForPublicConversations(phrase, req, res) {
+    lib.conversation.getAllForUser(req.user).then(conversations => {
+      lib.search.conversations.search.searchConversations({search: phrase}, conversations.map(conversation => String(conversation._id)), (err, result) => {
+        if (err) {
+          logger.error('Error while searching conversations', err);
+
+          return res.status(500).json({
+            error: {
+              code: 500,
+              message: 'Server Error',
+              details: err.message || 'Error while searching conversations'
+            }
+          });
+        }
+        res.header('X-ESN-Items-Count', result.total_count || 0);
+
+        return res.status(200).json(result.list);
+      });
+    });
+  }
 };
