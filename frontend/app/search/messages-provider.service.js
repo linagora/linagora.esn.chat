@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatSearchMessagesProviderService', chatSearchMessagesProviderService);
 
-  function chatSearchMessagesProviderService($q, newProvider, chatSearchMessageService, CHAT, chatParseMention) {
+  function chatSearchMessagesProviderService($q, $filter, newProvider, chatSearchMessageService, CHAT, chatParseMention) {
     var name = 'Chat Messages';
     var type = 'chat.message';
 
@@ -23,6 +23,9 @@
             return response.data.map(function(message) {
               message.type = type;
               message.text = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
+              message.text = $filter('linky')(message.text, '_blank');
+              message.text = $filter('esnEmoticonify')(message.text, {class: 'chat-emoji'});
+              message.text = $filter('esnHighlight')(message.text, query, {ignoreEscape: true});
 
               return message;
             });

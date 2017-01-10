@@ -10,4 +10,4 @@
     .date {{::item.timestamps.creation | date: "MM/dd/yyyy h:mma"}}
 
   a.message-content.clickable(ui-sref='chat.channels-views({id: item.channel._id})')
-    span(ng-bind-html="::item.text | esnHighlight: query")
+    span(ng-bind-html="::item.text")
