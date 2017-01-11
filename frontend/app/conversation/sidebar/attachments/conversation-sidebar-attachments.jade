@@ -1,0 +1,5 @@
+.conversation-sidebar-attachments
+  .close.hidden-xs
+    i.mdi.mdi-close.clickable(ui-sref="chat.channels-views")
+  .list
+    esn-attachment-list(object-type="{{::ctrl.objectType}}", id="{{::ctrl.id}}")

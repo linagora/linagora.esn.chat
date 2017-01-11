@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationAttachmentsProvider', chatConversationAttachmentsProvider);
 
-  function chatConversationAttachmentsProvider(chatConversationService, chatUsername, newProvider, CHAT, CHAT_ATTACHMENT_PROVIDER) {
+  function chatConversationAttachmentsProvider($q, chatConversationService, chatUsername, newProvider, CHAT, CHAT_ATTACHMENT_PROVIDER) {
     return newProvider({
       type: CHAT_ATTACHMENT_PROVIDER.conversation,
       fetch: function(options) {

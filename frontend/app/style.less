@@ -9,6 +9,8 @@
 @import './conversation/footer/footer.less';
 @import './conversation/view/conversation-view.less';
 @import './conversation/overview/conversation-overview.less';
+@import './conversation/sidebar/attachments/conversation-sidebar-attachments';
+@import './conversation/sidebar/conversation-sidebar';
 @import './conversation/subheader/conversation-subheader.less';
 @import './conversation/header/header.less';
 @import './conversation/join/join-conversation.less';
@@ -16,10 +18,13 @@
 @import './conversation/message/user/user-message.less';
 @import './conversation/topbar/conversation-topbar.less';
 @import './conversation/message-indicator/message-indicator.less';
+@import './conversation/messages-view';
 @import './search/messages-search.less';
 
 @chatAttachmentBorderColor: #E8E8E8;
 @chatDateTextColor: #B3B3B3;
+@chatRightSidebarDefaultWidth: 268px;
+@chatRightSidebarDesktopWidth: 300px;
 @chatSystemMessageTextColor: @secondaryTextColor;
 @dimmedBackgroundColor: rgba(0,0,0,.6);
 
@@ -121,4 +126,9 @@ body {
     .flex-shorthand(0, 0, 50%);
     height: 50%;
   }
+}
+
+.chat-main {
+  display: flex;
+  justify-content: flex-start;
 }
