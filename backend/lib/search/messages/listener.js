@@ -1,6 +1,8 @@
 'use strict';
 
-var CONSTANTS = require('../../constants');
+const Q = require('q');
+const messageUtils = require('../../message-utils');
+const CONSTANTS = require('../../constants');
 
 module.exports = function(dependencies) {
 
@@ -19,6 +21,9 @@ module.exports = function(dependencies) {
         update: CONSTANTS.NOTIFICATIONS.MESSAGE_UPDATED,
         remove: CONSTANTS.NOTIFICATIONS.MESSAGE_REMOVED
       },
+      skip: {
+        index: skipIndex
+      },
       denormalize: denormalize.denormalize,
       getId: denormalize.getId,
       type: CONSTANTS.SEARCH.MESSAGES.TYPE_NAME,
@@ -28,5 +33,9 @@ module.exports = function(dependencies) {
 
   function register() {
     return listeners.addListener(getMessageOptions());
+  }
+
+  function skipIndex(message) {
+    return Q(messageUtils.isSystemMessage(message));
   }
 };
