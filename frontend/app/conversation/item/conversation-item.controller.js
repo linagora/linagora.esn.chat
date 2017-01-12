@@ -37,7 +37,7 @@
     function $onInit() {
       if (self.conversation.last_message) {
         self.numberOfDays = getDaysSinceMessageCreated(self.conversation.last_message);
-        self.conversation.last_message.text = chatParseMention.chatParseMention(self.conversation.last_message.text, self.conversation.last_message.user_mentions, {skipLink: true});
+        self.conversation.last_message.text = chatParseMention.parseMentions(self.conversation.last_message.text, self.conversation.last_message.user_mentions, {skipLink: true});
         self.conversation.last_message.text = $filter('esnEmoticonify')(self.conversation.last_message.text, {class: 'chat-emoji'});
       }
 

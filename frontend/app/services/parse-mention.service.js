@@ -6,7 +6,7 @@
 
     function chatParseMention(chatUsername, CHAT_MENTION_CHAR) {
       var service = {
-        chatParseMention: chatParseMention,
+        parseMentions: parseMentions,
         generateProfileLink: generateProfileLink,
         userIsMentioned: userIsMentioned
       };
@@ -19,7 +19,7 @@
         return '<a href="#/profile/' + user._id + '/details/view">' + chatUsername.generateMention(user) + '</a>';
       }
 
-      function chatParseMention(text, mentions, options) {
+      function parseMentions(text, mentions, options) {
         options = options || {};
         var replace = options.skipLink ? chatUsername.generateMention : generateProfileLink;
 

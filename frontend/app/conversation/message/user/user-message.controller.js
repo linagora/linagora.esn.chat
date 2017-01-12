@@ -26,7 +26,7 @@
 
         parsedText = $filter('linky')(parsedText, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
-        parsedText = chatParseMention.chatParseMention(parsedText, self.message.user_mentions);
+        parsedText = chatParseMention.parseMentions(parsedText, self.message.user_mentions);
         self.parsed = {
           text: parsedText
         };

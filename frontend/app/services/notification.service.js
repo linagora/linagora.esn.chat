@@ -47,7 +47,7 @@
           chatConversationsService.getConversation(message.channel).then(function(channel) {
             if (canSendNotification(message)) {
               var channelName = channel.name || 'OpenPaas Chat';
-              var parsedText = chatParseMention.chatParseMention(message.text, message.user_mentions, {skipLink: true});
+              var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
 
               webNotification.showNotification('New message in ' + channelName, {
                 body: parsedText,
