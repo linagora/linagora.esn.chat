@@ -638,6 +638,255 @@ describe('The chat API', function() {
     });
   });
 
+  describe('GET /api/conversations/:id/attachments', function() {
+
+    it('should 404 when conversation does not exist', function(done) {
+      request(app.express)
+        .get('/api/conversations/' + new mongoose.Types.ObjectId() + '/attachments')
+        .expect('Content-Type', /json/)
+        .expect(404)
+        .end(done);
+    });
+
+    it('should 403 when private conversation and user is not member', function(done) {
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [new mongoose.Types.ObjectId()]
+      }, function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .get('/api/conversations/' + conversation._id + '/attachments')
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+        });
+    });
+
+    it('should return empty result when messages does not contain attachments', function(done) {
+      let channelId;
+      const limit = 10;
+      const offset = 0;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.CHANNEL
+      })
+        .then(function(channels) {
+          channelId = channels._id;
+
+          return Q.denodeify(app.lib.message.create)({
+            channel: channelId,
+            text: 'hello world',
+            type: 'text',
+            creator: userId,
+            attachments: []
+          });
+        })
+        .then(function() {
+          return Q.denodeify(app.lib.message.create)({
+            channel: channelId,
+            text: 'Foo bar',
+            type: 'text',
+            creator: userId,
+            attachments: []
+          });
+        })
+        .then(function() {
+          request(app.express)
+            .get('/api/conversations/' + channelId + '/attachments?limit=' + limit + '&offset=' + offset)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body.length).to.equal(0);
+              done();
+            });
+        }).catch(done);
+    });
+
+    it('should give the right list of attachment based on limit and offset params', function(done) {
+
+      let channelId;
+      const messageSequence = [4, 2, 1, 1, 1, 3, 1, 1];
+
+      function createMessage(numberOfAttachement, index, channelId) {
+        const id = '10000000000000000000000' + index;
+        const attachements = [];
+
+        for (let i = 0; i < numberOfAttachement; i++) {
+          const attachement = {
+            _id: index + '0000000000000000000000' + i,
+            name: index + '-' + i + '.png',
+            contentType: 'image/png',
+            length: 5351
+          };
+
+          attachements.push(attachement);
+        }
+
+        const coreMessage = {
+          _id: id,
+          channel: channelId,
+          text: 'hello world',
+          type: 'text',
+          creator: String(userId),
+          timestamps: {
+            creation: new Date(index).toISOString()
+          },
+          attachments: attachements
+        };
+
+        return coreMessage;
+      }
+
+      function createMessagesWithAttachments(messageSequence, channelId) {
+
+        return Q.all(messageSequence.map((sequence, i) => { Q.denodeify(app.lib.message.create)(createMessage(sequence, i + 1, channelId));}));
+      }
+
+      function getExpectedOutput(generatedMessage) {
+        const resReturned = [];
+
+        generatedMessage.attachments.map(function(attachment) {
+          return resReturned.push({
+            _id: attachment._id,
+            message_id: generatedMessage._id,
+            creator: generatedMessage.creator,
+            creation_date: generatedMessage.timestamps.creation,
+            name: attachment.name,
+            contentType: attachment.contentType,
+            length: attachment.length
+          });
+        });
+
+        return resReturned;
+      }
+
+      const flatten = list => list.reduce(
+        (a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []
+      );
+
+      function getExpectedData(messageSequence, channelId, limit, offset) {
+        const expectedResult = [];
+        let generatedMessage;
+        let expectedObject;
+
+        for (let i = 0; i < messageSequence.length; i++) {
+          generatedMessage = createMessage(messageSequence[i], i + 1, channelId);
+          expectedObject = getExpectedOutput(generatedMessage);
+          expectedResult.push(expectedObject);
+        }
+
+        return flatten(expectedResult).slice(offset, limit);
+      }
+
+      function init() {
+
+        return Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.CHANNEL
+        }).then(function(channels) {
+          channelId = channels._id;
+        });
+      }
+
+      function test(limit, offset, limitToExpect, offsetToExpect, channelId) {
+        const defer = Q.defer();
+
+        request(app.express)
+          .get('/api/conversations/' + channelId + '/attachments?limit=' + limit + '&offset=' + offset)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              defer.reject(err);
+            }
+
+            expect(res.body.length).to.equal(limitToExpect - offsetToExpect);
+            expect(res.body).to.deep.equal(getExpectedData(messageSequence, channelId, limitToExpect, offsetToExpect));
+            defer.resolve();
+          });
+
+          return defer.promise;
+      }
+
+      function createMessages() {
+        return createMessagesWithAttachments(messageSequence, channelId);
+      }
+
+      function firstAPICall() {
+        return test(10, 0, 10, 0, channelId);
+      }
+
+      function secondAPICall() {
+        return test(10, 10, 14, 10, channelId);
+      }
+
+      init()
+        .then(createMessages)
+        .then(firstAPICall)
+        .then(secondAPICall)
+        .then(done)
+        .catch(done);
+      });
+
+    it('should 200 with messages which are not moderated', function(done) {
+      let channelId;
+      const limit = 10;
+      const offset = 0;
+
+      Q.denodeify(app.lib.conversation.create)({
+        type: CONVERSATION_TYPE.CHANNEL
+      })
+        .then(function(channels) {
+          channelId = channels._id;
+
+          return Q.denodeify(app.lib.message.create)({
+            _id: '000000000000000000000012',
+            channel: channelId,
+            text: 'hello world',
+            type: 'text',
+            moderate: true,
+            creator: '5873a63e614c5d28384eb9b5',
+            attachments: [{
+              _id: '586d36d1587c5f0f56f4c13c',
+              name: 'indicatorDesktop.png',
+              contentType: 'image/png',
+              length: 5351
+            }]
+          });
+        })
+        .then(function() {
+          return Q.denodeify(app.lib.message.create)({
+            _id: '000000000000000000000010',
+            channel: channelId,
+            text: 'hello world',
+            type: 'text',
+            creator: '5873a63e614c5d28384eb9b5',
+            attachments: [{
+              _id: '586d36d1587c5f0f56f4c13c',
+              name: 'indicatorDesktop.png',
+              contentType: 'image/png',
+              length: 5351
+            }]
+          });
+        })
+        .then(function() {
+          request(app.express)
+            .get('/api/conversations/' + channelId + '/attachments?limit=' + limit + '&offset=' + offset)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function(err) {
+              if (err) {
+                return done(err);
+              }
+              done();
+            });
+      })
+      .catch(done);
+    });
+  });
+
   describe('GET /api/messages/:id', function() {
     it('should 404 when message does not exist', function(done) {
       request(app.express)
