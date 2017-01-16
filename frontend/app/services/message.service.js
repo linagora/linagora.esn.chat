@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatMessageService', chatMessageService);
 
-    function chatMessageService($q, $log, $rootScope, session, ChatTransportService, fileUploadService, backgroundProcessorService, CHAT_MESSAGE_TYPE, DEFAULT_FILE_TYPE) {
+    function chatMessageService($q, $log, $rootScope, session, ChatTransportService, fileUploadService, backgroundProcessorService, CHAT_MESSAGE_TYPE, DEFAULT_FILE_TYPE, CHAT_SYSTEM_MESSAGE_SUBTYPES, _) {
 
       var chatMessageServicePromise = session.ready.then(function(session) {
         var userId = session.user._id;
@@ -129,11 +129,16 @@
         };
       }
 
+      function isSystemMessage(message) {
+        return _.contains(CHAT_SYSTEM_MESSAGE_SUBTYPES, message.subtype);
+      }
+
       return {
         connect: bindToPromiseResult(chatMessageServicePromise, 'connect'),
         sendMessage: bindToPromiseResult(chatMessageServicePromise, 'sendMessage'),
         sendUserTyping: bindToPromiseResult(chatMessageServicePromise, 'sendUserTyping'),
-        sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments')
+        sendMessageWithAttachments: bindToPromiseResult(chatMessageServicePromise, 'sendMessageWithAttachments'),
+        isSystemMessage: isSystemMessage
       };
     }
 })();

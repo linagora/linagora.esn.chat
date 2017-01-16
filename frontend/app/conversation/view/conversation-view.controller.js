@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService) {
     var self = this;
 
     self.spinnerKey = 'ChatConversationSpinner';
@@ -38,7 +38,7 @@
       // So we traverse the array starting by the end
       for (var i = self.messages.length - 1; i > -1; i--) {
         if (self.messages[i].timestamps.creation < message.timestamps.creation) {
-          message.sameUser = isSameUser(message, self.messages[i]);
+          message.sameUser = isSameUser(message, self.messages[i]) && !chatMessageService.isSystemMessage(self.messages[i]);
           self.messages.splice(i + 1, 0, message);
 
           return;
@@ -104,7 +104,7 @@
           previousMessage = message;
           message.sameUser = false;
         } else {
-          message.sameUser = isSameUser(previousMessage, message);
+          message.sameUser = isSameUser(previousMessage, message) && !chatMessageService.isSystemMessage(previousMessage);
           previousMessage = message;
         }
       });

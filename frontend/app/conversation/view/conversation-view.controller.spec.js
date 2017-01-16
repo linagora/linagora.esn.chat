@@ -15,6 +15,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     MESSAGE_GROUP_TIMESPAN,
     chatScrollServiceMock,
     chatLocalStateServiceMock,
+    chatMessageServiceMock,
     $stateParams,
     usSpinnerServiceMock,
     $rootScope,
@@ -45,6 +46,12 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
         return $q.when([]);
       }),
       canScrollDown: sinon.spy(function() {
+        return $q.when([]);
+      })
+    };
+
+    chatMessageServiceMock = {
+      isSystemMessage: sinon.spy(function() {
         return $q.when([]);
       })
     };
@@ -82,6 +89,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('searchProviders', searchProviders);
+      $provide.value('chatMessageService', chatMessageServiceMock);
     });
   });
 
@@ -366,7 +374,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     describe('Group messages by sameUser variable', function() {
       var messages;
 
-      it('should set `sameUser` to true when message is created by same user and in timespan', function() {
+      it('should set `sameUser` to true when message is created by same user, in timespan and the previous message is not a system one ', function() {
         messages = [
           {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
           {_id: 2, creator: {_id: 1}, timestamps: {creation: Date.now()}}
@@ -376,6 +384,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
           return $q.when(messages);
         });
 
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(false);
         initCtrl();
         expect(scope.vm.messages[0].sameUser).to.be.false;
         expect(scope.vm.messages[1].sameUser).to.be.true;
@@ -411,6 +420,41 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
         initCtrl();
         expect(scope.vm.messages[0].sameUser).to.be.false;
         expect(scope.vm.messages[1].sameUser).to.be.false;
+      });
+
+      it('should set `sameUser` to false when the last message is a system one', function() {
+
+        messages = [
+          {_id: 1, creator: {_id: 1}, channel: 1, subtype: 'conversation_join', timestamps: {creation: new Date(86440000) }},
+          {_id: 2, creator: {_id: 1}, channel: 1, timestamps: {creation: new Date(86500000) }}
+        ];
+
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(true);
+        initCtrl();
+
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.false;
+      });
+
+      it('should set `sameUser` to true when message is created by same user, in timespan and the previous message is not a system one ', function() {
+        messages = [
+          {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+          {_id: 2, creator: {_id: 1}, subtype: 'conversation_join', timestamps: {creation: Date.now()}}
+        ];
+
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(false);
+        initCtrl();
+
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.true;
       });
 
     });
