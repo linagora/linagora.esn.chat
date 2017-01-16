@@ -9,7 +9,8 @@ module.exports = function(dependencies, lib) {
 
   return {
     sendConversationResult,
-    sendConversationsResult
+    sendConversationsResult,
+    sendHTTP500Error
   };
 
   function sendConversationResult(conversation, res, status = 200) {
@@ -21,13 +22,7 @@ module.exports = function(dependencies, lib) {
       res.status(status).json(denormalized);
     }, err => {
       logger.error('Can not denormalize conversation', err);
-      res.status(500).json({
-        error: {
-          status: 500,
-          message: 'Server Error',
-          details: 'Can not denormalize conversation'
-        }
-      });
+      sendHTTP500Error('Can not denormalize conversation', res);
     });
   }
 
@@ -36,13 +31,17 @@ module.exports = function(dependencies, lib) {
       res.status(status).json(denormalized);
     }, err => {
       logger.error('Can not denormalize conversations', err);
-      res.status(500).json({
-        error: {
-          status: 500,
-          message: 'Server Error',
-          details: 'Can not denormalize conversations'
-        }
-      });
+      sendHTTP500Error('Can not denormalize conversation', res);
+    });
+  }
+
+  function sendHTTP500Error(details, res) {
+    res.status(500).json({
+      error: {
+        code: 500,
+        message: 'Server Error',
+        details
+      }
     });
   }
 };

@@ -1,5 +1,5 @@
 .conversation-attachments-item
   .meta
     user-profile-link(user="ctrl.attachment.creator")
-    span.date {{::ctrl.attachment.timestamps.creation | amDateFormat:'MMM Do YYYY h:mm A'}}
+    span.date {{::ctrl.attachment.date | amDateFormat:'MMM Do YYYY h:mm A'}}
   esn-attachment(attachment="ctrl.attachment")

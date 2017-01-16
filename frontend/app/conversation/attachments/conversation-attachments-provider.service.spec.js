@@ -3,11 +3,12 @@
 /* global expect, sinon: false */
 
 describe('The linagora.esn.chat chatConversationAttachmentsProvider', function() {
-  var $q, $rootScope, chatConversationService, username, provider, CHAT_ATTACHMENT_PROVIDER;
+  var $q, $rootScope, chatConversationService, limit, username, provider, CHAT_ATTACHMENT_PROVIDER;
   /*eslint no-unused-vars: "off"*/
   var chatConversationAttachmentsProvider;
 
   beforeEach(module('linagora.esn.chat', function($provide) {
+    limit = 100;
     username = 'Bruce Willis';
     chatConversationService = {
       fetchAttachments: sinon.spy(function() {
@@ -35,6 +36,8 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
       add: sinon.spy()
     });
 
+    $provide.value('ELEMENTS_PER_REQUEST', limit);
+
     $provide.value('chatSearchMessagesProviderService', {});
   }));
 
@@ -48,17 +51,17 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
   describe('the fetch function', function() {
 
     it('should return a function wich paginate over conversation attachments', function() {
-      var options = {id: 1, limit: 2};
+      var options = {id: 1};
       var paginate = provider.fetch(options);
 
       paginate();
       $rootScope.$digest();
 
-      expect(chatConversationService.fetchAttachments).to.have.been.calledWith(options.id, {limit: options.limit, offset: 0});
+      expect(chatConversationService.fetchAttachments).to.have.been.calledWith(options.id, {limit: limit, offset: 0});
     });
 
     it('should fill response attachments', function(done) {
-      var options = {id: 1, limit: 2};
+      var options = {id: 1};
       var response = [{_id: 1}, {_id: 2}];
       var paginate = provider.fetch(options);
 
@@ -67,14 +70,14 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
       });
 
       paginate().then(function(result) {
-        expect(result).to.deep.equals([{_id: 1, type: CHAT_ATTACHMENT_PROVIDER.conversation, displayName: username}, {_id: 2, type: CHAT_ATTACHMENT_PROVIDER.conversation, displayName: username}]);
+        expect(result).to.shallowDeepEqual([{_id: 1, type: CHAT_ATTACHMENT_PROVIDER.conversation, displayName: username}, {_id: 2, type: CHAT_ATTACHMENT_PROVIDER.conversation, displayName: username}]);
         done();
       });
       $rootScope.$digest();
     });
 
     it('should fetch next items on next call', function() {
-      var options = {id: 1, limit: 2};
+      var options = {id: 1};
       var response = [{_id: 1}, {_id: 2}];
       var paginate = provider.fetch(options);
 
@@ -87,8 +90,8 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
       paginate();
       $rootScope.$digest();
 
-      expect(chatConversationService.fetchAttachments.firstCall).to.have.been.calledWith(options.id, {limit: options.limit, offset: 0});
-      expect(chatConversationService.fetchAttachments.secondCall).to.have.been.calledWith(options.id, {limit: options.limit, offset: response.length});
+      expect(chatConversationService.fetchAttachments.firstCall).to.have.been.calledWith(options.id, {limit: limit, offset: 0});
+      expect(chatConversationService.fetchAttachments.secondCall).to.have.been.calledWith(options.id, {limit: limit, offset: response.length});
     });
   });
 });
