@@ -35,7 +35,7 @@
       buildFetchContext: function(options) {
         return $q.when(options.query);
       },
-      templateUrl: '/chat/app/search/messages-search-item.html'
+      templateUrl: '/chat/app/search/messages/messages-search-item.html'
     });
   }
 

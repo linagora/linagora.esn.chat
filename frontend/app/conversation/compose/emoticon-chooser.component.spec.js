@@ -40,6 +40,7 @@ describe('the chatEmoticonChooser component', function() {
       add: sinon.spy()
     });
     $provide.value('chatSearchMessagesProviderService', {});
+    $provide.value('chatSearchConversationsProviderService', {});
     $provide.value('ChatTextEntitySelector', ChatTextEntitySelectorMock);
     $provide.value('esnEmoticonRegistry', esnEmoticonRegistryMock);
   }));

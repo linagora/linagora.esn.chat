@@ -88,6 +88,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       $provide.value('chatScrollService', chatScrollServiceMock);
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatMessageService', chatMessageServiceMock);
     });

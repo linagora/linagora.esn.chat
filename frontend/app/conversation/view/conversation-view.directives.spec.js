@@ -15,6 +15,7 @@ describe('The linagora.esn.chat conversation-view directive', function() {
         add: sinon.spy()
       });
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
     });
   });
 

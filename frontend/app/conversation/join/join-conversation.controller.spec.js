@@ -45,6 +45,7 @@ describe('the ChatJoinConversationController controller', function() {
       $provide.value('chatConversationService', chatConversationService);
       $provide.value('chatLocalStateService', chatLocalStateService);
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', session);
     });
 

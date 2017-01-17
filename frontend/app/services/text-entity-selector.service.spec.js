@@ -18,6 +18,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       add: sinon.spy()
     });
     $provide.value('chatSearchMessagesProviderService', {});
+    $provide.value('chatSearchConversationsProviderService', {});
   }));
 
   beforeEach(inject(function(_$rootScope_, _ChatTextEntitySelector_, _KEY_CODE_) {

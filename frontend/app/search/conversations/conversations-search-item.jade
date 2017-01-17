@@ -1,0 +1,13 @@
+.chat-conversations-search
+  .body
+    .conversation-title
+      h4.clickable(ui-sref='chat.channels-views({id: item.channel._id})')
+        i.mdi.mdi-pound
+        span(ng-bind-html="::item.name | esnHighlight: query")
+      span(ng-bind-html="::item.topic.value | esnHighlight: query")
+    
+    .conversation-purpose
+      span(ng-bind-html="::item.purpose.value | esnHighlight: query")
+  
+  .footer 
+    | #{__("Created on")} {{::item.timestamps.creation | date: "MM/dd/yyyy"}}

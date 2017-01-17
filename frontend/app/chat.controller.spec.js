@@ -91,6 +91,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
       });
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('$stateParams', $stateParams);
       $provide.value('$stateProvider', $stateProvider);
       $provide.value('chatConversationsService', chatConversationsService);
