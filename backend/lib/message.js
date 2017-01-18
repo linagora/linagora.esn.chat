@@ -85,22 +85,15 @@ module.exports = function(dependencies, lib) {
     }
   }
 
-  function getAttachmentsForConversation(conversation, query, callback) {
-
-    if (!query.moderate) {
-      query.moderate = false;
-    }
-
-    const conversationId = conversation._id || conversation;
-    const offset = parseInt(query.offset, 10);
-    const limit = parseInt(query.limit, 10);
+  function getAttachmentsForConversation(conversationId, query = {}, callback) {
+    const offset = parseInt(query.offset || CONSTANTS.DEFAULT_OFFSET, 10);
+    const limit = parseInt(query.limit || CONSTANTS.DEFAULT_LIMIT, 10);
 
     const mongoQuery = ChatMessage.aggregate([
       { $match: {channel: conversationId, moderate: false, attachments: { $gt: [] }} },
       { $unwind: '$attachments' },
       { $skip: offset },
       { $limit: limit },
-
       { $group: {
         _id: '$attachments._id',
         message_id: { $first: '$_id' },
@@ -110,7 +103,6 @@ module.exports = function(dependencies, lib) {
         contentType: { $first: '$attachments.contentType' },
         length: { $first: '$attachments.length' }
       }},
-
       { $sort: { creation_date: -1, name: -1} }
     ]);
 

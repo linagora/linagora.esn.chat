@@ -5,6 +5,8 @@ const Q = require('q');
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
+  const denormalizer = require('../denormalizers/message')(dependencies);
+  const utils = require('./utils')(dependencies, lib);
 
   return {
     get,
@@ -17,36 +19,26 @@ module.exports = function(dependencies, lib) {
     res.status(200).json(req.message);
   }
 
-  function getForConversation(req, res) {
-    lib.message.getForConversation(req.conversation._id, req.query, (err, results) => {
+  function getAttachmentsForConversation(req, res) {
+    lib.message.getAttachmentsForConversation(req.conversation._id, req.query, (err, attachments = []) => {
       if (err) {
-        logger.error('Error while getting messages for conversation %s', req.conversation._id, err);
-
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while getting messages for conversation'
-          }
-        });
+        return sendHTTPError(`Error while getting attachments of conversation ${req.conversation._id}`, err, res);
       }
 
-      return res.status(200).json(results);
+      denormalizer.denormalizeAttachments(attachments)
+        .then(denormalized => {
+          res.status(200).json(denormalized);
+        })
+        .catch(err => {
+          sendHTTPError(`Error while denormalizing attachments of conversation ${req.conversation._id}`, err, res);
+        });
     });
   }
 
-  function getAttachmentsForConversation(req, res) {
-    lib.message.getAttachmentsForConversation(req.conversation._id, req.query, (err, results) => {
+  function getForConversation(req, res) {
+    lib.message.getForConversation(req.conversation._id, req.query, (err, results) => {
       if (err) {
-        logger.error('Error while getting attachments of conversation %s', req.conversation._id, err);
-
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while getting attachments of conversation'
-          }
-        });
+        return sendHTTPError(`Error while getting messages for conversation ${req.conversation._id}`, err, res);
       }
 
       return res.status(200).json(results);
@@ -60,14 +52,7 @@ module.exports = function(dependencies, lib) {
     }
 
     function sendError(err) {
-      logger.error('Error while searching messages', err);
-      res.status(500).json({
-        error: {
-          code: 500,
-          message: 'Server Error',
-          details: err.message || 'Error while searching messages'
-        }
-      });
+      sendHTTPError('Error while searching messages', err, res);
     }
 
     lib.message.searchForUser(req.user, {search: req.query.search}, (err, result) => {
@@ -78,5 +63,11 @@ module.exports = function(dependencies, lib) {
       res.header('X-ESN-Items-Count', result.total_count || 0);
       Q.all(result.list.map(hydrateMessage)).then(messages => res.status(200).json(messages), sendError);
     });
+  }
+
+  function sendHTTPError(message, err, res) {
+    logger.error(message, err);
+
+    return utils.sendHTTP500Error(message, res);
   }
 };

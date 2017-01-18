@@ -4,21 +4,20 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationAttachmentsProvider', chatConversationAttachmentsProvider);
 
-  function chatConversationAttachmentsProvider($q, chatConversationService, chatUsername, newProvider, CHAT, CHAT_ATTACHMENT_PROVIDER) {
+  function chatConversationAttachmentsProvider($q, chatConversationService, chatUsername, newProvider, CHAT_ATTACHMENT_PROVIDER, ELEMENTS_PER_REQUEST) {
     return newProvider({
       type: CHAT_ATTACHMENT_PROVIDER.conversation,
       fetch: function(options) {
         var offset = 0;
 
         return function() {
-          var query = {limit: options.limit || CHAT.DEFAULT_FETCH_SIZE, offset: offset};
-
-          return chatConversationService.fetchAttachments(options.id, query).then(function(attachments) {
+          return chatConversationService.fetchAttachments(options.id, {limit: ELEMENTS_PER_REQUEST, offset: offset}).then(function(attachments) {
             offset += attachments.data.length;
 
             return attachments.data.map(function(attachment) {
               attachment.type = CHAT_ATTACHMENT_PROVIDER.conversation;
               attachment.displayName = chatUsername.generate(attachment.creator);
+              attachment.date = new Date(attachment.creation_date);
 
               return attachment;
             });

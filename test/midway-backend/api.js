@@ -752,7 +752,7 @@ describe('The chat API', function() {
           return resReturned.push({
             _id: attachment._id,
             message_id: generatedMessage._id,
-            creator: generatedMessage.creator,
+            creator: {_id: generatedMessage.creator},
             creation_date: generatedMessage.timestamps.creation,
             name: attachment.name,
             contentType: attachment.contentType,
@@ -803,7 +803,7 @@ describe('The chat API', function() {
             }
 
             expect(res.body.length).to.equal(limitToExpect - offsetToExpect);
-            expect(res.body).to.deep.equal(getExpectedData(messageSequence, channelId, limitToExpect, offsetToExpect));
+            expect(res.body).to.shallowDeepEqual(getExpectedData(messageSequence, channelId, limitToExpect, offsetToExpect));
             defer.resolve();
           });
 

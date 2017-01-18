@@ -1,11 +1,21 @@
 .conversation-attachments-item {
+  .flex-column;
+
+  margin-bottom: 10px;
 
   .meta {
-    color: @secondaryTextColor;
+    .flex-row;
+    .flex-space-between;
+
     font-size: 13px;
 
     .date {
-      margin-left: 5px;
+      color: @chatDateTextColor;
+    }
+
+    .profile-link {
+      color: @text-color;
+      font-weight: 600;
     }
   }
 
