@@ -78,6 +78,27 @@ describe('The linagora.esn.chat messages services', function() {
       });
     });
 
+    describe('The isSystemMessage function', function() {
+
+      it('should return true when message subtype is a `conversation_join`', function() {
+        var message = {subtype: 'conversation_join'};
+
+        expect(chatMessageService.isSystemMessage(message)).to.be.true;
+      });
+
+      it('should return true when message subtype is a `topic_update`', function() {
+        var message = {subtype: 'topic_update'};
+
+        expect(chatMessageService.isSystemMessage(message)).to.be.true;
+      });
+
+      it('should return false when message subtype is not a system message subtype', function() {
+        var message = {};
+
+        expect(chatMessageService.isSystemMessage(message)).to.be.false;
+      });
+    });
+
     describe('sendMessage function', function() {
       it('should send a message with text as type', function() {
         var promiseCallback = sinon.spy();
