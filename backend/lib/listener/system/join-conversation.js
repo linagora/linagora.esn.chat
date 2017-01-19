@@ -7,7 +7,7 @@ module.exports = function(dependencies, lib) {
   const logger = dependencies('logger');
   const pubsub = dependencies('pubsub').local;
   const newMessageTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
-  const membershipTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS);
+  const membershipTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.COLLABORATION_JOIN);
 
   return {
     start,
@@ -18,11 +18,11 @@ module.exports = function(dependencies, lib) {
     membershipTopic.subscribe(event => {
       logger.debug('System join conversation handler received an event', event);
 
-      if (CONSTANTS.MEMBERSHIP_ACTION.JOIN === event.type) {
-        return userHasJoined(event.userId, event.conversationId, event.timestamp);
+      if (event.collaboration.objectType !== CONSTANTS.OBJECT_TYPES.CONVERSATION) {
+        return Q.when();
       }
 
-      return Q.when();
+      return userHasJoined(event.target, event.collaboration.id);
     });
   }
 

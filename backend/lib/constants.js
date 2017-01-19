@@ -31,7 +31,8 @@ module.exports = {
     USERS_MENTION: 'chat:users_mention',
     CONVERSATION_INITIALIZED: 'chat:conversation:initialized',
     MEMBER_ADDED_IN_CONVERSATION: 'chat:conversation:members:add',
-    MEMBERSHIP_EVENTS: 'chat:conversation:membership'
+    MEMBERSHIP_EVENTS: 'chat:conversation:membership',
+    COLLABORATION_JOIN: 'collaboration:join'
   },
   DEFAULT_CHANNEL: {
     name: 'general',
