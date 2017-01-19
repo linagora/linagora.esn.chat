@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatLocalState service', function() {
-  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, communitys, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
+  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -44,10 +44,9 @@ describe('The chatLocalState service', function() {
     }
 
     function conversationsServiceFactory(CHAT_CONVERSATION_TYPE) {
-      channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL, numOfReadedMessage: {}}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL, numOfReadedMessage: {}}];
-      groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}}];
-      communitys = [{_id: 'community1', type: CHAT_CONVERSATION_TYPE.COMMUNITY, numOfReadedMessage: {}}, {_id: 'community2', type: CHAT_CONVERSATION_TYPE.COMMUNITY, numOfReadedMessage: {}}];
-      conversations = channels.concat(groups).concat(communitys);
+      channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN, numOfReadedMessage: {}}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN, numOfReadedMessage: {}}];
+      groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, numOfReadedMessage: {}}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, numOfReadedMessage: {}}];
+      conversations = channels.concat(groups);
 
       conversationsServiceMock = {
         getConversations: function() {
@@ -95,7 +94,6 @@ describe('The chatLocalState service', function() {
     $rootScope.$digest();
     chatLocalStateService.conversations = conversations.slice(0);
     chatLocalStateService.channels = channels.slice(0);
-    chatLocalStateService.communityConversations = communitys.slice(0);
     chatLocalStateService.privateConversations = groups.slice(0);
   });
 
@@ -232,7 +230,7 @@ describe('The chatLocalState service', function() {
   describe('add conversation', function() {
 
     it('should add a channel', function() {
-      var channel = {_id: 'channel3', type: CHAT_CONVERSATION_TYPE.CHANNEL, numOfReadedMessage: {}};
+      var channel = {_id: 'channel3', type: CHAT_CONVERSATION_TYPE.OPEN, numOfReadedMessage: {}};
 
       chatLocalStateService.addConversation(channel);
       expect(chatLocalStateService.channels).to.include(channel);
@@ -240,23 +238,15 @@ describe('The chatLocalState service', function() {
     });
 
     it('should add a private conversation', function() {
-      var privateConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}};
+      var privateConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, numOfReadedMessage: {}};
 
       chatLocalStateService.addConversation(privateConversation);
       expect(chatLocalStateService.privateConversations).to.include(privateConversation);
       expect(chatLocalStateService.conversations).to.include(privateConversation);
     });
 
-    it('should add a community', function() {
-      var communityConversation = {_id: 'group3', type: CHAT_CONVERSATION_TYPE.COMMUNITY, numOfReadedMessage: {}};
-
-      chatLocalStateService.addConversation(communityConversation);
-      expect(chatLocalStateService.communityConversations).to.include(communityConversation);
-      expect(chatLocalStateService.conversations).to.include(communityConversation);
-    });
-
     it('should do nothing if conversation existed', function() {
-      var conversation = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE, numOfReadedMessage: {}};
+      var conversation = {_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, numOfReadedMessage: {}};
       var oldGroups = groups.slice(0);
 
       chatLocalStateService.addConversation(conversation);
@@ -265,9 +255,9 @@ describe('The chatLocalState service', function() {
 
     it('should insert in the correct order', function() {
       chatLocalStateService.conversations = [];
-      var conv1 = {_id: '1', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 9e9}, numOfReadedMessage: {}};
-      var conv2 = {_id: '2', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 6e9}, numOfReadedMessage: {}};
-      var conv3 = {_id: '3', type: CHAT_CONVERSATION_TYPE.PRIVATE, last_message: {date: new Date() + 3e9}, numOfReadedMessage: {}};
+      var conv1 = {_id: '1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, last_message: {date: new Date() + 9e9}, numOfReadedMessage: {}};
+      var conv2 = {_id: '2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, last_message: {date: new Date() + 6e9}, numOfReadedMessage: {}};
+      var conv3 = {_id: '3', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, last_message: {date: new Date() + 3e9}, numOfReadedMessage: {}};
 
       [conv1, conv2, conv3].forEach(chatLocalStateService.addConversation);
 
@@ -289,14 +279,6 @@ describe('The chatLocalState service', function() {
       conversations.splice(2, 1);
       expect(chatLocalStateService.conversations).to.deep.equals(conversations);
       expect(chatLocalStateService.privateConversations).to.deep.equals(groups.slice(1));
-    });
-
-    it('should correctly delete communityConversation conversation', function() {
-      chatLocalStateService.deleteConversation(communitys[0]);
-      $rootScope.$digest();
-      conversations.splice(4, 1);
-      expect(chatLocalStateService.conversations).to.deep.equals(conversations);
-      expect(chatLocalStateService.communityConversations).to.deep.equals(communitys.slice(1));
     });
 
     it('should correctly call chatConversationsService.deleteConversation', function() {
@@ -323,14 +305,6 @@ describe('The chatLocalState service', function() {
       conversations.splice(2, 1);
       expect(chatLocalStateService.conversations).to.deep.equals(conversations);
       expect(chatLocalStateService.privateConversations).to.deep.equals(groups.slice(1));
-    });
-
-    it('should correctly leave communityConversation conversation', function() {
-      chatLocalStateService.leaveConversation(communitys[0]);
-      $rootScope.$digest();
-      conversations.splice(4, 1);
-      expect(chatLocalStateService.conversations).to.deep.equals(conversations);
-      expect(chatLocalStateService.communityConversations).to.deep.equals(communitys.slice(1));
     });
 
     it('should correctly call chatConversationsService.leaveConversation', function() {
@@ -380,7 +354,7 @@ describe('The chatLocalState service', function() {
 
     it('should listen to CHAT_NAMESPACE:CHAT_EVENTS.NEW_CONVERSATION and add regular channel in channel cache', function() {
       var id = 'justAdded';
-      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.CHANNEL, last_message: {date: new Date() + 10e9}, numOfReadedMessage: {}};
+      var data = {_id: id, type: CHAT_CONVERSATION_TYPE.OPEN, last_message: {date: new Date() + 10e9}, numOfReadedMessage: {}};
 
       callback(data);
       expect(chatLocalStateService.channels[0]).to.equals(data);

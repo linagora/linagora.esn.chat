@@ -113,12 +113,10 @@
 
           replaceConversationInSortedArray(service.conversations, conversation);
 
-          if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+          if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
             replaceConversationInSortedArray(service.channels, conversation);
-          } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+          } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
             replaceConversationInSortedArray(service.privateConversations, conversation);
-          } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
-            replaceConversationInSortedArray(service.communityConversations, conversation);
           }
         });
       }
@@ -194,12 +192,10 @@
           session.ready.then(function(session) {
             conversation.unreadMessageCount = (conversation.numOfMessage || 0) - ((conversation.numOfReadedMessage || {})[session.user._id] || 0);
           });
-          if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+          if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
             insertConversationInSortedArray(service.channels, conversation);
-          } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+          } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
             insertConversationInSortedArray(service.privateConversations, conversation);
-          } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
-            insertConversationInSortedArray(service.communityConversations, conversation);
           }
         }
       }
@@ -214,12 +210,10 @@
 
           return;
         }
-        if (conversation.type === CHAT_CONVERSATION_TYPE.CHANNEL) {
+        if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
           array = service.channels;
-        } else if (conversation.type === CHAT_CONVERSATION_TYPE.PRIVATE) {
+        } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
           array = service.privateConversations;
-        } else if (conversation.type === CHAT_CONVERSATION_TYPE.COMMUNITY) {
-          array = service.communityConversations;
         }
 
         _.remove(array, {_id: conversation._id});

@@ -8,6 +8,10 @@
     .constant('CHAT_ATTACHMENT_PROVIDER', {
       conversation: 'chat.conversation'
     })
+    .constant('CHAT_MEMBER_STATUS', {
+      MEMBER: 'member',
+      NONE: 'none'
+    })
     .constant('CHAT_EVENTS', {
       MESSAGE_RECEIVED: 'chat:message:received',
       USER_CHANGE_STATE: 'user:state',
@@ -36,18 +40,24 @@
       CHAT_DEFAULT_ICON: '/images/default_avatar.png'
     })
     .constant('CHAT_CONVERSATION_TYPE', {
-      CHANNEL: 'channel',
-      PRIVATE: 'private',
-      COMMUNITY: 'community'
+      OPEN: 'open',
+      CONFIDENTIAL: 'confidential'
+    })
+    .constant('CHAT_CONVERSATION_MODE', {
+      CHANNEL: 'channel'
     })
     .constant('CHAT_DEFAULT_CHANNEL', {
       CHANNEL: {
         name: 'general',
-        type: 'channel',
+        type: 'restricted',
+        mode: 'channel',
         topic: 'default',
         purpose: 'default',
         isNotRead: false
       }
+    })
+    .constant('CHAT_OBJECT_TYPES', {
+      CONVERSATION: 'chat.conversation'
     })
     .constant('MENTION_CHOOSER_MAX_RESULT', 15)
     .constant('CHAT_MESSAGE_TYPE', {

@@ -102,8 +102,8 @@ describe('The linagora.esn.chat services', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
-    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
-    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
+    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}];
+    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
   }));
 
   describe('chatNotificationService service', function() {

@@ -1,6 +1,6 @@
 .chat-conversation-topbar
   .conversation-metadata
-    a {{size = (ctrl.conversation.members || []).length; size}}
+    a {{size = (ctrl.conversation.members_count || 0); size}}
       span.members(ng-if='size === 1') #{__('member')}
       span.members(ng-if='size !== 1') #{__('members')}
     span.divider |

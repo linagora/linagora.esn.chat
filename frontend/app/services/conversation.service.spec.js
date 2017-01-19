@@ -1,11 +1,20 @@
 'use strict';
 
-/* global sinon: false */
+/* global chai, sinon: false */
+
+var expect = chai.expect;
 
 describe('The linagora.esn.chat conversation service', function() {
-  var chatConversationService, $httpBackend, $rootScope;
+  var chatConversationService, $httpBackend, $rootScope, collaborationAPIMock;
   var id = '1';
   var user = '2';
+
+  beforeEach(function() {
+    collaborationAPIMock = {
+      join: sinon.spy(),
+      leave: sinon.spy()
+    };
+  });
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -13,6 +22,7 @@ describe('The linagora.esn.chat conversation service', function() {
         add: sinon.spy()
       });
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('collaborationAPI', collaborationAPIMock);
     })
   );
 
@@ -51,19 +61,17 @@ describe('The linagora.esn.chat conversation service', function() {
 
   describe('join function', function() {
     it('should call the right endpoint', function() {
-      $httpBackend.expectPUT('/chat/api/conversations/' + id + '/members/' + user).respond({});
       chatConversationService.join(id, user);
       $rootScope.$digest();
-      $httpBackend.flush();
+      expect(collaborationAPIMock.join).to.have.been.calledWith('chat.conversation', id, user);
     });
   });
 
   describe('leave function', function() {
     it('should call the right endpoint', function() {
-      $httpBackend.expectDELETE('/chat/api/conversations/' + id + '/members/' + user).respond({});
       chatConversationService.leave(id, user);
       $rootScope.$digest();
-      $httpBackend.flush();
+      expect(collaborationAPIMock.leave).to.have.been.calledWith('chat.conversation', id, user);
     });
   });
 });

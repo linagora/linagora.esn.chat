@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('the ChatFooterController controller', function() {
 
-  var $rootScope, $scope, $controller, conversation, session, conversationId, userId;
+  var $rootScope, $scope, $controller, conversation, session, conversationId, userId, CHAT_MEMBER_STATUS;
 
   beforeEach(function() {
 
@@ -30,11 +30,12 @@ describe('the ChatFooterController controller', function() {
       $provide.value('session', session);
     });
 
-    angular.mock.inject(function(_$rootScope_, _$controller_, _session_) {
+    angular.mock.inject(function(_$rootScope_, _$controller_, _session_, _CHAT_MEMBER_STATUS_) {
       $rootScope = _$rootScope_;
       $scope = $rootScope.$new();
       $controller = _$controller_;
       session = _session_;
+      CHAT_MEMBER_STATUS = _CHAT_MEMBER_STATUS_;
     });
   });
 
@@ -52,7 +53,7 @@ describe('the ChatFooterController controller', function() {
   describe('the $onInit function', function() {
 
     it('should set isMember flag to true when user is in conversation members', function() {
-      conversation.members = [{_id: userId}];
+      conversation.member_status = CHAT_MEMBER_STATUS.MEMBER;
 
       var controller = initController(conversation);
 
@@ -61,7 +62,7 @@ describe('the ChatFooterController controller', function() {
     });
 
     it('should set isMember flag to false when user is not in conversation members', function() {
-      conversation.members = [{_id: 'A'}, {_id: 'B'}];
+      conversation.member_status = CHAT_MEMBER_STATUS.NONE;
 
       var controller = initController(conversation);
 
