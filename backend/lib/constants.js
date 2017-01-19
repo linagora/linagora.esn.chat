@@ -21,6 +21,7 @@ module.exports = {
     USER_DISCONNECTION: 'user:disconnection',
     CHANNEL_CREATION: 'chat:channel:creation',
     CHANNEL_DELETION: 'chat:channel:deletion',
+    CHANNEL_SAVED: 'chat:channel:saved',
     TOPIC_UPDATED: 'chat:message:text:channel:topic',
     CONVERSATION_UPDATE: 'chat:conversation:update',
     USERS_MENTION: 'chat:users_mention',
@@ -57,6 +58,10 @@ module.exports = {
     MESSAGES: {
       TYPE_NAME: 'chat.messages',
       INDEX_NAME: 'chat.messages.idx'
+    },
+    CONVERSATIONS: {
+      TYPE_NAME: 'chat.conversations',
+      INDEX_NAME: 'chat.conversations.idx'
     }
   }
 };

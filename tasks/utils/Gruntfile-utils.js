@@ -1,19 +1,20 @@
 'use strict';
 
-var util = require('util');
-var fs = require('fs-extra');
-var path = require('path');
-var async = require('async');
-var MongoClient = require('mongodb').MongoClient;
-var Server = require('mongodb').Server;
-var EsnConfig = require('esn-elasticsearch-configuration');
+const util = require('util');
+const fs = require('fs-extra');
+const path = require('path');
+const async = require('async');
+const Q = require('q');
+const MongoClient = require('mongodb').MongoClient;
+const Server = require('mongodb').Server;
+const EsnConfig = require('esn-elasticsearch-configuration');
 
 function _args(grunt) {
-  var opts = ['test', 'chunk', 'ci', 'reporter'];
-  var args = {};
+  const opts = ['test', 'chunk', 'ci', 'reporter'];
+  const args = {};
 
   opts.forEach(function(optName) {
-    var opt = grunt.option(optName);
+    const opt = grunt.option(optName);
 
     if (opt) {
       args[optName] = '' + opt;
@@ -24,7 +25,7 @@ function _args(grunt) {
 }
 
 function _taskSuccessIfMatch(grunt, regex, info) {
-  var taskIsDone = false;
+  let taskIsDone = false;
 
   return function(chunk, done) {
     if (taskIsDone) { return; }
@@ -47,8 +48,8 @@ function GruntfileUtils(grunt, servers) {
 }
 
 GruntfileUtils.prototype.command = function command() {
-  var servers = this.servers;
-  var commandObject = {};
+  const servers = this.servers;
+  const commandObject = {};
 
   commandObject.redis = util.format('%s --port %s %s %s',
       servers.redis.cmd,
@@ -57,7 +58,7 @@ GruntfileUtils.prototype.command = function command() {
       (servers.redis.conf_file ? servers.redis.conf_file : ''));
 
   commandObject.mongo = function(repl) {
-    var replset = repl ?
+    const replset = repl ?
       util.format('--replSet \'%s\' --smallfiles --oplogSize 128', servers.mongodb.replicat_set_name) :
       '--nojournal';
 
@@ -81,7 +82,7 @@ GruntfileUtils.prototype.command = function command() {
 };
 
 GruntfileUtils.prototype.shell = function shell() {
-  var grunt = this.grunt;
+  const grunt = this.grunt;
 
   return {
     newShell: function(command, regex, info) {
@@ -99,8 +100,8 @@ GruntfileUtils.prototype.shell = function shell() {
 };
 
 GruntfileUtils.prototype.runGrunt = function runGrunt() {
-  var grunt = this.grunt;
-  var args = this.args;
+  const grunt = this.grunt;
+  const args = this.args;
 
   function _process(res) {
     if (res.fail) {
@@ -130,7 +131,7 @@ GruntfileUtils.prototype.runGrunt = function runGrunt() {
 };
 
 GruntfileUtils.prototype.setupEnvironment = function setupEnvironment() {
-  var servers = this.servers;
+  const servers = this.servers;
 
   return function() {
     try {
@@ -143,12 +144,12 @@ GruntfileUtils.prototype.setupEnvironment = function setupEnvironment() {
 };
 
 GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
-  var grunt = this.grunt;
-  var servers = this.servers;
+  const grunt = this.grunt;
+  const servers = this.servers;
 
   return function() {
     function _removeAllFilesInDirectory(directory) {
-      var files;
+      let files;
 
       try {
         files = fs.readdirSync(directory);
@@ -156,8 +157,8 @@ GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
         return;
       }
       if (files.length > 0) {
-        for (var i = 0; i < files.length; i++) {
-          var filePath = directory + '/' + files[i];
+        for (let i = 0; i < files.length; i++) {
+          const filePath = directory + '/' + files[i];
 
           if (fs.statSync(filePath).isFile()) {
             fs.unlinkSync(filePath);
@@ -173,8 +174,8 @@ GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
       }
     }
 
-    var testsFailed = !grunt.config.get('esn.tests.success');
-    var applog = path.join(servers.tmp, 'application.log');
+    const testsFailed = !grunt.config.get('esn.tests.success');
+    const applog = path.join(servers.tmp, 'application.log');
 
     if (testsFailed && fs.existsSync(applog)) {
       fs.copySync(applog, 'application.log');
@@ -186,22 +187,22 @@ GruntfileUtils.prototype.cleanEnvironment = function cleanEnvironment() {
       grunt.fail.fatal('error', 3);
     }
 
-    var done = this.async();
+    const done = this.async();
 
     done(true);
   };
 };
 
 GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
-  var grunt = this.grunt;
-  var servers = this.servers;
+  const grunt = this.grunt;
+  const servers = this.servers;
 
   return function() {
-    var done = this.async();
-    var command = this.args[0];
+    const done = this.async();
+    const command = this.args[0];
 
-    var _doReplSet = function() {
-      var client = new MongoClient(new Server(servers.host, servers.mongodb.port), {native_parser: true});
+    const _doReplSet = function() {
+      const client = new MongoClient(new Server(servers.host, servers.mongodb.port), {native_parser: true});
 
       client.open(function(err) {
         if (err) {
@@ -209,8 +210,8 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
 
           return done(false);
         }
-        var db = client.db('admin');
-        var replSetCommand = {
+        const db = client.db('admin');
+        let replSetCommand = {
           _id: servers.mongodb.replicat_set_name,
           members: [
             {_id: 0, host: ('127.0.0.1:' + servers.mongodb.port)}
@@ -232,8 +233,8 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
           if (response && response.ok === 1) {
             grunt.log.writeln('MongoDB - rs.initiate() done');
 
-            var nbExecuted = 0;
-            var finish = false;
+            let nbExecuted = 0;
+            let finish = false;
 
             async.doWhilst(function(callback) {
               setTimeout(function() {
@@ -283,15 +284,18 @@ GruntfileUtils.prototype.setupMongoReplSet = function setupMongoReplSet() {
 };
 
 GruntfileUtils.prototype.setupElasticsearchIndex = function() {
-  var grunt = this.grunt;
-  var servers = this.servers;
-  var p = path.normalize(__dirname + '/../../config/elasticsearch/');
+  const grunt = this.grunt;
+  const servers = this.servers;
+  const p = path.normalize(__dirname + '/../../config/elasticsearch/');
 
   return function() {
-    var done = this.async();
-    var esnConf = new EsnConfig({host: servers.host, port: servers.elasticsearch.port, path: p});
+    const done = this.async();
+    const esnConf = new EsnConfig({host: servers.host, port: servers.elasticsearch.port, path: p});
 
-    esnConf.createIndex('chat.messages').then(function() {
+    Q.all([
+      esnConf.createIndex('chat.messages'),
+      esnConf.createIndex('chat.conversations')
+    ]).then(function() {
       grunt.log.write('Elasticsearch settings are successfully added');
       done(true);
     }, done);

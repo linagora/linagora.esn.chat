@@ -383,4 +383,130 @@ describe('The Chat search API', function() {
       }
     });
   });
+
+  describe('on conversation creation', function() {
+    it('should index in elasticsearch', function(done) {
+      const self = this;
+      const conversation = {
+        name: 'Test Channel 1',
+        purpose: {
+          value: 'This is a test channel'
+        },
+        type: CONVERSATION_TYPE.CHANNEL
+      };
+      const conversation2 = {
+        name: 'Test Channel 2',
+        purpose: {
+          value: 'This is also a test channel'
+        },
+        type: CONVERSATION_TYPE.CHANNEL
+      };
+
+      Q.all([
+        Q.nfapply(app.lib.conversation.create, [conversation]),
+        Q.nfapply(app.lib.conversation.create, [conversation2])
+      ]).then(test, done);
+
+      function checkConversationsIndexed(conversations) {
+        const options = {
+          index: CONSTANTS.SEARCH.CONVERSATIONS.INDEX_NAME,
+          type: CONSTANTS.SEARCH.CONVERSATIONS.TYPE_NAME,
+          ids: conversations.map(conversation => conversation._id)
+        };
+
+        return Q.nfapply(self.helpers.elasticsearch.checkDocumentsIndexed, [options]);
+      }
+
+      function test(created) {
+        checkConversationsIndexed(created).then(function() {
+          done();
+        }, done);
+      }
+    });
+  });
+
+  describe('GET /api/conversations?search=', function() {
+    it('should return all public conversations even channels which user is not a member of', function(done) {
+      const self = this;
+      const search = 'searchme';
+
+      const publicChannel1 = {
+        name: 'First public channel: searchme',
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [userId]
+      };
+
+      const publicChannel2 = {
+        name: 'Second public channel',
+        topic: {
+          value: 'This channel topic is relevant: searchme'
+        },
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [anotherUserId]
+      };
+
+      const publicChannel3 = {
+        name: 'Third public channel',
+        purpose: {
+          value: 'This channel purpose is relevant: searchme'
+        },
+        type: CONVERSATION_TYPE.CHANNEL,
+        members: [anotherUserId, userId]
+      };
+
+      const privateChannel1 = {
+        name: 'A private channel: searchme',
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [anotherUserId, userId]
+      };
+
+      const privateChannel2 = {
+        name: 'This private channel does not belong to current user: searchme',
+        type: CONVERSATION_TYPE.PRIVATE,
+        members: [anotherUserId]
+      };
+
+      Q.all([
+          Q.nfapply(app.lib.conversation.create, [publicChannel1]),
+          Q.nfapply(app.lib.conversation.create, [publicChannel2]),
+          Q.nfapply(app.lib.conversation.create, [publicChannel3]),
+          Q.nfapply(app.lib.conversation.create, [privateChannel1]),
+          Q.nfapply(app.lib.conversation.create, [privateChannel2])
+        ]).then(waitForConversationsToBeIndexed)
+      .then(test)
+      .catch(done);
+
+    function test() {
+      request(app.express)
+        .get(`/api/conversations?search=${search}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+          const results = res.body.map(result => result._source.name);
+
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.headers['x-esn-items-count']).to.equal('4');
+          expect(results).to.include(publicChannel1.name);
+          expect(results).to.include(publicChannel2.name);
+          expect(results).to.include(publicChannel3.name);
+          expect(results).to.include(privateChannel1.name);
+          expect(results).to.not.include(privateChannel2.name);
+          done();
+        });
+      }
+
+      function waitForConversationsToBeIndexed(conversations) {
+        const options = {
+          index: CONSTANTS.SEARCH.CONVERSATIONS.INDEX_NAME,
+          type: CONSTANTS.SEARCH.CONVERSATIONS.TYPE_NAME,
+          ids: conversations.map(conversation => conversation._id)
+        };
+
+        return Q.nfapply(self.helpers.elasticsearch.checkDocumentsIndexed, [options]);
+      }
+    });
+  });
 });
