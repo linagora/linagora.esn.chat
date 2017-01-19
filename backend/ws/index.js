@@ -59,22 +59,19 @@ function init(dependencies, lib) {
     const conversation = data.conversation;
 
     sendDataToConversation(conversation, CONVERSATION_UPDATE, conversation);
-    if (data.deleteMembers) {
-      sendDataToUsers(data.deleteMembers, CHANNEL_DELETION, conversation);
-    }
   });
 
-  function sendDataToUsers(users, type, data) {
-    users.forEach(user => {
-      const sockets = helper.getUserSocketsFromNamespace(user._id || user, chatNamespace.sockets) || [];
+  function sendDataToMembers(members, type, data) {
+    members.forEach(member => {
+      const sockets = helper.getUserSocketsFromNamespace(member.member.id, chatNamespace.sockets) || [];
 
       sockets.forEach(socket => socket.emit(type, data));
     });
   }
 
   function sendDataToConversation(conversation, type, data) {
-    if (conversation.type === CONVERSATION_TYPE.PRIVATE || conversation.type === CONVERSATION_TYPE.COLLABORATION) {
-      sendDataToUsers(conversation.members, type, data);
+    if (conversation.type === CONVERSATION_TYPE.OPEN || conversation.type === CONVERSATION_TYPE.CONFIDENTIAL) {
+      sendDataToMembers(conversation.members, type, data);
     } else {
       chatNamespace.emit(type, data);
     }

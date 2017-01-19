@@ -1,19 +1,12 @@
 'use strict';
 
-const async = require('async');
-const _ = require('lodash');
 const Q = require('q');
 const CONSTANTS = require('../lib/constants');
-
+const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
 const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-const CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-const CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
-const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
-const CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
 
 module.exports = function(dependencies) {
 
@@ -21,24 +14,15 @@ module.exports = function(dependencies) {
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Types.ObjectId;
   const Conversation = mongoose.model('ChatConversation');
-  const ChatMessage = mongoose.model('ChatMessage');
   const pubsubGlobal = dependencies('pubsub').global;
   const pubsubLocal = dependencies('pubsub').local;
   const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
-  const channelSavedTopic = pubsubLocal.topic(CHANNEL_SAVED);
-  const channelUpdateTopic = pubsubGlobal.topic(CONVERSATION_UPDATE);
-  const channelDeletionTopic = pubsubGlobal.topic(CHANNEL_DELETION);
-  const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   const topicUpdateTopic = pubsubLocal.topic(TOPIC_UPDATED);
-  const membershipTopic = pubsubLocal.topic(MEMBERSHIP_EVENTS);
-  const ensureObjectId = require('./utils')(dependencies).ensureObjectId;
-  const messageLib = require('./message')(dependencies);
   const permission = require('./permission/conversation')(dependencies);
   const userConversationsFinders = [];
 
   return {
-    addMember,
     create,
     find,
     getAllForUser,
@@ -49,119 +33,27 @@ module.exports = function(dependencies) {
     listForUser,
     moderate,
     permission,
-    remove,
-    removeMember,
     registerUserConversationFinder,
     update,
     updateTopic
   };
 
+  function create(options, callback) {
+    const conversation = new Conversation(options);
+
+    conversation.save((err, saved) => {
+      if (!err) {
+        channelCreationTopic.publish(JSON.parse(JSON.stringify(saved)));
+      }
+      callback(err, saved);
+    });
+  }
+
   function createDefaultChannel(callback) {
     Conversation.findOneAndUpdate(
-      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type },
-      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type },
+      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode},
+      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode },
       { new: true, upsert: true, setDefaultsOnInsert: true}, callback);
-  }
-
-  function init(callback) {
-    createDefaultChannel(callback);
-  }
-
-  function getChannels(options, callback) {
-    Conversation.find({type: CONVERSATION_TYPE.CHANNEL, moderate: Boolean(options.moderate)}).populate('members', SKIP_FIELDS.USER).exec((err, channels) => {
-      channels = channels || [];
-      if (channels.length === 0) {
-        return createDefaultChannel((err, channel) => {
-          if (err) {
-            return callback(new Error('Can not create the default channel'));
-          }
-          callback(null, [channel]);
-        });
-      }
-      callback(err, channels);
-    });
-  }
-
-  function getById(channelId, callback) {
-    Conversation.findById(channelId).populate('members', SKIP_FIELDS.USER).exec(callback);
-  }
-
-  function remove(channelId, callback) {
-    Conversation.findOneAndRemove({_id: channelId}, (err, result) => {
-      if (err) {
-        return callback(err);
-      }
-
-      channelDeletionTopic.publish(result);
-      ChatMessage.remove({channel: channelId}, err => {
-        callback(err, result);
-      });
-    });
-  }
-
-  /**
-   *
-   * @param {string|[string]} options.type - allowed types if none provided all type are accepted
-   * @param {boolean} options.ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
-   *    This makes sense because everybody can access channels even if there are not member of it.
-   * @param {boolean} options.exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
-   * @param {[string]} options.members of members' id
-   * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
-   * @return {[Conversation]}
-   */
-  function find(options, callback) {
-    const type = options.type;
-    const ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
-    const exactMembersMatch = options.exactMembersMatch;
-    const members = options.members;
-    const name = options.name;
-    const moderate = Boolean(options.moderate);
-
-    if (exactMembersMatch && !members) {
-      throw new Error('Could not set exactMembersMatch to true without providing members');
-    }
-
-    if (ignoreMemberFilterForChannel && !members) {
-      throw new Error('Could not set ignoreMemberFilterForChannel to true without providing members');
-    }
-
-    let request = {moderate: moderate};
-
-    if (members) {
-      request.members = {
-        $all: members.map(function(participant) {
-          return new ObjectId(participant);
-        })
-      };
-    }
-
-    if (type) {
-      request.type = {$in: _.isArray(type) ? type : [type]};
-    }
-
-    if (name) {
-      request.name = name;
-    }
-
-    if (name === null) {
-      request.$or = [{name: {$exists: false}}, {name: null}];
-    }
-
-    if (ignoreMemberFilterForChannel && (!type || type.indexOf(CONVERSATION_TYPE.CHANNEL) > -1)) {
-      delete request.moderate;
-      request = {
-        $or: [request, {
-          type: CONVERSATION_TYPE.CHANNEL
-        }],
-        moderate: moderate
-      };
-    }
-
-    if (exactMembersMatch) {
-      request.members.$size = members.length;
-    }
-
-    Conversation.find(request).populate('members', SKIP_FIELDS.USER).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
   }
 
   function getAllForUser(user, options = {}) {
@@ -176,8 +68,95 @@ module.exports = function(dependencies) {
     return Q.all(userConversationsFinders.map(finder => wrap(finder))).then(result => [].concat.apply([], result));
   }
 
-  function listForUser(user, options, callback) {
-    Conversation.find({type: {$in: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE]}, members: {$in: [user._id]}}).exec(callback);
+  function getById(conversationId, callback) {
+    Conversation.findById(conversationId).exec(callback);
+  }
+
+  function getChannels(options, callback) {
+    Conversation.find({mode: CONVERSATION_MODE.CHANNEL, moderate: Boolean(options.moderate)}).exec((err, channels) => {
+      channels = channels || [];
+      if (channels.length === 0) {
+        return createDefaultChannel((err, channel) => {
+          if (err) {
+            return callback(new Error('Can not create the default channel'));
+          }
+          callback(null, [channel]);
+        });
+      }
+      callback(err, channels);
+    });
+  }
+
+  function init(callback) {
+    createDefaultChannel(callback);
+  }
+
+  /**
+   *
+   * @param {string|[string]} options.type - allowed types if none provided all type are accepted
+   * @param {boolean} options.ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
+   *    This makes sense because everybody can access channels even if there are not member of it.
+   * @param {boolean} options.exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
+   * @param {[string]} options.members of members' id
+   * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
+   * @return {[Conversation]}
+   */
+  function find(options, callback) {
+    const mode = options.mode;
+    const type = options.type;
+    const ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
+    const exactMembersMatch = options.exactMembersMatch;
+    const members = options.members;
+    const name = options.name;
+    const moderate = Boolean(options.moderate);
+
+    if (exactMembersMatch && !members) {
+      return callback(new Error('Could not set exactMembersMatch to true without providing members'));
+    }
+
+    if (ignoreMemberFilterForChannel && !members) {
+      return callback(new Error('Could not set ignoreMemberFilterForChannel to true without providing members'));
+    }
+
+    let request = {moderate: moderate};
+
+    if (members) {
+      request.members = {
+        $all: members.map(member => ({$elemMatch: {'member.objectType': member.member.objectType, 'member.id': member.member.id}}))
+      };
+    }
+
+    if (mode) {
+      request.mode = mode;
+    }
+
+    if (type) {
+      request.type = type;
+    }
+
+    if (name) {
+      request.name = name;
+    }
+
+    if (name === null) {
+      request.$or = [{name: {$exists: false}}, {name: null}];
+    }
+
+    if (ignoreMemberFilterForChannel && (!mode || mode.indexOf(CONVERSATION_MODE.CHANNEL) > -1)) {
+      delete request.moderate;
+      request = {
+        $or: [request, {
+          mode: CONVERSATION_MODE.CHANNEL
+        }],
+        moderate: moderate
+      };
+    }
+
+    if (exactMembersMatch) {
+      request.members.$size = members.length;
+    }
+
+    Conversation.find(request).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
   }
 
   function list(options, callback) {
@@ -206,7 +185,7 @@ module.exports = function(dependencies) {
         conversationQuery = conversationQuery.limit(options.limit);
       }
 
-      conversationQuery.sort(sort).populate('creator members last_message.creator', CONSTANTS.SKIP_FIELDS.USER).exec((err, conversations) => {
+      conversationQuery.sort(sort).populate('creator last_message.creator', CONSTANTS.SKIP_FIELDS.USER).exec((err, conversations) => {
         if (err) {
           return callback(err);
         }
@@ -218,115 +197,8 @@ module.exports = function(dependencies) {
     });
   }
 
-  function create(options, callback) {
-    async.waterfall([
-        function(callback) {
-          const conversation = new Conversation(options);
-
-          conversation.last_message = {
-            date: conversation.timestamps && conversation.timestamps.creation || new Date(),
-            user_mentions: []
-          };
-          conversation.numOfMessage = conversation.numOfMessage || 0;
-          conversation.numOfReadedMessage = conversation.numOfReadedMessage || {};
-          conversation.save(callback);
-        },
-        /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
-        function(conversation, _num, callback) {
-          channelSavedTopic.publish(conversation);
-          Conversation.populate(conversation, 'members', callback);
-        },
-        function(conversation, callback) {
-          channelCreationTopic.publish(JSON.parse(JSON.stringify(conversation)));
-          callback(null, conversation);
-        }
-    ], callback);
-  }
-
-  function addMember(conversationId, userId, callback) {
-    const userObjectId = ensureObjectId(userId);
-
-    Conversation.findByIdAndUpdate(conversationId, {
-      $addToSet: {members: userObjectId}
-    }, function(err, conversation) {
-      if (err) {
-        return callback(err);
-      }
-
-      channelAddMember.publish(conversation);
-      membershipTopic.publish({type: CONSTANTS.MEMBERSHIP_ACTION.JOIN, conversationId: conversationId, userId: userId});
-      messageLib.markAllAsRead(userId, conversation, callback);
-    });
-  }
-
-  function update(conversationId, modifications, callback) {
-
-    const mongoModifications = {};
-    let nextMongoModification = null;
-
-    if (modifications.newMembers && modifications.newMembers.length) {
-      mongoModifications.$addToSet = {
-        members: {
-          $each: modifications.newMembers.map(ensureObjectId)
-        }
-      };
-    }
-
-    if (modifications.deleteMembers && modifications.deleteMembers.length) {
-      mongoModifications.$pullAll = {
-        members: modifications.deleteMembers.map(ensureObjectId)
-      };
-    }
-
-    mongoModifications.$set = {};
-    if (modifications.name) {
-      mongoModifications.$set.name = modifications.name;
-    }
-
-    if (modifications.avatar) {
-      mongoModifications.$set.avatar = new ObjectId(modifications.avatar);
-    }
-
-    function done(callback, err, conversation) {
-      if (err) {
-        return callback(err);
-      }
-
-      Conversation.populate(conversation.toObject(), 'members', (err, conversation) => {
-        if (err) {
-          return callback(err);
-        }
-
-        channelUpdateTopic.publish({
-          conversation: conversation,
-          deleteMembers: modifications.deleteMembers
-        });
-
-        if (modifications.newMembers && modifications.newMembers.length) {
-          messageLib.markAllAsRead((nextMongoModification || mongoModifications).$addToSet.$each, conversation, callback);
-        } else {
-          callback(err, conversation);
-        }
-      });
-    }
-
-    if (mongoModifications.$addToSet && mongoModifications.$pullAll) {
-      //mongo does not allow to do those modification in one request
-      nextMongoModification = {$addToSet: mongoModifications.$addToSet};
-      delete mongoModifications.$addToSet;
-    }
-
-    if (_.isEmpty(mongoModifications.$set)) {
-      delete mongoModifications.$set;
-    }
-
-    Conversation.findOneAndUpdate({_id: conversationId}, mongoModifications, (err, conversation) => {
-      if (nextMongoModification) {
-        Conversation.findOneAndUpdate({_id: conversationId}, nextMongoModification, done.bind(null, callback));
-      } else {
-        done(callback, err, conversation);
-      }
-    });
+  function listForUser(user, options, callback) {
+    Conversation.find({'members.member.id': String(user._id), 'members.member.objectType': OBJECT_TYPES.USER}).exec(callback);
   }
 
   function moderate(conversationId, moderate, callback) {
@@ -341,22 +213,19 @@ module.exports = function(dependencies) {
     finder && userConversationsFinders.push(finder);
   }
 
-  function removeMember(conversationId, userId, callback) {
-    const unsetOperation = {};
+  function update(conversationId, modifications, callback) {
+    const mongoModifications = {};
 
-    unsetOperation['numOfReadedMessage.' + userId] = '';
-    Conversation.findByIdAndUpdate(conversationId, {
-      $pull: {members: new ObjectId(userId)},
-      $unset: unsetOperation
-    }, (err, conversation) => {
-      if (!err) {
-        channelUpdateTopic.publish({
-          conversation: conversation,
-          deleteMembers: [{_id: userId}]
-        });
-      }
-      callback(err, conversation);
-    });
+    mongoModifications.$set = {};
+    if (modifications.name) {
+      mongoModifications.$set.name = modifications.name;
+    }
+
+    if (modifications.avatar) {
+      mongoModifications.$set.avatar = new ObjectId(modifications.avatar);
+    }
+
+    Conversation.findOneAndUpdate({_id: conversationId}, mongoModifications, callback);
   }
 
   function updateTopic(conversationId, topic, callback) {

@@ -14,26 +14,11 @@ module.exports = function(dependencies) {
   const search = require('./search')(dependencies);
   const conversation = require('./conversation')(dependencies);
   const message = require('./message')(dependencies, {conversation, search});
-  const collaboration = require('./collaboration')(dependencies);
   const members = require('./members')(dependencies);
-  const userState = require('./user-state')(dependencies);
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies, {conversation, message});
 
-  function start(callback) {
-    listener.start();
-    userState.init();
-    moderate.start();
-    search.init();
-    conversation.registerUserConversationFinder(Q.denodeify(conversation.listForUser));
-    conversation.registerUserConversationFinder(Q.denodeify(collaboration.listForUser));
-    conversation.init(() => {
-      callback();
-    });
-  }
-
   return {
-    collaboration,
     constants,
     conversation,
     listener,
@@ -43,7 +28,16 @@ module.exports = function(dependencies) {
     models,
     search,
     start,
-    userState,
     utils
   };
+
+  function start(callback) {
+    listener.start();
+    moderate.start();
+    search.init();
+    conversation.registerUserConversationFinder(Q.denodeify(conversation.listForUser));
+    conversation.init(() => {
+      callback();
+    });
+  }
 };

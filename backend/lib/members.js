@@ -1,31 +1,42 @@
 'use strict';
 
 const Q = require('q');
+const CONSTANTS = require('./constants');
+const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
+const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 module.exports = function(dependencies) {
 
-  const providers = {
-    collaboration: require('./collaboration')(dependencies).getMembers
-  };
+  const collaborationModule = dependencies('collaboration');
+
+  const pubsubGlobal = dependencies('pubsub').global;
+  const pubsubLocal = dependencies('pubsub').local;
+  const channelAddMember = pubsubGlobal.topic(MEMBER_ADDED_IN_CONVERSATION);
+  const membershipTopic = pubsubLocal.topic(MEMBERSHIP_EVENTS);
 
   return {
-    addProvider,
-    getMembers
+    countMembers,
+    getMembers,
+    isMember,
+    start
   };
 
-  function addProvider(type, provider) {
-    providers[type] = provider;
+  function countMembers(conversation) {
+    return Q.denodeify(collaborationModule.member.countMembers)(CONSTANTS.OBJECT_TYPES.CONVERSATION, conversation._id);
   }
 
-  function defaultProvider(conversation) {
-    return Q(conversation.members || []);
+  function getMembers() {
+    return Q([]);
   }
 
-  function getMembers(conversation) {
-    return getProvider(conversation.type)(conversation);
+  function isMember(conversation, user) {
+    return Q.denodeify(collaborationModule.member.isMember)(conversation, {objectType: OBJECT_TYPES.USER, id: String(user._id)});
   }
 
-  function getProvider(type) {
-    return providers[type] ? providers[type] : defaultProvider;
+  function start() {
+    // TODO: Listen to collaboration events and forward events
+    //channelAddMember.publish(conversation);
+    //membershipTopic.publish({type: CONSTANTS.MEMBERSHIP_ACTION.JOIN, conversationId: conversationId, userId: userId});
   }
 };

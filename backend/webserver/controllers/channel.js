@@ -18,12 +18,12 @@ module.exports = function(dependencies, lib) {
           error: {
             code: 500,
             message: 'Server Error',
-            details: err.message || 'Error while getting channels'
+            details: 'Error while getting channels'
           }
         });
       }
 
-      utils.sendConversationResult(result, res);
+      utils.sendConversationResult(result, req.user, res);
     });
   }
 };

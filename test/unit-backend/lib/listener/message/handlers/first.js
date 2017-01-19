@@ -174,7 +174,7 @@ describe('The first channel message handler', function() {
       return {
         getById: function(channel, callback) {
           getSpy(channel);
-          callback(null, {members: [{_id: creator._id}]});
+          callback(null, {members: [{member: {id: String(creator._id), objectType: 'user'}}]});
         }
       };
     });
@@ -209,7 +209,11 @@ describe('The first channel message handler', function() {
         getById: function(channel, callback) {
           getSpy(channel);
           callback(null, {
-            members: [{_id: creator._id}, {_id: 1}, {_id: 2}],
+            members: [
+              {member: {id: String(creator._id), objectType: 'user'}},
+              {member: {id: 1, objectType: 'user'}},
+              {member: {id: 2, objectType: 'user'}}
+            ],
             toObject: function() {
               return this;
             }

@@ -1,6 +1,7 @@
 'use strict';
 
 const CONSTANTS = require('../../../constants');
+const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
 
 module.exports = function(dependencies) {
 
@@ -23,9 +24,8 @@ module.exports = function(dependencies) {
             return logger.error('Can not get channel %s', channel, err);
           }
 
-          conversation.members && conversation.members.filter(function(member) {
-            return String(member._id) !== String(data.message.creator._id);
-          }).forEach(function(member) {
+          conversation.members && conversation.members.filter(member => (member.member.objectType === OBJECT_TYPES.USER && String(member.member.id) !== String(data.message.creator._id)))
+          .forEach(member => {
             pubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_INITIALIZED).publish({room: data.room, message: data.message, conversation: conversation.toObject(), target: member});
           });
         });
