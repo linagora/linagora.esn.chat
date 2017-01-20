@@ -118,7 +118,11 @@ module.exports = function(dependencies, lib) {
   }
 
   function list(req, res) {
-    return lib.conversation.list(req.query, sendResponse(req, res));
+    if (req.query.search) {
+      return searchForPublicConversations(req.query.search, req, res);
+    }
+
+    lib.conversation.list(req.query, sendResponse(req, res));
   }
 
   function markAllMessageOfAConversationReaded(req, res) {
@@ -225,7 +229,7 @@ module.exports = function(dependencies, lib) {
         }
         res.header('X-ESN-Items-Count', result.total_count || 0);
 
-        return res.status(200).json(result.list);
+        utils.sendConversationResult(result.list, req.user, res);
       });
     });
   }

@@ -93,6 +93,14 @@ describe('The Chat search API', function() {
         queryOne: function(tuple, query, callback) {
           callback(null, {});
         },
+        member: {
+          isMember: function(collaboration, tuple, callback) {
+            callback(null, _.find(collaboration.members, userAsMember));
+          },
+          countMembers: function(objectType, id, callback) {
+            callback(null, 0);
+          }
+        },
         permission: {
           canWrite: function(collaboration, tuple, callback) {
             callback(null, true);
@@ -333,14 +341,14 @@ describe('The Chat search API', function() {
         purpose: {
           value: 'This is a test channel'
         },
-        type: CONVERSATION_TYPE.CHANNEL
+        type: CONVERSATION_TYPE.OPEN
       };
       const conversation2 = {
         name: 'Test Channel 2',
         purpose: {
           value: 'This is also a test channel'
         },
-        type: CONVERSATION_TYPE.CHANNEL
+        type: CONVERSATION_TYPE.OPEN
       };
 
       Q.all([
@@ -373,8 +381,8 @@ describe('The Chat search API', function() {
 
       const publicChannel1 = {
         name: 'First public channel: searchme',
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [userId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [userAsMember]
       };
 
       const publicChannel2 = {
@@ -382,8 +390,8 @@ describe('The Chat search API', function() {
         topic: {
           value: 'This channel topic is relevant: searchme'
         },
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [anotherUserId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [asMember(anotherUserId)]
       };
 
       const publicChannel3 = {
@@ -391,20 +399,20 @@ describe('The Chat search API', function() {
         purpose: {
           value: 'This channel purpose is relevant: searchme'
         },
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [anotherUserId, userId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [asMember(anotherUserId), userAsMember]
       };
 
       const privateChannel1 = {
         name: 'A private channel: searchme',
-        type: CONVERSATION_TYPE.PRIVATE,
-        members: [anotherUserId, userId]
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [asMember(anotherUserId), userAsMember]
       };
 
       const privateChannel2 = {
         name: 'This private channel does not belong to current user: searchme',
-        type: CONVERSATION_TYPE.PRIVATE,
-        members: [anotherUserId]
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [asMember(anotherUserId)]
       };
 
       Q.all([

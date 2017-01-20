@@ -32,11 +32,11 @@ module.exports = function(dependencies) {
         or: [
           {
             and: [
-              {term: {type: CONSTANTS.CONVERSATION_TYPE.PRIVATE}},
+              {term: {type: CONSTANTS.CONVERSATION_TYPE.CONFIDENTIAL}},
               {or: conversationIds.map(id => ({term: {id: id}}))}
             ]
           },
-          {term: {type: CONSTANTS.CONVERSATION_TYPE.CHANNEL}}
+          {term: {type: CONSTANTS.CONVERSATION_TYPE.OPEN}}
         ]
       }
     };

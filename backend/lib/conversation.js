@@ -5,6 +5,7 @@ const CONSTANTS = require('../lib/constants');
 const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
 const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
@@ -19,6 +20,7 @@ module.exports = function(dependencies) {
   const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   const topicUpdateTopic = pubsubLocal.topic(TOPIC_UPDATED);
+  const channelSavedTopic = pubsubLocal.topic(CHANNEL_SAVED);
   const permission = require('./permission/conversation')(dependencies);
   const userConversationsFinders = [];
 
@@ -44,6 +46,7 @@ module.exports = function(dependencies) {
     conversation.save((err, saved) => {
       if (!err) {
         channelCreationTopic.publish(JSON.parse(JSON.stringify(saved)));
+        channelSavedTopic.publish(saved);
       }
       callback(err, saved);
     });
