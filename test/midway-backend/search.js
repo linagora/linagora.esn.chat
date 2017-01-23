@@ -14,10 +14,14 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The Chat search API', function() {
 
-  let deps, mongoose, userId, user, anotherUserId, anotherUser, app;
+  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember;
 
   function dependencies(name) {
     return deps[name];
+  }
+
+  function asMember(id) {
+    return {member: {id: String(id), objectType: 'user'}};
   }
 
   beforeEach(function(done) {
@@ -28,6 +32,7 @@ describe('The Chat search API', function() {
     mongoose.connect(this.testEnv.mongoUrl);
     userId = mongoose.Types.ObjectId();
     anotherUserId = mongoose.Types.ObjectId();
+    userAsMember = asMember(userId);
 
     // all the following mockery calls are here to avoid to intialize OP.core but mock what is needed by ES and pubsub modules.
     mockery.registerMock('../esn-config', function() {
@@ -79,11 +84,22 @@ describe('The Chat search API', function() {
         }
       },
       collaboration: {
+        registerCollaborationModel: function(objectType, name, schema) {
+          return mongoose.model(name, schema);
+        },
         getCollaborationsForUser: function(user, options, callback) {
           callback(null, []);
         },
         queryOne: function(tuple, query, callback) {
           callback(null, {});
+        },
+        member: {
+          isMember: function(collaboration, tuple, callback) {
+            callback(null, _.find(collaboration.members, userAsMember));
+          },
+          countMembers: function(objectType, id, callback) {
+            callback(null, 0);
+          }
         },
         permission: {
           canWrite: function(collaboration, tuple, callback) {
@@ -98,7 +114,27 @@ describe('The Chat search API', function() {
       },
       db: {
         mongo: {
-          mongoose: mongoose
+          mongoose: mongoose,
+          models: {
+            'base-collaboration': function(definition) {
+              const Tuple = new mongoose.Schema({
+                objectType: {type: String, required: true},
+                id: {type: mongoose.Schema.Types.Mixed, required: true}
+              }, {_id: false});
+
+              definition.members = [
+                {
+                  member: {type: Tuple.tree, required: true},
+                  status: {type: String},
+                  timestamps: {
+                    creation: {type: Date, default: Date.now}
+                  }
+                }
+              ];
+
+              return new mongoose.Schema(definition);
+            }
+          }
         }
       },
       authorizationMW: {
@@ -189,26 +225,26 @@ describe('The Chat search API', function() {
 
       const publicChannel1 = {
         name: 'A public channel',
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [userId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [userAsMember]
       };
 
       const publicChannel2 = {
         name: 'Another public channel',
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [anotherUserId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [asMember(anotherUserId)]
       };
 
       const privateChannel1 = {
         name: 'A private channel I am member of',
-        type: CONVERSATION_TYPE.PRIVATE,
-        members: [userId, anotherUserId]
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [userAsMember, asMember(anotherUserId)]
       };
 
       const privateChannel2 = {
         name: 'A private channel I am not member of',
-        type: CONVERSATION_TYPE.PRIVATE,
-        members: [anotherUserId]
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [asMember(anotherUserId)]
       };
 
       const message = {
@@ -295,93 +331,6 @@ describe('The Chat search API', function() {
         return Q.nfapply(self.helpers.elasticsearch.checkDocumentsIndexed, [options]);
       }
     });
-
-    it('should return messages from collaboration conversations where current user is member', function(done) {
-      const self = this;
-      const collaboration = {
-        objectType: 'community',
-        _id: mongoose.Types.ObjectId()
-      };
-      const search = 'searchme';
-
-      deps.collaboration.getCollaborationsForUser = function(user, options, callback) {
-        callback(null, [collaboration]);
-      };
-
-      const publicChannel = {
-        name: 'A public channel',
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: []
-      };
-
-      const collaborationChannel = {
-        name: 'A collaboration channel',
-        type: CONVERSATION_TYPE.COLLABORATION,
-        collaboration: {
-          objectType: collaboration.objectType,
-          id: String(collaboration._id)
-        }
-      };
-
-      const message = {
-        text: 'This is the message in public channel I am not member: searchme',
-        type: 'text'
-      };
-
-      const message2 = {
-        text: 'This is the message in collaboration channel I am member: searchme',
-        type: 'text'
-      };
-
-      const message3 = {
-        text: 'This is another message in collaboration channel where term is not present',
-        type: 'text'
-      };
-
-      Q.spread([
-        Q.nfapply(app.lib.conversation.create, [publicChannel]),
-        Q.nfapply(app.lib.conversation.create, [collaborationChannel])
-      ], (publicChan, collaborationChan) => {
-
-        message.channel = publicChan._id;
-        message2.channel = collaborationChan._id;
-        message3.channel = collaborationChan._id;
-
-        return Q.all([
-          Q.nfapply(app.lib.message.create, [message]),
-          Q.nfapply(app.lib.message.create, [message2]),
-          Q.nfapply(app.lib.message.create, [message3])
-        ]);
-
-      }).then(waitForMessagesToBeIndexed)
-      .then(test)
-      .catch(done);
-
-    function test() {
-      request(app.express)
-        .get(`/api/messages?search=${search}`)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          expect(res.headers['x-esn-items-count']).to.equal('1');
-          expect(res.body).to.shallowDeepEqual([{text: message2.text, channel: {_id: String(message2.channel)}}]);
-          done();
-        });
-      }
-
-      function waitForMessagesToBeIndexed(messages) {
-        const options = {
-          index: CONSTANTS.SEARCH.MESSAGES.INDEX_NAME,
-          type: CONSTANTS.SEARCH.MESSAGES.TYPE_NAME,
-          ids: messages.map(message => message._id)
-        };
-
-        return Q.nfapply(self.helpers.elasticsearch.checkDocumentsIndexed, [options]);
-      }
-    });
   });
 
   describe('on conversation creation', function() {
@@ -392,14 +341,14 @@ describe('The Chat search API', function() {
         purpose: {
           value: 'This is a test channel'
         },
-        type: CONVERSATION_TYPE.CHANNEL
+        type: CONVERSATION_TYPE.OPEN
       };
       const conversation2 = {
         name: 'Test Channel 2',
         purpose: {
           value: 'This is also a test channel'
         },
-        type: CONVERSATION_TYPE.CHANNEL
+        type: CONVERSATION_TYPE.OPEN
       };
 
       Q.all([
@@ -432,8 +381,8 @@ describe('The Chat search API', function() {
 
       const publicChannel1 = {
         name: 'First public channel: searchme',
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [userId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [userAsMember]
       };
 
       const publicChannel2 = {
@@ -441,8 +390,8 @@ describe('The Chat search API', function() {
         topic: {
           value: 'This channel topic is relevant: searchme'
         },
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [anotherUserId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [asMember(anotherUserId)]
       };
 
       const publicChannel3 = {
@@ -450,20 +399,20 @@ describe('The Chat search API', function() {
         purpose: {
           value: 'This channel purpose is relevant: searchme'
         },
-        type: CONVERSATION_TYPE.CHANNEL,
-        members: [anotherUserId, userId]
+        type: CONVERSATION_TYPE.OPEN,
+        members: [asMember(anotherUserId), userAsMember]
       };
 
       const privateChannel1 = {
         name: 'A private channel: searchme',
-        type: CONVERSATION_TYPE.PRIVATE,
-        members: [anotherUserId, userId]
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [asMember(anotherUserId), userAsMember]
       };
 
       const privateChannel2 = {
         name: 'This private channel does not belong to current user: searchme',
-        type: CONVERSATION_TYPE.PRIVATE,
-        members: [anotherUserId]
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [asMember(anotherUserId)]
       };
 
       Q.all([

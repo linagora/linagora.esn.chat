@@ -65,26 +65,7 @@ describe('The channel controller', function() {
           return {
             json: function(json) {
               expect(lib.conversation.getChannels).to.have.been.calledWith({});
-              expect(json).to.shallowDeepEqual({error: {code: 500}});
-              done();
-            }
-          };
-        }
-      });
-    });
-
-    it('should send back HTTP 200 with the lib.getChannels result', function(done) {
-      result = [{id: 1}, {id: 2}];
-      const controller = getController(this.moduleHelpers.dependencies, lib);
-
-      controller.getChannels({query: {}}, {
-        status: function(code) {
-          expect(code).to.equal(200);
-
-          return {
-            json: function(json) {
-              expect(lib.conversation.getChannels).to.have.been.calledWith({});
-              expect(json).to.deep.equal(result);
+              expect(json).to.shallowDeepEqual({error: {code: 500, details: 'Error while getting channels'}});
               done();
             }
           };

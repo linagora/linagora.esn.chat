@@ -9,7 +9,7 @@
     var self = this;
 
     self.conversation = {
-      type: CHAT_CONVERSATION_TYPE.CHANNEL,
+      type: CHAT_CONVERSATION_TYPE.OPEN,
       domain: session.domain._id
     };
     self.create = create;

@@ -13,12 +13,12 @@ module.exports = function(dependencies, lib) {
     sendHTTP500Error
   };
 
-  function sendConversationResult(conversation, res, status = 200) {
+  function sendConversationResult(conversation, user, res, status = 200) {
     if (Array.isArray(conversation)) {
-      return sendConversationsResult(conversation, res, status);
+      return sendConversationsResult(conversation, user, res, status);
     }
 
-    return denormalize(conversation).then(denormalized => {
+    return denormalize(conversation, user).then(denormalized => {
       res.status(status).json(denormalized);
     }, err => {
       logger.error('Can not denormalize conversation', err);
@@ -26,8 +26,8 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function sendConversationsResult(conversations, res, status = 200) {
-    return Q.all(conversations.map(conversation => denormalize(conversation))).then(denormalized => {
+  function sendConversationsResult(conversations, user, res, status = 200) {
+    return Q.all(conversations.map(conversation => denormalize(conversation, user))).then(denormalized => {
       res.status(status).json(denormalized);
     }, err => {
       logger.error('Can not denormalize conversations', err);

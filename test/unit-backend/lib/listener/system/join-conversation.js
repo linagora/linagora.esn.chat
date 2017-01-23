@@ -40,7 +40,7 @@ describe('The join conversation system message handler', function() {
           topic: function(name) {
             if (name === CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED) {
               return newMessageTopic;
-            } else if (name === CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS) {
+            } else if (name === CONSTANTS.NOTIFICATIONS.COLLABORATION_JOIN) {
               return membershipTopic;
             }
           }
@@ -50,14 +50,14 @@ describe('The join conversation system message handler', function() {
   });
 
   describe('The start function', function() {
-    it('should subscribe to MEMBERSHIP_EVENTS topic', function() {
+    it('should subscribe to COLLABORATION_JOIN topic', function() {
       const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies);
 
       module.start();
       expect(membershipTopic.subscribe).to.have.been.calledOnce;
     });
 
-    it('should publish event on MESSAGE_RECEIVED topic when event is MEMBERSHIP_ACTION.JOIN', function(done) {
+    it('should publish event on MESSAGE_RECEIVED topic when event collaboration is conversation', function(done) {
       let handler;
 
       membershipTopic.subscribe = function(callback) {
@@ -75,10 +75,11 @@ describe('The join conversation system message handler', function() {
         })
       };
       const event = {
-        type: CONSTANTS.MEMBERSHIP_ACTION.JOIN,
-        userId: userId,
-        conversationId: conversationId,
-        timestamp: timestamp
+        collaboration: {
+          objectType: 'chat.conversation',
+          id: conversationId
+        },
+        target: userId
       };
       const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies, {conversation});
 
@@ -100,7 +101,7 @@ describe('The join conversation system message handler', function() {
       }, done);
     });
 
-    it('should not publish event on MESSAGE_RECEIVED topic when event is not MEMBERSHIP_ACTION.JOIN', function(done) {
+    it('should not publish event on MESSAGE_RECEIVED topic when event is for chat conversation', function(done) {
       let handler;
 
       membershipTopic.subscribe = function(callback) {
@@ -118,9 +119,10 @@ describe('The join conversation system message handler', function() {
         })
       };
       const event = {
-        type: CONSTANTS.MEMBERSHIP_ACTION.JOIN + 'foo',
-        userId: userId,
-        conversationId: conversationId
+        collaboration: {
+          objectType: 'community',
+          id: 1
+        }
       };
       const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies, {conversation});
 

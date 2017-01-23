@@ -1,25 +1,22 @@
 'use strict';
 
-const cleanUser = require('./utils').cleanUser;
 const CONSTANTS = require('../constants');
-const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 
 module.exports = function(dependencies) {
 
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Schema.ObjectId;
+  const baseCollaboration = dependencies('db').mongo.models['base-collaboration'];
+  const collaborationModule = dependencies('collaboration');
 
-  const ConversationSchema = new mongoose.Schema({
+  const ConversationDefinition = {
     name: {type: String},
-    type: {type: String, enum: [CONVERSATION_TYPE.CHANNEL, CONVERSATION_TYPE.PRIVATE, CONVERSATION_TYPE.COLLABORATION], required: true, index: true},
-    creator: {type: ObjectId, ref: 'User'},
+    // collaboration type
+    type: {type: String, trim: true, required: true, default: 'open'},
+    mode: {type: String, trim: true, default: CONVERSATION_MODE.CHANNEL},
     avatar: ObjectId,
     isNotRead: {type: Boolean},
-    members: [{type: ObjectId, ref: 'User', index: true}],
-    collaboration: {
-      id: {type: String},
-      objectType: {type: String}
-    },
     moderate: {type: Boolean, default: false},
     topic: {
       value: {type: String},
@@ -41,23 +38,21 @@ module.exports = function(dependencies) {
       user_mentions: [{type: ObjectId, ref: 'User'}]
     },
     domain: {type: ObjectId, ref: 'Domain'},
+    membershipRequests: [
+      {
+        user: {type: ObjectId, ref: 'User'},
+        workflow: {type: String, required: true},
+        timestamp: {
+          creation: {type: Date, default: Date.now}
+        }
+      }
+    ],
     schemaVersion: {type: Number, default: 1},
     numOfReadedMessage: mongoose.Schema.Types.Mixed, // this will be a map that associate a num of unread message to a userId (ie: { 'userId1': 0, 'userId2': 2, 'userId3': 3})
     numOfMessage: {type: Number, default: 0}
-  });
+  };
 
-  /*eslint no-unused-vars: ["error", {"args": "after-used"}]*/
-  function cleanConversation(original, object) {
-    object.members && object.members.map(cleanUser);
+  const ConversationSchema = baseCollaboration(ConversationDefinition, CONSTANTS.OBJECT_TYPES.CONVERSATION);
 
-    return object;
-  }
-
-  ConversationSchema.options.toObject = ConversationSchema.options.toObject || {};
-  ConversationSchema.options.toObject.transform = cleanConversation;
-
-  ConversationSchema.options.toJSON = ConversationSchema.options.toJSON || {};
-  ConversationSchema.options.toJSON.transform = cleanConversation;
-
-  return mongoose.model('ChatConversation', ConversationSchema);
+  return collaborationModule.registerCollaborationModel(CONSTANTS.OBJECT_TYPES.CONVERSATION, 'ChatConversation', ConversationSchema);
 };

@@ -67,7 +67,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
     $rootScope = _$rootScope_;
     sessionMock.ready = $q.when({user: user});
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
-    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
+    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
   }));
 
   it('it should listen for comversation deletion and update cache correctly', function() {
@@ -173,13 +173,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should fetch data from the rest API', function() {
       var conversations = [{
         _id: 1,
-        type: CHAT_CONVERSATION_TYPE.CHANNEL
+        type: CHAT_CONVERSATION_TYPE.OPEN
       }, {
         _id: 2,
-        type: CHAT_CONVERSATION_TYPE.COMMUNITY
-      }, {
-        _id: 3,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE
+        type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
       var callback = sinon.spy();
 
@@ -191,8 +188,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       expect(callback).to.have.been.calledWith(sinon.match({
         0: conversations[0],
         1: conversations[1],
-        2: conversations[2],
-        length: 3
+        length: 2
       }));
     });
   });
@@ -201,10 +197,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should fetch data from the rest API', function() {
       var conversations = [{
         _id: 1,
-        type: CHAT_CONVERSATION_TYPE.CHANNEL
+        type: CHAT_CONVERSATION_TYPE.OPEN
       }, {
         _id: 2,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE
+        type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
       var callback = sinon.spy();
 
@@ -222,10 +218,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should not fetch data from the rest API when data has been cached from the first retrieve', function() {
       var conversations = [{
         _id: 1,
-        type: CHAT_CONVERSATION_TYPE.CHANNEL
+        type: CHAT_CONVERSATION_TYPE.OPEN
       }, {
         _id: 2,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE
+        type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
       var callback = sinon.spy();
 
@@ -245,10 +241,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should fetch data from the rest API when data has been cached from the first retrieve and if resetCache has been called mainwhile', function() {
       var conversations = [{
         _id: 1,
-        type: CHAT_CONVERSATION_TYPE.CHANNEL
+        type: CHAT_CONVERSATION_TYPE.OPEN
       }, {
         _id: 2,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE
+        type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
       var callback = sinon.spy();
 
@@ -259,10 +255,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
 
       var newConversations = [{
         _id: 42,
-        type: CHAT_CONVERSATION_TYPE.CHANNEL
+        type: CHAT_CONVERSATION_TYPE.OPEN
       }, {
         _id: 2,
-        type: CHAT_CONVERSATION_TYPE.PRIVATE
+        type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
 
       $httpBackend.expectGET('/chat/api/user/conversations').respond(newConversations);
@@ -281,7 +277,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
     it('should fetch data from the rest API the first time', function() {
       sessionMock.ready = $q.when({user: user});
       var groups = [1, 2].map(function(i) {
-        return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
+        return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
       var callback = sinon.spy();
 
@@ -297,7 +293,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
 
     it('should not fetch data from the rest API when data has been cached from the first retieve', function() {
       var groups = [1, 2].map(function(i) {
-        return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
+        return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
 
       $httpBackend.expectGET('/chat/api/user/conversations').respond(groups);
@@ -317,7 +313,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
 
     it('should fetch data from the rest API when data has been cached from the first retieve if reset cache has been called mainwhile', function() {
       var groups = [1, 2].map(function(i) {
-        return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
+        return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
 
       $httpBackend.expectGET('/chat/api/user/conversations').respond(groups);
@@ -326,7 +322,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       $httpBackend.flush();
 
       var newGroups = [1, 2, 3].map(function(i) {
-        return {_id: i, type: CHAT_CONVERSATION_TYPE.PRIVATE, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
+        return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
 
       $httpBackend.expectGET('/chat/api/user/conversations').respond(newGroups);

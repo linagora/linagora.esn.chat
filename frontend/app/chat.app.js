@@ -5,6 +5,7 @@
     'esn.core',
     'esn.router',
     'restangular',
+    'esn.collaboration',
     'esn.search',
     'esn.attachment',
     'esn.attachment-list',

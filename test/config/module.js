@@ -16,6 +16,7 @@ angular.module('esn.oembed', []);
 angular.module('esn.oembed.image', []);
 angular.module('esn.localstorage', []);
 angular.module('esn.file', []);
+angular.module('esn.collaboration', []);
 angular.module('esn.lodash-wrapper', []);
 angular.module('esn.provider', [])
   .factory('newProvider', function() {});

@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationsService', chatConversationsService);
 
-    function chatConversationsService($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
+    function chatConversationsService($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
       var defer = $q.defer();
       var conversationsPromise = defer.promise;
       var sio = livenotification(CHAT_NAMESPACE);
@@ -61,11 +61,11 @@
       }
 
       function getPrivateConversations() {
-        return getConversationByType(CHAT_CONVERSATION_TYPE.PRIVATE);
+        return getConversationByType(CHAT_CONVERSATION_TYPE.CONFIDENTIAL);
       }
 
       function getChannels() {
-        return getConversationByType(CHAT_CONVERSATION_TYPE.CHANNEL);
+        return getConversationByType(CHAT_CONVERSATION_TYPE.OPEN);
       }
 
       function getConversation(conversationId) {
@@ -97,13 +97,15 @@
       }
 
       function addPrivateConversation(privateConversation) {
-        privateConversation.type = CHAT_CONVERSATION_TYPE.PRIVATE;
+        privateConversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
+        privateConversation.mode = CHAT_CONVERSATION_MODE.CHANNEL;
 
         return postConversations(privateConversation);
       }
 
       function addChannels(channel) {
-        channel.type = CHAT_CONVERSATION_TYPE.CHANNEL;
+        channel.type = CHAT_CONVERSATION_TYPE.PUBLIC;
+        channel.mode = CHAT_CONVERSATION_MODE.CHANNEL;
 
         return postConversations(channel);
       }

@@ -12,21 +12,6 @@ module.exports = function(dependencies, lib, router) {
 
   router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, controller.get);
   router.put('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.update);
-  router.delete('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRemove, controller.remove);
-
-  router.put('/conversations/:id/members/:user_id',
-    authorizationMW.requiresAPILogin,
-    middleware.load,
-    middleware.loadUser,
-    middleware.canJoin,
-    controller.joinConversation);
-
-  router.delete('/conversations/:id/members/:user_id',
-    authorizationMW.requiresAPILogin,
-    middleware.load,
-    middleware.loadUser,
-    middleware.canLeave,
-    controller.leaveConversation);
 
   router.get('/conversations/:id/messages', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, messageController.getForConversation);
 
@@ -40,6 +25,6 @@ module.exports = function(dependencies, lib, router) {
     middleware.canRead,
     messageController.getAttachmentsForConversation);
 
-  router.get('/user/conversations/private', authorizationMW.requiresAPILogin, controller.findMyPrivateConversations);
-  router.get('/user/conversations', authorizationMW.requiresAPILogin, controller.findMyConversations);
+  router.get('/user/conversations/private', authorizationMW.requiresAPILogin, controller.getUserPrivateConversations);
+  router.get('/user/conversations', authorizationMW.requiresAPILogin, controller.getUserConversations);
 };

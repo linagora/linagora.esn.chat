@@ -1,14 +1,13 @@
 'use strict';
 
 const Q = require('q');
+const MEMBER_STATUS = require('../../lib/constants').MEMBER_STATUS;
 
 module.exports = function(dependencies, lib) {
 
-  const denormalizeUser = dependencies('denormalizeUser');
-
   return denormalize;
 
-  function denormalize(conversation) {
+  function denormalize(conversation, user) {
     if (!conversation) {
       return Q({});
     }
@@ -18,19 +17,15 @@ module.exports = function(dependencies, lib) {
     }
 
     return Q.allSettled([
-      denormalizeMembers(conversation)
-    ]).spread(function(members) {
-      conversation.members = members.state === 'fulfilled' ? members.value || [] : [];
+      lib.members.isMember(conversation, user),
+      lib.members.countMembers(conversation)
+    ]).spread(function(isMember, numberOfMembers) {
+      conversation.member_status = isMember.state === 'fulfilled' ? (isMember.value ? MEMBER_STATUS.MEMBER : MEMBER_STATUS.NONE) || MEMBER_STATUS.NONE : MEMBER_STATUS.NONE;
+      conversation.members_count = numberOfMembers.state === 'fulfilled' ? numberOfMembers.value || 0 : 0;
+
+      delete conversation.members;
 
       return conversation;
     });
-  }
-
-  function denormalizeMember(member) {
-    return denormalizeUser.denormalize(member);
-  }
-
-  function denormalizeMembers(conversation) {
-    return lib.members.getMembers(conversation).then(members => Q.all(members.map(denormalizeMember)));
   }
 };

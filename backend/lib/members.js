@@ -1,31 +1,28 @@
 'use strict';
 
 const Q = require('q');
+const CONSTANTS = require('./constants');
+const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
 
 module.exports = function(dependencies) {
 
-  const providers = {
-    collaboration: require('./collaboration')(dependencies).getMembers
-  };
+  const collaborationModule = dependencies('collaboration');
 
   return {
-    addProvider,
-    getMembers
+    countMembers,
+    getMembers,
+    isMember
   };
 
-  function addProvider(type, provider) {
-    providers[type] = provider;
+  function countMembers(conversation) {
+    return Q.denodeify(collaborationModule.member.countMembers)(CONSTANTS.OBJECT_TYPES.CONVERSATION, conversation._id);
   }
 
-  function defaultProvider(conversation) {
-    return Q(conversation.members || []);
+  function getMembers() {
+    return Q([]);
   }
 
-  function getMembers(conversation) {
-    return getProvider(conversation.type)(conversation);
-  }
-
-  function getProvider(type) {
-    return providers[type] ? providers[type] : defaultProvider;
+  function isMember(conversation, user) {
+    return Q.denodeify(collaborationModule.member.isMember)(conversation, {objectType: OBJECT_TYPES.USER, id: String(user._id)});
   }
 };

@@ -162,13 +162,10 @@ describe('The Chat WS server', function() {
     initWs();
     var callbackOnConversationUpdateTopic;
     var socketOne = {emit: sinon.spy()};
-    var socketTwo = {emit: sinon.spy()};
 
     getUserSocketsFromNamespaceMock = function(data) {
       if (data === 'memberId') {
         return [socketOne];
-      } else if (data === 'deleteId') {
-        return [socketTwo];
       }
       throw new Error('Unexpected id');
     };
@@ -180,11 +177,10 @@ describe('The Chat WS server', function() {
       return _.isFunction(callback);
     }));
 
-    var data = {conversation: {type: 'collaboration', members: [{_id: 'memberId'}]}, deleteMembers: [{_id: 'deleteId'}]};
+    var data = {conversation: {type: 'open', members: [{member: {id: 'memberId'}}]}, deleteMembers: [{_id: 'deleteId'}]};
 
     callbackOnConversationUpdateTopic(data);
     expect(socketOne.emit).to.have.been.calledWith(CONVERSATION_UPDATE, data.conversation);
-    expect(socketTwo.emit).to.have.been.calledWith(CHANNEL_DELETION, data.conversation);
   });
 
   it('should listen CHANNEL_CREATION pubsub and emit it only on his members if it is a group', function() {
@@ -198,7 +194,7 @@ describe('The Chat WS server', function() {
       return _.isFunction(callback);
     }));
 
-    var data = {type: 'private', members: [{_id: 'membersId'}]};
+    var data = {type: 'confidential', members: [{member: {id: 'membersId'}}]};
 
     callbackOnCreationChannelPubsub(data);
     expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CHANNEL_CREATION, data);
@@ -215,7 +211,7 @@ describe('The Chat WS server', function() {
       return _.isFunction(callback);
     }));
 
-    var data = {type: 'private', members: [{_id: 'membersId'}]};
+    var data = {type: 'confidential', members: [{member: {id: 'membersId'}}]};
 
     callbackOnDeletionChannelPubsub(data);
     expect(getUserSocketsFromNamespaceResponse[0].emit).to.have.been.calledWith(CHANNEL_DELETION, data);
@@ -346,7 +342,7 @@ describe('The Chat WS server', function() {
         })));
 
         var data = {channel: 'channelId'};
-        var channel = {type: 'private', members: [{_id: 'memberId'}]};
+        var channel = {type: 'confidential', members: [{member: {id: 'memberId'}}]};
 
         getUserSocketsFromNamespaceResponse = [{emit: sinon.spy()}];
         messageReceptorHandler({room: room, message: data});

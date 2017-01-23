@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  OBJECT_TYPES: {
+    CONVERSATION: 'chat.conversation',
+    USER: 'user'
+  },
   WEBSOCKET: {
     NAMESPACE: '/chat'
   },
@@ -27,25 +31,33 @@ module.exports = {
     USERS_MENTION: 'chat:users_mention',
     CONVERSATION_INITIALIZED: 'chat:conversation:initialized',
     MEMBER_ADDED_IN_CONVERSATION: 'chat:conversation:members:add',
-    MEMBERSHIP_EVENTS: 'chat:conversation:membership'
+    MEMBERSHIP_EVENTS: 'chat:conversation:membership',
+    COLLABORATION_JOIN: 'collaboration:join'
   },
   DEFAULT_CHANNEL: {
     name: 'general',
-    type: 'channel',
+    type: 'open',
+    mode: 'channel',
     topic: 'default',
     purpose: 'default',
     isNotRead: false
   },
+  CONVERSATION_MODE: {
+    CHANNEL: 'channel'
+  },
   CONVERSATION_TYPE: {
-    PRIVATE: 'private',
-    CHANNEL: 'channel',
-    COLLABORATION: 'collaboration'
+    CONFIDENTIAL: 'confidential',
+    OPEN: 'open'
   },
   MEMBERSHIP_ACTION: {
     JOIN: 'join'
   },
   MESSAGE_TYPE: {
     USER_TYPING: 'user_typing'
+  },
+  MEMBER_STATUS: {
+    MEMBER: 'member',
+    NONE: 'none'
   },
   MESSAGE_SUBTYPE: {
     CONVERSATION_JOIN: 'conversation_join',

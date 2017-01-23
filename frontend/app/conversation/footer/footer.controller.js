@@ -4,14 +4,14 @@
   angular.module('linagora.esn.chat')
     .controller('ChatFooterController', ChatFooterController);
 
-  function ChatFooterController(_, session) {
+  function ChatFooterController(CHAT_MEMBER_STATUS) {
     var self = this;
 
     self.onJoin = onJoin;
     self.$onInit = $onInit;
 
     function $onInit() {
-      self.isMember = !!_.find(self.conversation.members, {_id: session.user._id});
+      self.isMember = self.conversation.member_status === CHAT_MEMBER_STATUS.MEMBER;
     }
 
     function onJoin() {

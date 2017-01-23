@@ -112,8 +112,8 @@ describe('The linagora.esn.chat ChatController controller', function() {
     scope = $rootScope.$new();
     chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
-    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.PRIVATE}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.PRIVATE}];
-    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.CHANNEL}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.CHANNEL}];
+    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}];
+    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
     chatLocalStateService.channels = channels;
     chatLocalStateService.privateConversations = groups;
   }));
