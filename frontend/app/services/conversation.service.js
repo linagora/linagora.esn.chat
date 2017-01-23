@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationService', chatConversationService);
 
-    function chatConversationService(ChatRestangular, collaborationAPI, CHAT_OBJECT_TYPES) {
+    function chatConversationService(ChatRestangular, esnCollaborationClientService, CHAT_OBJECT_TYPES) {
       var service = {
         fetchMessages: fetchMessages,
         fetchAttachments: fetchAttachments,
@@ -41,11 +41,11 @@
       }
 
       function join(id, userId) {
-        return collaborationAPI.join(CHAT_OBJECT_TYPES.CONVERSATION, id, userId);
+        return esnCollaborationClientService.join(CHAT_OBJECT_TYPES.CONVERSATION, id, userId);
       }
 
       function leave(id, userId) {
-        return collaborationAPI.leave(CHAT_OBJECT_TYPES.CONVERSATION, id, userId);
+        return esnCollaborationClientService.leave(CHAT_OBJECT_TYPES.CONVERSATION, id, userId);
       }
     }
 })();
