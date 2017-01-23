@@ -67,8 +67,10 @@ return cacheId;
       prependPrefix: '/linagora.esn.chat',
       // setting this option will create only a single module that contains templates
       // from all the files, so you can load them all with module('templates')
-      jadeRenderConfig: {
-        basedir: require('path').resolve(__dirname, '../../node_modules/linagora-rse/frontend/views'),
+      jadeRenderOptions: {
+        basedir: require('path').resolve(__dirname, '../../node_modules/linagora-rse/frontend/views')
+      },
+      jadeRenderLocals: {
         __: function(str) {
           return str;
         }
