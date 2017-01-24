@@ -1,13 +1,14 @@
 'use strict';
 
-/* global chai, sinon, _: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
 describe('The linagora.esn.chat chatConversationNameService', function() {
   var chatConversationNameService,
-    CHAT_CONVERSATION_TYPE,
-    userUtilsMock,
+    $rootScope,
+    $q,
+    chatUsernameMock,
     user;
 
   beforeEach(angular.mock.module('linagora.esn.chat'));
@@ -15,9 +16,9 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
   beforeEach(function() {
     user = {_id: 'userId'};
 
-    userUtilsMock = {
-      displayNameOf: sinon.spy(function(user) {
-        return user.firstname + ' ' + user.lastname;
+    chatUsernameMock = {
+      getFromCache: sinon.spy(function() {
+        return $q.when();
       })
     };
 
@@ -27,53 +28,77 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
-      $provide.value('userUtils', userUtilsMock);
+      $provide.value('chatUsername', chatUsernameMock);
       $provide.value('session', {user: user});
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatConversationNameService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_chatConversationNameService_, _$rootScope_, _$q_) {
     chatConversationNameService = _chatConversationNameService_;
-    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
+    $rootScope = _$rootScope_;
+    $q = _$q_;
   }));
 
   describe('The getName function', function() {
 
-    it('should use userUtils.displayNameOf when options.onlyFirstName is not defined', function() {
-      expect(chatConversationNameService.getName({
-        members: [{_id: user._id, firstname: 'John', lastname: 'Doe'}]
-      })).to.equal('John Doe');
-      expect(userUtilsMock.displayNameOf).to.have.been.called;
+    it('should resolve with empty object when conversation is undefined', function(done) {
+      chatConversationNameService.getName().then(function(name) {
+        expect(name).to.not.exist;
+        done();
+      }, done);
+      $rootScope.$digest();
     });
 
-    it('should use user firstname when options.onlyFirstName is defined', function() {
-      expect(chatConversationNameService.getName({
-        members: [{_id: user._id, firstname: 'John', lastname: 'Doe'}]
-      }, {onlyFirstName: true})).to.equal('John');
-      expect(userUtilsMock.displayNameOf).to.not.have.been.called;
+    it('should resolve with empty object when conversation does not contains name nor members', function(done) {
+      chatConversationNameService.getName({}).then(function(name) {
+        expect(name).to.not.exist;
+        done();
+      }, done);
+      $rootScope.$digest();
     });
 
-    it('should not use the current user name', function() {
-      expect(chatConversationNameService.getName({
-        members: [{_id: user._id, firstname: 'John', lastname: 'Doe'}, {_id: 'youId', firstname: 'Bruce', lastname: 'Willis'}]
-      })).to.equal('Bruce Willis');
-      expect(userUtilsMock.displayNameOf).to.have.been.called;
+    it('should resolve with the conversation.name when defined', function(done) {
+      var name = 'MyConversation';
+
+      chatConversationNameService.getName({name: name}).then(function(_name) {
+        expect(_name).to.equal(name);
+        done();
+      }, done);
+      $rootScope.$digest();
     });
 
-    it('should generate name from all members', function() {
-      expect(chatConversationNameService.getName({
-        members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
-      })).to.equal('Eric Cartman, Stan Marsh, Kenny McCormick');
-    });
+    it('should resolve with the member name when conversation.members.length === 1', function(done) {
+      var name = 'Bruce Willis';
 
-    it('should return conversation name if it is defined no matter the type of the conversation', function() {
-      _.map(CHAT_CONVERSATION_TYPE, function(type) {
-        expect(chatConversationNameService.getName({
-          name: 'name',
-          type: type,
-          members: [{_id: '1', firstname: 'Eric', lastname: 'Cartman'}, {_id: '2', firstname: 'Stan', lastname: 'Marsh'}, {_id: 3, firstname: 'Kenny', lastname: 'McCormick'}]
-        })).to.equal('name');
+      chatUsernameMock.getFromCache = sinon.spy(function() {
+        return $q.when(name);
       });
+
+      chatConversationNameService.getName({members: [{member: {id: 'id', objectType: 'user'}}]}).then(function(_name) {
+        expect(_name).to.equal(name);
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('id');
+        done();
+      }, done);
+      $rootScope.$digest();
+    });
+
+    it('should resolve with concatenated member names excluding the current one', function(done) {
+      var names = {id1: 'Bruce Willis', id2: 'John Doe'};
+
+      chatUsernameMock.getFromCache = sinon.spy(function(id) {
+        return $q.when(names[id]);
+      });
+
+      chatConversationNameService.getName({members: [
+        {member: {id: user._id, objectType: 'user'}},
+        {member: {id: 'id1', objectType: 'user'}},
+        {member: {id: 'id2', objectType: 'user'}}
+      ]}).then(function(_name) {
+        expect(_name === 'Bruce Willis, John Doe' || name === 'John Doe, Bruce Willis').to.be.true;
+        expect(chatUsernameMock.getFromCache).to.have.been.calledTwice;
+        done();
+      }, done);
+      $rootScope.$digest();
     });
   });
 });

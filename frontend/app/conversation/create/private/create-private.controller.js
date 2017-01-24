@@ -18,7 +18,9 @@
 
       var group = {
         domain: session.domain._id,
-        members: self.members
+        members: (self.members || []).map(function(member) {
+          return member._id;
+        })
       };
 
       chatConversationsService.addPrivateConversation(group).then(function(response) {

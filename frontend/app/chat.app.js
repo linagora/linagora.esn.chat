@@ -2,6 +2,7 @@
   'use strict';
 
   angular.module('linagora.esn.chat', [
+    'esn.cache',
     'esn.core',
     'esn.router',
     'restangular',

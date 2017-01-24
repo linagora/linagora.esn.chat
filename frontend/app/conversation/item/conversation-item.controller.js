@@ -12,7 +12,6 @@
     self.connected = true;
     self.channelState = self.channelState || 'chat.channels-views';
     self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
-    self.name = chatConversationNameService.getName(self.conversation);
     self.$onInit = $onInit;
 
     function getDaysSinceMessageCreated(message) {
@@ -35,25 +34,27 @@
     }
 
     function $onInit() {
+      chatConversationNameService.getName(self.conversation).then(function(name) {
+        self.name = name;
+      });
+
       if (self.conversation.last_message) {
         self.numberOfDays = getDaysSinceMessageCreated(self.conversation.last_message);
         self.conversation.last_message.text = chatParseMention.parseMentions(self.conversation.last_message.text, self.conversation.last_message.user_mentions, {skipLink: true});
         self.conversation.last_message.text = $filter('esnEmoticonify')(self.conversation.last_message.text, {class: 'chat-emoji'});
       }
 
-      // FIXME : Use the new ChatUserNameService once merged
-      self.otherUsers = _.reject(self.conversation.members, {_id: session.user._id});
-      if (self.otherUsers.length > 1) {
-        self.conversationName = self.conversation.name || _.map(self.otherUsers, 'firstname').join(', ');
-      }
-
       if (self.conversation.last_message.creator) {
         updateLastMessageInformation(self.conversation.last_message);
       }
 
+      self.otherUsers = _.reject(self.conversation.members, function(member) {
+        return member.member.id === session.user._id;
+      });
+
       var statesPromises = self.otherUsers.map(function(member) {
-        return userStatusService.getCurrentStatus(member._id).then(function(status) {
-          userToConnected[member._id] = status && (status.status !== 'disconnected');
+        return userStatusService.getCurrentStatus(member.member.id).then(function(status) {
+          userToConnected[member.member.id] = status && (status.status !== 'disconnected');
         });
       });
 

@@ -2,6 +2,7 @@
 
 /* global _: false */
 
+angular.module('esn.cache', []);
 angular.module('esn.highlight', []);
 angular.module('esn.attachment', []);
 angular.module('esn.attachment-list', []);
