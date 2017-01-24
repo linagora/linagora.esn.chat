@@ -50,6 +50,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
         add: sinon.spy()
       });
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
 

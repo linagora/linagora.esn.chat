@@ -12,6 +12,7 @@ describe('The chatHumanizeEntitiesLabel service', function() {
       add: sinon.spy()
     });
     $provide.value('chatSearchMessagesProviderService', {});
+    $provide.value('chatSearchConversationsProviderService', {});
   }));
 
   beforeEach(angular.mock.inject(function(_chatHumanizeEntitiesLabel_) {

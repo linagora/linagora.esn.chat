@@ -1,0 +1,39 @@
+.chat-conversations-search {
+  .flex-space-between;
+  .flex-vertical-centered;
+
+  .highlight {
+    background: @m-yellow;
+  }
+
+  .body {
+    width: 80%;
+
+    .conversation-title {
+      padding-bottom: 8px;
+      color: @secondaryTextColor;
+
+      h4 {
+        font-size: 14px;
+        margin-bottom: 0;
+        margin-top: 0;
+
+        i {
+          color: @secondaryTextColor;
+        }
+      }
+    }
+
+    .conversation-purpose {
+      .ellipsis;
+
+      color: @text-color;
+    }
+  }
+
+  .footer {
+    .flex-end;
+
+    width: 20%;
+  }
+}

@@ -45,6 +45,7 @@ describe('The ChatMessageIndicatorController controller', function() {
       $provide.value('chatScrollService', chatScrollServiceMock);
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('searchProviders', searchProviders);
     });
   });

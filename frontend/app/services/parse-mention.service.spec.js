@@ -12,6 +12,7 @@ describe('The chatParseMention service', function() {
       add: sinon.spy()
     });
     $provide.value('chatSearchMessagesProviderService', {});
+    $provide.value('chatSearchConversationsProviderService', {});
   }));
 
   beforeEach(function() {

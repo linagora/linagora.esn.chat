@@ -23,6 +23,7 @@ describe('The linagora.esn.chat conversation service', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('collaborationAPI', collaborationAPIMock);
+      $provide.value('chatSearchConversationsProviderService', {});
     })
   );
 

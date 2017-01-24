@@ -43,6 +43,7 @@ describe('the chatFileUploadController controller', function() {
       $provide.value('chatMessageService', chatMessageService);
       $provide.value('chatLocalStateService', chatLocalStateService);
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', session);
     });
 

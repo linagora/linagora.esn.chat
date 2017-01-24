@@ -13,6 +13,7 @@ describe('The chatLocalState service', function() {
         add: sinon.spy()
       });
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
     })
   );
 

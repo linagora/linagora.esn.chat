@@ -35,6 +35,7 @@ describe('The linagora.esn.chat composerStateService', function() {
       $provide.value('localStorageService', localStorageService);
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', {user: {_id: ''}});
       $provide.value('chatScrollService', {scrollDown: sinon.spy()});
       $provide.value('searchProviders', {add: sinon.spy()});

@@ -29,6 +29,7 @@ describe('The linagora.esn.chat services', function() {
         add: sinon.spy()
       });
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
     })
   );
 

@@ -17,6 +17,7 @@ describe('The chatUsername service', function() {
       });
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('chatSearchMessagesProviderService', {});
+      $provide.value('chatSearchConversationsProviderService', {});
     });
   });
 

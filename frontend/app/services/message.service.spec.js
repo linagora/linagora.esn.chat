@@ -55,6 +55,7 @@ describe('The linagora.esn.chat messages services', function() {
           add: sinon.spy()
         });
         $provide.value('chatSearchMessagesProviderService', {});
+        $provide.value('chatSearchConversationsProviderService', {});
         $provide.factory('session', sessionFactory);
         $provide.value('ChatTransportService', ChatTransportMock);
         $provide.value('backgroundProcessorService', backgroundProcessorServiceMock);
@@ -223,6 +224,7 @@ describe('The linagora.esn.chat messages services', function() {
           add: sinon.spy()
         });
         $provide.value('chatSearchMessagesProviderService', {});
+        $provide.value('chatSearchConversationsProviderService', {});
         $provide.factory('session', sessionFactory);
         $provide.factory('livenotification', livenotificationFactory);
       });
