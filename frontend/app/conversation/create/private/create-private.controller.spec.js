@@ -88,7 +88,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
 
     it('should add the conversation to the cache on creation success, notify and redirect to the conversation page', function() {
       var result = {_id: 1};
-      var members = [1, 2, 3];
+      var members = [{_id: 1}, {_id: 2}, {_id: 3}];
 
       chatConversationsService.addPrivateConversation = sinon.spy(function() {
         return $q.when({data: result});
@@ -102,7 +102,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
       controller.members = members;
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: members});
+      expect(chatConversationsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: [1, 2, 3]});
       expect(chatLocalStateService.addConversation).to.have.been.calledWith(result);
       expect(notificationFactory.weakSuccess).to.have.been.calledWith('success', 'Private conversation successfuly created');
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: result._id});
