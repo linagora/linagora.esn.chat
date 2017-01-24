@@ -266,11 +266,11 @@ describe('The chat API', function() {
       });
     });
 
-    it('should 200 when the conversation is public', function(done) {
+    it('should 200 when the conversation is OPEN', function(done) {
       readable = true;
 
       app.lib.conversation.create({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }, function(err, channel) {
         err && done(err);
         request(app.express)
@@ -343,7 +343,7 @@ describe('The chat API', function() {
 
       app.lib.conversation.create({
         name: 'foo',
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }, function(err, conversation) {
         err && done(err);
         request(app.express)
@@ -412,7 +412,7 @@ describe('The chat API', function() {
 
       app.lib.conversation.create({
         name: 'foo',
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }, function(err, conversation) {
         err && done(err);
         request(app.express)
@@ -497,7 +497,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }).then(function(channels) {
         channelId = channels._id;
 
@@ -533,7 +533,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }).then(function(channels) {
         channelId = channels._id;
 
@@ -611,7 +611,7 @@ describe('The chat API', function() {
       }
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }).then(function(channel) {
         channelId = channel._id;
 
@@ -681,7 +681,7 @@ describe('The chat API', function() {
       const offset = 0;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       })
         .then(function(channels) {
           channelId = channels._id;
@@ -797,7 +797,7 @@ describe('The chat API', function() {
       function init() {
 
         return Q.denodeify(app.lib.conversation.create)({
-          type: CONVERSATION_TYPE.PUBLIC
+          type: CONVERSATION_TYPE.OPEN
         }).then(function(channels) {
           channelId = channels._id;
         });
@@ -849,7 +849,7 @@ describe('The chat API', function() {
       const offset = 0;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       })
         .then(function(channels) {
           channelId = channels._id;
@@ -934,7 +934,7 @@ describe('The chat API', function() {
       var channelId;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC
+        type: CONVERSATION_TYPE.OPEN
       }).then(function(channels) {
         channelId = channels._id;
 
@@ -1363,7 +1363,7 @@ describe('The chat API', function() {
       var numOfMessage = 42;
 
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC,
+        type: CONVERSATION_TYPE.OPEN,
         numOfMessage: numOfMessage
       }).then(function(mongoResponse) {
         channelId = mongoResponse._id;
@@ -1416,6 +1416,7 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
+            expect(res.body.length).to.equal(1);
             expect(res.body).to.shallowDeepEqual([{_id: String(channel._id)}]);
             done();
           });
@@ -1464,6 +1465,7 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
+            expect(res.body.length).to.equal(2);
             expect(res.body).to.shallowDeepEqual([{_id: String(channel1._id)}, {_id: String(channel2._id)}]);
             done();
           });
@@ -1472,7 +1474,7 @@ describe('The chat API', function() {
 
     it('should return channel even if I am not a member of them yet', function(done) {
       Q.denodeify(app.lib.conversation.create)({
-        type: CONVERSATION_TYPE.PUBLIC,
+        type: CONVERSATION_TYPE.OPEN,
         members: []
       }).then(function(channel) {
         request(app.express)

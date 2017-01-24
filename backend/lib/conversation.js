@@ -7,6 +7,7 @@ const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
 const CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
@@ -145,11 +146,11 @@ module.exports = function(dependencies) {
       request.$or = [{name: {$exists: false}}, {name: null}];
     }
 
-    if (ignoreMemberFilterForChannel && (!mode || mode.indexOf(CONVERSATION_MODE.CHANNEL) > -1)) {
+    if (ignoreMemberFilterForChannel && (!type || type === CONVERSATION_TYPE.OPEN)) {
       delete request.moderate;
       request = {
         $or: [request, {
-          mode: CONVERSATION_MODE.CHANNEL
+          type: CONVERSATION_TYPE.OPEN
         }],
         moderate: moderate
       };
