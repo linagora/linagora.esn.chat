@@ -110,14 +110,6 @@
             user_mentions: message.user_mentions
           };
           conversation.canScrollDown = true;
-
-          replaceConversationInSortedArray(service.conversations, conversation);
-
-          if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
-            replaceConversationInSortedArray(service.channels, conversation);
-          } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
-            replaceConversationInSortedArray(service.privateConversations, conversation);
-          }
         });
       }
 
@@ -230,11 +222,6 @@
         return chatConversationsService.leaveConversation(conversation._id).then(function() {
           deleteConversationInCache(conversation);
         });
-      }
-
-      function replaceConversationInSortedArray(array, conv) {
-        _.remove(array, {_id: conv._id});
-        insertConversationInSortedArray(array, conv);
       }
 
       function unsetActive() {
