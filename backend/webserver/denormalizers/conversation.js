@@ -1,7 +1,9 @@
 'use strict';
 
 const Q = require('q');
-const MEMBER_STATUS = require('../../lib/constants').MEMBER_STATUS;
+const CONSTANTS = require('../../lib/constants');
+const MEMBER_STATUS = CONSTANTS.MEMBER_STATUS;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 module.exports = function(dependencies, lib) {
 
@@ -23,7 +25,9 @@ module.exports = function(dependencies, lib) {
       conversation.member_status = isMember.state === 'fulfilled' ? (isMember.value ? MEMBER_STATUS.MEMBER : MEMBER_STATUS.NONE) || MEMBER_STATUS.NONE : MEMBER_STATUS.NONE;
       conversation.members_count = numberOfMembers.state === 'fulfilled' ? numberOfMembers.value || 0 : 0;
 
-      delete conversation.members;
+      if (conversation.type !== CONVERSATION_TYPE.CONFIDENTIAL) {
+        delete conversation.members;
+      }
 
       return conversation;
     });
