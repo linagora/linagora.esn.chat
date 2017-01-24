@@ -109,7 +109,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       $rootScope.$digest();
 
       entitySelector.select('smile_c');
-      expect(adapter.replaceText).to.have.been.calledWith('toto :smile_c#', 14, 14);
+      expect(adapter.replaceText).to.have.been.calledWith('toto :smile_c# ', 14, 14);
     });
 
     it('should update the message by adding the spaces if the message is empty', function() {
@@ -119,7 +119,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       $rootScope.$digest();
 
       entitySelector.select('smile_c');
-      expect(adapter.replaceText).to.have.been.calledWith('     :smile_c#', 14, 14);
+      expect(adapter.replaceText).to.have.been.calledWith('     :smile_c# ', 14, 14);
     });
 
     it('should update the message correctly if the message is sent from another input than the textarea', function() {
@@ -134,7 +134,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       $rootScope.$digest();
 
       entitySelector.select('smile_c');
-      expect(adapter.textArea.replaceText).to.have.been.calledWith('toto :smile_c#', 14, 14);
+      expect(adapter.textArea.replaceText).to.have.been.calledWith('toto :smile_c# ', 14, 14);
     });
 
     it('should update the message event if the message is empty', function() {
@@ -269,7 +269,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
-      expect(adapter.replaceText).to.have.been.calledWith(':smile_c#', 9, 9);
+      expect(adapter.replaceText).to.have.been.calledWith(':smile_c# ', 9, 9);
     });
 
     it('should update the textarea text in the middle of text', function() {
@@ -278,7 +278,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
-      expect(adapter.replaceText).to.have.been.calledWith(':smile_a# test :smile_c# test', 24, 24);
+      expect(adapter.replaceText).to.have.been.calledWith(':smile_a# test :smile_c# test ', 24, 24);
     });
 
     it('should not be confused when there is two times the same emoji start', function() {
@@ -287,7 +287,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       entitySelector.textChanged(adapter);
       $rootScope.$digest();
       entitySelector.select('smile_c');
-      expect(adapter.replaceText).to.have.been.calledWith(':smile test :smile_c# test', 21, 21);
+      expect(adapter.replaceText).to.have.been.calledWith(':smile test :smile_c# test ', 21, 21);
     });
 
     it('should use the given toHumanLabel and toRealValue method if there are provided', function() {
@@ -307,7 +307,7 @@ describe('the ChatTextEntitySelector constructor', function() {
       expect(toRealValue).to.have.been.calledWith('smile_c');
       expect(toHumanLabel).to.have.been.calledWith('smile_c');
       expect(chatHumanizeEntitiesLabelMock.addHumanRepresentation).to.have.been.calledWith(':' + toHumanLabelResult + '#', ':' + toRealValueResult + '#');
-      expect(adapter.replaceText).to.have.been.calledWith(addHumanRepresentationResult, size, size);
+      expect(adapter.replaceText).to.have.been.calledWith(addHumanRepresentationResult + ' ', size, size);
     });
   });
 

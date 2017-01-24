@@ -19,9 +19,16 @@
         self.displayFile = !self.displayFile;
       }
 
+      function splitMentions(text) {
+        return text.replace(/@/g, ' @').replace(/^ @/, '@').replace(/ {2}@/g, ' @');
+      }
+
       function $onInit() {
         var parsedText = $filter('oembedImageFilter')(self.message.text);
 
+        if (self.message.user_mentions.length > 0) {
+          parsedText = splitMentions(parsedText);
+        }
         session.ready.then(sessionReady);
 
         parsedText = $filter('linky')(parsedText, '_blank');
