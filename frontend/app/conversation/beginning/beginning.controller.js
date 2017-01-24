@@ -7,7 +7,13 @@
     function ChatConversationBeginningController(chatConversationNameService) {
       var self = this;
 
-      self.name = chatConversationNameService.getName(self.conversation);
+      self.$onInit = $onInit;
+
+      function $onInit() {
+        chatConversationNameService.getName(self.conversation).then(function(name) {
+          self.name = name;
+        });
+      }
     }
 
 })();

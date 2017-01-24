@@ -4,36 +4,35 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationNameService', chatConversationNameService);
 
-    function chatConversationNameService(session, _, userUtils) {
+    function chatConversationNameService($q, session, _, chatUsername) {
 
       return {
         getName: getName
       };
 
-      function getName(conversation, options) {
-        var currentUserId = session.user._id;
-
-        function userToString(user) {
-          return options && options.onlyFirstName ? user.firstname : userUtils.displayNameOf(user);
-        }
+      function getName(conversation) {
 
         if (!conversation || (!conversation.name && !conversation.members)) {
-          return;
+          return $q.when();
         }
 
         if (conversation.name) {
-          return conversation.name;
+          return $q.when(conversation.name);
         }
 
         if (conversation.members.length === 1) {
-          return userToString(conversation.members[0]);
+          return chatUsername.getFromCache(conversation.members[0].member.id);
         }
 
-        return _.chain(conversation.members)
-          .reject({_id: currentUserId})
-          .map(userToString)
-          .value()
-          .join(', ');
+        var otherUsers = _.reject(conversation.members, function(member) {
+          return member.member.id === session.user._id;
+        });
+
+        return $q.all(otherUsers.map(function(member) {
+          return chatUsername.getFromCache(member.member.id);
+        })).then(function(results) {
+          return results.join(', ');
+        });
       }
     }
 })();

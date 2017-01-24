@@ -16,6 +16,7 @@ describe('The ChatConversationItemController controller', function() {
   CHAT_EVENTS,
   userUtils,
   getConversationNameMock,
+  getConversationNameServiceMock,
   conversationNameResult,
   searchProviders;
 
@@ -38,6 +39,12 @@ describe('The ChatConversationItemController controller', function() {
       return conversationNameResult;
     });
 
+    getConversationNameServiceMock = {
+      getName: sinon.spy(function() {
+        return $q.when();
+      })
+    };
+
     session = {
       user: {
         _id: 'userId'
@@ -55,6 +62,10 @@ describe('The ChatConversationItemController controller', function() {
       $provide.value('userStatusService', userStatusService);
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);
+      $provide.value('chatConversationNameService', getConversationNameServiceMock);
+      $provide.value('chatParseMention', {
+        parseMentions: sinon.spy()
+      });
       $provide.value('esnEmoticonifyFilter', sinon.spy());
       $provide.factory('chatConversationsService', function($q) {
         return {getConversationNamePromise: $q.when(getConversationNameMock)};
@@ -93,7 +104,7 @@ describe('The ChatConversationItemController controller', function() {
       userStateResult = {2: {status: 'connected'}, 3: {status: 'connected'}};
       conversation = {
         _id: 1,
-        members: [user, {_id: 2}, {_id: 3}],
+        members: [{member: {id: user._id, objectType: 'user'}}, {member: {id: 2, objectType: 'user'}}, {member: {id: 3, objectType: 'user'}}],
         last_message: {
           creator: user
         }

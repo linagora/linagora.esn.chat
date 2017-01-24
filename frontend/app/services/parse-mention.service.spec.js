@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatParseMention service', function() {
-  var chatParseMention, userUtilsMock;
+  var chatParseMention, chatUsernameMock;
 
   beforeEach(angular.mock.module('linagora.esn.chat', function($provide) {
     $provide.value('searchProviders', {
@@ -16,14 +16,10 @@ describe('The chatParseMention service', function() {
   }));
 
   beforeEach(function() {
-    userUtilsMock = {
-      displayNameOf: function(user) {
-        return user.firstname + '.' + user.lastname;
-      }
-    };
+    chatUsernameMock = {};
 
     angular.mock.module(function($provide) {
-      $provide.value('userUtils', userUtilsMock);
+      $provide.value('chatUsername', chatUsernameMock);
     });
   });
 
@@ -33,17 +29,27 @@ describe('The chatParseMention service', function() {
 
   describe('The chatParseMention function', function() {
     it('should replace mention with the correct link', function() {
+      chatUsernameMock.generateMention = sinon.spy(function(user) {
+        return '@' + user.firstname + '.' + user.lastname;
+      });
+
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '<a href="#/profile/abcd/details/view">@firstname.lastname</a>';
 
       expect(chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions)).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+      expect(chatUsernameMock.generateMention).to.have.been.calledOnce;
     });
 
     it('should replace mention with the display name', function() {
+      chatUsernameMock.generateMention = sinon.spy(function(user) {
+        return '@' + user.firstname + '.' + user.lastname;
+      });
+
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '@firstname.lastname';
 
       expect(chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions, {skipLink: true})).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+      expect(chatUsernameMock.generateMention).to.have.been.calledOnce;
     });
   });
 
