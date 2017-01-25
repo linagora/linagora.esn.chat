@@ -1,0 +1,5 @@
+.conversation-sidebar-members
+  .close.hidden-xs
+    i.mdi.mdi-close.clickable(ui-sref="chat.channels-views")
+  .list
+    esn-collaboration-members-list(collaboration="ctrl.conversation", elements-per-page="{{::ctrl.DEFAULT_FETCH_SIZE}}", scroll-inside-container="true")
