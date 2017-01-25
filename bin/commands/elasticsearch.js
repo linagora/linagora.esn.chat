@@ -2,7 +2,7 @@
 
 const path = require('path');
 const ESConfiguration = require('esn-elasticsearch-configuration');
-const INDEXES = ['chat.messages'];
+const INDEXES = ['chat.messages', 'chat.conversations'];
 
 function createCommand(command) {
   command
