@@ -6,12 +6,18 @@
 
     function chatConversationService(ChatRestangular, esnCollaborationClientService, CHAT_OBJECT_TYPES) {
       var service = {
+        create: create,
         fetchMessages: fetchMessages,
         fetchAttachments: fetchAttachments,
         get: get,
         getMessage: getMessage,
         join: join,
-        leave: leave
+        leave: leave,
+        listForCurrentUser: listForCurrentUser,
+        markAsRead: markAsRead,
+        remove: remove,
+        update: update,
+        updateTopic: updateTopic
       };
 
       return service;
@@ -22,6 +28,10 @@
 
       function _stripResponse(response) {
         return ChatRestangular.stripRestangular(response.data);
+      }
+
+      function create(conversation) {
+        return ChatRestangular.one('conversations').doPOST(conversation);
       }
 
       function fetchMessages(id, options) {
@@ -46,6 +56,28 @@
 
       function leave(id, userId) {
         return esnCollaborationClientService.leave(CHAT_OBJECT_TYPES.CONVERSATION, id, userId);
+      }
+
+      function listForCurrentUser() {
+        return ChatRestangular.one('user').all('conversations').getList();
+      }
+
+      function markAsRead(id) {
+        return _getBase(id).one('readed').doPOST();
+      }
+
+      function remove(id) {
+        return _getBase(id).doDELETE();
+      }
+
+      function update(id, conversation) {
+        return _getBase(id).doPUT(conversation);
+      }
+
+      function updateTopic(id, topic) {
+        return _getBase(id).one('topic').doPUT({
+          value: topic
+        });
       }
     }
 })();

@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationsService', chatConversationsService);
 
-    function chatConversationsService($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, ChatRestangular, _) {
+    function chatConversationsService($rootScope, $q, $log, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_NAMESPACE, CHAT_EVENTS, livenotification, session, chatConversationService, _) {
       var defer = $q.defer();
       var conversationsPromise = defer.promise;
       var sio = livenotification(CHAT_NAMESPACE);
@@ -12,7 +12,7 @@
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversationInCache);
 
       session.ready.then(function() {
-        fetchAllConversation();
+        fetchAllConversations();
       });
 
       var service = {
@@ -28,7 +28,6 @@
         updateConversationTopic: updateConversationTopic,
         setTopicChannel: setTopicChannel,
         markAllMessageReaded: markAllMessageReaded,
-        getConversationByCommunityId: getConversationByCommunityId,
         updateConversation: updateConversation
       };
 
@@ -36,9 +35,9 @@
 
       ////////////
 
-      function fetchAllConversation() {
+      function fetchAllConversations() {
         return $q.all({
-          conversations: ChatRestangular.one('user').all('conversations').getList(),
+          conversations: chatConversationService.listForCurrentUser(),
           session: session.ready
         }).then(function(resolved) {
           var conversations = resolved.conversations.data;
@@ -53,7 +52,7 @@
       function resetCache() {
         defer = $q.defer();
         conversationsPromise = defer.promise;
-        fetchAllConversation();
+        fetchAllConversations();
       }
 
       function getConversationByType(type) {
@@ -76,20 +75,20 @@
             return conversation;
           }
 
-          return ChatRestangular.one('conversations', conversationId).get().then(_.property('data'));
+          return chatConversationService.get(conversationId).then(_.property('data'));
         });
       }
 
       function postConversations(conversation) {
-        return ChatRestangular.one('conversations').customPOST(conversation).then(function(c) {
-          $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, c.data);
+        return chatConversationService.create(conversation).then(function(result) {
+          $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, result.data);
 
-          return c;
+          return result;
         });
       }
 
       function leaveConversation(conversationId) {
-        return ChatRestangular.one('conversations', conversationId).one('members').doDELETE().then(function() {
+        return chatConversationService.leave(conversationId, session.user._id).then(function() {
           return deleteConversationInCache(conversationId);
         }, function(err) {
           $log.error('Could not leave conversation', err);
@@ -111,13 +110,11 @@
       }
 
       function updateConversationTopic(topicValue, conversationId) {
-        return ChatRestangular.one('conversations', conversationId).one('topic').customPUT({
-          value: topicValue
-        });
+        return chatConversationService.updateTopic(conversationId, topicValue);
       }
 
       function markAllMessageReaded(conversationId) {
-        return ChatRestangular.one('conversations', conversationId).one('readed').doPOST();
+        return chatConversationService.markAsRead(conversationId);
       }
 
       function setTopicChannel(topic) {
@@ -134,10 +131,6 @@
         return conversationsPromise;
       }
 
-      function getConversationByCommunityId(communityId) {
-        return ChatRestangular.one('community').get({id: communityId});
-      }
-
       function deleteConversationInCache(conversationId) {
         return conversationsPromise.then(function(conversations) {
           for (var i = 0, len = conversations.length; i < len; i++) {
@@ -151,7 +144,7 @@
       }
 
       function deleteConversation(conversationId) {
-        return ChatRestangular.one('conversations', conversationId).doDELETE().then(function() {
+        return chatConversationService.remove(conversationId).then(function() {
           return deleteConversationInCache(conversationId);
         }, function(err) {
           $log.error('Could not delete conversation', err);
@@ -164,7 +157,9 @@
           modifications: modifications
         };
 
-        return ChatRestangular.one('conversations', conversationId).customPUT(body);
+        chatConversationService.update(conversationId, body);
+
+        return chatConversationService.update(conversationId, body);
       }
     }
 })();
