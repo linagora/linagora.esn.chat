@@ -185,6 +185,7 @@ describe('The chat API', function() {
               return done(err);
             }
 
+            expect(res.body.length).to.equal(1);
             expect(res.body).to.shallowDeepEqual([{_id: String(channel._id)}]);
             done();
           });
@@ -202,6 +203,39 @@ describe('The chat API', function() {
         }, execTest);
       });
 
+    });
+
+    it('should return an array open channels', function(done) {
+      function execTest(channel1, channel2, channel3) {
+        request(app.express)
+          .get('/api/channels')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.length).to.equal(2);
+            expect(res.body).to.shallowDeepEqual([{_id: String(channel1._id)}, {_id: String(channel3._id)}]);
+            done();
+          });
+      }
+
+      Q.all([
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.CONFIDENTIAL,
+          mode: CONVERSATION_MODE.CHANNEL
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        })
+      ]).spread(execTest).catch(done);
     });
   });
 

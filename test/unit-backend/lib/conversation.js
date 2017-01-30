@@ -7,6 +7,7 @@ var Q = require('q');
 var CONSTANTS = require('../../../backend/lib/constants');
 var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
 var CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
+var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
 var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
 var CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
@@ -173,7 +174,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
   });
 
-  describe('The getChannels function', function() {
+  describe('The getOpenChannels function', function() {
 
     beforeEach(function() {
       modelsMock.ChatConversation = sinon.spy();
@@ -201,8 +202,8 @@ describe('The linagora.esn.chat conversation lib', function() {
       mq.exec = function(cb) {
         cb(null, {});
       };
-      require('../../../backend/lib/conversation')(dependencies, lib).getChannels({}, function() {
-        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({mode: CONVERSATION_MODE.CHANNEL, moderate: false});
+      require('../../../backend/lib/conversation')(dependencies, lib).getOpenChannels({}, function() {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.OPEN, mode: CONVERSATION_MODE.CHANNEL, moderate: false});
         done();
       });
     });
@@ -210,8 +211,8 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should return the default channel', function(done) {
       const module = require('../../../backend/lib/conversation')(dependencies, lib);
 
-      module.getChannels({}, function(err, channels) {
-        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({mode: CONVERSATION_MODE.CHANNEL, moderate: false});
+      module.getOpenChannels({}, function(err, channels) {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.OPEN, mode: CONVERSATION_MODE.CHANNEL, moderate: false});
         expect(err).to.be.equal(null);
         expect(channels).not.to.be.empty;
         expect(channels).not.to.be.undefined;
