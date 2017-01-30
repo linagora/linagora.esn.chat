@@ -21,7 +21,10 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     $rootScope,
     $controller,
     user,
-    searchProviders;
+    searchProviders,
+    chatLastConversationServiceMock,
+    channels,
+    channelId;
 
   beforeEach(function() {
 
@@ -78,6 +81,14 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       add: sinon.spy()
     };
 
+    chatLastConversationServiceMock = {
+      getConversationId: sinon.spy(function() {
+        return $q.when(channels);
+      })
+    };
+    channelId = '583e9769ecac5c59a19fe6af';
+    channels = {channelId: channelId};
+
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
       $provide.value('chatConversationService', chatConversationServiceMock);
@@ -90,6 +101,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('searchProviders', searchProviders);
+      $provide.value('chatLastConversationService', chatLastConversationServiceMock);
       $provide.value('chatMessageService', chatMessageServiceMock);
     });
   });
@@ -127,6 +139,9 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     beforeEach(function() {
       $stateParams.id = null;
       message = {_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}};
+      chatConversationServiceMock.fetchMessages = function() {
+        return $q.when([]);
+      };
     });
 
     it('should not add the message if message does not have a channel', function() {
@@ -180,6 +195,9 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     beforeEach(function() {
       $stateParams.id = null;
       message = {_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}};
+      chatConversationServiceMock.fetchMessages = function() {
+        return $q.when([]);
+      };
     });
 
     it('should not add the message if message does not have a channel', function() {
@@ -222,7 +240,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
 
       initCtrl();
       $rootScope.$digest();
-      expect(chatLocalStateServiceMock.setActive).to.be.calledWith($stateParams.id);
+      expect(chatLocalStateServiceMock.setActive).to.be.calledWith(channelId);
     });
 
     it('should fetch messages', function() {
@@ -246,7 +264,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       initCtrl();
       scope.vm.loadPreviousMessages();
       $rootScope.$digest();
-      expect(chatConversationServiceMock.fetchMessages).to.be.calledWith($stateParams.id);
+      expect(chatConversationServiceMock.fetchMessages).to.be.calledWith(channelId);
     });
 
     it('should call chatConversationService.fetchMessages with before parameter when messages are already available', function() {
@@ -261,7 +279,7 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
       scope.vm.topOfConversation = false;
       scope.vm.loadPreviousMessages();
       $rootScope.$digest();
-      expect(chatConversationServiceMock.fetchMessages).to.be.calledWith($stateParams.id, {before: message._id, limit: CHAT.DEFAULT_FETCH_SIZE});
+      expect(chatConversationServiceMock.fetchMessages).to.be.calledWith(channelId, {before: message._id, limit: CHAT.DEFAULT_FETCH_SIZE});
     });
 
     it('should populate controller messages', function() {

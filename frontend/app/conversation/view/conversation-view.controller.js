@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, chatLastConversationService) {
     var self = this;
 
     self.spinnerKey = 'ChatConversationSpinner';
@@ -25,7 +25,18 @@
     }
 
     function getConversationId() {
-      return $stateParams.id || (self.chatLocalStateService.channels && self.chatLocalStateService.channels[0] && self.chatLocalStateService.channels[0]._id);
+      var deferred = $q.defer();
+
+      chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
+        if (!conversationId.channelId) {
+          return deferred.reject('Cannot get current conversationId');
+
+        }
+
+        return deferred.resolve(conversationId.channelId);
+      });
+
+      return deferred.promise;
     }
 
     function getOlderMessageId() {
@@ -68,7 +79,6 @@
       }
 
       isFirstLoad = isFirstLoad || false;
-      var conversationId = getConversationId();
       var options = {limit: CHAT.DEFAULT_FETCH_SIZE};
       var older = getOlderMessageId();
 
@@ -78,7 +88,10 @@
 
       usSpinnerService.spin(self.spinnerKey);
 
-      return chatConversationService.fetchMessages(conversationId, options)
+      return getConversationId()
+      .then(function(conversationId) {
+        return chatConversationService.fetchMessages(conversationId, options);
+      })
       .then(checkMessagesOfSameUser)
       .then(function(result) {
         self.topOfConversation = result.length < CHAT.DEFAULT_FETCH_SIZE;
@@ -131,17 +144,21 @@
     }
 
     function init() {
-      var conversationId = getConversationId();
 
-      if (conversationId) {
-        self.chatLocalStateService.setActive(conversationId);
-        loadPreviousMessages(true).then(scrollDown);
-      }
+      chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
 
-      $scope.$on('$destroy', function() {
-        if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId) {
-          self.chatLocalStateService.unsetActive();
+        if (conversationId.channelId) {
+          self.chatLocalStateService.setActive(conversationId.channelId);
+
+          return loadPreviousMessages(true).then(scrollDown);
         }
+
+        $scope.$on('$destroy', function() {
+          if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId.channelId) {
+            chatLastConversationService.saveConversationId(session.user._id, {channelId: conversationId.channelId});
+            self.chatLocalStateService.unsetActive();
+          }
+        });
       });
     }
 

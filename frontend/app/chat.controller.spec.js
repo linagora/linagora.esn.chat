@@ -28,7 +28,10 @@ describe('The linagora.esn.chat ChatController controller', function() {
     chatConversationsService,
     chatLocalStateService,
     chatLocalStateServiceMock,
-    searchProviders;
+    searchProviders,
+    chatNotificationService,
+    chatLastConversationServiceMock,
+    conversation;
 
   beforeEach(function() {
     $state = {
@@ -70,6 +73,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
     user = {_id: 'userId'};
 
     sessionMock = {
+      user: user,
       ready: { then: _.constant(user)}
     };
 
@@ -83,6 +87,12 @@ describe('The linagora.esn.chat ChatController controller', function() {
 
     searchProviders = {
       add: sinon.spy()
+    };
+
+    chatLastConversationServiceMock = {
+      getConversationId: sinon.spy(function() {
+        return $q.when(conversation);
+      })
     };
 
     module('linagora.esn.chat', function($provide) {
@@ -101,6 +111,8 @@ describe('The linagora.esn.chat ChatController controller', function() {
       $provide.value('livenotification', livenotificationMock);
       $provide.value('ChatMessageAdapter', ChatMessageAdapter);
       $provide.value('chatScrollService', chatScrollService);
+      $provide.value('chatNotificationService', chatNotificationService);
+      $provide.value('chatLastConversationService', chatLastConversationServiceMock);
       $provide.value('chatLocalStateService', chatLocalStateServiceMock);
       $provide.value('chatParseMention', {});
     });
@@ -115,6 +127,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
+    conversation = {channelId: '583e9769ecac5c59a19fe6af'};
     chatLocalStateService.channels = channels;
     chatLocalStateService.privateConversations = groups;
   }));
@@ -141,10 +154,24 @@ describe('The linagora.esn.chat ChatController controller', function() {
       expect(scope.vm.chatLocalStateService).to.be.equal(chatLocalStateService);
     });
 
-    it('should call setActive with the default channel', function() {
+    it('should call setActive with the default channel if the chatLastConversation Service return nothing', function() {
+      chatLastConversationServiceMock.getConversationId = function() {
+        return $q.when([]);
+      };
       initCtrl();
+
       $rootScope.$digest();
       expect(chatLocalStateService.setActive).to.be.calledWith(channels[0]._id);
+    });
+
+    it('should call setActive with the channelId returned by the chatLastConversation service', function() {
+      chatLastConversationServiceMock.getConversationId = function() {
+        return $q.when(conversation);
+      };
+      initCtrl();
+
+      $rootScope.$digest();
+      expect(chatLocalStateService.setActive).to.be.calledWith(conversation.channelId);
     });
   });
 });

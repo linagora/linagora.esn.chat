@@ -18,7 +18,9 @@ describe('The ChatConversationItemController controller', function() {
   getConversationNameMock,
   getConversationNameServiceMock,
   conversationNameResult,
-  searchProviders;
+  searchProviders,
+  channels,
+  chatLastConversationServiceMock;
 
   beforeEach(function() {
     userStatusService = {
@@ -54,6 +56,18 @@ describe('The ChatConversationItemController controller', function() {
     searchProviders = {
       add: sinon.spy()
     };
+
+    chatLastConversationServiceMock = {
+      getConversationId: sinon.spy(function() {
+        return $q.when(channels);
+      }),
+      saveConversationId: sinon.spy(function() {
+        return $q.when([]);
+      })
+    };
+
+    channels = {channelId: '583e9769ecac5c59a19fe6af'};
+
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProviders);
@@ -66,6 +80,7 @@ describe('The ChatConversationItemController controller', function() {
       $provide.value('chatParseMention', {
         parseMentions: sinon.spy()
       });
+      $provide.value('chatLastConversationService', chatLastConversationServiceMock);
       $provide.value('esnEmoticonifyFilter', sinon.spy());
       $provide.factory('chatConversationsService', function($q) {
         return {getConversationNamePromise: $q.when(getConversationNameMock)};
@@ -269,5 +284,29 @@ describe('The ChatConversationItemController controller', function() {
         expect(controller.connected).to.be.true;
       });
     });
+
+    describe('the onConversationItemClicked function', function() {
+      var controller, conversationId;
+
+      beforeEach(function() {
+        conversationId = 'aConversationId';
+        controller = initController();
+      });
+
+      it('should call chatLastConversationService.saveConversation when conversationId is defined', function() {
+
+        controller.onConversationItemClicked(conversationId);
+
+        expect(chatLastConversationServiceMock.saveConversationId).to.have.been.calledWith(session.user._id, {channelId: conversationId});
+      });
+
+      it('should not call chatLastConversationService.saveConversation if conversationId is undefined', function() {
+
+        controller.onConversationItemClicked();
+
+        expect(chatLastConversationServiceMock.saveConversationId).to.not.have.been.called;
+      });
+    });
+
   });
 });
