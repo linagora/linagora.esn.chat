@@ -1,3 +1,8 @@
-.conversation-list
-  .no-messages(ng-if="!vm.hasWantedConversation()") #{__('You do not have any messages yet.')}
-  chat-conversation-overview(channel-state='vm.channelState', ng-repeat="item in vm.groups|filter:wanted" item="item", ng-click='vm.goToChannel($event, item._id)')
+.chat-conversation-list
+  infinite-list(load-more-elements='ctrl.loadMoreElements()')
+    chat-conversation-list-item(conversation="conversation" ng-repeat="conversation in ctrl.elements" ng-if="ctrl.elements.length > 0")
+    .list-empty(ng-if="!ctrl.elements.length && ctrl.infiniteScrollCompleted")
+      i.mdi.mdi-facebook-messenger
+      .message #{__("No conversations")}
+    ul.nav.nav-pills.nav-stacked(ng-if='ctrl.infiniteScrollDisabled')
+      li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')

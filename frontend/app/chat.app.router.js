@@ -59,6 +59,14 @@
             template: '<chat-conversation-create-channel/>'
           }
         }
+      })
+      .state('chat.channels-list', {
+        url: '/channels/list',
+        views: {
+          'main@chat': {
+            template: '<chat-conversation-list/>'
+          }
+        }
       });
   });
 })();
