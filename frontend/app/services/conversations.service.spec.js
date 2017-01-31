@@ -13,7 +13,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
   user,
   livenotificationMock,
   chatNamespace,
-  $httpBackend,
+  chatConversationService,
   $rootScope,
   channels;
 
@@ -33,6 +33,8 @@ describe('The linagora.esn.chat conversationsServices', function() {
       ready: null
     };
 
+    chatConversationService = {};
+
     function livenotificationFactory(CHAT_NAMESPACE) {
       livenotificationMock = function(name) {
         if (name === CHAT_NAMESPACE) {
@@ -51,6 +53,7 @@ describe('The linagora.esn.chat conversationsServices', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatConversationService', chatConversationService);
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
 
@@ -60,28 +63,30 @@ describe('The linagora.esn.chat conversationsServices', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _chatConversationsService_, _CHAT_EVENTS_, _$rootScope_, _$httpBackend_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _chatConversationsService_, _CHAT_EVENTS_, _$rootScope_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
     chatConversationsService = _chatConversationsService_;
     CHAT_EVENTS = _CHAT_EVENTS_;
-    $httpBackend = _$httpBackend_;
     $rootScope = _$rootScope_;
     sessionMock.ready = $q.when({user: user});
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
   }));
 
-  it('it should listen for comversation deletion and update cache correctly', function() {
-    $httpBackend.expectGET('/chat/api/user/conversations').respond(channels);
+  it('it should listen for conversation deletion and update cache correctly', function() {
+    chatConversationService.listForCurrentUser = function() {
+      return $q.when({data: channels});
+    };
     $rootScope.$digest();
-    $httpBackend.flush();
+
     expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.CONVERSATION_DELETION, sinon.match.func.and(sinon.match(function(callback) {
       callback('channel1');
       var thenSpy = sinon.spy();
 
       chatConversationsService.getChannels().then(thenSpy);
       $rootScope.$digest();
-      expect(thenSpy).to.have.been.calledWith(sinon.match({length: 1, 0: channels[1]}));
+
+      expect(thenSpy).to.have.been.calledWith(sinon.match({length: 1, 0: {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}}));
 
       return true;
     })));
@@ -92,13 +97,21 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var thenSpyForDelete = sinon.spy();
       var thenSpyForGet = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(channels);
-      $httpBackend.flush();
-      $httpBackend.expectDELETE('/chat/api/conversations/channel1').respond(204, null);
+      chatConversationService.listForCurrentUser = function() {
+        return $q.when({data: channels});
+      };
+
+      chatConversationService.remove = sinon.spy(function() {
+        return $q.when();
+      });
+
       chatConversationsService.deleteConversation('channel1').then(thenSpyForDelete);
-      $httpBackend.flush();
+      $rootScope.$digest();
+
       chatConversationsService.getChannels().then(thenSpyForGet);
       $rootScope.$digest();
+
+      expect(chatConversationService.remove).to.have.been.calledOnce;
       expect(thenSpyForDelete).to.have.been.calledOnce;
       expect(thenSpyForGet).to.have.been.calledWith(sinon.match({length: 1, 0: {_id: 'channel2'}}));
     });
@@ -109,13 +122,23 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var thenSpyForDelete = sinon.spy();
       var thenSpyForGet = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(channels);
-      $httpBackend.flush();
-      $httpBackend.expectDELETE('/chat/api/conversations/channel1/members').respond(204, null);
+      sessionMock.user = user;
+
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: channels});
+      });
+
+      chatConversationService.leave = sinon.spy(function() {
+        return $q.when();
+      });
+
       chatConversationsService.leaveConversation('channel1').then(thenSpyForDelete);
-      $httpBackend.flush();
+      $rootScope.$digest();
       chatConversationsService.getChannels().then(thenSpyForGet);
       $rootScope.$digest();
+
+      expect(chatConversationService.leave).to.have.been.calledOnce;
+      expect(chatConversationService.listForCurrentUser).to.have.been.calledOnce;
       expect(thenSpyForDelete).to.have.been.calledOnce;
       expect(thenSpyForGet).to.have.been.calledWith(sinon.match({length: 1, 0: {_id: 'channel2'}}));
     });
@@ -126,47 +149,59 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var channel = {_id: 'channelId'};
       var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond([]);
-      $httpBackend.expectGET('/chat/api/conversations/channelId').respond(channel);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: []});
+      });
+
+      chatConversationService.get = sinon.spy(function() {
+        return $q.when({data: channel});
+      });
+
       chatConversationsService.getConversation('channelId').then(callback);
       $rootScope.$digest();
-      $httpBackend.flush();
+
+      expect(chatConversationService.listForCurrentUser).to.have.been.calledOnce;
+      expect(chatConversationService.get).to.have.been.calledWith('channelId');
       expect(callback).to.have.been.calledWith(sinon.match(channel));
     });
 
     it('should not fetch data from the rest API if channel is in the cached data', function() {
       var channel = {_id: 'channelId'};
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond([channel]);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: [channel]});
+      });
+
       chatConversationsService.getChannels();
       $rootScope.$digest();
-      $httpBackend.flush();
 
       var callback = sinon.spy();
 
       chatConversationsService.getConversation('channelId').then(callback);
       $rootScope.$digest();
+      expect(chatConversationService.listForCurrentUser).to.have.been.calledOnce;
       expect(callback).to.have.been.calledWith(sinon.match(channel));
     });
 
     it('should refetch data after the cache has been resetted', function() {
-      var channel = {_id: 'channelId', data: 'data1'};
+      var channel = {_id: 'channelId', data: 'data1', type: CHAT_CONVERSATION_TYPE.OPEN};
+      var newChannel = {_id: 'channelId', data: 'data2', type: CHAT_CONVERSATION_TYPE.OPEN};
+      var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond([channel]);
+      chatConversationService.listForCurrentUser = sinon.stub();
+      chatConversationService.listForCurrentUser.onCall(0).returns($q.when({data: [channel]}));
+      chatConversationService.listForCurrentUser.onCall(1).returns($q.when({data: [newChannel]}));
+
       chatConversationsService.getChannels();
       $rootScope.$digest();
-      $httpBackend.flush();
 
       chatConversationsService.resetCache();
-      var newChannel = {_id: 'channelId', data: 'data2'};
-
-      $httpBackend.expectGET('/chat/api/user/conversations').respond([newChannel]);
-      var callback = sinon.spy();
 
       chatConversationsService.getConversation('channelId').then(callback);
       $rootScope.$digest();
-      $httpBackend.flush();
+
       expect(callback).to.have.been.calledWith(sinon.match(newChannel));
+      expect(chatConversationService.listForCurrentUser).to.have.been.calledTwice;
     });
   });
 
@@ -181,10 +216,12 @@ describe('The linagora.esn.chat conversationsServices', function() {
       }];
       var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(conversations);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: conversations});
+      });
       chatConversationsService.getConversations().then(callback);
       $rootScope.$digest();
-      $httpBackend.flush();
+
       expect(callback).to.have.been.calledOnce;
       expect(callback).to.have.been.calledWith(sinon.match({
         0: conversations[0],
@@ -205,10 +242,13 @@ describe('The linagora.esn.chat conversationsServices', function() {
       }];
       var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(conversations);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: conversations});
+      });
+
       chatConversationsService.getChannels().then(callback);
       $rootScope.$digest();
-      $httpBackend.flush();
+
       expect(callback).to.have.been.calledOnce;
       expect(callback).to.have.been.calledWith(sinon.match({
         0: conversations[0],
@@ -226,13 +266,16 @@ describe('The linagora.esn.chat conversationsServices', function() {
       }];
       var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(conversations);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: conversations});
+      });
+
       chatConversationsService.getChannels();
       $rootScope.$digest();
-      $httpBackend.flush();
 
       chatConversationsService.getChannels().then(callback);
       $rootScope.$digest();
+
       expect(callback).to.have.been.calledWith(sinon.match({
         0: conversations[0],
         length: 1
@@ -247,13 +290,6 @@ describe('The linagora.esn.chat conversationsServices', function() {
         _id: 2,
         type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
-      var callback = sinon.spy();
-
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(conversations);
-      chatConversationsService.getChannels();
-      $rootScope.$digest();
-      $httpBackend.flush();
-
       var newConversations = [{
         _id: 42,
         type: CHAT_CONVERSATION_TYPE.OPEN
@@ -261,12 +297,19 @@ describe('The linagora.esn.chat conversationsServices', function() {
         _id: 2,
         type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL
       }];
+      var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(newConversations);
+      chatConversationService.listForCurrentUser = sinon.stub();
+      chatConversationService.listForCurrentUser.onCall(0).returns($q.when({data: conversations}));
+      chatConversationService.listForCurrentUser.onCall(1).returns($q.when({data: newConversations}));
+
+      chatConversationsService.getChannels();
+      $rootScope.$digest();
+
       chatConversationsService.resetCache();
       chatConversationsService.getChannels().then(callback);
-      $httpBackend.flush();
       $rootScope.$digest();
+
       expect(callback).to.have.been.calledWith(sinon.match({
         0: newConversations[0],
         length: 1
@@ -282,10 +325,13 @@ describe('The linagora.esn.chat conversationsServices', function() {
       });
       var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(groups);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: groups});
+      });
+
       chatConversationsService.getPrivateConversations().then(callback);
       $rootScope.$digest();
-      $httpBackend.flush();
+
       expect(callback).to.have.been.calledWith(sinon.match({
         0: {_id: 1},
         length: 2
@@ -296,16 +342,18 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var groups = [1, 2].map(function(i) {
         return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
+      var callback = sinon.spy();
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(groups);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: groups});
+      });
+
       chatConversationsService.getPrivateConversations();
       $rootScope.$digest();
-      $httpBackend.flush();
-
-      var callback = sinon.spy();
 
       chatConversationsService.getPrivateConversations().then(callback);
       $rootScope.$digest();
+
       expect(callback).to.have.been.calledWith(sinon.match({
         0: {_id: 1},
         length: 2
@@ -316,24 +364,23 @@ describe('The linagora.esn.chat conversationsServices', function() {
       var groups = [1, 2].map(function(i) {
         return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
-
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(groups);
-      chatConversationsService.getPrivateConversations();
-      $rootScope.$digest();
-      $httpBackend.flush();
-
       var newGroups = [1, 2, 3].map(function(i) {
         return {_id: i, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: [{_id: i, firstname: String(i), lastname: String(i)}]};
       });
-
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(newGroups);
-      chatConversationsService.resetCache();
-
       var callback = sinon.spy();
 
-      chatConversationsService.getPrivateConversations().then(callback);
-      $httpBackend.flush();
+      chatConversationService.listForCurrentUser = sinon.stub();
+      chatConversationService.listForCurrentUser.onCall(0).returns($q.when({data: groups}));
+      chatConversationService.listForCurrentUser.onCall(1).returns($q.when({data: newGroups}));
+
+      chatConversationsService.getPrivateConversations();
       $rootScope.$digest();
+
+      chatConversationsService.resetCache();
+
+      chatConversationsService.getPrivateConversations().then(callback);
+      $rootScope.$digest();
+
       expect(callback).to.have.been.calledWith(sinon.match({
         0: {_id: 1},
         length: 3
@@ -344,18 +391,18 @@ describe('The linagora.esn.chat conversationsServices', function() {
   describe('updateConversationTopic', function() {
     it('should return the channel affected', function() {
       var value = 'Default';
-      var channel = {
-        _id: 'channelId'
-      };
+      var channelId = 'channelId';
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond([]);
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: []});
+      });
+
+      chatConversationService.updateTopic = sinon.spy();
+
+      chatConversationsService.updateConversationTopic(value, channelId);
       $rootScope.$digest();
-      $httpBackend.flush();
-      $httpBackend.expectPUT('/chat/api/conversations/channelId/topic', {
-        value: value
-      }).respond(channel);
-      chatConversationsService.updateConversationTopic(value, 'channelId');
-      $httpBackend.flush();
+
+      expect(chatConversationService.updateTopic).to.have.been.calledWith(channelId, value);
     });
   });
 
@@ -372,10 +419,10 @@ describe('The linagora.esn.chat conversationsServices', function() {
     });
 
     it('should set the topic of a room', function() {
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({data: channels});
+      });
 
-      $httpBackend.expectGET('/chat/api/user/conversations').respond(channels);
-      chatConversationsService.getChannels();
-      $httpBackend.flush();
       chatConversationsService.setTopicChannel(topic).then(function(isSet) {
         expect(isSet).to.be.equal(true);
       });
