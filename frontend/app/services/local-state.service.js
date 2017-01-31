@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatLocalStateService', chatLocalStateService);
 
-    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, chatConversationsService, chatConversationService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE) {
+    function chatLocalStateService($rootScope, $q, $log, _, session, livenotification, chatConversationsService, chatConversationService, chatParseMention, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_NAMESPACE, CHAT_MEMBER_STATUS) {
       var deferred = $q.defer();
       var activeRoom = {};
       var service = {
@@ -19,6 +19,7 @@
         addConversation: addConversation,
         deleteConversation: deleteConversation,
         leaveConversation: leaveConversation,
+        joinConversation: joinConversation,
         updateConversation: updateConversation,
         channels: [],
         privateConversations: [],
@@ -215,6 +216,14 @@
       function deleteConversation(conversation) {
         return chatConversationsService.deleteConversation(conversation._id).then(function() {
           deleteConversationInCache(conversation);
+        });
+      }
+
+      function joinConversation(conversation) {
+        return chatConversationsService.joinConversation(conversation._id).then(function() {
+          conversation.member_status = CHAT_MEMBER_STATUS.MEMBER;
+
+          return addConversation(conversation);
         });
       }
 

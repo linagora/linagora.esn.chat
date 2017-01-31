@@ -19,6 +19,7 @@
         resetCache: resetCache,
         deleteConversation: deleteConversation,
         leaveConversation: leaveConversation,
+        joinConversation: joinConversation,
         getConversations: getConversations,
         getChannels: getChannels,
         getConversation: getConversation,
@@ -85,6 +86,10 @@
 
           return result;
         });
+      }
+
+      function joinConversation(conversationId) {
+        return chatConversationService.join(conversationId, session.user._id);
       }
 
       function leaveConversation(conversationId) {

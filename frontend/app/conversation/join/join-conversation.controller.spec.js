@@ -5,12 +5,11 @@
 
 var expect = chai.expect;
 
-describe('the ChatJoinConversationController controller', function() {
+describe('The ChatJoinConversationController controller', function() {
 
-  var $rootScope, $scope, $controller, $q, conversation, chatConversationService, chatLocalStateService, searchProviders, session, conversationId, userId;
+  var $rootScope, $scope, $controller, $q, conversation, chatLocalStateService, session, conversationId, userId;
 
   beforeEach(function() {
-
     conversationId = 1;
     userId = 2;
 
@@ -18,21 +17,7 @@ describe('the ChatJoinConversationController controller', function() {
       _id: conversationId
     };
 
-    chatConversationService = {
-      join: sinon.spy(function() {
-        return $q.when();
-      })
-    };
-
-    chatLocalStateService = {
-      updateConversation: sinon.spy(function() {
-        return $q.when();
-      })
-    };
-
-    searchProviders = {
-      add: sinon.spy()
-    };
+    chatLocalStateService = {};
 
     session = {
       user: {
@@ -41,22 +26,18 @@ describe('the ChatJoinConversationController controller', function() {
     };
 
     angular.mock.module('linagora.esn.chat', function($provide) {
-      $provide.value('searchProviders', searchProviders);
-      $provide.value('chatConversationService', chatConversationService);
+      $provide.value('searchProviders', {add: angular.noop});
       $provide.value('chatLocalStateService', chatLocalStateService);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', session);
     });
 
-    angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _$state_, _chatConversationService_, _chatLocalStateService_, _session_) {
+    angular.mock.inject(function(_$rootScope_, _$controller_, _$q_) {
       $rootScope = _$rootScope_;
       $scope = $rootScope.$new();
       $q = _$q_;
       $controller = _$controller_;
-      chatConversationService = _chatConversationService_;
-      chatLocalStateService = _chatLocalStateService_;
-      session = _session_;
     });
   });
 
@@ -73,21 +54,62 @@ describe('the ChatJoinConversationController controller', function() {
 
   describe('the join function', function() {
 
-    it('should join conversation', function() {
+    it('should reject when chatLocalStateService.joinConversation rejects', function() {
+      var error = new Error('I failed');
+      var onResolve = sinon.spy();
+      var onReject = sinon.spy();
+
+      chatLocalStateService.joinConversation = sinon.spy(function() {
+        return $q.reject(error);
+      });
+      initController(conversation).join().then(onResolve, onReject);
+      $rootScope.$digest();
+
+      expect(chatLocalStateService.joinConversation).to.have.been.calledWith(conversation);
+      expect(onResolve).to.not.have.been.called;
+      expect(onReject).to.have.been.calledWith(error);
+    });
+
+    it('should resolve when chatLocalStateService.joinConversation resolves', function() {
+      chatLocalStateService.joinConversation = sinon.spy(function() {
+        return $q.when();
+      });
+
       initController(conversation).join();
       $rootScope.$digest();
 
-      expect(chatConversationService.join).to.have.been.calledWith(conversationId, userId);
-      expect(chatLocalStateService.updateConversation).to.have.been.calledWith(conversationId);
+      expect(chatLocalStateService.joinConversation).to.have.been.calledWith(conversation);
     });
 
     it('should call the onJoin callback', function() {
       var spy = sinon.spy();
 
+      chatLocalStateService.joinConversation = sinon.spy(function() {
+        return $q.when();
+      });
       initController(conversation, spy).join();
       $rootScope.$digest();
 
       expect(spy).to.have.been.calledWith(userId);
+    });
+
+    it('should reject when onJoin rejects', function() {
+      var error = new Error('I failed');
+      var spy = sinon.spy(function() {
+        return $q.reject(error);
+      });
+      var onResolve = sinon.spy();
+      var onReject = sinon.spy();
+
+      chatLocalStateService.joinConversation = sinon.spy(function() {
+        return $q.when();
+      });
+      initController(conversation, spy).join().then(onResolve, onReject);
+      $rootScope.$digest();
+
+      expect(spy).to.have.been.calledWith(userId);
+      expect(onResolve).to.not.have.been.called;
+      expect(onReject).to.have.been.calledWith(error);
     });
   });
 });
