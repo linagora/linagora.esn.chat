@@ -28,12 +28,12 @@
       var deferred = $q.defer();
 
       chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
-        if (!conversationId.channelId) {
+        if (!conversationId) {
           return deferred.reject('Cannot get current conversationId');
 
         }
 
-        return deferred.resolve(conversationId.channelId);
+        return deferred.resolve(conversationId);
       });
 
       return deferred.promise;
@@ -147,15 +147,15 @@
 
       chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
 
-        if (conversationId.channelId) {
-          self.chatLocalStateService.setActive(conversationId.channelId);
+        if (conversationId) {
+          self.chatLocalStateService.setActive(conversationId);
 
           return loadPreviousMessages(true).then(scrollDown);
         }
 
         $scope.$on('$destroy', function() {
-          if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId.channelId) {
-            chatLastConversationService.saveConversationId(session.user._id, {channelId: conversationId.channelId});
+          if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId) {
+            chatLastConversationService.saveConversationId(session.user._id, conversationId);
             self.chatLocalStateService.unsetActive();
           }
         });

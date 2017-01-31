@@ -23,7 +23,6 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
     user,
     searchProviders,
     chatLastConversationServiceMock,
-    channels,
     channelId;
 
   beforeEach(function() {
@@ -83,11 +82,10 @@ describe('The linagora.esn.chat ChatConversationViewController controller', func
 
     chatLastConversationServiceMock = {
       getConversationId: sinon.spy(function() {
-        return $q.when(channels);
+        return $q.when(channelId);
       })
     };
     channelId = '583e9769ecac5c59a19fe6af';
-    channels = {channelId: channelId};
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);

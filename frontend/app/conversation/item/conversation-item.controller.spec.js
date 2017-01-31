@@ -297,7 +297,7 @@ describe('The ChatConversationItemController controller', function() {
 
         controller.onConversationItemClicked(conversationId);
 
-        expect(chatLastConversationServiceMock.saveConversationId).to.have.been.calledWith(session.user._id, {channelId: conversationId});
+        expect(chatLastConversationServiceMock.saveConversationId).to.have.been.calledWith(session.user._id, conversationId);
       });
 
       it('should not call chatLastConversationService.saveConversation if conversationId is undefined', function() {
