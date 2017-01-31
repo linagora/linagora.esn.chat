@@ -10,7 +10,7 @@ module.exports = function(dependencies, lib) {
   };
 
   function getChannels(req, res) {
-    lib.conversation.getChannels(req.query, (err, result) => {
+    lib.conversation.getOpenChannels(req.query, (err, result) => {
       if (err) {
         logger.error('Error while getting conversations', err);
 

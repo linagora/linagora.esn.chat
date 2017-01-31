@@ -6,6 +6,7 @@ angular.module('esn.cache', []);
 angular.module('esn.highlight', []);
 angular.module('esn.attachment', []);
 angular.module('esn.attachment-list', []);
+angular.module('esn.pagination', []);
 angular.module('esn.router', []);
 angular.module('esn.search', []);
 angular.module('esn.scroll', []);

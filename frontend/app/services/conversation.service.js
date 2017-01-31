@@ -10,9 +10,11 @@
         fetchMessages: fetchMessages,
         fetchAttachments: fetchAttachments,
         get: get,
+        getChannels: getChannels,
         getMessage: getMessage,
         join: join,
         leave: leave,
+        list: list,
         listForCurrentUser: listForCurrentUser,
         markAsRead: markAsRead,
         remove: remove,
@@ -46,6 +48,10 @@
         return _getBase(id).get().then(_stripResponse);
       }
 
+      function getChannels(options) {
+        return ChatRestangular.all('channels').getList(options);
+      }
+
       function getMessage(id) {
         return _getBase(id).get().then(_stripResponse);
       }
@@ -56,6 +62,10 @@
 
       function leave(id, userId) {
         return esnCollaborationClientService.leave(CHAT_OBJECT_TYPES.CONVERSATION, id, userId);
+      }
+
+      function list(options) {
+        return ChatRestangular.all('conversations').getList(options);
       }
 
       function listForCurrentUser() {

@@ -27,7 +27,7 @@ describe('The channel controller', function() {
         getForConversation: sinon.spy(function(channel, options, callback) {
           return callback(err, result);
         }),
-        getChannels: sinon.spy(function(options, callback) {
+        getOpenChannels: sinon.spy(function(options, callback) {
           return callback(err, result);
         }),
         create: sinon.spy(function(options, callback) {
@@ -64,7 +64,7 @@ describe('The channel controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.getChannels).to.have.been.calledWith({});
+              expect(lib.conversation.getOpenChannels).to.have.been.calledWith({});
               expect(json).to.shallowDeepEqual({error: {code: 500, details: 'Error while getting channels'}});
               done();
             }

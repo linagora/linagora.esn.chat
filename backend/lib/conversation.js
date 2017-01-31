@@ -30,7 +30,7 @@ module.exports = function(dependencies) {
     find,
     getAllForUser,
     getById,
-    getChannels,
+    getOpenChannels,
     init,
     list,
     listForUser,
@@ -76,19 +76,21 @@ module.exports = function(dependencies) {
     Conversation.findById(conversationId).exec(callback);
   }
 
-  function getChannels(options, callback) {
-    Conversation.find({mode: CONVERSATION_MODE.CHANNEL, moderate: Boolean(options.moderate)}).exec((err, channels) => {
-      channels = channels || [];
-      if (channels.length === 0) {
-        return createDefaultChannel((err, channel) => {
-          if (err) {
-            return callback(new Error('Can not create the default channel'));
-          }
-          callback(null, [channel]);
-        });
-      }
-      callback(err, channels);
-    });
+  function getOpenChannels(options, callback) {
+    Conversation.find({type: CONVERSATION_TYPE.OPEN, mode: CONVERSATION_MODE.CHANNEL, moderate: Boolean(options.moderate)})
+      .sort('name')
+      .exec((err, channels) => {
+        channels = channels || [];
+        if (channels.length === 0) {
+          return createDefaultChannel((err, channel) => {
+            if (err) {
+              return callback(new Error('Can not create the default channel'));
+            }
+            callback(null, [channel]);
+          });
+        }
+        callback(err, channels);
+      });
   }
 
   function init(callback) {

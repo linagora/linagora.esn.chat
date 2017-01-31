@@ -5,6 +5,7 @@
     'esn.cache',
     'esn.core',
     'esn.router',
+    'esn.pagination',
     'restangular',
     'esn.collaboration',
     'esn.search',
