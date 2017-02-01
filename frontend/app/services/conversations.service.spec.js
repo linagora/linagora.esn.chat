@@ -438,4 +438,24 @@ describe('The linagora.esn.chat conversationsServices', function() {
       });
     });
   });
+
+  describe('The joinConversation function', function() {
+    it('should call the chatConversationService.join with right parameters', function() {
+      var id = 1;
+
+      sessionMock.user = user;
+      chatConversationService.listForCurrentUser = function() {
+        return $q.when({data: channels});
+      };
+
+      chatConversationService.join = sinon.spy(function() {
+        return $q.when();
+      });
+
+      chatConversationsService.joinConversation(id);
+      $rootScope.$digest();
+
+      expect(chatConversationService.join).to.have.been.calledWith(id, sessionMock.user._id);
+    });
+  });
 });

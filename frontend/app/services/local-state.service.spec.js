@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatLocalState service', function() {
-  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, $rootScope, channels, CHAT_EVENTS, groups, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
+  var chatLocalStateService, chatConversationService, chatConversationMock, chatUsernameMock, CHAT_CONVERSATION_TYPE, CHAT_MEMBER_STATUS, $rootScope, channels, CHAT_EVENTS, groups, conversations, sessionMock, user, chatNamespace, conversationsServiceMock, $q;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -60,6 +60,9 @@ describe('The chatLocalState service', function() {
         leaveConversation: sinon.spy(function() {
           return $q.when(null);
         }),
+        joinConversation: sinon.spy(function() {
+          return $q.when();
+        }),
         resetCache: sinon.spy()
       };
 
@@ -80,12 +83,13 @@ describe('The chatLocalState service', function() {
 
   });
 
-  beforeEach(angular.mock.inject(function(_chatLocalStateService_, _chatConversationService_, _CHAT_CONVERSATION_TYPE_, _$rootScope_, _CHAT_EVENTS_, _$q_) {
+  beforeEach(angular.mock.inject(function(_chatLocalStateService_, _chatConversationService_, _CHAT_CONVERSATION_TYPE_, _$rootScope_, _CHAT_EVENTS_, _$q_, _CHAT_MEMBER_STATUS_) {
     chatLocalStateService = _chatLocalStateService_;
     chatConversationService = _chatConversationService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     $rootScope = _$rootScope_;
     CHAT_EVENTS = _CHAT_EVENTS_;
+    CHAT_MEMBER_STATUS = _CHAT_MEMBER_STATUS_;
     $q = _$q_;
     $rootScope = _$rootScope_;
   }));
@@ -315,6 +319,19 @@ describe('The chatLocalState service', function() {
       $rootScope.$digest();
       expect(thenSpy).to.have.been.calledOnce;
       expect(conversationsServiceMock.leaveConversation).to.have.been.calledWith(channels[1]._id);
+    });
+  });
+
+  describe('The joinConversation function', function() {
+    it('should call chatConversationsService.joinConversation', function() {
+      var thenSpy = sinon.spy();
+
+      chatLocalStateService.joinConversation(channels[1]).then(thenSpy);
+      $rootScope.$digest();
+
+      expect(conversationsServiceMock.joinConversation).to.have.been.calledWith(channels[1]._id);
+      expect(channels[1].member_status).to.equal(CHAT_MEMBER_STATUS.MEMBER);
+      expect(thenSpy).to.have.been.called;
     });
   });
 

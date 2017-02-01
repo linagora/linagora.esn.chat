@@ -13,6 +13,9 @@
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatLocalStateService.channels" conversation="conversation", ng-click='$hide()')
 
+        .lv-item.clickable(ui-sref="chat.channels-list", ui-sref-active="selected")
+          span #{__('More')}&hellip;
+
         .lv-item.clickable.menu-heading
           .title(ui-sref='chat.channels-views')
             i.menu-icon.mdi.mdi-facebook-messenger

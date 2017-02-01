@@ -1,4 +1,7 @@
-.chat-conversation-list-item(ui-sref='chat.channels-views({id: ctrl.conversation._id})')
-  .conversation-title
+.chat-conversation-list-item
+  .conversation-title(ui-sref='chat.channels-views({id: ctrl.conversation._id})')
     h3 {{::ctrl.conversation.name}}
     span.topic {{::ctrl.conversation.topic.value}}
+
+  .conversation-actions
+    chat-join-conversation(ng-if='!ctrl.isMember', conversation='ctrl.conversation', on-join='ctrl.onJoin()')
