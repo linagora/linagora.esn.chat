@@ -5,7 +5,7 @@
   angular.module('linagora.esn.chat')
   .factory('chatLastConversationService', chatLastConversationService);
 
-  function chatLastConversationService($log, localStorageService) {
+  function chatLastConversationService($q, $log, localStorageService) {
     var storage = localStorageService.getOrCreateInstance('chat-conversation');
     var service = {
       saveConversationId: saveConversationId,
@@ -14,15 +14,19 @@
 
     return service;
 
-    function saveConversationId(userId, channelId) {
-      return storage.setItem(userId, channelId).catch(function(error) {
+    function saveConversationId(userId, conversationId) {
+      return storage.setItem(userId, {conversationId: conversationId}).catch(function(error) {
         $log.error('Error while saving current conversation', error);
       });
     }
 
     function getConversationId(userId) {
-      return storage.getItem(userId).catch(function(error) {
-        $log.error('Cannot get current conversation', error);
+      return storage.getItem(userId).then(function(result) {
+        if (result) {
+          return result.conversationId;
+        }
+
+        return $q.reject(new Error('No conversation for user' + userId));
       });
     }
   }

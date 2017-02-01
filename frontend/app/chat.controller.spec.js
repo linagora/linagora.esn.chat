@@ -31,7 +31,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
     searchProviders,
     chatNotificationService,
     chatLastConversationServiceMock,
-    conversation;
+    conversationId;
 
   beforeEach(function() {
     $state = {
@@ -91,7 +91,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
 
     chatLastConversationServiceMock = {
       getConversationId: sinon.spy(function() {
-        return $q.when(conversation);
+        return $q.when(conversationId);
       })
     };
 
@@ -127,7 +127,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
-    conversation = {channelId: '583e9769ecac5c59a19fe6af'};
+    conversationId = '583e9769ecac5c59a19fe6af';
     chatLocalStateService.channels = channels;
     chatLocalStateService.privateConversations = groups;
   }));
@@ -156,7 +156,7 @@ describe('The linagora.esn.chat ChatController controller', function() {
 
     it('should call setActive with the default channel if the chatLastConversation Service return nothing', function() {
       chatLastConversationServiceMock.getConversationId = function() {
-        return $q.when([]);
+        return $q.when();
       };
       initCtrl();
 
@@ -166,12 +166,12 @@ describe('The linagora.esn.chat ChatController controller', function() {
 
     it('should call setActive with the channelId returned by the chatLastConversation service', function() {
       chatLastConversationServiceMock.getConversationId = function() {
-        return $q.when(conversation);
+        return $q.when(conversationId);
       };
       initCtrl();
 
       $rootScope.$digest();
-      expect(chatLocalStateService.setActive).to.be.calledWith(conversation.channelId);
+      expect(chatLocalStateService.setActive).to.be.calledWith(conversationId);
     });
   });
 });

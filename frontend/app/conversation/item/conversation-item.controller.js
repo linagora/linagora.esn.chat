@@ -35,7 +35,7 @@
     }
 
     function onConversationItemClicked(conversationId) {
-      conversationId && chatLastConversationService.saveConversationId(session.user._id, {channelId: conversationId});
+      conversationId && chatLastConversationService.saveConversationId(session.user._id, conversationId);
     }
 
     function $onInit() {

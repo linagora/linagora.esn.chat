@@ -14,10 +14,10 @@
       function activate() {
         if (!self.chatLocalStateService.activeRoom._id) {
           chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
-            if (!conversationId.channelId) {
+            if (!conversationId) {
               return self.chatLocalStateService.channels[0] && self.chatLocalStateService.setActive(self.chatLocalStateService.channels[0]._id);
             }
-            self.chatLocalStateService.setActive(conversationId.channelId);
+            self.chatLocalStateService.setActive(conversationId);
           });
         }
       }

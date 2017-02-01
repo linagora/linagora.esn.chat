@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The linagora.esn.chat conversationStateService', function() {
-  var $q, localStorageService, chatLastConversationService, searchProviders, getItem, setItem, getItemResult, userId;
+  var $q, localStorageService, chatLastConversationService, searchProviders, getItem, setItem, getItemResult, userId, conversationId;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat')
@@ -34,6 +34,8 @@ describe('The linagora.esn.chat conversationStateService', function() {
         setItem: setItem
       })
     };
+
+    conversationId = 'conversationTest';
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('localStorageService', localStorageService);
@@ -72,14 +74,14 @@ describe('The linagora.esn.chat conversationStateService', function() {
 
   describe('saveConversationId method', function() {
     it('should call setItem', function() {
-      chatLastConversationService.saveConversationId(userId, 'conversationTest');
-      expect(setItem).to.have.been.calledWith(userId, 'conversationTest');
+      chatLastConversationService.saveConversationId(userId, conversationId);
+      expect(setItem).to.have.been.calledWith(userId, { conversationId: conversationId });
     });
 
     it('should never reject', function() {
       var thenSpy = sinon.spy();
 
-      chatLastConversationService.saveConversationId(userId, 'conversationTest').catch(thenSpy);
+      chatLastConversationService.saveConversationId(userId, conversationId).catch(thenSpy);
       expect(thenSpy).to.not.have.been.called;
     });
   });
