@@ -1,6 +1,9 @@
 #messages-main {
 
-  height: ~"calc(100vh - 112px)";
+  .flex;
+  .flex-column;
+
+  height: 100%;
 
   .editable-input {
     font-size: 14px;
@@ -55,15 +58,12 @@
   .card {
     .listview.lv-message {
       .flex-column;
-
-      height: ~"calc(100vh - 220px)";
     }
 
     .lv-body {
       .flex-grow;
 
       overflow: auto;
-      max-height: 70vh;
       display: block;
     }
 
@@ -81,10 +81,6 @@
 @media (min-width: @screen-sm-min) {
   #messages-main {
     padding-top: 25px;
-
-    .card .listview.lv-message {
-      height: ~"calc(100vh - 255px)";
-    }
   }
 }
 

@@ -1,18 +1,30 @@
-.chat-messages-view {
-  margin-bottom: 0;
-  width: 100%;
+chat-messages-view {
+  .flex;
 
-  .chat-messages-container {
-    .flex;
+  height: 100%;
 
-    .chat-messages-main {
-      .flex-start;
+  .chat-messages-view {
+    margin-bottom: 0;
+    width: 100%;
 
-      width: 100%;
-    }
+    .chat-messages-container {
+      .flex;
 
-    .chat-messages-sidebar {
-      .flex-end;
+      height: 100%;
+
+      .chat-messages-main {
+        .flex-start;
+
+        width: 100%;
+
+        .lv-body {
+          height: 100%;
+        }
+      }
+
+      .chat-messages-sidebar {
+        .flex-end;
+      }
     }
   }
 }
