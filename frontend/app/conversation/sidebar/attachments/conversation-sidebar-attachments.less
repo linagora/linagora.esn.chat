@@ -1,6 +1,7 @@
 .conversation-sidebar-attachments {
   .flex-column;
 
+  height: 100%;
   max-width: @chatRightSidebarDefaultWidth;
   min-width: @chatRightSidebarDefaultWidth;
 
@@ -8,11 +9,21 @@
     .flex-end;
 
     font-size: 24px;
-    padding: 15px;
+
+    .mdi {
+      height: 30px;
+    }
   }
 
   .list {
-    padding: 10px;
+    .flex;
+
+    height: 100%;
+    padding: 0 5px;
+
+    esn-attachment-list {
+      width: 100%;
+    }
   }
 
   @media(min-width: @screen-md-min) {
@@ -23,7 +34,8 @@
 
 .chat-messages-sidebar {
   .conversation-sidebar-attachments .list .attachment-list{
-    overflow-y: scroll;
-    height: ~"calc(100vh - 309px)";
+    overflow: auto;
+    height: 100%;
+    padding: 5px;
   }
 }
