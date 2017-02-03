@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .directive('chatUserTyping', chatUserTyping);
 
-    function chatUserTyping(_, session, userUtils, chatLocalStateService) {
+    function chatUserTyping(_, session, userUtils, chatConversationsStoreService) {
       var directive = {
         restrict: 'E',
         scope: true,
@@ -23,7 +23,7 @@
 
             scope.usersTyping = _.chain(scope.typing)
               .filter(function(message) {
-                return message.state && chatLocalStateService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
+                return message.state && chatConversationsStoreService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
               })
               .map('creator')
               .map(userUtils.displayNameOf)

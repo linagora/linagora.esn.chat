@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .directive('chatMessageCompose', chatMessageCompose);
 
-  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatLocalStateService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel, chatComposerState) {
+  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatConversationsStoreService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel, chatComposerState) {
     var directive = {
       restrict: 'E',
       templateUrl: '/chat/app/conversation/compose/message-compose.html',
@@ -28,12 +28,12 @@
       chatMessageService.connect();
       var textarea = element.find('textarea').get(0);
       var timer = null;
-      var currentRoomId = chatLocalStateService.activeRoom._id;
+      var currentRoomId = chatConversationsStoreService.activeRoom._id;
 
       scope.typing = false;
       scope.text = '';
 
-      chatComposerState.getMessage(chatLocalStateService.activeRoom._id).then(function(message) {
+      chatComposerState.getMessage(chatConversationsStoreService.activeRoom._id).then(function(message) {
         scope.text = message && message.text ? message.text : '';
       });
 
@@ -44,7 +44,7 @@
       function sendUserTyping(state) {
         var message = {
           state: state,
-          channel: chatLocalStateService.activeRoom._id,
+          channel: chatConversationsStoreService.activeRoom._id,
           date: Date.now()
         };
 
@@ -108,7 +108,7 @@
           type: 'text',
           text: chatHumanizeEntitiesLabel.replaceHumanPresentationByRealData(scope.text),
           creator: session.user._id,
-          channel: chatLocalStateService.activeRoom._id,
+          channel: chatConversationsStoreService.activeRoom._id,
           date: Date.now()
         };
       }

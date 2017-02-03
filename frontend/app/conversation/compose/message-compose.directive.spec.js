@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The message-compose directive', function() {
-  var $scope, $rootScope, $compile, $q, chatComposerState, deviceDetector, chatLocalStateService, chatMessageService, domainAPI;
+  var $scope, $rootScope, $compile, $q, chatComposerState, deviceDetector, chatConversationsStoreService, chatMessageService, domainAPI;
 
   beforeEach(function() {
     chatComposerState = {
@@ -20,7 +20,7 @@ describe('The message-compose directive', function() {
       isMobile: sinon.spy()
     };
 
-    chatLocalStateService = {
+    chatConversationsStoreService = {
       activeRoom: {_id: '1'}
     };
 
@@ -41,7 +41,7 @@ describe('The message-compose directive', function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('chatComposerState', chatComposerState);
       $provide.value('deviceDetector', deviceDetector);
-      $provide.value('chatLocalStateService', chatLocalStateService);
+      $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatMessageService', chatMessageService);
       $provide.value('domainAPI', domainAPI);
       $provide.value('chatSearchMessagesProviderService', {});
@@ -81,7 +81,7 @@ describe('The message-compose directive', function() {
   it('should call saveMessage on scope destroy', function() {
     initDirective();
     $scope.text = 'test';
-    var roomId = chatLocalStateService.activeRoom._id;
+    var roomId = chatConversationsStoreService.activeRoom._id;
 
     $scope.$destroy();
     expect(chatComposerState.saveMessage).to.have.been.calledWith(roomId, {text: $scope.text});

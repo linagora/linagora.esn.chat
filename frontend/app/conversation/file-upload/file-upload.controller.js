@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .controller('chatFileUploadController', chatFileUploadController);
 
-    function chatFileUploadController($log, $scope, session, chatLocalStateService, chatMessageService) {
+    function chatFileUploadController($log, $scope, session, chatConversationsStoreService, chatMessageService) {
       var self = this;
 
       self.onFileSelect = onFileSelect;
@@ -13,7 +13,7 @@
         return {
           text: '',
           creator: session.user._id,
-          channel: chatLocalStateService.activeRoom._id,
+          channel: chatConversationsStoreService.activeRoom._id,
           date: Date.now()
         };
       }

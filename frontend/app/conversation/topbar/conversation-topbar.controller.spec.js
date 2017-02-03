@@ -8,11 +8,11 @@ describe('The ChatConversationTopbarController controller', function() {
   var conversation,
     $rootScope,
     $scope,
-    chatConversationsService,
+    chatConversationActionsService,
     $controller;
 
   beforeEach(function() {
-    chatConversationsService = {};
+    chatConversationActionsService = {};
     conversation = {_id: 1};
 
     angular.mock.module('jadeTemplates');
@@ -20,7 +20,7 @@ describe('The ChatConversationTopbarController controller', function() {
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
-      $provide.value('chatConversationsService', chatConversationsService);
+      $provide.value('chatConversationActionsService', chatConversationActionsService);
     });
   });
 
@@ -45,7 +45,7 @@ describe('The ChatConversationTopbarController controller', function() {
     it('should call chatConversationsService.updateConversationTopic', function() {
       var topic = {name: 'MyTopic'};
 
-      chatConversationsService.updateConversationTopic = sinon.spy();
+      chatConversationActionsService.updateConversationTopic = sinon.spy();
 
       var controller = initController();
 
@@ -53,7 +53,7 @@ describe('The ChatConversationTopbarController controller', function() {
       controller.updateTopic(topic);
       $rootScope.$digest();
 
-      expect(chatConversationsService.updateConversationTopic).to.have.been.calledWith(topic, conversation._id);
+      expect(chatConversationActionsService.updateConversationTopic).to.have.been.calledWith(topic, conversation._id);
     });
   });
 });

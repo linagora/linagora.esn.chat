@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatScrollService', chatScrollService);
 
-    function chatScrollService(elementScrollService, chatLocalStateService) {
+    function chatScrollService(elementScrollService, chatConversationsStoreService) {
 
       return {
         scrollDown: scrollDown,
@@ -17,7 +17,7 @@
       }
 
       function setCanScrollDown(conversationId, value) {
-        var conversation = chatLocalStateService.findConversation(conversationId);
+        var conversation = chatConversationsStoreService.findConversation(conversationId);
 
         if (conversation) {
           conversation.canScrollDown = value;
@@ -25,10 +25,10 @@
       }
 
       function canScrollDown(conversationId) {
-        var conversation = chatLocalStateService.findConversation(conversationId);
+        var conversation = chatConversationsStoreService.findConversation(conversationId);
 
         if (conversation) {
-          return (conversation.canScrollDown && chatLocalStateService.isActiveRoom(conversation._id));
+          return !!(conversation.canScrollDown && chatConversationsStoreService.isActiveRoom(conversation._id));
         }
       }
     }

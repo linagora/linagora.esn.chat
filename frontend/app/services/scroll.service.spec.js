@@ -9,18 +9,16 @@ describe('The linagora.esn.chat chatScrollService', function() {
   var elementScrollService,
       elementScrollServiceMock,
       chatScrollService,
-      chatLocalStateService,
-      chatLocalStateServiceMock,
-      conversationMock,
+      chatConversationsStoreService,
+      conversation,
       searchProviders;
-
-  conversationMock = {canScrollDown: false};
 
   beforeEach(
     angular.mock.module('linagora.esn.chat')
   );
 
   beforeEach(function() {
+    conversation = {_id: 1, canScrollDown: false};
 
     searchProviders = {
       add: sinon.spy()
@@ -30,81 +28,90 @@ describe('The linagora.esn.chat chatScrollService', function() {
       autoScrollDown: sinon.spy()
     };
 
-    chatLocalStateServiceMock = {
-      findConversation: function() {
-        return conversationMock;
-      },
+    chatConversationsStoreService = {
+      findConversation: sinon.spy(function() {
+        return conversation;
+      }),
       isActiveRoom: sinon.spy()
     };
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('elementScrollService', elementScrollServiceMock);
-      $provide.value('chatLocalStateService', chatLocalStateServiceMock);
+      $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatScrollService_, _elementScrollService_, _chatLocalStateService_) {
+  beforeEach(angular.mock.inject(function(_chatScrollService_, _elementScrollService_) {
     chatScrollService = _chatScrollService_;
     elementScrollService = _elementScrollService_;
-    chatLocalStateService = _chatLocalStateService_;
   }));
 
   describe('The scrollDown function', function() {
 
     it('should call elementScrollService.autoScrollDown service', function() {
       chatScrollService.scrollDown();
+
       expect(elementScrollService.autoScrollDown).to.have.been.called;
     });
   });
 
-  describe('when the setCanScrollDown function called with true', function() {
+  describe('The setCanScrollDown function', function() {
+    it('should set the canScrollDown flag in the conversation with the given value', function() {
+      var value = 'My value';
 
-    it('should set the canScrollDown flag to true', function() {
-      chatLocalStateService.findConversation = sinon.stub().returns(conversationMock);
-      chatScrollService.setCanScrollDown('1', true);
-      expect(conversationMock.canScrollDown).to.equal(true);
-    });
+      chatScrollService.setCanScrollDown(conversation._id, value);
 
-    it('The canScrollDown function return true when isActiveRoom return true', function() {
-      chatLocalStateService.findConversation = sinon.stub().returns(conversationMock);
-      chatLocalStateService.isActiveRoom = sinon.stub().returns(true);
-      expect(chatScrollService.canScrollDown()).to.equal(true);
-    });
-
-    it('The canScrollDown function return false when isActiveRoom return false', function() {
-      chatLocalStateService.findConversation = sinon.stub().returns(conversationMock);
-      chatLocalStateService.isActiveRoom = sinon.stub().returns(false);
-      expect(chatScrollService.canScrollDown()).to.equal(false);
-    });
-
-    it('The canScrollDown function do nothing when findConversation does not return result', function() {
-      chatLocalStateService.findConversation = sinon.stub().returns();
-      expect(chatLocalStateService.isActiveRoom).to.not.have.been.called;
+      expect(conversation.canScrollDown).to.equal(value);
     });
   });
 
-  describe('when the setCanScrollDown function called with false', function() {
+  describe('The canScrollDown function', function() {
 
-    it('should set the canScrollDown flag to false', function() {
+    it('should return true when conversation.canScrollDown and conversation is the active one', function() {
+      conversation.canScrollDown = true;
 
-      chatLocalStateService.findConversation = sinon.stub().returns(conversationMock);
-      chatScrollService.setCanScrollDown('1', false);
-
-      expect(conversationMock.canScrollDown).to.equal(false);
-    });
-
-    describe('The canScrollDown function', function() {
-
-      it('should return false when canScrollDown return false', function() {
-        chatLocalStateService.findConversation = sinon.stub().returns(conversationMock);
-        chatLocalStateService.isActiveRoom = sinon.stub().returns(true);
-
-        expect(chatScrollService.canScrollDown()).to.equal(false);
+      chatConversationsStoreService.isActiveRoom = sinon.spy(function() {
+        return true;
       });
 
+      expect(chatScrollService.canScrollDown(conversation._id)).to.be.true;
+      expect(chatConversationsStoreService.isActiveRoom).to.have.been.calledWith(conversation._id);
+    });
+
+    it('should return false when conversation.canScrollDown is false', function() {
+      conversation.canScrollDown = false;
+
+      chatConversationsStoreService.isActiveRoom = sinon.spy(function() {
+        return true;
+      });
+
+      expect(chatScrollService.canScrollDown(conversation._id)).to.be.false;
+      expect(chatConversationsStoreService.isActiveRoom).to.not.have.been.called;
+    });
+
+    it('should return false when conversation.canScrollDown is false and conversation is not the active one', function() {
+      conversation.canScrollDown = false;
+
+      chatConversationsStoreService.isActiveRoom = sinon.spy(function() {
+        return false;
+      });
+
+      expect(chatScrollService.canScrollDown(conversation._id)).to.be.false;
+      expect(chatConversationsStoreService.isActiveRoom).to.not.have.been.called;
+    });
+
+    it('should return false when conversation.canScrollDown is true and conversation is not the active one', function() {
+      conversation.canScrollDown = true;
+
+      chatConversationsStoreService.isActiveRoom = sinon.spy(function() {
+        return false;
+      });
+
+      expect(chatScrollService.canScrollDown(conversation._id)).to.be.false;
+      expect(chatConversationsStoreService.isActiveRoom).to.have.been.calledWith(conversation._id);
     });
   });
 });

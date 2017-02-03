@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationCreatePrivateController', ChatConversationCreatePrivateController);
 
-  function ChatConversationCreatePrivateController($log, $state, chatConversationsService, chatLocalStateService, notificationFactory, session) {
+  function ChatConversationCreatePrivateController($log, $state, chatConversationActionsService, notificationFactory, session) {
     var self = this;
 
     self.create = create;
@@ -16,17 +16,16 @@
         return;
       }
 
-      var group = {
+      var conversation = {
         domain: session.domain._id,
         members: (self.members || []).map(function(member) {
           return member._id;
         })
       };
 
-      chatConversationsService.addPrivateConversation(group).then(function(response) {
-        chatLocalStateService.addConversation(response.data);
+      chatConversationActionsService.addPrivateConversation(conversation).then(function(response) {
         notificationFactory.weakSuccess('success', 'Private conversation successfuly created');
-        $state.go('chat.channels-views', { id: response.data._id});
+        $state.go('chat.channels-views', { id: response._id});
       }, function(err) {
         $log.error('Error while creating private conversation', err);
         notificationFactory.weakError('error', 'Error while creating private conversation');

@@ -4,7 +4,7 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat services', function() {
+describe('The chatNotificationService service', function() {
   var $q,
     CHAT_EVENTS,
     sessionMock,
@@ -14,7 +14,7 @@ describe('The linagora.esn.chat services', function() {
     chatNamespace,
     chatNotificationService,
     CHAT_CONVERSATION_TYPE,
-    conversationsServiceMock,
+    chatConversationActionsService,
     chatUsernameMock,
     groups,
     channels,
@@ -52,7 +52,7 @@ describe('The linagora.esn.chat services', function() {
       }
     };
 
-    conversationsServiceMock = {
+    chatConversationActionsService = {
       getChannels: function() {
         return $q.when(channels);
       },
@@ -91,7 +91,7 @@ describe('The linagora.esn.chat services', function() {
     angular.mock.module(function($provide) {
       $provide.value('session', sessionMock);
       $provide.factory('livenotification', livenotificationFactory);
-      $provide.value('chatConversationsService', conversationsServiceMock);
+      $provide.value('chatConversationActionsService', chatConversationActionsService);
       $provide.value('localStorageService', localStorageService);
       $provide.value('chatUsername', chatUsernameMock);
     });

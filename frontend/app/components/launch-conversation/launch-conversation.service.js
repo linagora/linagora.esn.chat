@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatLaunchConversationService', chatLaunchConversationService);
 
-  function chatLaunchConversationService($q, $log, $state, chatConversationsService) {
+  function chatLaunchConversationService($q, $log, $state, chatConversationActionsService) {
 
     return {
       launch: launch
@@ -21,7 +21,7 @@
 
       onSuccess = onSuccess || getDefaultSuccess;
 
-      return chatConversationsService.addPrivateConversation({members: userIds})
+      return chatConversationActionsService.addPrivateConversation({members: userIds})
         .then(function(response) {
           return onSuccess(response.data);
         })

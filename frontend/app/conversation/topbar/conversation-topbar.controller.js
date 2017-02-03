@@ -4,13 +4,13 @@
   angular.module('linagora.esn.chat')
     .controller('ChatConversationTopbarController', ChatConversationTopbarController);
 
-  function ChatConversationTopbarController(chatConversationsService) {
+  function ChatConversationTopbarController(chatConversationActionsService) {
     var self = this;
 
     self.updateTopic = updateTopic;
 
     function updateTopic(topic) {
-      chatConversationsService.updateConversationTopic(topic, self.conversation._id);
+      chatConversationActionsService.updateConversationTopic(topic, self.conversation._id);
     }
   }
 })();

@@ -9,7 +9,7 @@ describe('The ChatMessageIndicatorController controller', function() {
       scope,
       $controller,
       sessionMock,
-      chatLocalStateServiceMock,
+      chatConversationsStoreService,
       chatScrollServiceMock,
       CHAT_EVENTS,
       user,
@@ -30,7 +30,7 @@ describe('The ChatMessageIndicatorController controller', function() {
 
     sessionMock = {user: user};
 
-    chatLocalStateServiceMock = {
+    chatConversationsStoreService = {
       activeRoom: {}
     };
 
@@ -43,14 +43,14 @@ describe('The ChatMessageIndicatorController controller', function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
       $provide.value('chatScrollService', chatScrollServiceMock);
-      $provide.value('chatLocalStateService', chatLocalStateServiceMock);
+      $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('searchProviders', searchProviders);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _session_, _chatLocalStateService_, _chatScrollService_, _CHAT_EVENTS_) {
+  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _session_, _chatScrollService_, _CHAT_EVENTS_) {
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     $controller = _$controller_;
@@ -87,7 +87,7 @@ describe('The ChatMessageIndicatorController controller', function() {
     it('should reset the number of unread message', function() {
 
       message.creator._id = 'anId';
-      chatLocalStateServiceMock.activeRoom._id = channel;
+      chatConversationsStoreService.activeRoom._id = channel;
       message.channel = channel;
       initController('ChatMessageIndicatorController as ctrl');
 
@@ -101,7 +101,7 @@ describe('The ChatMessageIndicatorController controller', function() {
     it('should set the message indicator flag to false', function() {
 
       message.creator._id = 'anId';
-      chatLocalStateServiceMock.activeRoom._id = channel;
+      chatConversationsStoreService.activeRoom._id = channel;
       message.channel = channel;
       initController('ChatMessageIndicatorController as ctrl');
 
@@ -118,7 +118,7 @@ describe('The ChatMessageIndicatorController controller', function() {
     it('should calculate the number of unread messages', function() {
 
       message.creator._id = 'anId';
-      chatLocalStateServiceMock.activeRoom._id = channel;
+      chatConversationsStoreService.activeRoom._id = channel;
       message.channel = channel;
       initController('ChatMessageIndicatorController as ctrl');
 
@@ -140,7 +140,7 @@ describe('The ChatMessageIndicatorController controller', function() {
     it('should display and hide the message indicator', function() {
 
       message.creator._id = 'anId';
-      chatLocalStateServiceMock.activeRoom._id = channel;
+      chatConversationsStoreService.activeRoom._id = channel;
       message.channel = channel;
       initController('ChatMessageIndicatorController as ctrl');
       $rootScope.$digest();

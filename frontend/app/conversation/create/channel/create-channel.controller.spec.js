@@ -11,15 +11,13 @@ describe('The ChatConversationCreateChannelController controller', function() {
     $scope,
     $state,
     session,
-    chatConversationsService,
-    chatLocalStateService,
+    chatConversationActionsService,
     notificationFactory,
     CHAT_CONVERSATION_TYPE,
     $controller;
 
   beforeEach(function() {
-    chatConversationsService = {};
-    chatLocalStateService = {};
+    chatConversationActionsService = {};
     notificationFactory = {};
     $state = {};
     form = {};
@@ -35,8 +33,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('notificationFactory', {});
-      $provide.value('chatConversationsService', chatConversationsService);
-      $provide.value('chatLocalStateService', chatLocalStateService);
+      $provide.value('chatConversationActionsService', chatConversationActionsService);
       $provide.value('notificationFactory', notificationFactory);
       $provide.value('$state', $state);
       $provide.value('session', session);
@@ -65,16 +62,16 @@ describe('The ChatConversationCreateChannelController controller', function() {
 
     it('should not create channel when form is invalid', function() {
       form.$invalid = true;
-      chatConversationsService.addChannels = sinon.spy();
+      chatConversationActionsService.addChannel = sinon.spy();
       var controller = initController();
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationsService.addChannels).to.not.have.been.called;
+      expect(chatConversationActionsService.addChannel).to.not.have.been.called;
     });
 
     it('should display a notification on creation failure', function() {
-      chatConversationsService.addChannels = sinon.spy(function() {
+      chatConversationActionsService.addChannel = sinon.spy(function() {
         return $q.reject(new Error());
       });
       notificationFactory.weakError = sinon.spy();
@@ -83,18 +80,17 @@ describe('The ChatConversationCreateChannelController controller', function() {
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationsService.addChannels).to.have.been.calledWith(controller.conversation);
+      expect(chatConversationActionsService.addChannel).to.have.been.calledWith(controller.conversation);
       expect(notificationFactory.weakError).to.have.been.calledWith('error', 'Error while creating channel');
     });
 
-    it('should add the conversation to the cache on creation success, notify and redirect to the conversation page', function() {
+    it('should add the conversation, notify and redirect to the conversation page', function() {
       var result = {_id: 1};
       var name = 'My conversation';
 
-      chatConversationsService.addChannels = sinon.spy(function() {
-        return $q.when({data: result});
+      chatConversationActionsService.addChannel = sinon.spy(function() {
+        return $q.when(result);
       });
-      chatLocalStateService.addConversation = sinon.spy();
       notificationFactory.weakSuccess = sinon.spy();
       $state.go = sinon.spy();
 
@@ -103,8 +99,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
       controller.create();
       controller.conversation.name = name;
       $rootScope.$digest();
-      expect(chatConversationsService.addChannels).to.have.been.calledWith({type: CHAT_CONVERSATION_TYPE.OPEN, name: name, domain: session.domain._id});
-      expect(chatLocalStateService.addConversation).to.have.been.calledWith(result);
+      expect(chatConversationActionsService.addChannel).to.have.been.calledWith({type: CHAT_CONVERSATION_TYPE.OPEN, name: name, domain: session.domain._id});
       expect(notificationFactory.weakSuccess).to.have.been.calledWith('success', 'Channel successfuly created');
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: result._id});
     });

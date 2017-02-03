@@ -11,14 +11,12 @@ describe('The ChatConversationCreatePrivateController controller', function() {
     $scope,
     $state,
     session,
-    chatConversationsService,
-    chatLocalStateService,
+    chatConversationActionsService,
     notificationFactory,
     $controller;
 
   beforeEach(function() {
-    chatConversationsService = {};
-    chatLocalStateService = {};
+    chatConversationActionsService = {};
     notificationFactory = {};
     $state = {};
     form = {};
@@ -34,8 +32,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('notificationFactory', {});
-      $provide.value('chatConversationsService', chatConversationsService);
-      $provide.value('chatLocalStateService', chatLocalStateService);
+      $provide.value('chatConversationActionsService', chatConversationActionsService);
       $provide.value('notificationFactory', notificationFactory);
       $provide.value('$state', $state);
       $provide.value('session', session);
@@ -63,17 +60,17 @@ describe('The ChatConversationCreatePrivateController controller', function() {
 
     it('should not create channel when form is invalid', function() {
       form.$invalid = true;
-      chatConversationsService.addPrivateConversation = sinon.spy();
+      chatConversationActionsService.addPrivateConversation = sinon.spy();
 
       var controller = initController();
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationsService.addPrivateConversation).to.not.have.been.called;
+      expect(chatConversationActionsService.addPrivateConversation).to.not.have.been.called;
     });
 
     it('should display a notification on creation failure', function() {
-      chatConversationsService.addPrivateConversation = sinon.spy(function() {
+      chatConversationActionsService.addPrivateConversation = sinon.spy(function() {
         return $q.reject(new Error());
       });
       notificationFactory.weakError = sinon.spy();
@@ -82,18 +79,17 @@ describe('The ChatConversationCreatePrivateController controller', function() {
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: []});
+      expect(chatConversationActionsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: []});
       expect(notificationFactory.weakError).to.have.been.calledWith('error', 'Error while creating private conversation');
     });
 
-    it('should add the conversation to the cache on creation success, notify and redirect to the conversation page', function() {
+    it('should add the conversation, notify and redirect to the conversation page', function() {
       var result = {_id: 1};
       var members = [{_id: 1}, {_id: 2}, {_id: 3}];
 
-      chatConversationsService.addPrivateConversation = sinon.spy(function() {
-        return $q.when({data: result});
+      chatConversationActionsService.addPrivateConversation = sinon.spy(function() {
+        return $q.when(result);
       });
-      chatLocalStateService.addConversation = sinon.spy();
       notificationFactory.weakSuccess = sinon.spy();
       $state.go = sinon.spy();
 
@@ -102,8 +98,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
       controller.members = members;
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: [1, 2, 3]});
-      expect(chatLocalStateService.addConversation).to.have.been.calledWith(result);
+      expect(chatConversationActionsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: [1, 2, 3]});
       expect(notificationFactory.weakSuccess).to.have.been.calledWith('success', 'Private conversation successfuly created');
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: result._id});
     });

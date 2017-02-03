@@ -4,132 +4,69 @@
 
 var expect = chai.expect;
 
-describe('The linagora.esn.chat ChatController controller', function() {
-  var $state,
-    $q,
-    windowMock,
-    $stateParams,
-    $stateProvider,
+describe('The ChatController controller', function() {
+  var $q,
     scope,
     $rootScope,
     $controller,
     groups,
     channels,
-    sessionMock,
+    session,
     user,
-    livenotificationMock,
-    CHAT_CONVERSATION_TYPE,
-    ChatMessageAdapter,
-    chatScrollService,
-    getItemResult,
-    getItem,
-    setItem,
-    localStorageService,
-    chatConversationsService,
-    chatLocalStateService,
-    chatLocalStateServiceMock,
-    searchProviders,
+    chatConversationActionsService,
     chatNotificationService,
-    chatLastConversationServiceMock,
-    conversationId;
+    chatConversationsStoreService,
+    chatLastConversationService,
+    conversationId,
+    CHAT_CONVERSATION_TYPE;
 
   beforeEach(function() {
-    $state = {
-      go: sinon.spy()
-    };
-
-    getItemResult = 'true';
-    getItem = sinon.spy(function(key) {
-      return $q.when(({
-        isNotificationEnabled: getItemResult
-      })[key]);
-    });
-    setItem = sinon.spy(function() {
-      return $q.when({});
-    });
-    localStorageService = {
-      getOrCreateInstance: sinon.stub().returns({
-        getItem: getItem,
-        setItem: setItem
-      })
-    };
-
-    chatConversationsService = {
-      getChannels: sinon.spy(function() {
-        return $q.when(channels);
-      }),
-      getPrivateConversations: sinon.spy(function() {
-        return $q.when(groups);
-      })
-    };
-
-    windowMock = {
-      open: sinon.spy()
-    };
-    $stateParams = {
-      emailId: '4'
-    };
-
     user = {_id: 'userId'};
 
-    sessionMock = {
+    session = {
       user: user,
       ready: { then: _.constant(user)}
     };
 
-    livenotificationMock = {
+    chatConversationsStoreService = {
+      activeRoom: {}
     };
 
-    chatLocalStateServiceMock = {
-      activeRoom: {},
+    chatConversationActionsService = {
       setActive: sinon.spy()
     };
 
-    searchProviders = {
-      add: sinon.spy()
-    };
-
-    chatLastConversationServiceMock = {
+    chatLastConversationService = {
       getConversationId: sinon.spy(function() {
         return $q.when(conversationId);
       })
     };
 
+    chatNotificationService = {};
+
     module('linagora.esn.chat', function($provide) {
-      $provide.decorator('$window', function($delegate) {
-        return angular.extend($delegate, windowMock);
-      });
-      $provide.value('searchProviders', searchProviders);
+      $provide.value('searchProviders', {add: angular.noop});
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
-      $provide.value('$stateParams', $stateParams);
-      $provide.value('$stateProvider', $stateProvider);
-      $provide.value('chatConversationsService', chatConversationsService);
-      $provide.value('localStorageService', localStorageService);
-      $provide.value('session', sessionMock);
-      $provide.value('$state', $state);
-      $provide.value('livenotification', livenotificationMock);
-      $provide.value('ChatMessageAdapter', ChatMessageAdapter);
-      $provide.value('chatScrollService', chatScrollService);
+      $provide.value('session', session);
+      $provide.value('chatConversationActionsService', chatConversationActionsService);
       $provide.value('chatNotificationService', chatNotificationService);
-      $provide.value('chatLastConversationService', chatLastConversationServiceMock);
-      $provide.value('chatLocalStateService', chatLocalStateServiceMock);
-      $provide.value('chatParseMention', {});
+      $provide.value('chatLastConversationService', chatLastConversationService);
+      $provide.value('chatConversationsStoreService', chatConversationsStoreService);
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _chatLocalStateService_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_CONVERSATION_TYPE_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
-    chatLocalStateService = _chatLocalStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}];
     channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
     conversationId = '583e9769ecac5c59a19fe6af';
-    chatLocalStateService.channels = channels;
-    chatLocalStateService.privateConversations = groups;
+    chatConversationsStoreService.channels = channels;
+    chatConversationsStoreService.privateConversations = groups;
   }));
 
   function initController(ctrl) {
@@ -142,36 +79,59 @@ describe('The linagora.esn.chat ChatController controller', function() {
     return controller;
   }
 
-  describe('The ChatController controller', function() {
+  function initCtrl() {
+    return initController('ChatController as vm');
+  }
 
-    function initCtrl() {
-      return initController('ChatController as vm');
-    }
+  it('should instanciate chatConversationsStoreService', function() {
+    initCtrl();
+    $rootScope.$digest();
 
-    it('should instanciate chatLocalStateService', function() {
-      initCtrl();
-      $rootScope.$digest();
-      expect(scope.vm.chatLocalStateService).to.be.equal(chatLocalStateService);
-    });
+    expect(scope.vm.chatConversationsStoreService).to.be.equal(chatConversationsStoreService);
+  });
 
+  describe('The $onInit function', function() {
     it('should call setActive with the default channel if the chatLastConversation Service return nothing', function() {
-      chatLastConversationServiceMock.getConversationId = function() {
+      chatLastConversationService.getConversationId = sinon.spy(function() {
         return $q.when();
-      };
-      initCtrl();
+      });
 
+      var controller = initCtrl();
+
+      controller.$onInit();
       $rootScope.$digest();
-      expect(chatLocalStateService.setActive).to.be.calledWith(channels[0]._id);
+
+      expect(chatLastConversationService.getConversationId).to.have.been.calledWith(session.user._id);
+      expect(chatConversationActionsService.setActive).to.have.been.calledWith(channels[0]._id);
     });
 
     it('should call setActive with the channelId returned by the chatLastConversation service', function() {
-      chatLastConversationServiceMock.getConversationId = function() {
+      chatLastConversationService.getConversationId = sinon.spy(function() {
         return $q.when(conversationId);
-      };
-      initCtrl();
+      });
 
+      var controller = initCtrl();
+
+      controller.$onInit();
       $rootScope.$digest();
-      expect(chatLocalStateService.setActive).to.be.calledWith(conversationId);
+
+      expect(chatLastConversationService.getConversationId).to.have.been.calledWith(session.user._id);
+      expect(chatConversationActionsService.setActive).to.have.been.calledWith(conversationId);
+    });
+
+    it('should not try to get the last conversation when active room id defined', function() {
+      chatConversationsStoreService.activeRoom._id = 1;
+
+      chatLastConversationService.getConversationId = sinon.spy(function() {
+        return $q.when(conversationId);
+      });
+
+      var controller = initCtrl();
+
+      controller.$onInit();
+      $rootScope.$digest();
+
+      expect(chatLastConversationService.getConversationId).to.not.have.been.called;
     });
   });
 });
