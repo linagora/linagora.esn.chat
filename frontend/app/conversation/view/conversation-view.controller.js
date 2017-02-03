@@ -5,20 +5,21 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationsService, CHAT_EVENTS, CHAT, chatScrollService, chatLocalStateService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, chatLastConversationService) {
+  function ChatConversationViewController($scope, $q, session, chatConversationService, chatConversationActionsService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, chatLastConversationService) {
     var self = this;
 
     self.spinnerKey = 'ChatConversationSpinner';
-    self.chatLocalStateService = chatLocalStateService;
+    self.chatConversationsStoreService = chatConversationsStoreService;
+    self.chatConversationActionsService = chatConversationActionsService;
     self.user = session.user;
     self.messages = [];
     self.glued = true;
     self.loadPreviousMessages = loadPreviousMessages;
     self.newMessage = newMessage;
     self.topOfConversation = false;
-    self.chatLocalStateService.ready.then(init);
     self.setLastLineInView = setLastLineInView;
     self.inview = false;
+    self.$onInit = $onInit;
 
     function addUniqId(message) {
       message._uniqId = message.creator._id + ':' + message.timestamps.creation + '' + message.text;
@@ -98,6 +99,7 @@
         var lastLoaded = result.length - 1;
 
         queueOlderMessages(result, isFirstLoad);
+
         if (!isFirstLoad && lastLoaded > 0) {
           self.messages[lastLoaded + 1].sameUser = isSameUser(self.messages[lastLoaded], self.messages[lastLoaded + 1]);
         }
@@ -139,24 +141,23 @@
     }
 
     function isSameUser(previousMessage, nextMessage) {
-      return previousMessage.creator._id === nextMessage.creator._id &&
+      return previousMessage && nextMessage && previousMessage.creator._id === nextMessage.creator._id &&
       Math.abs(nextMessage.timestamps.creation - previousMessage.timestamps.creation) < MESSAGE_GROUP_TIMESPAN;
     }
 
-    function init() {
+    function $onInit() {
 
       chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
-
         if (conversationId) {
-          self.chatLocalStateService.setActive(conversationId);
+          self.chatConversationActionsService.setActive(conversationId);
 
           return loadPreviousMessages(true).then(scrollDown);
         }
 
         $scope.$on('$destroy', function() {
-          if (self.chatLocalStateService.activeRoom && self.chatLocalStateService.activeRoom._id === conversationId) {
+          if (self.chatConversationsStoreService.activeRoom && self.chatConversationsStoreService.activeRoom._id === conversationId) {
             chatLastConversationService.saveConversationId(session.user._id, conversationId);
-            self.chatLocalStateService.unsetActive();
+            self.chatConversationActionsService.unsetActive();
           }
         });
       });
@@ -164,7 +165,7 @@
 
     [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
       $scope.$on(eventReceived, function(event, message) {
-        if (message.channel && message.channel === self.chatLocalStateService.activeRoom._id) {
+        if (message.channel && message.channel === self.chatConversationsStoreService.activeRoom._id) {
           self.newMessage(message);
           scrollDown(message.creator._id === session.user._id, message.channel);
         }

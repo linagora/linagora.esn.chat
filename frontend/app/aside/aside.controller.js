@@ -4,10 +4,10 @@
   angular.module('linagora.esn.chat')
     .controller('chatAsideController', chatAsideController);
 
-  function chatAsideController(chatLocalStateService, chatNotificationService) {
+  function chatAsideController(chatConversationsStoreService, chatNotificationService) {
     var self = this;
 
-    self.chatLocalStateService = chatLocalStateService;
+    self.chatConversationsStoreService = chatConversationsStoreService;
     self.isNotificationEnabled = isNotificationEnabled;
     self.toggleNotification = toggleNotification;
 

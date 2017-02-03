@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('the chatFileUploadController controller', function() {
 
-  var $rootScope, $scope, $controller, $q, conversation, chatMessageService, chatLocalStateService, searchProviders, session, conversationId, userId;
+  var $rootScope, $scope, $controller, $q, conversation, chatMessageService, chatConversationsStoreService, searchProviders, session, conversationId, userId;
 
   beforeEach(function() {
 
@@ -24,7 +24,7 @@ describe('the chatFileUploadController controller', function() {
       })
     };
 
-    chatLocalStateService = {
+    chatConversationsStoreService = {
       activeRoom: {_id: conversationId}
     };
 
@@ -41,7 +41,7 @@ describe('the chatFileUploadController controller', function() {
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatMessageService', chatMessageService);
-      $provide.value('chatLocalStateService', chatLocalStateService);
+      $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', session);

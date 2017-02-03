@@ -5,19 +5,19 @@
     .module('linagora.esn.chat')
     .controller('ChatController', ChatController);
 
-    function ChatController(chatNotificationService, chatLocalStateService, chatLastConversationService, session) {
+    function ChatController(chatNotificationService, chatConversationsStoreService, chatLastConversationService, chatConversationActionsService, session) {
       var self = this;
 
-      self.chatLocalStateService = chatLocalStateService;
-      activate();
+      self.chatConversationsStoreService = chatConversationsStoreService;
+      self.$onInit = $onInit;
 
-      function activate() {
-        if (!self.chatLocalStateService.activeRoom._id) {
+      function $onInit() {
+        if (!self.chatConversationsStoreService.activeRoom._id) {
           chatLastConversationService.getConversationId(session.user._id).then(function(conversationId) {
             if (!conversationId) {
-              return self.chatLocalStateService.channels[0] && self.chatLocalStateService.setActive(self.chatLocalStateService.channels[0]._id);
+              return self.chatConversationsStoreService.channels[0] && chatConversationActionsService.setActive(self.chatConversationsStoreService.channels[0]._id);
             }
-            self.chatLocalStateService.setActive(conversationId);
+            chatConversationActionsService.setActive(conversationId);
           });
         }
       }

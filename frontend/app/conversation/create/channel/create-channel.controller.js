@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationCreateChannelController', ChatConversationCreateChannelController);
 
-  function ChatConversationCreateChannelController($log, $state, chatConversationsService, chatLocalStateService, CHAT_CONVERSATION_TYPE, notificationFactory, session) {
+  function ChatConversationCreateChannelController($log, $state, chatConversationActionsService, CHAT_CONVERSATION_TYPE, notificationFactory, session) {
     var self = this;
 
     self.conversation = {
@@ -19,10 +19,9 @@
         return;
       }
 
-      chatConversationsService.addChannels(self.conversation).then(function(response) {
-        chatLocalStateService.addConversation(response.data);
+      chatConversationActionsService.addChannel(self.conversation).then(function(response) {
         notificationFactory.weakSuccess('success', 'Channel successfuly created');
-        $state.go('chat.channels-views', {id: response.data._id});
+        $state.go('chat.channels-views', {id: response._id});
       }, function(err) {
         $log.error('Error while creating article', err);
         notificationFactory.weakError('error', 'Error while creating channel');

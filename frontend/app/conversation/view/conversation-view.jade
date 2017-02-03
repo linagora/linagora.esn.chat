@@ -3,5 +3,5 @@
     .overlay-text
       i.mdi.mdi-cloud-upload
       | #{__('Drop files here to upload')}
-  chat-messages-view(conversation='vm.chatLocalStateService.activeRoom', messages='vm.messages', header='true', load-previous-messages='vm.loadPreviousMessages', spinner-key='vm.spinnerKey', set-last-line-in-view='vm.setLastLineInView', top-of-conversation='vm.topOfConversation', inview='vm.inview')
-  chat-footer(conversation='vm.chatLocalStateService.activeRoom')
+  chat-messages-view(conversation='vm.chatConversationsStoreService.activeRoom', messages='vm.messages', header='true', load-previous-messages='vm.loadPreviousMessages', spinner-key='vm.spinnerKey', set-last-line-in-view='vm.setLastLineInView', top-of-conversation='vm.topOfConversation', inview='vm.inview')
+  chat-footer(conversation='vm.chatConversationsStoreService.activeRoom')

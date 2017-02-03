@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatNotificationService', chatNotificationService);
 
-    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, chatConversationsService, chatParseMention) {
+    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, chatConversationActionsService, chatParseMention) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
       var service = {
@@ -44,7 +44,7 @@
       function start() {
         initLocalPermission();
         $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-          chatConversationsService.getConversation(message.channel).then(function(channel) {
+          chatConversationActionsService.getConversation(message.channel).then(function(channel) {
             if (canSendNotification(message)) {
               var channelName = channel.name || 'OpenPaas Chat';
               var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
