@@ -5,15 +5,13 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationItemController', ChatConversationItemController);
 
-  function ChatConversationItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, userStatusService, session, moment, userUtils, chatConversationNameService, chatLastConversationService) {
+  function ChatConversationItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, userStatusService, session, moment, userUtils, chatConversationNameService) {
     var self = this;
     var userToConnected = {};
 
     self.connected = true;
-    self.channelState = self.channelState || 'chat.channels-views';
     self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     self.$onInit = $onInit;
-    self.onConversationItemClicked = onConversationItemClicked;
 
     function getDaysSinceMessageCreated(message) {
       var d1 = moment().startOf('day');
@@ -32,10 +30,6 @@
       if (!self.lastMessageIsMe) {
         self.lastMessageDisplayName = userUtils.displayNameOf(message.creator);
       }
-    }
-
-    function onConversationItemClicked(conversationId) {
-      conversationId && chatLastConversationService.saveConversationId(session.user._id, conversationId);
     }
 
     function $onInit() {

@@ -12,6 +12,9 @@
       MEMBER: 'member',
       NONE: 'none'
     })
+    .constant('CHAT_LOCAL_STORAGE', {
+      LAST_CONVERSATION: 'chat.last-conversation'
+    })
     .constant('CHAT_EVENTS', {
       MESSAGE_RECEIVED: 'chat:message:received',
       USER_CHANGE_STATE: 'user:state',

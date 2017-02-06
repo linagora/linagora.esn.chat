@@ -5,6 +5,8 @@
     .factory('chatConversationActionsService', chatConversationActionsService);
 
   function chatConversationActionsService($log, $q, $rootScope, _, session, chatConversationService, chatConversationsStoreService, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE) {
+    var ready = $q.defer();
+
     return {
       addChannel: addChannel,
       addPrivateConversation: addPrivateConversation,
@@ -13,6 +15,7 @@
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
       markAllMessagesAsRead: markAllMessagesAsRead,
+      ready: ready.promise,
       setActive: setActive,
       unsetActive: unsetActive,
       updateConversation: updateConversation,
@@ -113,6 +116,9 @@
           $log.error('Can not get user conversations', err);
 
           return $q.reject(err);
+        })
+        .finally(function() {
+          ready.resolve();
         });
     }
 
