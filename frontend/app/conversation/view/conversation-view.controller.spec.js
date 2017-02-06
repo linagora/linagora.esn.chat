@@ -22,7 +22,6 @@ describe('The ChatConversationViewController controller', function() {
     $controller,
     user,
     searchProviders,
-    chatLastConversationServiceMock,
     channelId;
 
   beforeEach(function() {
@@ -34,7 +33,8 @@ describe('The ChatConversationViewController controller', function() {
     chatConversationServiceMock = {};
 
     usSpinnerServiceMock = {
-      spin: function() {}
+      spin: function() {},
+      stop: function() {}
     };
 
     chatConversationActionsService = {
@@ -78,11 +78,6 @@ describe('The ChatConversationViewController controller', function() {
       add: sinon.spy()
     };
 
-    chatLastConversationServiceMock = {
-      getConversationId: sinon.spy(function() {
-        return $q.when(channelId);
-      })
-    };
     channelId = '583e9769ecac5c59a19fe6af';
 
     module('linagora.esn.chat', function($provide) {
@@ -97,7 +92,6 @@ describe('The ChatConversationViewController controller', function() {
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('searchProviders', searchProviders);
-      $provide.value('chatLastConversationService', chatLastConversationServiceMock);
       $provide.value('chatMessageService', chatMessageServiceMock);
       $provide.constant('CHAT', CHAT);
     });
@@ -238,23 +232,7 @@ describe('The ChatConversationViewController controller', function() {
   });
 
   describe('The $onInit function', function() {
-
-    it('should set current conversationId as active', function() {
-      chatConversationActionsService.setActive = sinon.spy();
-      chatConversationServiceMock.fetchMessages = function() {
-        return $q.when([]);
-      };
-
-      var ctrl = initCtrl();
-
-      ctrl.$onInit();
-      $rootScope.$digest();
-
-      expect(chatConversationActionsService.setActive).to.have.been.called;
-    });
-
     it('should fetch messages', function() {
-      chatConversationActionsService.setActive = sinon.spy();
       chatConversationServiceMock.fetchMessages = sinon.spy(function() {
         return $q.when([]);
       });
@@ -271,6 +249,7 @@ describe('The ChatConversationViewController controller', function() {
   describe('The loadPreviousMessages function', function() {
 
     it('should call chatConversationService.fetchMessages', function() {
+      chatConversationsStoreService.activeRoom._id = channelId;
       chatConversationServiceMock.fetchMessages = sinon.spy(function() {
         return $q.when([]);
       });
@@ -282,9 +261,30 @@ describe('The ChatConversationViewController controller', function() {
       expect(chatConversationServiceMock.fetchMessages).to.be.calledWith(channelId);
     });
 
+    it('should catch error when chatConversationService.fetchMessages rejects', function() {
+      var error = new Error('I failed');
+      var successSpy = sinon.spy();
+      var errorSpy = sinon.spy();
+
+      chatConversationsStoreService.activeRoom._id = channelId;
+      chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+        return $q.reject(error);
+      });
+
+      initCtrl();
+      scope.vm.loadPreviousMessages().then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(chatConversationServiceMock.fetchMessages).to.be.calledWith(channelId);
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.getCalls()[0].args[0].message).to.equal('Error while fetching messages');
+    });
+
     it('should call chatConversationService.fetchMessages with before parameter when messages are already available', function() {
       var message = {_id: 1};
 
+      chatConversationsStoreService.activeRoom._id = channelId;
       chatConversationServiceMock.fetchMessages = sinon.spy(function() {
         return $q.when([]);
       });
@@ -305,6 +305,7 @@ describe('The ChatConversationViewController controller', function() {
         {_id: 3, creator: {_id: 1}, timestamps: {creation: Date.now()}}
       ];
 
+      chatConversationsStoreService.activeRoom._id = channelId;
       chatConversationServiceMock.fetchMessages = sinon.spy(function() {
         return $q.when(messages);
       });

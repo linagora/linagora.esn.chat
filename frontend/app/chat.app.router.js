@@ -2,17 +2,11 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-  .config(function($stateProvider, routeResolver) {
+  .config(function($stateProvider) {
     $stateProvider
       .state('chat', {
         url: '/chat',
         templateUrl: '/chat/app/index.html',
-        controller: 'ChatController',
-        controllerAs: 'root',
-        resolve: {
-          domain: routeResolver.session('domain'),
-          user: routeResolver.session('user')
-        },
         deepStateRedirect: {
           default: 'chat.channels-views',
           fn: function() {
@@ -26,6 +20,17 @@
           'main@chat': {
             template: '<sub-header><chat-conversation-subheader/></sub-header><chat-conversation-view/>'
           }
+        },
+        resolve: {
+          conversationId: function(chatConversationResolverService, $stateParams) {
+            return chatConversationResolverService($stateParams.id);
+          }
+        },
+        onEnter: function(chatConversationActionsService, conversationId) {
+          chatConversationActionsService.setActive(conversationId);
+        },
+        onExit: function(chatLastConversationService, conversationId) {
+          chatLastConversationService.set(conversationId);
         }
       })
       .state('chat.channels-views.attachments', {

@@ -3,31 +3,31 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-  .factory('chatLastConversationService', chatLastConversationService);
+    .factory('chatLastConversationService', chatLastConversationService);
 
-  function chatLastConversationService($q, $log, localStorageService) {
-    var storage = localStorageService.getOrCreateInstance('chat-conversation');
+  function chatLastConversationService($q, session, localStorageService, CHAT_LOCAL_STORAGE) {
+    var storage = localStorageService.getOrCreateInstance(CHAT_LOCAL_STORAGE.LAST_CONVERSATION);
     var service = {
-      saveConversationId: saveConversationId,
-      getConversationId: getConversationId
+      get: get,
+      set: set
     };
 
     return service;
 
-    function saveConversationId(userId, conversationId) {
-      return storage.setItem(userId, {conversationId: conversationId}).catch(function(error) {
-        $log.error('Error while saving current conversation', error);
+    function get() {
+      return storage.getItem(session.user._id).then(function(result) {
+        if (result && result._id) {
+          return result._id;
+        }
       });
     }
 
-    function getConversationId(userId) {
-      return storage.getItem(userId).then(function(result) {
-        if (result) {
-          return result.conversationId;
-        }
+    function set(conversationId) {
+      if (!conversationId) {
+        return $q.reject(new Error('Conversation id is required'));
+      }
 
-        return $q.reject(new Error('No conversation for user' + userId));
-      });
+      return storage.setItem(session.user._id, {_id: conversationId});
     }
   }
 
