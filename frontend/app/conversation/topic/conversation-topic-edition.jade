@@ -1,0 +1,4 @@
+.chat-conversation-topic-edition
+  span.editable(ng-if="!ctrl.conversation.topic.value" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
+    | #{__('Set a topic')}
+  span.editable(ng-if="ctrl.conversation.topic.value" ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
