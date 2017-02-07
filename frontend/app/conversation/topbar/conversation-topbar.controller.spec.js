@@ -43,17 +43,16 @@ describe('The ChatConversationTopbarController controller', function() {
     }
 
     it('should call chatConversationsService.updateConversationTopic', function() {
-      var topic = {name: 'MyTopic'};
+      var topic = 'MyTopic';
 
       chatConversationActionsService.updateConversationTopic = sinon.spy();
 
       var controller = initController();
 
-      controller.topic = topic;
       controller.updateTopic(topic);
       $rootScope.$digest();
 
-      expect(chatConversationActionsService.updateConversationTopic).to.have.been.calledWith(topic, conversation._id);
+      expect(chatConversationActionsService.updateConversationTopic).to.have.been.calledWith(conversation, topic);
     });
   });
 });
