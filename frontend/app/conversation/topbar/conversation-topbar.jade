@@ -1,8 +1,7 @@
 .chat-conversation-topbar
   .conversation-metadata
-    span.editable(ng-if="!ctrl.conversation.topic.value" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
-      | #{__('Set a topic')}
-    span.editable(ng-if="ctrl.conversation.topic.value" ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="ctrl.conversation.topic.value" buttons="no" onbeforesave='ctrl.updateTopic($data)')
+    chat-conversation-topic-edition(ng-if="ctrl.userIsMember" conversation="ctrl.conversation")
+    span(ng-if="!ctrl.userIsMember && ctrl.conversation.topic.value" ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}")
   .conversation-actions
     chat-conversation-topbar-actions-members(conversation="ctrl.conversation")
     chat-conversation-topbar-actions-attachments(conversation="ctrl.conversation")

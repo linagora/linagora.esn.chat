@@ -4,13 +4,13 @@
   angular.module('linagora.esn.chat')
     .controller('ChatConversationTopbarController', ChatConversationTopbarController);
 
-  function ChatConversationTopbarController(chatConversationActionsService) {
+  function ChatConversationTopbarController(chatConversationMemberService) {
     var self = this;
 
-    self.updateTopic = updateTopic;
+    self.$onInit = $onInit;
 
-    function updateTopic(topic) {
-      chatConversationActionsService.updateConversationTopic(self.conversation, topic);
+    function $onInit() {
+      self.userIsMember = chatConversationMemberService.currentUserIsMemberOf(self.conversation);
     }
   }
 })();

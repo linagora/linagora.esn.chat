@@ -4,15 +4,15 @@
 
 var expect = chai.expect;
 
-describe('The ChatConversationTopbarController controller', function() {
+describe('The ChatConversationTopicEditionController controller', function() {
   var conversation,
     $rootScope,
     $scope,
-    chatConversationMemberService,
+    chatConversationActionsService,
     $controller;
 
   beforeEach(function() {
-    chatConversationMemberService = {};
+    chatConversationActionsService = {};
     conversation = {_id: 1};
 
     angular.mock.module('jadeTemplates');
@@ -20,7 +20,7 @@ describe('The ChatConversationTopbarController controller', function() {
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
-      $provide.value('chatConversationMemberService', chatConversationMemberService);
+      $provide.value('chatConversationActionsService', chatConversationActionsService);
     });
   });
 
@@ -30,9 +30,9 @@ describe('The ChatConversationTopbarController controller', function() {
     $controller = _$controller_;
   }));
 
-  describe('The $onInit function', function() {
+  describe('The updateTopic function', function() {
     function initController() {
-      var controller = $controller('ChatConversationTopbarController',
+      var controller = $controller('ChatConversationTopicEditionController',
         {$scope: $scope},
         {conversation: conversation}
       );
@@ -42,19 +42,17 @@ describe('The ChatConversationTopbarController controller', function() {
       return controller;
     }
 
-    it('should set the userIsMember property to the result of chatConversationMemberService.currentUserIsMemberOf', function() {
-      var result = 'MyResult';
+    it('should call chatConversationsService.updateConversationTopic', function() {
+      var topic = 'MyTopic';
 
-      chatConversationMemberService.currentUserIsMemberOf = sinon.spy(function() {
-        return result;
-      });
+      chatConversationActionsService.updateConversationTopic = sinon.spy();
 
       var controller = initController();
 
-      controller.$onInit();
+      controller.updateTopic(topic);
+      $rootScope.$digest();
 
-      expect(chatConversationMemberService.currentUserIsMemberOf).to.have.been.calledWith(conversation);
-      expect(controller.userIsMember).to.deep.equal(result);
+      expect(chatConversationActionsService.updateConversationTopic).to.have.been.calledWith(conversation, topic);
     });
   });
 });
