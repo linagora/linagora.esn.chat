@@ -23,6 +23,7 @@ module.exports = function(dependencies) {
   const topicUpdateTopic = pubsubLocal.topic(TOPIC_UPDATED);
   const channelSavedTopic = pubsubLocal.topic(CONVERSATION_SAVED);
   const permission = require('./permission/conversation')(dependencies);
+  const utils = require('./utils')(dependencies);
   const userConversationsFinders = [];
 
   return {
@@ -42,6 +43,14 @@ module.exports = function(dependencies) {
   };
 
   function create(options, callback) {
+    if (options && options.members) {
+      options.members.map(member => {
+        member.member.id = utils.ensureObjectId(member.member.id);
+
+        return member;
+      });
+    }
+
     const conversation = new Conversation(options);
 
     conversation.save((err, saved) => {
@@ -128,7 +137,7 @@ module.exports = function(dependencies) {
 
     if (members) {
       request.members = {
-        $all: members.map(member => ({$elemMatch: {'member.objectType': member.member.objectType, 'member.id': member.member.id}}))
+        $all: members.map(member => ({$elemMatch: {'member.objectType': member.member.objectType, 'member.id': utils.ensureObjectId(member.member.id)}}))
       };
     }
 
@@ -204,7 +213,7 @@ module.exports = function(dependencies) {
   }
 
   function listForUser(user, options, callback) {
-    Conversation.find({'members.member.id': String(user._id), 'members.member.objectType': OBJECT_TYPES.USER}).exec(callback);
+    Conversation.find({'members.member.id': utils.ensureObjectId(user._id), 'members.member.objectType': OBJECT_TYPES.USER}).exec(callback);
   }
 
   function moderate(conversationId, moderate, callback) {
