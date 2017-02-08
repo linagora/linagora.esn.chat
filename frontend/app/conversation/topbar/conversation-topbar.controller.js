@@ -10,7 +10,7 @@
     self.updateTopic = updateTopic;
 
     function updateTopic(topic) {
-      chatConversationActionsService.updateConversationTopic(topic, self.conversation._id);
+      chatConversationActionsService.updateConversationTopic(self.conversation, topic);
     }
   }
 })();
