@@ -13,7 +13,7 @@
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatConversationsStoreService.channels" conversation="conversation", ng-click='$hide()')
 
-        .lv-item.clickable(ui-sref="chat.channels-list", ui-sref-active="selected")
+        .lv-item.clickable.more-item(ui-sref="chat.channels-list", ui-sref-active="selected")
           span #{__('More')}&hellip;
 
         .lv-item.clickable.menu-heading
