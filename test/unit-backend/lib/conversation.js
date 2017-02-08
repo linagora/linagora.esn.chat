@@ -1,19 +1,19 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Q = require('q');
+const sinon = require('sinon');
+const expect = require('chai').expect;
+const Q = require('q');
 
-var CONSTANTS = require('../../../backend/lib/constants');
-var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-var CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
-var CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
-var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-var CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
-var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
+const CONSTANTS = require('../../../backend/lib/constants');
+const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
+const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
+const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
+const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
+const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
@@ -142,26 +142,26 @@ describe('The linagora.esn.chat conversation lib', function() {
             if (name === TOPIC_UPDATED) {
               return localChannelTopicUpdateTopic;
             }
-            if (name === CHANNEL_SAVED) {
+            if (name === CONVERSATION_SAVED) {
               return channelSavedTopic;
             }
           }
         },
         global: {
           topic: function(name) {
-            if (name === CHANNEL_CREATION) {
+            if (name === CONVERSATION_CREATED) {
               return channelCreationTopic;
             }
             if (name === TOPIC_UPDATED) {
               return channelTopicUpdateTopic;
             }
-            if (name === ADD_MEMBERS_TO_CHANNEL) {
+            if (name === MEMBER_ADDED_IN_CONVERSATION) {
               return channelAddMember;
             }
-            if (name === CONVERSATION_UPDATE) {
+            if (name === CONVERSATION_UPDATED) {
               return channelUpdateTopic;
             }
-            if (name === CHANNEL_DELETION) {
+            if (name === CONVERSATION_DELETED) {
               return channelDeletionTopic;
             }
           }
@@ -260,7 +260,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       require('../../../backend/lib/conversation')(dependencies, lib).create(options, done);
     });
 
-    it('should publish on the global CHANNEL_CREATION topic', function(done) {
+    it('should publish on the global CONVERSATION_CREATED topic', function(done) {
       const channel = {
         isAChannel: true
       };
