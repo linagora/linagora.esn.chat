@@ -138,7 +138,7 @@
 
     function updateConversationTopic(conversation, topicValue) {
       return chatConversationService.updateTopic(conversation._id, topicValue).then(function(result) {
-        chatConversationsStoreService.updateTopic(conversation, topicValue);
+        chatConversationsStoreService.updateTopic(result.data, result.data.topic);
 
         return result.data;
       });

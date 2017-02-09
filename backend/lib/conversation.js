@@ -4,7 +4,7 @@ const Q = require('q');
 const CONSTANTS = require('../lib/constants');
 const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
-const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
@@ -19,8 +19,8 @@ module.exports = function(dependencies) {
   const pubsubGlobal = dependencies('pubsub').global;
   const pubsubLocal = dependencies('pubsub').local;
   const channelCreationTopic = pubsubGlobal.topic(CONVERSATION_CREATED);
-  const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
-  const topicUpdateTopic = pubsubLocal.topic(TOPIC_UPDATED);
+  const channelTopicUpdateTopic = pubsubGlobal.topic(CONVERSATION_TOPIC_UPDATED);
+  const topicUpdateTopic = pubsubLocal.topic(CONVERSATION_TOPIC_UPDATED);
   const channelSavedTopic = pubsubLocal.topic(CONVERSATION_SAVED);
   const permission = require('./permission/conversation')(dependencies);
   const userConversationsFinders = [];
@@ -243,7 +243,7 @@ module.exports = function(dependencies) {
           last_set: topic.last_set
         }
       }
-    }, function(err, conversation) {
+    }, (err, conversation) => {
       if (!err) {
         channelTopicUpdateTopic.publish({conversationId: conversationId, topic: topic});
         topicUpdateTopic.publish({conversationId: conversationId, userId: topic.creator, old_topic: conversation.topic.value, topic: topic.value});

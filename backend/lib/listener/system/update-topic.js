@@ -7,7 +7,7 @@ module.exports = function(dependencies, lib) {
   const logger = dependencies('logger');
   const pubsub = dependencies('pubsub').local;
   const newMessageTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
-  const topicUpdatedTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED);
+  const topicUpdatedTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED);
 
   return {
     start,

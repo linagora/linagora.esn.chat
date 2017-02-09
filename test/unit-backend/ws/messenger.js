@@ -232,14 +232,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.topicUpdated(conversation);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED, conversation);
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, conversation);
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.topicUpdated(conversation);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED, conversation);
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, conversation);
     });
   });
 });

@@ -42,7 +42,7 @@ describe('The update topic system message handler', function() {
           topic: function(name) {
             if (name === CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED) {
               return newMessageTopic;
-            } else if (name === CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED) {
+            } else if (name === CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED) {
               return topicUpdateTopic;
             }
           }
