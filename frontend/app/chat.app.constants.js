@@ -18,8 +18,8 @@
     .constant('CHAT_EVENTS', {
       MESSAGE_RECEIVED: 'chat:message:received',
       USER_CHANGE_STATE: 'user:state',
-      NEW_CONVERSATION: 'chat:channel:creation',
-      CONVERSATION_DELETION: 'chat:channel:deletion',
+      NEW_CONVERSATION: 'chat:conversation:created',
+      CONVERSATION_DELETION: 'chat:conversation:deleted',
       TEXT_MESSAGE: 'chat:message:text',
       FILE_MESSAGE: 'chat:message:file',
       TOPIC_UPDATED: 'chat:message:text:channel:topic',

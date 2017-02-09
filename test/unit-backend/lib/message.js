@@ -1,19 +1,18 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var CONSTANTS = require('../../../backend/lib/constants');
-var CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
-var CONVERSATION_UPDATE = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE;
-var CHANNEL_DELETION = CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION;
-var TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-var MESSAGE_SAVED = CONSTANTS.NOTIFICATIONS.MESSAGE_SAVED;
-var ADD_MEMBERS_TO_CHANNEL = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
-var _ = require('lodash');
+const sinon = require('sinon');
+const expect = require('chai').expect;
+const _ = require('lodash');
+const CONSTANTS = require('../../../backend/lib/constants');
+const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
+const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
+const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
+const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const MESSAGE_SAVED = CONSTANTS.NOTIFICATIONS.MESSAGE_SAVED;
+const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 
 describe('The linagora.esn.chat message lib', function() {
-
-  var deps, logger, messageSavedTopic, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  let deps, logger, messageSavedTopic, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -127,19 +126,19 @@ describe('The linagora.esn.chat message lib', function() {
         },
         global: {
           topic: function(name) {
-            if (name === CHANNEL_CREATION) {
+            if (name === CONVERSATION_CREATED) {
               return channelCreationTopic;
             }
             if (name === TOPIC_UPDATED) {
               return channelTopicUpdateTopic;
             }
-            if (name === ADD_MEMBERS_TO_CHANNEL) {
+            if (name === MEMBER_ADDED_IN_CONVERSATION) {
               return channelAddMember;
             }
-            if (name === CONVERSATION_UPDATE) {
+            if (name === CONVERSATION_UPDATED) {
               return channelUpdateTopic;
             }
-            if (name === CHANNEL_DELETION) {
+            if (name === CONVERSATION_DELETED) {
               return channelDeletionTopic;
             }
           }

@@ -3,9 +3,9 @@
 const Q = require('q');
 const CONSTANTS = require('../lib/constants');
 const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
-const CHANNEL_CREATION = CONSTANTS.NOTIFICATIONS.CHANNEL_CREATION;
+const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
-const CHANNEL_SAVED = CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED;
+const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
@@ -18,10 +18,10 @@ module.exports = function(dependencies) {
   const Conversation = mongoose.model('ChatConversation');
   const pubsubGlobal = dependencies('pubsub').global;
   const pubsubLocal = dependencies('pubsub').local;
-  const channelCreationTopic = pubsubGlobal.topic(CHANNEL_CREATION);
+  const channelCreationTopic = pubsubGlobal.topic(CONVERSATION_CREATED);
   const channelTopicUpdateTopic = pubsubGlobal.topic(TOPIC_UPDATED);
   const topicUpdateTopic = pubsubLocal.topic(TOPIC_UPDATED);
-  const channelSavedTopic = pubsubLocal.topic(CHANNEL_SAVED);
+  const channelSavedTopic = pubsubLocal.topic(CONVERSATION_SAVED);
   const permission = require('./permission/conversation')(dependencies);
   const userConversationsFinders = [];
 

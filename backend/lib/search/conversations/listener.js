@@ -15,9 +15,9 @@ module.exports = function(dependencies) {
   function getConversationOptions() {
     return {
       events: {
-        add: CONSTANTS.NOTIFICATIONS.CHANNEL_SAVED,
-        update: CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATE,
-        remove: CONSTANTS.NOTIFICATIONS.CHANNEL_DELETION
+        add: CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED,
+        update: CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED,
+        remove: CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED
       },
       denormalize: denormalize.denormalize,
       getId: denormalize.getId,
