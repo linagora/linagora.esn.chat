@@ -44,6 +44,7 @@
       sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversation);
       sio.on(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, addNewMembers);
       sio.on(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
+      sio.on(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
 
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
         addConversation(data);
@@ -56,6 +57,10 @@
 
     function updateConversation(conversation) {
       return chatConversationsStoreService.updateConversation(conversation);
+    }
+
+    function topicUpdated(conversation) {
+      return chatConversationsStoreService.updateTopic(conversation, conversation.topic);
     }
   }
 })();

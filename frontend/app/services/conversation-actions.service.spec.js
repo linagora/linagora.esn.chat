@@ -334,6 +334,7 @@ describe('The chatConversationActionsService service', function() {
     it('should call the chatConversationService.updateTopic function and update the store', function() {
       var topic = 'New topic';
 
+      result.topic = {value: topic};
       chatConversationService.updateTopic = sinon.spy(function() {
         return $q.when(result);
       });
@@ -343,7 +344,7 @@ describe('The chatConversationActionsService service', function() {
       $rootScope.$digest();
 
       expect(chatConversationService.updateTopic).to.have.been.calledWith(conversation._id, topic);
-      expect(chatConversationsStoreService.updateTopic).to.have.been.calledWith(conversation, topic);
+      expect(chatConversationsStoreService.updateTopic).to.have.been.calledWith(result.data, result.data.topic);
     });
 
     it('should reject when chatConversationService.updateTopic rejects', function() {

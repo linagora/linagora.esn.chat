@@ -11,7 +11,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
 const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
-const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
@@ -139,7 +139,7 @@ describe('The linagora.esn.chat conversation lib', function() {
             if (name === MEMBERSHIP_EVENTS) {
               return membershipTopic;
             }
-            if (name === TOPIC_UPDATED) {
+            if (name === CONVERSATION_TOPIC_UPDATED) {
               return localChannelTopicUpdateTopic;
             }
             if (name === CONVERSATION_SAVED) {
@@ -152,7 +152,7 @@ describe('The linagora.esn.chat conversation lib', function() {
             if (name === CONVERSATION_CREATED) {
               return channelCreationTopic;
             }
-            if (name === TOPIC_UPDATED) {
+            if (name === CONVERSATION_TOPIC_UPDATED) {
               return channelTopicUpdateTopic;
             }
             if (name === MEMBER_ADDED_IN_CONVERSATION) {

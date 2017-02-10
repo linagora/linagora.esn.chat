@@ -183,13 +183,13 @@
       var conv = findConversation(conversation._id);
 
       if (!conv) {
-        conversation.topic = {value: topic};
+        conversation.topic = topic;
         addConversation(conversation);
 
         return;
       }
 
-      conv.topic = {value: topic};
+      conv.topic = topic;
     }
   }
 })();

@@ -9,17 +9,17 @@ const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
 const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
-const TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.TOPIC_UPDATED;
+const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, room, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
+  var adapter, lib, room, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
 
   beforeEach(function() {
     var self = this;
 
     room = 'MyRoom';
-    message = {_id: 123, text: 'My message'};
+    message = {_id: 123, text: 'My message', channel: 456};
 
     localMessageReceivedTopic = {
       subscribe: sinon.spy(),
@@ -56,7 +56,11 @@ describe('The chat websocket adapter', function() {
       publish: sinon.spy()
     };
 
-    logger = { info: sinon.spy(), warn: sinon.spy() };
+    lib = {
+      conversation: {}
+    };
+
+    logger = { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() };
 
     _.forEach({
       pubsub: {
@@ -75,7 +79,7 @@ describe('The chat websocket adapter', function() {
             if (name === CONVERSATION_DELETED) {
               return conversationDeletedTopic;
             }
-            if (name === TOPIC_UPDATED) {
+            if (name === CONVERSATION_TOPIC_UPDATED) {
               return conversationTopicUpdatedTopic;
             }
             if (name === MESSAGE_RECEIVED) {
@@ -97,7 +101,7 @@ describe('The chat websocket adapter', function() {
   });
 
   beforeEach(function() {
-    adapter = require('../../../backend/ws/adapter')(this.moduleHelpers.dependencies);
+    adapter = require('../../../backend/ws/adapter')(this.moduleHelpers.dependencies, lib);
   });
 
   describe('The bindEvents function', function() {
@@ -156,7 +160,10 @@ describe('The chat websocket adapter', function() {
       expect(messenger.conversationUpdated).to.have.been.calledWith(conversation);
     });
 
-    it('should subscribe to TOPIC_UPDATED event', function() {
+    it('should subscribe to CONVERSATION_TOPIC_UPDATED event', function(done) {
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(null, conversation);
+      });
       messenger.topicUpdated = sinon.spy();
       adapter.bindEvents(messenger);
 
@@ -168,7 +175,61 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.topicUpdated).to.have.been.calledWith(data);
+      process.nextTick(function() {
+        expect(messenger.topicUpdated).to.have.been.calledWith(conversation);
+        expect(lib.conversation.getById).to.have.been.called;
+        done();
+      });
+    });
+
+    it('should subscribe to CONVERSATION_TOPIC_UPDATED event but not call messenger when conversation.getById fails', function(done) {
+      const error = new Error('I failed');
+
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(error);
+      });
+      messenger.topicUpdated = sinon.spy();
+      adapter.bindEvents(messenger);
+
+      expect(conversationTopicUpdatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      process.nextTick(function() {
+        expect(messenger.topicUpdated).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.calledWith('Error while getting conversation for topic update', error);
+        done();
+      });
+    });
+
+    it('should subscribe to CONVERSATION_TOPIC_UPDATED event but not call messenger when conversation.getById does not return conversation', function(done) {
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback();
+      });
+      messenger.topicUpdated = sinon.spy();
+      adapter.bindEvents(messenger);
+
+      expect(conversationTopicUpdatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      process.nextTick(function() {
+        expect(messenger.topicUpdated).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.called;
+        expect(logger.error.args[0][0]).to.equal('Error while getting conversation for topic update');
+        expect(logger.error.args[0][1].message).to.match(/Can not find conversation/);
+        done();
+      });
     });
 
     it('should subscribe to MEMBER_ADDED_IN_CONVERSATION event', function() {
@@ -186,8 +247,11 @@ describe('The chat websocket adapter', function() {
       expect(messenger.newMemberAdded).to.have.been.calledWith(data);
     });
 
-    it('should subscribe to MESSAGE_RECEIVED event', function() {
+    it('should subscribe to MESSAGE_RECEIVED event', function(done) {
       data = {room, message};
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(null, conversation);
+      });
       messenger.sendMessage = sinon.spy();
       adapter.bindEvents(messenger);
 
@@ -199,7 +263,62 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.sendMessage).to.have.been.calledWith(data.room, data.message);
+      process.nextTick(function() {
+        expect(messenger.sendMessage).to.have.been.calledWith(conversation, data.room, data.message);
+        done();
+      });
+    });
+
+    it('should subscribe to MESSAGE_RECEIVED event but not call messenger when conversation.getById fails', function(done) {
+      const error = new Error('I failed');
+
+      data = {room, message};
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(error);
+      });
+      messenger.sendMessage = sinon.spy();
+      adapter.bindEvents(messenger);
+
+      expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      process.nextTick(function() {
+        expect(messenger.sendMessage).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.calledWith('Error while getting conversation to send message', error);
+        done();
+      });
+    });
+
+    it('should subscribe to MESSAGE_RECEIVED event but not call messenger when conversation.getById does not return conversation', function(done) {
+      data = {room, message};
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback();
+      });
+      messenger.sendMessage = sinon.spy();
+      adapter.bindEvents(messenger);
+
+      expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      process.nextTick(function() {
+        expect(messenger.sendMessage).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.called;
+        expect(logger.error.args[0][0]).to.equal('Error while getting conversation to send message');
+        expect(logger.error.args[0][1].message).to.match(/Can not find conversation/);
+        done();
+      });
     });
 
     it('should publish a message in local pubsub on messenger "message" event', function() {

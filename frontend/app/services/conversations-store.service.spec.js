@@ -291,7 +291,7 @@ describe('The chatConversationsStoreService service', function() {
 
   describe('The updateTopic function', function() {
     it('should add the conversation if not found', function() {
-      var topic = 'My new topic';
+      var topic = {value: 'My new topic'};
 
       chatConversationsStoreService.conversations = [conversation];
       chatConversationsStoreService.updateTopic(publicConversation, topic);
@@ -300,13 +300,13 @@ describe('The chatConversationsStoreService service', function() {
         {
           _id: publicConversation._id,
           name: publicConversation.name,
-          topic: {value: topic}
+          topic: topic
         }
       ]);
     });
 
     it('should update the topic of the conversation', function() {
-      var topic = 'My new topic';
+      var topic = {value: 'My new topic'};
 
       chatConversationsStoreService.conversations = [conversation, publicConversation];
       chatConversationsStoreService.channels = [publicConversation];
@@ -316,7 +316,7 @@ describe('The chatConversationsStoreService service', function() {
         {
           _id: publicConversation._id,
           name: publicConversation.name,
-          topic: {value: topic}
+          topic: topic
         }
       ]);
     });

@@ -16,13 +16,13 @@
       LAST_CONVERSATION: 'chat.last-conversation'
     })
     .constant('CHAT_EVENTS', {
+      CONVERSATION_TOPIC_UPDATED: 'chat:conversation:topic:updated',
       MESSAGE_RECEIVED: 'chat:message:received',
       USER_CHANGE_STATE: 'user:state',
       NEW_CONVERSATION: 'chat:conversation:created',
       CONVERSATION_DELETION: 'chat:conversation:deleted',
       TEXT_MESSAGE: 'chat:message:text',
       FILE_MESSAGE: 'chat:message:file',
-      TOPIC_UPDATED: 'chat:message:text:channel:topic',
       SET_ACTIVE_ROOM: 'chat:message:set_active_room',
       UNSET_ACTIVE_ROOM: 'chat:message:unset_active_room',
       CONVERSATIONS: {
