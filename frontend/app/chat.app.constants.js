@@ -31,6 +31,9 @@
         UPDATE: 'chat:conversation:update'
       }
     })
+    .constant('CHAT_WEBSOCKET_EVENTS', {
+      MESSAGE: 'message'
+    })
     .constant('CHAT_MESSAGE_DISPLAYABLE_TYPES', {
       USER: 'user',
       SYSTEM: 'system'
