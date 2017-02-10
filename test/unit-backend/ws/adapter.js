@@ -19,7 +19,7 @@ describe('The chat websocket adapter', function() {
     var self = this;
 
     room = 'MyRoom';
-    message = {_id: 123, text: 'My message'};
+    message = {_id: 123, text: 'My message', channel: 456};
 
     localMessageReceivedTopic = {
       subscribe: sinon.spy(),
@@ -160,7 +160,7 @@ describe('The chat websocket adapter', function() {
       expect(messenger.conversationUpdated).to.have.been.calledWith(conversation);
     });
 
-    it('should subscribe to CONVERSATION_TOPIC_UPDATED event', function() {
+    it('should subscribe to CONVERSATION_TOPIC_UPDATED event', function(done) {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(null, conversation);
       });
@@ -175,11 +175,14 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.topicUpdated).to.have.been.calledWith(conversation);
-      expect(lib.conversation.getById).to.have.been.called;
+      process.nextTick(function() {
+        expect(messenger.topicUpdated).to.have.been.calledWith(conversation);
+        expect(lib.conversation.getById).to.have.been.called;
+        done();
+      });
     });
 
-    it('should subscribe to CONVERSATION_TOPIC_UPDATED event but not call messenger when conversation.getById fails', function() {
+    it('should subscribe to CONVERSATION_TOPIC_UPDATED event but not call messenger when conversation.getById fails', function(done) {
       const error = new Error('I failed');
 
       lib.conversation.getById = sinon.spy(function(id, callback) {
@@ -196,12 +199,15 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.topicUpdated).to.not.have.been.called;
-      expect(lib.conversation.getById).to.have.been.called;
-      expect(logger.error).to.have.been.calledWith('Error while getting conversation for topic update', error);
+      process.nextTick(function() {
+        expect(messenger.topicUpdated).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.calledWith('Error while getting conversation for topic update', error);
+        done();
+      });
     });
 
-    it('should subscribe to CONVERSATION_TOPIC_UPDATED event but not call messenger when conversation.getById does not return conversation', function() {
+    it('should subscribe to CONVERSATION_TOPIC_UPDATED event but not call messenger when conversation.getById does not return conversation', function(done) {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback();
       });
@@ -216,9 +222,14 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.topicUpdated).to.not.have.been.called;
-      expect(lib.conversation.getById).to.have.been.called;
-      expect(logger.warn).to.have.been.calledWith('Can not find conversation for topic update');
+      process.nextTick(function() {
+        expect(messenger.topicUpdated).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.called;
+        expect(logger.error.args[0][0]).to.equal('Error while getting conversation for topic update');
+        expect(logger.error.args[0][1].message).to.match(/Can not find conversation/);
+        done();
+      });
     });
 
     it('should subscribe to MEMBER_ADDED_IN_CONVERSATION event', function() {
@@ -236,8 +247,11 @@ describe('The chat websocket adapter', function() {
       expect(messenger.newMemberAdded).to.have.been.calledWith(data);
     });
 
-    it('should subscribe to MESSAGE_RECEIVED event', function() {
+    it('should subscribe to MESSAGE_RECEIVED event', function(done) {
       data = {room, message};
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(null, conversation);
+      });
       messenger.sendMessage = sinon.spy();
       adapter.bindEvents(messenger);
 
@@ -249,7 +263,62 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.sendMessage).to.have.been.calledWith(data.room, data.message);
+      process.nextTick(function() {
+        expect(messenger.sendMessage).to.have.been.calledWith(conversation, data.room, data.message);
+        done();
+      });
+    });
+
+    it('should subscribe to MESSAGE_RECEIVED event but not call messenger when conversation.getById fails', function(done) {
+      const error = new Error('I failed');
+
+      data = {room, message};
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(error);
+      });
+      messenger.sendMessage = sinon.spy();
+      adapter.bindEvents(messenger);
+
+      expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      process.nextTick(function() {
+        expect(messenger.sendMessage).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.calledWith('Error while getting conversation to send message', error);
+        done();
+      });
+    });
+
+    it('should subscribe to MESSAGE_RECEIVED event but not call messenger when conversation.getById does not return conversation', function(done) {
+      data = {room, message};
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback();
+      });
+      messenger.sendMessage = sinon.spy();
+      adapter.bindEvents(messenger);
+
+      expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      process.nextTick(function() {
+        expect(messenger.sendMessage).to.not.have.been.called;
+        expect(lib.conversation.getById).to.have.been.called;
+        expect(logger.error).to.have.been.called;
+        expect(logger.error.args[0][0]).to.equal('Error while getting conversation to send message');
+        expect(logger.error.args[0][1].message).to.match(/Can not find conversation/);
+        done();
+      });
     });
 
     it('should publish a message in local pubsub on messenger "message" event', function() {

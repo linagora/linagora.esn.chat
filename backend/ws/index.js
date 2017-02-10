@@ -23,7 +23,7 @@ function init(dependencies, lib) {
   chatNamespace = io.of(NAMESPACE);
 
   const transport = new Transport(chatNamespace, {dependencies});
-  const messenger = new Messenger(transport, {dependencies, lib});
+  const messenger = new Messenger(transport, {dependencies});
 
   adapter.bindEvents(messenger);
 

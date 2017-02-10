@@ -14,7 +14,6 @@ class Messenger extends EventEmitter {
 
   constructor(transport, options) {
     super();
-    this.lib = options.lib;
     this.transport = transport;
     this.logger = options.dependencies('logger');
     this.listenToIncomingEvents();
@@ -50,18 +49,8 @@ class Messenger extends EventEmitter {
     }
   }
 
-  sendMessage(room, message) {
-    this.lib.conversation.getById(message.channel, (err, conversation) => {
-      if (err) {
-        return this.logger.error('Error while getting conversation to send message', err);
-      }
-
-      if (!conversation) {
-        return this.logger.warn('Can not find conversation to send message');
-      }
-
-      this.sendDataToClients(conversation, 'message', {room, data: message});
-    });
+  sendMessage(conversation, room, message) {
+    this.sendDataToClients(conversation, 'message', {room, data: message});
   }
 
   topicUpdated(conversation) {

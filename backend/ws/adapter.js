@@ -1,5 +1,6 @@
 'use strict';
 
+const Q = require('q');
 const CONSTANTS = require('../lib/constants');
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
@@ -24,24 +25,39 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(CONVERSATION_UPDATED).subscribe(data => messenger.conversationUpdated(data.conversation));
     globalPubsub.topic(CONVERSATION_TOPIC_UPDATED).subscribe(topicUpdated);
     globalPubsub.topic(MEMBER_ADDED_IN_CONVERSATION).subscribe(messenger.newMemberAdded);
-    globalPubsub.topic(MESSAGE_RECEIVED).subscribe(data => messenger.sendMessage(data.room, data.message));
+    globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
 
     messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({room: message.room, message}));
+
+    function getConversation(id) {
+      return Q.denodeify(lib.conversation.getById)(id).then(conversation => {
+        if (!conversation) {
+          throw new Error(`Can not find conversation ${id}`);
+        }
+
+        return conversation;
+      });
+    }
+
+    // Event payload is { room, message }
+    function sendMessage(event) {
+      getConversation(event.message.channel)
+        .then(conversation => {
+          messenger.sendMessage(conversation, event.room, event.message);
+        })
+        .catch(err => {
+          logger.error('Error while getting conversation to send message', err);
+        });
+    }
 
     /**
     * Event payload is {conversationId: conversationId, topic: topic}
     */
     function topicUpdated(event) {
-      lib.conversation.getById(event.conversationId, (err, conversation) => {
-        if (err) {
-          return logger.error('Error while getting conversation for topic update', err);
-        }
-
-        if (!conversation) {
-          return logger.warn('Can not find conversation for topic update');
-        }
-
-        messenger.topicUpdated(conversation);
+      getConversation(event.conversationId)
+        .then(messenger.topicUpdated)
+        .catch(err => {
+          logger.error('Error while getting conversation for topic update', err);
       });
     }
   }

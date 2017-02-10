@@ -7,23 +7,19 @@ const CONSTANTS = require('../../../backend/lib/constants');
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The chat websocket messenger', function() {
-  let channel, conversation, members, message, messenger, logger, lib, options, transport, sendDataToMembersSpy, sendDataToUsersSpy;
+  let channel, conversation, members, message, messenger, logger, options, transport, sendDataToMembersSpy, sendDataToUsersSpy;
 
   beforeEach(function() {
     members = [];
     channel = 123;
     conversation = {_id: 1, members: members};
     logger = { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() };
-    lib = {
-      conversation: {}
-    };
     message = {_id: 1, text: 'My message', channel: channel};
     sendDataToMembersSpy = sinon.spy();
     sendDataToUsersSpy = sinon.spy();
 
     this.moduleHelpers.addDep('logger', logger);
     options = {
-      lib: lib,
       dependencies: this.moduleHelpers.dependencies
     };
   });
@@ -159,70 +155,20 @@ describe('The chat websocket messenger', function() {
   describe('The sendMessage function', function() {
     const room = 'MyRoom';
 
-    it('should not send data when conversation.getById fails', function(done) {
-      const err = new Error('I failed');
-
-      lib.conversation.getById = sinon.spy(function(channel, callback) {
-        callback(err);
-      });
-
-      messenger.sendMessage(room, message);
-
-      process.nextTick(() => {
-        expect(lib.conversation.getById).to.have.been.called;
-        expect(logger.error).to.have.been.calledWith('Error while getting conversation to send message', err);
-        expect(sendDataToUsersSpy).to.not.have.been.called;
-        expect(sendDataToMembersSpy).to.not.have.been.called;
-        done();
-      });
-    });
-
-    it('should not send data when conversation can not be found', function(done) {
-      lib.conversation.getById = sinon.spy(function(channel, callback) {
-        callback();
-      });
-
-      messenger.sendMessage(room, message);
-
-      process.nextTick(() => {
-        expect(lib.conversation.getById).to.have.been.called;
-        expect(logger.warn).to.have.been.calledWith('Can not find conversation to send message');
-        expect(sendDataToUsersSpy).to.not.have.been.called;
-        expect(sendDataToMembersSpy).to.not.have.been.called;
-        done();
-      });
-    });
-
-    it('should send data to members when conversation is confidential', function(done) {
+    it('should send data to members when conversation is confidential', function() {
       conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
-      lib.conversation.getById = sinon.spy(function(channel, callback) {
-        callback(null, conversation);
-      });
+      messenger.sendMessage(conversation, room, message);
 
-      messenger.sendMessage(room, message);
-
-      process.nextTick(() => {
-        expect(lib.conversation.getById).to.have.been.called;
-        expect(sendDataToUsersSpy).to.not.have.been.called;
-        expect(sendDataToMembersSpy).to.have.been.called;
-        done();
-      });
+      expect(sendDataToUsersSpy).to.not.have.been.called;
+      expect(sendDataToMembersSpy).to.have.been.called;
     });
 
-    it('should send data to users when conversation is not confidential', function(done) {
+    it('should send data to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
-      lib.conversation.getById = sinon.spy(function(channel, callback) {
-        callback(null, conversation);
-      });
+      messenger.sendMessage(conversation, room, message);
 
-      messenger.sendMessage(room, message);
-
-      process.nextTick(() => {
-        expect(lib.conversation.getById).to.have.been.called;
-        expect(sendDataToUsersSpy).to.have.been.called;
-        expect(sendDataToMembersSpy).to.not.have.been.called;
-        done();
-      });
+      expect(sendDataToUsersSpy).to.have.been.called;
+      expect(sendDataToMembersSpy).to.not.have.been.called;
     });
   });
 
