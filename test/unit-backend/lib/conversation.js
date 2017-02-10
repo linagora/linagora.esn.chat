@@ -17,7 +17,7 @@ const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  let deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectIdMock, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic;
+  let deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -115,7 +115,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       }
     };
 
-    ObjectIdMock = sinon.spy();
+    ObjectId = require('mongoose').Types.ObjectId;
 
     deps = {
       logger: logger,
@@ -126,9 +126,7 @@ describe('The linagora.esn.chat conversation lib', function() {
               return modelsMock[type];
             },
             Types: {
-              ObjectId: function() {
-                return ObjectIdMock.apply(this, arguments);
-              }
+              ObjectId: ObjectId
             }
           }
         }
@@ -253,6 +251,46 @@ describe('The linagora.esn.chat conversation lib', function() {
         expect(name).to.equal('members');
         expect(_channel).to.equal(channel);
         cb(null, channel);
+      };
+
+      modelsMock.ChatConversation = ChatConversation;
+
+      require('../../../backend/lib/conversation')(dependencies, lib).create(options, done);
+    });
+
+    it('should set member.id instance of mongo ObjectId if member.id is a String', function(done) {
+      const options = {id: 1, members: [{member: {id: '589c6a2a53bf175bd6164386'}}]};
+
+      function ChatConversation(opts) {
+        expect(opts).to.deep.equal(options);
+        expect(opts.members[0].member.id).to.be.instanceof(ObjectId);
+      }
+
+      const channel = {};
+
+      ChatConversation.prototype.save = function(cb) {
+        cb(null, channel, 1);
+      };
+
+      modelsMock.ChatConversation = ChatConversation;
+
+      require('../../../backend/lib/conversation')(dependencies, lib).create(options, done);
+    });
+
+    it('should not change member.id if it already instance of mongo ObjectId', function(done) {
+      const anObjectId = new ObjectId();
+      const options = {id: 1, members: [{member: {id: anObjectId}}]};
+
+      function ChatConversation(opts) {
+        expect(opts).to.deep.equal(options);
+        expect(opts.members[0].member.id).to.be.instanceof(ObjectId);
+
+      }
+
+      const channel = {};
+
+      ChatConversation.prototype.save = function(cb) {
+        cb(null, channel, 1);
       };
 
       modelsMock.ChatConversation = ChatConversation;
