@@ -89,7 +89,7 @@ describe('The conversation controller', function() {
 
           return {
             json: function(json) {
-              expect(lib.conversation.find).to.have.been.calledWith({ignoreMemberFilterForChannel: true, mode: CONVERSATION_MODE.CHANNEL, members: [{member: {objectType: 'user', id: 'id'}}]});
+              expect(lib.conversation.find).to.have.been.calledWith({ignoreMemberFilterForChannel: false, mode: CONVERSATION_MODE.CHANNEL, members: [{member: {objectType: 'user', id: 'id'}}]});
               expect(json).to.deep.equal(result);
               done();
             }

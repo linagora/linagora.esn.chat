@@ -1506,11 +1506,11 @@ describe('The chat API', function() {
       }).catch(done);
     });
 
-    it('should return channel even if I am not a member of them yet', function(done) {
+    it('should not return channel if I am not a member of them yet', function(done) {
       Q.denodeify(app.lib.conversation.create)({
         type: CONVERSATION_TYPE.OPEN,
         members: []
-      }).then(function(channel) {
+      }).then(function() {
         request(app.express)
           .get('/api/user/conversations')
           .expect(200)
@@ -1518,7 +1518,7 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
-            expect(res.body).to.shallowDeepEqual([{_id: String(channel._id)}]);
+            expect(res.body).to.shallowDeepEqual([]);
             done();
           });
       }).catch(done);

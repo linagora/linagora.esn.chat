@@ -103,7 +103,7 @@ module.exports = function(dependencies, lib) {
   function getUserConversations(req, res) {
     getConversations({
       mode: CONSTANTS.CONVERSATION_MODE.CHANNEL,
-      ignoreMemberFilterForChannel: true,
+      ignoreMemberFilterForChannel: false,
       members: [{member: currentUserAsMember(req)}]
     }, req, res);
   }
