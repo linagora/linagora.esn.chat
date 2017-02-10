@@ -1,19 +1,38 @@
 'use strict';
 
-/* global chai: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
 describe('The chatConversationsStoreService service', function() {
 
-  var members, chatConversationsStoreService, conversation, publicConversation, confidentialConversation;
+  var members, chatConversationsStoreService, conversation, publicConversation, confidentialConversation, user, chatConversationNameService, chatConversationNameServiceMock;
   var CHAT_CONVERSATION_TYPE, CHAT_MEMBER_STATUS;
+
+  function setChatConversationNameServiceReturn(conversations) {
+    if (!Array.isArray(conversations)) {
+      conversations = [conversations];
+    }
+
+    conversations.forEach(function(conversation) {
+      chatConversationNameService.getName.withArgs(conversation).returns({
+        then: function(callback) {
+            callback(conversation.name);
+        }
+      });
+    });
+  }
 
   beforeEach(function() {
     conversation = {_id: 3, name: 'My conversation'};
     publicConversation = {_id: 1, name: 'My public conversation'};
     confidentialConversation = {_id: 2, name: 'My confidential conversation'};
     members = [{_id: 'userId1'}, {_id: 'userId2'}];
+    chatConversationsStoreService = {};
+    user = {_id: 'userId'};
+    chatConversationNameServiceMock = {
+      getName: sinon.stub()
+    };
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {
@@ -21,11 +40,15 @@ describe('The chatConversationsStoreService service', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('session', {user: user});
+      $provide.value('chatConversationNameService', chatConversationNameServiceMock);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatConversationsStoreService_, _CHAT_CONVERSATION_TYPE_, _CHAT_MEMBER_STATUS_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationNameService_, _chatConversationsStoreService_, _CHAT_CONVERSATION_TYPE_, _CHAT_MEMBER_STATUS_) {
     chatConversationsStoreService = _chatConversationsStoreService_;
+    chatConversationNameService = _chatConversationNameService_;
+
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     CHAT_MEMBER_STATUS = _CHAT_MEMBER_STATUS_;
 
@@ -36,6 +59,7 @@ describe('The chatConversationsStoreService service', function() {
   describe('The addConversation function', function() {
     it('should not add the conversation in conversations if already in', function() {
       chatConversationsStoreService.conversations = [conversation];
+      setChatConversationNameServiceReturn(conversation);
       chatConversationsStoreService.addConversation(conversation);
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
@@ -45,6 +69,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should add the conversation in conversations if not alreay in', function() {
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn(conversation);
       chatConversationsStoreService.addConversation(conversation);
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
@@ -52,6 +77,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should add the conversation in channels when type is open', function() {
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn(publicConversation);
       chatConversationsStoreService.addConversation(publicConversation);
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([publicConversation]);
@@ -62,17 +88,45 @@ describe('The chatConversationsStoreService service', function() {
     it('should add the conversation in privateConversations when type is confidential', function() {
       conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn(confidentialConversation);
       chatConversationsStoreService.addConversation(confidentialConversation);
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([confidentialConversation]);
       expect(chatConversationsStoreService.channels).to.deep.equals([]);
       expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation]);
     });
+
+    it('should add the conversation in channels and order by alphabetic', function() {
+      var publicConversation2 = {_id: 3, name: 'The public conversation', type: CHAT_CONVERSATION_TYPE.OPEN};
+      var publicConversation3 = {_id: 4, name: 'A new public conversation', type: CHAT_CONVERSATION_TYPE.OPEN};
+
+      chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn([publicConversation, publicConversation2, publicConversation3]);
+      chatConversationsStoreService.addConversations([publicConversation, publicConversation2, publicConversation3]);
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([publicConversation3, publicConversation, publicConversation2]);
+      expect(chatConversationsStoreService.channels).to.deep.equals([publicConversation3, publicConversation, publicConversation2]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
+    });
+
+    it('should add the conversation in channels and order by alphabetic', function() {
+      var confidentialConversation2 = {_id: 5, name: 'The confidential conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL};
+      var confidentialConversation3 = {_id: 6, name: 'A new confidential conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL};
+
+      chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn([confidentialConversation, confidentialConversation2, confidentialConversation3]);
+      chatConversationsStoreService.addConversations([confidentialConversation, confidentialConversation2, confidentialConversation3]);
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([confidentialConversation3, confidentialConversation, confidentialConversation2]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation3, confidentialConversation, confidentialConversation2]);
+      expect(chatConversationsStoreService.channels).to.deep.equals([]);
+    });
   });
 
   describe('The addConversations function', function() {
     it('should do nothing when input is undefined', function() {
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn(conversation);
       chatConversationsStoreService.addConversations();
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([]);
@@ -82,6 +136,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should do nothing when input is empty', function() {
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn(conversation);
       chatConversationsStoreService.addConversations([]);
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([]);
@@ -91,6 +146,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should add the given conversations to the store', function() {
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn([publicConversation, confidentialConversation]);
       chatConversationsStoreService.addConversations([publicConversation, confidentialConversation]);
 
       expect(chatConversationsStoreService.conversations.length).to.equal(2);
@@ -109,6 +165,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should not add the conversation with new members if it does not exists', function() {
       chatConversationsStoreService.conversations = [];
+      setChatConversationNameServiceReturn(conversation);
       chatConversationsStoreService.setMembers(conversation, members);
 
       expect(chatConversationsStoreService.conversations).to.deep.equals([]);
@@ -265,6 +322,7 @@ describe('The chatConversationsStoreService service', function() {
     });
 
     it('should set the member_status and add the conversation to the store', function() {
+      setChatConversationNameServiceReturn(conversation);
       chatConversationsStoreService.joinConversation(conversation);
 
       expect(chatConversationsStoreService.conversations).to.deep.equal([{_id: conversation._id, name: conversation.name, member_status: CHAT_MEMBER_STATUS.MEMBER}]);
@@ -337,9 +395,10 @@ describe('The chatConversationsStoreService service', function() {
 
   describe('The updateConversation function', function() {
     it('should add conversation as is when not already in store', function() {
+      setChatConversationNameServiceReturn([conversation, publicConversation]);
       chatConversationsStoreService.conversations = [conversation];
-
       chatConversationsStoreService.updateConversation(publicConversation);
+
       expect(chatConversationsStoreService.conversations.length).to.equal(2);
       expect(chatConversationsStoreService.channels).to.deep.equal([publicConversation]);
     });
@@ -366,6 +425,7 @@ describe('The chatConversationsStoreService service', function() {
     it('should add the conversation if not found', function() {
       var topic = {value: 'My new topic'};
 
+      setChatConversationNameServiceReturn([conversation, publicConversation]);
       chatConversationsStoreService.conversations = [conversation];
       chatConversationsStoreService.updateTopic(publicConversation, topic);
 
