@@ -2,9 +2,9 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .factory('chatWebsocketTransportService', chatWebsocketTransportService);
+    .factory('ChatWebsocketTransportService', ChatWebsocketTransportService);
 
-    function chatWebsocketTransportService($log, $q, livenotification, _, CHAT_NAMESPACE) {
+    function ChatWebsocketTransportService($log, $q, livenotification, _, CHAT_NAMESPACE, CHAT_WEBSOCKET_EVENTS) {
 
       function ChatWebsocketTransportService(options) {
         this.options = options;
@@ -50,7 +50,7 @@
       ChatWebsocketTransportService.prototype.sendMessage = function(message) {
         $log.debug('Send chat message to peers', message);
 
-        return this.sendRawMessage('message', message);
+        return this.sendRawMessage(CHAT_WEBSOCKET_EVENTS.MESSAGE, message);
       };
 
       return ChatWebsocketTransportService;

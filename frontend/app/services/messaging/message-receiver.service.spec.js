@@ -8,7 +8,7 @@ describe('The chatMessageReceiverService factory', function() {
   var user, domain, session, message;
   var $rootScope, $log;
   var chatMessageReceiverService;
-  var CHAT_MESSAGE_TYPE;
+  var CHAT_MESSAGE_TYPE, CHAT_MESSAGE_PREFIX;
 
   beforeEach(function() {
     user = {_id: 'userId'};
@@ -31,11 +31,12 @@ describe('The chatMessageReceiverService factory', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$log_, _$rootScope_, _chatMessageReceiverService_, _CHAT_MESSAGE_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$log_, _$rootScope_, _chatMessageReceiverService_, _CHAT_MESSAGE_TYPE_, _CHAT_MESSAGE_PREFIX_) {
     $log = _$log_;
     $rootScope = _$rootScope_;
     chatMessageReceiverService = _chatMessageReceiverService_;
     CHAT_MESSAGE_TYPE = _CHAT_MESSAGE_TYPE_;
+    CHAT_MESSAGE_PREFIX = _CHAT_MESSAGE_PREFIX_;
   }));
 
   describe('The onMessage function', function() {
@@ -50,14 +51,14 @@ describe('The chatMessageReceiverService factory', function() {
       chatMessageReceiverService.onMessage();
 
       expect(logSpy).to.have.been.calledTwice;
-      expect(logSpy.getCalls()[1].args[0]).to.equal('Empty message returned, skipping');
+      expect(logSpy.secondCall.args[0]).to.equal('Empty message returned, skipping');
       expect($rootScope.$broadcast).to.not.have.been.called;
     });
 
     it('should skip when message does not have type', function() {
       chatMessageReceiverService.onMessage(message);
 
-      expect(logSpy.getCalls()[1].args[0]).to.equal('Message does not have valid type, skipping');
+      expect(logSpy.secondCall.args[0]).to.equal('Message does not have valid type, skipping');
       expect($rootScope.$broadcast).to.not.have.been.called;
     });
 
@@ -66,7 +67,7 @@ describe('The chatMessageReceiverService factory', function() {
       message.type = CHAT_MESSAGE_TYPE.USER_TYPING;
       chatMessageReceiverService.onMessage(message);
 
-      expect(logSpy.getCalls()[1].args[0]).to.equal('Skipping own message');
+      expect(logSpy.secondCall.args[0]).to.equal('Skipping own message');
       expect($rootScope.$broadcast).to.not.have.been.called;
     });
 
@@ -74,7 +75,7 @@ describe('The chatMessageReceiverService factory', function() {
       message.type = 'MyType';
       chatMessageReceiverService.onMessage(message);
 
-      expect($rootScope.$broadcast).to.have.been.calledWith('chat:message:' + message.type, message);
+      expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_MESSAGE_PREFIX + message.type, message);
     });
   });
 });

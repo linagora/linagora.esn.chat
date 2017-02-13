@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatMessageReceiverService', chatMessageReceiverService);
 
-  function chatMessageReceiverService($log, $rootScope, session, CHAT_MESSAGE_TYPE) {
+  function chatMessageReceiverService($log, $rootScope, session, CHAT_MESSAGE_TYPE, CHAT_MESSAGE_PREFIX) {
 
     return {
       onMessage: onMessage
@@ -14,7 +14,7 @@
       return message.creator && message.creator === session.user._id && message.type === CHAT_MESSAGE_TYPE.USER_TYPING;
     }
 
-    function missingType(message) {
+    function isMissingType(message) {
       return !message.type;
     }
 
@@ -27,7 +27,7 @@
         return;
       }
 
-      if (missingType(message)) {
+      if (isMissingType(message)) {
         $log.debug('Message does not have valid type, skipping');
 
         return;
@@ -39,7 +39,7 @@
         return;
       }
 
-      $rootScope.$broadcast('chat:message:' + message.type, message);
+      $rootScope.$broadcast(CHAT_MESSAGE_PREFIX + message.type, message);
     }
   }
 })();

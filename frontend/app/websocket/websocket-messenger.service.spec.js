@@ -6,13 +6,13 @@ var expect = chai.expect;
 
 describe('The chatWebsocketMessengerService factory', function() {
   var user, domain, session;
-  var chatWebsocketMessengerService, chatWebsocketTransportService;
+  var chatWebsocketMessengerService, ChatWebsocketTransportService;
   var instanceSpy;
 
   beforeEach(function() {
     instanceSpy = sinon.spy();
     chatWebsocketMessengerService = {};
-    chatWebsocketTransportService = function(options) {
+    ChatWebsocketTransportService = function(options) {
       instanceSpy(options);
     };
     user = {_id: '123'};
@@ -27,7 +27,7 @@ describe('The chatWebsocketMessengerService factory', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
-      $provide.value('chatWebsocketTransportService', chatWebsocketTransportService);
+      $provide.value('ChatWebsocketTransportService', ChatWebsocketTransportService);
       $provide.value('session', session);
     });
   });
@@ -38,7 +38,7 @@ describe('The chatWebsocketMessengerService factory', function() {
 
   describe('The get function', function() {
     it('should returns a chatWebsocketTransportInstance instance', function() {
-      expect(chatWebsocketMessengerService.get()).to.be.an.instanceof(chatWebsocketTransportService);
+      expect(chatWebsocketMessengerService.get()).to.be.an.instanceof(ChatWebsocketTransportService);
       expect(instanceSpy).to.have.been.calledWith({room: domain._id, user: user._id});
     });
 

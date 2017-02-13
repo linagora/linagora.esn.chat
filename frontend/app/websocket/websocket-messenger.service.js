@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatWebsocketMessengerService', chatWebsocketMessengerService);
 
-  function chatWebsocketMessengerService($log, chatWebsocketTransportService, session) {
+  function chatWebsocketMessengerService(ChatWebsocketTransportService, session) {
     var chatWebsocketTransportInstance;
 
     return {
@@ -16,7 +16,7 @@
         return chatWebsocketTransportInstance;
       }
 
-      chatWebsocketTransportInstance = new chatWebsocketTransportService({
+      chatWebsocketTransportInstance = new ChatWebsocketTransportService({
         room: getRoom(),
         user: session.user._id
       });

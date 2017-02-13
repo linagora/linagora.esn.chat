@@ -7,7 +7,7 @@
   function chatMessageService($q, $log, $rootScope, chatMessengerService, fileUploadService, backgroundProcessorService, CHAT_MESSAGE_TYPE, DEFAULT_FILE_TYPE, CHAT_SYSTEM_MESSAGE_SUBTYPES, _) {
     return {
       isSystemMessage: isSystemMessage,
-      sendMessage: sendTextMessage,
+      sendMessage: sendMessage,
       sendMessageWithAttachments: sendMessageWithAttachments,
       sendUserTyping: sendUserTyping
     };
@@ -39,7 +39,7 @@
       return _.contains(CHAT_SYSTEM_MESSAGE_SUBTYPES, message.subtype);
     }
 
-    function sendMessage(message) {
+    function _sendMessage(message) {
       $log.debug('Send message', message);
 
       return chatMessengerService.sendMessage(message);
@@ -57,7 +57,7 @@
       function filesUploaded(attachments) {
         $log.debug('Upload complete');
 
-        return sendMessage(buildMessage(message, attachments)).then(function(response) {
+        return _sendMessage(buildMessage(message, attachments)).then(function(response) {
           $log.debug('Message with files has been sent');
           filesUploadDefer.resolve(response);
         }, function(err) {
@@ -78,13 +78,13 @@
     function sendUserTyping(message) {
       message.type = CHAT_MESSAGE_TYPE.USER_TYPING;
 
-      return sendMessage(message);
+      return _sendMessage(message);
     }
 
-    function sendTextMessage(message) {
+    function sendMessage(message) {
       message.type = CHAT_MESSAGE_TYPE.TEXT;
 
-      return sendMessage(message);
+      return _sendMessage(message);
     }
   }
 })();

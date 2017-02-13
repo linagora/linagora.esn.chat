@@ -5,8 +5,9 @@
 var expect = chai.expect;
 
 describe('The chatWebsocketTransportService factory', function() {
-  var livenotification, options, transport, chatWebsocketTransportService, $rootScope;
+  var livenotification, options, transport, ChatWebsocketTransportService, $rootScope;
   var onSpy, sendSpy, successSpy, errorSpy;
+  var CHAT_NAMESPACE;
 
   beforeEach(function() {
     options = {room: '123'};
@@ -33,13 +34,14 @@ describe('The chatWebsocketTransportService factory', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _chatWebsocketTransportService_) {
+  beforeEach(angular.mock.inject(function(_$rootScope_, _ChatWebsocketTransportService_, _CHAT_NAMESPACE_) {
     $rootScope = _$rootScope_;
-    chatWebsocketTransportService = _chatWebsocketTransportService_;
+    ChatWebsocketTransportService = _ChatWebsocketTransportService_;
+    CHAT_NAMESPACE = _CHAT_NAMESPACE_;
   }));
 
   beforeEach(function() {
-    transport = new chatWebsocketTransportService(options);
+    transport = new ChatWebsocketTransportService(options);
   });
 
   it('should instanciate correctly', function() {
@@ -85,8 +87,9 @@ describe('The chatWebsocketTransportService factory', function() {
       transport.connect();
 
       expect(livenotification).to.have.been.calledOnce;
+      expect(livenotification).to.have.been.calledWith(CHAT_NAMESPACE, options.room);
       expect(onSpy).to.have.been.calledOnce;
-      expect(onSpy.getCalls()[0].args[0]).to.equal('connected');
+      expect(onSpy.firstCall.args[0]).to.equal('connected');
     });
 
     it('should register all the event listeners', function() {
@@ -97,6 +100,9 @@ describe('The chatWebsocketTransportService factory', function() {
       transport.connect();
 
       expect(livenotification).to.have.been.calledOnce;
+      expect(onSpy.firstCall.args[0]).to.equal('a');
+      expect(onSpy.secondCall.args[0]).to.equal('b');
+      expect(onSpy.thirdCall.args[0]).to.equal('connected');
       expect(onSpy).to.have.been.calledThrice;
     });
   });

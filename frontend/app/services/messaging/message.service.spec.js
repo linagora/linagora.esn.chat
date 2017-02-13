@@ -82,16 +82,4 @@ describe('The chatMessageService factory', function() {
       expect(promiseCallback).to.have.been.calledOnce;
     });
   });
-
-  describe('sendMessage function ', function() {
-    it('should send a message with text as type', function() {
-      var promiseCallback = sinon.spy();
-
-      chatMessageService.sendMessage({data: 'data'}).then(promiseCallback);
-      $rootScope.$digest();
-
-      expect(chatMessengerService.sendMessage).to.have.been.calledWith({data: 'data', type: 'text'});
-      expect(promiseCallback).to.have.been.calledOnce;
-    });
-  });
 });
