@@ -5,24 +5,19 @@ const expect = require('chai').expect;
 const CONSTANTS = require('../../../../../backend/lib/constants');
 
 describe('The join conversation system message handler', function() {
-
-  let deps, dependencies, newMessageTopic, membershipTopic, domainId, userId, conversationId, timestamp;
+  let deps, dependencies, newMessageTopic, membershipTopic, userId, conversationId;
 
   beforeEach(function() {
     dependencies = function(name) {
       return deps[name];
     };
 
-    domainId = '123';
     userId = '456';
     conversationId = '789';
-    timestamp = Date.now();
-
     newMessageTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
-
     membershipTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
@@ -30,10 +25,9 @@ describe('The join conversation system message handler', function() {
 
     deps = {
       logger: {
-        /*eslint no-console: ["error", { allow: ["log"] }] */
-        error: console.log,
-        info: console.log,
-        debug: console.log
+        error: sinon.spy(),
+        info: sinon.spy(),
+        debug: sinon.spy()
       },
       pubsub: {
         local: {
@@ -57,23 +51,13 @@ describe('The join conversation system message handler', function() {
       expect(membershipTopic.subscribe).to.have.been.calledOnce;
     });
 
-    it('should publish event on MESSAGE_RECEIVED topic when event collaboration is conversation', function(done) {
+    it('should publish event on MESSAGE_RECEIVED topic when event collaboration is conversation', function() {
       let handler;
 
       membershipTopic.subscribe = function(callback) {
         handler = callback;
       };
 
-      const conv = {
-        domain: domainId
-      };
-      const conversation = {
-        getById: sinon.spy(function(id, callback) {
-          conv._id = id;
-
-          callback(null, conv);
-        })
-      };
       const event = {
         collaboration: {
           objectType: 'chat.conversation',
@@ -81,57 +65,43 @@ describe('The join conversation system message handler', function() {
         },
         target: userId
       };
-      const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies, {conversation});
+      const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies);
 
       module.start();
-      handler(event).then(() => {
-        expect(newMessageTopic.publish).to.have.been.calledWith({
-          room: domainId,
-          message: {
-            text: '@' + userId + ' has joined the conversation.',
-            type: 'text',
-            subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_JOIN,
-            creator: userId,
-            channel: conversationId,
-            user_mentions: [userId],
-            timestamps: {creation: timestamp}
-          }
-        });
-        done();
-      }, done);
+      handler(event);
+
+      expect(newMessageTopic.publish.getCalls()[0].args[0]).to.shallowDeepEqual({
+        message: {
+          text: '@' + userId + ' has joined the conversation.',
+          type: 'text',
+          subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_JOIN,
+          creator: userId,
+          channel: conversationId,
+          user_mentions: [userId]
+        }
+      });
     });
 
-    it('should not publish event on MESSAGE_RECEIVED topic when event is for chat conversation', function(done) {
+    it('should not publish event on MESSAGE_RECEIVED topic when event is for chat conversation', function() {
       let handler;
 
       membershipTopic.subscribe = function(callback) {
         handler = callback;
       };
 
-      const conv = {
-        domain: domainId
-      };
-      const conversation = {
-        getById: sinon.spy(function(id, callback) {
-          conv._id = id;
-
-          callback(null, conv);
-        })
-      };
       const event = {
         collaboration: {
           objectType: 'community',
           id: 1
         }
       };
-      const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies, {conversation});
+      const module = require('../../../../../backend/lib/listener/system/join-conversation')(dependencies);
 
       module.start();
-      handler(event).then(() => {
-        expect(newMessageTopic.publish).to.not.have.beenCalled;
-        done();
-      }, done);
-    });
+      handler(event);
 
+      expect(newMessageTopic.publish).to.not.have.beenCalled;
+      expect(deps.logger.debug.getCalls()[1].args[0]).to.match(/is not a conversation, skipping/);
+    });
   });
 });

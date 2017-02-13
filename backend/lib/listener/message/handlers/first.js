@@ -26,7 +26,7 @@ module.exports = function(dependencies) {
 
           conversation.members && conversation.members.filter(member => (member.member.objectType === OBJECT_TYPES.USER && String(member.member.id) !== String(data.message.creator._id)))
           .forEach(member => {
-            pubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_INITIALIZED).publish({room: data.room, message: data.message, conversation: conversation.toObject(), target: member});
+            pubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_INITIALIZED).publish({message: data.message, conversation: conversation.toObject(), target: member});
           });
         });
       }

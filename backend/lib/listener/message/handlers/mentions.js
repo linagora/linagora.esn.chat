@@ -8,7 +8,7 @@ module.exports = function(dependencies) {
 
   return function(data) {
     data.message.user_mentions && data.message.user_mentions.forEach(mention => {
-      pubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({room: data.room, message: data.message, for: mention});
+      pubsub.topic(CONSTANTS.NOTIFICATIONS.USERS_MENTION).publish({message: data.message, for: mention});
     });
   };
 

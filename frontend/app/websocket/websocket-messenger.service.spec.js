@@ -8,6 +8,7 @@ describe('The chatWebsocketMessengerService factory', function() {
   var user, domain, session;
   var chatWebsocketMessengerService, ChatWebsocketTransportService;
   var instanceSpy;
+  var CHAT_WEBSOCKET_ROOM;
 
   beforeEach(function() {
     instanceSpy = sinon.spy();
@@ -32,14 +33,15 @@ describe('The chatWebsocketMessengerService factory', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatWebsocketMessengerService_) {
+  beforeEach(angular.mock.inject(function(_chatWebsocketMessengerService_, _CHAT_WEBSOCKET_ROOM_) {
     chatWebsocketMessengerService = _chatWebsocketMessengerService_;
+    CHAT_WEBSOCKET_ROOM = _CHAT_WEBSOCKET_ROOM_;
   }));
 
   describe('The get function', function() {
     it('should returns a chatWebsocketTransportInstance instance', function() {
       expect(chatWebsocketMessengerService.get()).to.be.an.instanceof(ChatWebsocketTransportService);
-      expect(instanceSpy).to.have.been.calledWith({room: domain._id, user: user._id});
+      expect(instanceSpy).to.have.been.calledWith({room: CHAT_WEBSOCKET_ROOM.DEFAULT, user: user._id});
     });
 
     it('should always return the same chatWebsocketTransportInstance instance', function() {

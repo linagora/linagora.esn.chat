@@ -6,7 +6,8 @@ module.exports = {
     USER: 'user'
   },
   WEBSOCKET: {
-    NAMESPACE: '/chat'
+    NAMESPACE: '/chat',
+    DEFAULT_ROOM: 'default'
   },
   DEFAULT_LIMIT: 25,
   DEFAULT_OFFSET: 0,

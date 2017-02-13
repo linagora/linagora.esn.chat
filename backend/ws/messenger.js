@@ -9,6 +9,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
 const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
+const DEFAULT_ROOM = CONSTANTS.WEBSOCKET.DEFAULT_ROOM;
 
 class Messenger extends EventEmitter {
 
@@ -42,6 +43,7 @@ class Messenger extends EventEmitter {
   }
 
   sendDataToClients(conversation, type, data) {
+    data.room = DEFAULT_ROOM;
     if (conversation.type === CONVERSATION_TYPE.CONFIDENTIAL) {
       this.transport.sendDataToMembers(conversation.members, type, data);
     } else {
@@ -49,8 +51,8 @@ class Messenger extends EventEmitter {
     }
   }
 
-  sendMessage(conversation, room, message) {
-    this.sendDataToClients(conversation, 'message', {room, data: message});
+  sendMessage(conversation, message) {
+    this.sendDataToClients(conversation, 'message', {data: message});
   }
 
   topicUpdated(conversation) {

@@ -93,8 +93,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
       const data = {
         message: {
           type: type
-        },
-        room: 'room'
+        }
       };
       const channel = {
         createMessage: function() {
@@ -120,7 +119,6 @@ describe('The linagora.esn.chat lib message listener module', function() {
       const creator = '1';
       const conversation = 'general';
       const attachments = [1, 2, 3];
-      const room = 'room';
       let data;
 
       beforeEach(function() {
@@ -133,8 +131,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
             creator: creator,
             channel: conversation,
             attachments: attachments
-          },
-          room: room
+          }
         };
       });
 
@@ -172,7 +169,7 @@ describe('The linagora.esn.chat lib message listener module', function() {
           });
 
           expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
-          expect(data).to.be.deep.equals({room: data.room, message: createMessageResult});
+          expect(data).to.be.deep.equals({message: createMessageResult});
           expect(conversationMock.getById).to.have.been.calledWith(conversation);
           done();
         };
