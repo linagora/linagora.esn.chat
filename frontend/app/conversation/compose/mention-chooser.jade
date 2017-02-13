@@ -1,6 +1,7 @@
 .emoji-chooser(ng-if="ctlr.entitySelector.visible")
-  header Members matching "#[strong {{ctlr.entitySelector.entityStart}}]"
   section
+    header
+      span #{__('Member matching')} "#[strong {{ctlr.entitySelector.entityStart}}]"
     .emoticon-info(ng-repeat="member in ctlr.entitySelector.entityList",
       ng-click='ctlr.entitySelector.select(member, $event)',
       ng-mouseover='ctlr.focusIndex = $index',
