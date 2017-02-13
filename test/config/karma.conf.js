@@ -33,7 +33,11 @@ module.exports = function(config) {
       'frontend/app/**/*.js',
       'frontend/app/**/*.jade'
     ],
-    exclude: ['frontend/app/chat.app.run.js', 'frontend/app/conversation/attachments/conversation-attachments.run.js'],
+    exclude: [
+      'frontend/app/chat.app.run.js',
+      'frontend/app/websocket/websocket.run.js',
+      'frontend/app/conversation/attachments/conversation-attachments.run.js'
+    ],
     frameworks: ['mocha'],
     colors: true,
     singleRun: true,

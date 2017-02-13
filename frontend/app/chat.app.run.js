@@ -4,8 +4,7 @@
   angular.module('linagora.esn.chat')
     .run(runBlock);
 
-  function runBlock(chatNotificationService, chatMessageService, chatConversationActionsService, chatConversationListenerService, editableOptions) {
-    chatMessageService.connect();
+  function runBlock(chatNotificationService, chatConversationActionsService, chatConversationListenerService, editableOptions) {
     chatNotificationService.start();
     chatConversationActionsService.start();
     chatConversationListenerService.start();

@@ -100,7 +100,8 @@ module.exports = function(grunt) {
   grunt.registerTask('setup-servers', ['spawn-servers', 'continue:on', 'setupElasticsearchIndex']);
   grunt.registerTask('test-midway-backend', ['setup-environment', 'setup-servers', 'run_grunt:midway_backend', 'kill-servers', 'clean-environment']);
   grunt.registerTask('test-unit-backend', 'Test backend code', ['mochacli:backend']);
-  grunt.registerTask('test-unit-frontend', 'Test frontend code', ['karma:unit']);
-  grunt.registerTask('test', ['linters', 'test-unit-frontend', 'test-unit-backend', 'test-midway-backend']);
+  grunt.registerTask('test-unit-frontend', 'Unit test frontend code', ['karma:unit']);
+  grunt.registerTask('test-frontend', 'Test frontend code', ['test-unit-frontend']);
+  grunt.registerTask('test', ['linters', 'test-frontend', 'test-unit-backend', 'test-midway-backend']);
   grunt.registerTask('default', ['test']);
 };

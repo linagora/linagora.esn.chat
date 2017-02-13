@@ -31,10 +31,14 @@
         UPDATE: 'chat:conversation:update'
       }
     })
+    .constant('CHAT_WEBSOCKET_EVENTS', {
+      MESSAGE: 'message'
+    })
     .constant('CHAT_MESSAGE_DISPLAYABLE_TYPES', {
       USER: 'user',
       SYSTEM: 'system'
     })
+    .constant('CHAT_MESSAGE_PREFIX', 'chat:message:')
     .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'topic_update'])
     .constant('CHAT_MENTION_CHAR', '@')
     .constant('CHAT_NAMESPACE', '/chat')

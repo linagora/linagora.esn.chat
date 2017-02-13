@@ -25,7 +25,6 @@
     }
 
     function link(scope, element) {
-      chatMessageService.connect();
       var textarea = element.find('textarea').get(0);
       var timer = null;
       var currentRoomId = chatConversationsStoreService.activeRoom._id;
