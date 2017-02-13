@@ -55,10 +55,12 @@ module.exports = (dependencies, lib) => {
     */
     function topicUpdated(event) {
       getConversation(event.conversationId)
-        .then(messenger.topicUpdated)
+        .then(conversation => {
+          messenger.topicUpdated(conversation.toObject());
+        })
         .catch(err => {
           logger.error('Error while getting conversation for topic update', err);
-      });
+        });
     }
   }
 };

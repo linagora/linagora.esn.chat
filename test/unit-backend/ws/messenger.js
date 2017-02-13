@@ -68,14 +68,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.conversationCreated(conversation);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED, conversation);
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED, {data: conversation, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.conversationCreated(conversation);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED, conversation);
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED, {data: conversation, room: DEFAULT_ROOM});
     });
   });
 
@@ -85,14 +85,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.conversationDeleted(conversation);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED, conversation);
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED, {data: conversation, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.conversationDeleted(conversation);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED, conversation);
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED, {data: conversation, room: DEFAULT_ROOM});
     });
   });
 
@@ -102,14 +102,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.conversationUpdated(conversation);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED, conversation);
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED, {data: conversation, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.conversationUpdated(conversation);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED, conversation);
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED, {data: conversation, room: DEFAULT_ROOM});
     });
   });
 
@@ -119,14 +119,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.newMemberAdded(conversation);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION, conversation);
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION, {data: conversation, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.newMemberAdded(conversation);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION, conversation);
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION, {data: conversation, room: DEFAULT_ROOM});
     });
   });
 
@@ -139,7 +139,7 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.sendDataToClients(conversation, type, data);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, type, {data: data.data, room: DEFAULT_ROOM});
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, type, {data: data, room: DEFAULT_ROOM});
     });
 
     it('should send data to users when conversation is not confidential', function() {
@@ -149,7 +149,7 @@ describe('The chat websocket messenger', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.sendDataToClients(conversation, type, data);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(type, {data: data.data, room: DEFAULT_ROOM});
+      expect(sendDataToUsersSpy).to.have.been.calledWith(type, {data: data, room: DEFAULT_ROOM});
     });
   });
 
@@ -179,14 +179,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.topicUpdated(conversation);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, conversation);
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, {data: conversation, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.topicUpdated(conversation);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, conversation);
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, {data: conversation, room: DEFAULT_ROOM});
     });
   });
 });

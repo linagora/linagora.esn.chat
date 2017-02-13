@@ -160,8 +160,14 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to CONVERSATION_TOPIC_UPDATED event', function(done) {
+      const result = {
+        toObject: function() {
+          return conversation;
+        }
+      };
+
       lib.conversation.getById = sinon.spy(function(id, callback) {
-        callback(null, conversation);
+        callback(null, result);
       });
       messenger.topicUpdated = sinon.spy();
       adapter.bindEvents(messenger);

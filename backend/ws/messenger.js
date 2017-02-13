@@ -43,16 +43,20 @@ class Messenger extends EventEmitter {
   }
 
   sendDataToClients(conversation, type, data) {
-    data.room = DEFAULT_ROOM;
+    const payload = {
+      data: data,
+      room: DEFAULT_ROOM
+    };
+
     if (conversation.type === CONVERSATION_TYPE.CONFIDENTIAL) {
-      this.transport.sendDataToMembers(conversation.members, type, data);
+      this.transport.sendDataToMembers(conversation.members, type, payload);
     } else {
-      this.transport.sendDataToUsers(type, data);
+      this.transport.sendDataToUsers(type, payload);
     }
   }
 
   sendMessage(conversation, message) {
-    this.sendDataToClients(conversation, 'message', {data: message});
+    this.sendDataToClients(conversation, 'message', message);
   }
 
   topicUpdated(conversation) {
