@@ -27,6 +27,7 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.wsserver', 'wsserver'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.helpers', 'helpers'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.db', 'db'),
+    new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.i18n', 'i18n'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.emoticon', 'emoticon')
   ],
   states: {
@@ -45,9 +46,9 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
 
     deploy: function(dependencies, callback) {
       const webserverWrapper = dependencies('webserver-wrapper');
-      const app = require('./backend/webserver/application')(this, dependencies);
+      const app = require('./backend/webserver/application')(dependencies);
       const lessFile = path.resolve(__dirname, './frontend/app/style.less');
-      const resources = ['../components/zInfiniteScroll/zInfiniteScroll.js', '../components/angular-inview/angular-inview.js']
+      const resources = ['../components/zInfiniteScroll/zInfiniteScroll.js', '../components/angular-inview/angular-inview.js'];
 
       let frontendModules = glob.sync([
         FRONTEND_JS_PATH + '**/!(*spec).js'
