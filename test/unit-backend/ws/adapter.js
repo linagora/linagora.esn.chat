@@ -13,12 +13,11 @@ const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UP
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, lib, room, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
+  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
 
   beforeEach(function() {
     var self = this;
 
-    room = 'MyRoom';
     message = {_id: 123, text: 'My message', channel: 456};
 
     localMessageReceivedTopic = {
@@ -161,8 +160,14 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to CONVERSATION_TOPIC_UPDATED event', function(done) {
+      const result = {
+        toObject: function() {
+          return conversation;
+        }
+      };
+
       lib.conversation.getById = sinon.spy(function(id, callback) {
-        callback(null, conversation);
+        callback(null, result);
       });
       messenger.topicUpdated = sinon.spy();
       adapter.bindEvents(messenger);
@@ -248,7 +253,7 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to MESSAGE_RECEIVED event', function(done) {
-      data = {room, message};
+      data = {message};
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(null, conversation);
       });
@@ -264,7 +269,7 @@ describe('The chat websocket adapter', function() {
       subscribeCallback(data);
 
       process.nextTick(function() {
-        expect(messenger.sendMessage).to.have.been.calledWith(conversation, data.room, data.message);
+        expect(messenger.sendMessage).to.have.been.calledWith(conversation, data.message);
         done();
       });
     });
@@ -272,7 +277,7 @@ describe('The chat websocket adapter', function() {
     it('should subscribe to MESSAGE_RECEIVED event but not call messenger when conversation.getById fails', function(done) {
       const error = new Error('I failed');
 
-      data = {room, message};
+      data = {message};
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(error);
       });
@@ -296,7 +301,7 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to MESSAGE_RECEIVED event but not call messenger when conversation.getById does not return conversation', function(done) {
-      data = {room, message};
+      data = {message};
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback();
       });
@@ -322,14 +327,13 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should publish a message in local pubsub on messenger "message" event', function() {
-      data = {room, message};
+      data = {message};
 
       adapter.bindEvents(messenger);
 
       expect(messenger.on).to.have.been.calledWith('message', sinon.match.func.and(sinon.match(function(handler) {
         handler(data);
         expect(localMessageReceivedTopic.publish).to.have.been.calledWith({
-          room: room,
           message: data
         });
 

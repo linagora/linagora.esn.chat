@@ -1,9 +1,8 @@
 'use strict';
 
 const CONSTANTS = require('../../constants');
-const Q = require('q');
 
-module.exports = function(dependencies, lib) {
+module.exports = function(dependencies) {
   const logger = dependencies('logger');
   const pubsub = dependencies('pubsub').local;
   const newMessageTopic = pubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
@@ -19,7 +18,9 @@ module.exports = function(dependencies, lib) {
       logger.debug('System join conversation handler received an event', event);
 
       if (event.collaboration.objectType !== CONSTANTS.OBJECT_TYPES.CONVERSATION) {
-        return Q.when();
+        logger.debug(`Collaboration ${event.collaboration.id} is not a conversation, skipping`);
+
+        return;
       }
 
       return userHasJoined(event.target, event.collaboration.id);
@@ -27,25 +28,20 @@ module.exports = function(dependencies, lib) {
   }
 
   function userHasJoined(userId, conversationId, timestamp = Date.now()) {
-    return Q.denodeify(lib.conversation.getById)(conversationId).then(conversation => {
-      const event = {
-        room: conversation.domain,
-        message: {
-          text: `@${userId} has joined the conversation.`,
-          type: 'text',
-          subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_JOIN,
-          creator: userId,
-          channel: conversationId,
-          user_mentions: [userId],
-          timestamps: {
-            creation: timestamp
-          }
+    const event = {
+      message: {
+        text: `@${userId} has joined the conversation.`,
+        type: 'text',
+        subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_JOIN,
+        creator: userId,
+        channel: conversationId,
+        user_mentions: [userId],
+        timestamps: {
+          creation: timestamp
         }
-      };
+      }
+    };
 
-      newMessageTopic.publish(event);
-
-      return event;
-    });
+    newMessageTopic.publish(event);
   }
 };

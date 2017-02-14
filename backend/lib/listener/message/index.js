@@ -27,7 +27,7 @@ module.exports = function(dependencies, lib) {
     handler && messageHandlers.push(handler);
   }
 
-  function forwardMessage(room, message) {
+  function forwardMessage(message) {
     const handler = getForwardHandler(message.type);
 
     if (!handler) {
@@ -39,7 +39,7 @@ module.exports = function(dependencies, lib) {
         return logger.error('Can not forward message', err);
       }
 
-      publish({room, message});
+      publish({message});
     });
   }
 
@@ -61,8 +61,8 @@ module.exports = function(dependencies, lib) {
     return !!forwardHandlers[message.type];
   }
 
-  function publish(data) {
-    globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish(data);
+  function publish(event) {
+    globalPubsub.topic(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED).publish(event);
   }
 
   function start() {
@@ -74,13 +74,13 @@ module.exports = function(dependencies, lib) {
 
     function onMessageReceived(data) {
       if (isForwardable(data.message)) {
-        return forwardMessage(data.room, data.message);
+        return forwardMessage(data.message);
       }
 
       return saveAsChatMessage(data).then(message => {
         logger.debug('Chat Message saved', message);
-        publish({room: data.room, message: message});
-        handleMessage({message: message, room: data.room});
+        publish({message});
+        handleMessage({message});
 
         return Q(message);
       }).catch(err => {

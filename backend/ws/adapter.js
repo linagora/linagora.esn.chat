@@ -27,7 +27,7 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(MEMBER_ADDED_IN_CONVERSATION).subscribe(messenger.newMemberAdded);
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
 
-    messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({room: message.room, message}));
+    messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({message}));
 
     function getConversation(id) {
       return Q.denodeify(lib.conversation.getById)(id).then(conversation => {
@@ -43,7 +43,7 @@ module.exports = (dependencies, lib) => {
     function sendMessage(event) {
       getConversation(event.message.channel)
         .then(conversation => {
-          messenger.sendMessage(conversation, event.room, event.message);
+          messenger.sendMessage(conversation, event.message);
         })
         .catch(err => {
           logger.error('Error while getting conversation to send message', err);
@@ -55,10 +55,12 @@ module.exports = (dependencies, lib) => {
     */
     function topicUpdated(event) {
       getConversation(event.conversationId)
-        .then(messenger.topicUpdated)
+        .then(conversation => {
+          messenger.topicUpdated(conversation.toObject());
+        })
         .catch(err => {
           logger.error('Error while getting conversation for topic update', err);
-      });
+        });
     }
   }
 };

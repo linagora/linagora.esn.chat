@@ -7,8 +7,8 @@ var expect = chai.expect;
 describe('The chatMessageReceiverService factory', function() {
   var user, domain, session, message;
   var $rootScope, $log;
-  var chatMessageReceiverService;
-  var CHAT_MESSAGE_TYPE, CHAT_MESSAGE_PREFIX;
+  var chatMessageReceiverService, chatMessengerService;
+  var CHAT_MESSAGE_TYPE, CHAT_MESSAGE_PREFIX, CHAT_WEBSOCKET_EVENTS;
 
   beforeEach(function() {
     user = {_id: 'userId'};
@@ -18,6 +18,9 @@ describe('The chatMessageReceiverService factory', function() {
       domain: domain
     };
     message = {};
+    chatMessengerService = {
+      addEventListener: sinon.spy()
+    };
   });
 
   beforeEach(function() {
@@ -27,17 +30,27 @@ describe('The chatMessageReceiverService factory', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatMessengerService', chatMessengerService);
       $provide.value('session', session);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$log_, _$rootScope_, _chatMessageReceiverService_, _CHAT_MESSAGE_TYPE_, _CHAT_MESSAGE_PREFIX_) {
+  beforeEach(angular.mock.inject(function(_$log_, _$rootScope_, _chatMessageReceiverService_, _CHAT_MESSAGE_TYPE_, _CHAT_MESSAGE_PREFIX_, _CHAT_WEBSOCKET_EVENTS_) {
     $log = _$log_;
     $rootScope = _$rootScope_;
     chatMessageReceiverService = _chatMessageReceiverService_;
     CHAT_MESSAGE_TYPE = _CHAT_MESSAGE_TYPE_;
     CHAT_MESSAGE_PREFIX = _CHAT_MESSAGE_PREFIX_;
+    CHAT_WEBSOCKET_EVENTS = _CHAT_WEBSOCKET_EVENTS_;
   }));
+
+  describe('The addEventListener function', function() {
+    it('should listener to the chatMessengerService service', function() {
+      chatMessageReceiverService.addEventListener();
+
+      expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_WEBSOCKET_EVENTS.MESSAGE, chatMessageReceiverService.onMessage);
+    });
+  });
 
   describe('The onMessage function', function() {
     var logSpy;

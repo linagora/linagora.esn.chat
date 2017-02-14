@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationListenerService service', function() {
 
-  var $rootScope, conversation, chatNamespace, livenotificationMock, chatParseMention, chatConversationActionsService, chatConversationsStoreService, members, chatConversationListenerService;
+  var $rootScope, conversation, chatMessengerService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, members, chatConversationListenerService;
   var CHAT_EVENTS;
 
   beforeEach(function() {
@@ -15,21 +15,10 @@ describe('The chatConversationListenerService service', function() {
     chatConversationsStoreService = {};
     chatParseMention = {};
     members = [{_id: 'userId1'}, {_id: 'userId2'}];
-    chatNamespace = {
-      on: sinon.spy()
+
+    chatMessengerService = {
+      addEventListener: sinon.spy()
     };
-
-    function livenotificationFactory(CHAT_NAMESPACE) {
-      livenotificationMock = function(name) {
-        if (name === CHAT_NAMESPACE) {
-          return chatNamespace;
-        }
-
-        throw new Error(name + 'namespace has not been mocked', CHAT_NAMESPACE);
-      };
-
-      return livenotificationMock;
-    }
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {
@@ -40,7 +29,7 @@ describe('The chatConversationListenerService service', function() {
       $provide.value('chatConversationActionsService', chatConversationActionsService);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatParseMention', chatParseMention);
-      $provide.factory('livenotification', livenotificationFactory);
+      $provide.value('chatMessengerService', chatMessengerService);
     });
   });
 
@@ -50,14 +39,20 @@ describe('The chatConversationListenerService service', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
   }));
 
-  describe('The livenotification events', function() {
+  describe('The addEventListeners function', function() {
+    it('should register event handlers', function() {
+      chatConversationListenerService.addEventListeners();
+
+      expect(chatMessengerService.addEventListener.getCalls().length).to.equal(5);
+    });
+
     describe('on CHAT_EVENTS.NEW_CONVERSATION', function() {
       it('should add the conversation to the store', function() {
         chatConversationsStoreService.addConversation = sinon.spy();
 
-        chatConversationListenerService.start();
+        chatConversationListenerService.addEventListeners();
 
-        expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.NEW_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.NEW_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
           callback(conversation);
 
           expect(chatConversationsStoreService.addConversation).to.have.been.calledWith(conversation);
@@ -71,9 +66,9 @@ describe('The chatConversationListenerService service', function() {
       it('should delete the conversation from the store', function() {
         chatConversationsStoreService.deleteConversation = sinon.spy();
 
-        chatConversationListenerService.start();
+        chatConversationListenerService.addEventListeners();
 
-        expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.CONVERSATION_DELETION, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.CONVERSATION_DELETION, sinon.match.func.and(sinon.match(function(callback) {
           callback(conversation);
 
           expect(chatConversationsStoreService.deleteConversation).to.have.been.calledWith(conversation);
@@ -88,9 +83,9 @@ describe('The chatConversationListenerService service', function() {
         conversation.members = members;
         chatConversationsStoreService.addMembers = sinon.spy();
 
-        chatConversationListenerService.start();
+        chatConversationListenerService.addEventListeners();
 
-        expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, sinon.match.func.and(sinon.match(function(callback) {
           callback(conversation);
 
           expect(chatConversationsStoreService.addMembers).to.have.been.calledWith(conversation, conversation.members);
@@ -104,9 +99,9 @@ describe('The chatConversationListenerService service', function() {
       it('should update the conversation in the store', function() {
         chatConversationsStoreService.updateConversation = sinon.spy();
 
-        chatConversationListenerService.start();
+        chatConversationListenerService.addEventListeners();
 
-        expect(chatNamespace.on).to.have.been.calledWith(CHAT_EVENTS.CONVERSATIONS.UPDATE, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.CONVERSATIONS.UPDATE, sinon.match.func.and(sinon.match(function(callback) {
           callback(conversation);
 
           expect(chatConversationsStoreService.updateConversation).to.have.been.calledWith(conversation);

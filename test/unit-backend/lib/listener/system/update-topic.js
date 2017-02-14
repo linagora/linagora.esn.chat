@@ -6,7 +6,7 @@ const CONSTANTS = require('../../../../../backend/lib/constants');
 
 describe('The update topic system message handler', function() {
 
-  let clock, deps, dependencies, newMessageTopic, topicUpdateTopic, domainId, userId, conversationId, timestamp;
+  let clock, deps, dependencies, newMessageTopic, topicUpdateTopic, userId, conversationId, timestamp;
 
   beforeEach(function() {
     dependencies = function(name) {
@@ -14,8 +14,6 @@ describe('The update topic system message handler', function() {
     };
 
     clock = sinon.useFakeTimers();
-
-    domainId = '123';
     userId = '456';
     conversationId = '789';
     timestamp = Date.now();
@@ -60,10 +58,11 @@ describe('The update topic system message handler', function() {
       const module = require('../../../../../backend/lib/listener/system/update-topic')(dependencies);
 
       module.start();
+
       expect(topicUpdateTopic.subscribe).to.have.been.calledOnce;
     });
 
-    it('should publish event on MESSAGE_RECEIVED topic with update message when topic has been updated', function(done) {
+    it('should publish event on MESSAGE_RECEIVED topic with update message when topic has been updated', function() {
       let handler;
 
       topicUpdateTopic.subscribe = function(callback) {
@@ -72,16 +71,6 @@ describe('The update topic system message handler', function() {
 
       const topicValue = 'My old topic';
       const newTopicValue = 'My new topic';
-      const conv = {
-        domain: domainId
-      };
-      const conversation = {
-        getById: sinon.spy(function(id, callback) {
-          conv._id = id;
-
-          callback(null, conv);
-        })
-      };
       const event = {
         userId: userId,
         conversationId: conversationId,
@@ -89,27 +78,25 @@ describe('The update topic system message handler', function() {
         old_topic: topicValue,
         timestamp: timestamp
       };
-      const module = require('../../../../../backend/lib/listener/system/update-topic')(dependencies, {conversation});
+      const module = require('../../../../../backend/lib/listener/system/update-topic')(dependencies);
 
       module.start();
-      handler(event).then(() => {
-        expect(newMessageTopic.publish).to.have.been.calledWith({
-          room: domainId,
-          message: {
-            text: `@${userId} updated the conversation topic from ${topicValue} to ${newTopicValue}.`,
-            type: 'text',
-            subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
-            creator: userId,
-            channel: conversationId,
-            user_mentions: [userId],
-            timestamps: {creation: timestamp}
-          }
-        });
-        done();
-      }, done);
+      handler(event);
+
+      expect(newMessageTopic.publish).to.have.been.calledWith({
+        message: {
+          text: `@${userId} updated the conversation topic from ${topicValue} to ${newTopicValue}.`,
+          type: 'text',
+          subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
+          creator: userId,
+          channel: conversationId,
+          user_mentions: [userId],
+          timestamps: {creation: timestamp}
+        }
+      });
     });
 
-    it('should publish event on MESSAGE_RECEIVED topic with set message when topic has been updated', function(done) {
+    it('should publish event on MESSAGE_RECEIVED topic with set message when topic has been updated', function() {
       let handler;
 
       topicUpdateTopic.subscribe = function(callback) {
@@ -117,41 +104,28 @@ describe('The update topic system message handler', function() {
       };
 
       const newTopicValue = 'My new topic';
-      const conv = {
-        domain: domainId
-      };
-      const conversation = {
-        getById: sinon.spy(function(id, callback) {
-          conv._id = id;
-
-          callback(null, conv);
-        })
-      };
       const event = {
         userId: userId,
         conversationId: conversationId,
         topic: newTopicValue,
         timestamp: timestamp
       };
-      const module = require('../../../../../backend/lib/listener/system/update-topic')(dependencies, {conversation});
+      const module = require('../../../../../backend/lib/listener/system/update-topic')(dependencies);
 
       module.start();
-      handler(event).then(() => {
-        expect(newMessageTopic.publish).to.have.been.calledWith({
-          room: domainId,
-          message: {
-            text: `@${userId} had set the conversation topic to ${newTopicValue}.`,
-            type: 'text',
-            subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
-            creator: userId,
-            channel: conversationId,
-            user_mentions: [userId],
-            timestamps: {creation: timestamp}
-          }
-        });
-        done();
-      }, done);
-    });
+      handler(event);
 
+      expect(newMessageTopic.publish).to.have.been.calledWith({
+        message: {
+          text: `@${userId} had set the conversation topic to ${newTopicValue}.`,
+          type: 'text',
+          subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
+          creator: userId,
+          channel: conversationId,
+          user_mentions: [userId],
+          timestamps: {creation: timestamp}
+        }
+      });
+    });
   });
 });

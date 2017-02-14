@@ -35,7 +35,7 @@ module.exports = function(config) {
     ],
     exclude: [
       'frontend/app/chat.app.run.js',
-      'frontend/app/websocket/websocket.run.js',
+      'frontend/app/services/messaging/messaging.run.js',
       'frontend/app/conversation/attachments/conversation-attachments.run.js'
     ],
     frameworks: ['mocha'],

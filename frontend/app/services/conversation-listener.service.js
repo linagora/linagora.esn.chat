@@ -4,13 +4,22 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationListenerService', chatConversationListenerService);
 
-  function chatConversationListenerService($rootScope, livenotification, chatConversationActionsService, chatConversationsStoreService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS) {
+  function chatConversationListenerService($rootScope, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS) {
     return {
+      addEventListeners: addEventListeners,
       start: start
     };
 
     function addConversation(conversation) {
       chatConversationsStoreService.addConversation(conversation);
+    }
+
+    function addEventListeners() {
+      chatMessengerService.addEventListener(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
+      chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversation);
+      chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, addNewMembers);
+      chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
+      chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
     }
 
     function addNewMembers(conversation) {
@@ -38,14 +47,6 @@
     }
 
     function start() {
-      var sio = livenotification(CHAT_NAMESPACE);
-
-      sio.on(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
-      sio.on(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversation);
-      sio.on(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, addNewMembers);
-      sio.on(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
-      sio.on(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
-
       $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
         addConversation(data);
       });

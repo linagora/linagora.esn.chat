@@ -1,13 +1,12 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var _ = require('lodash');
-var CONSTANTS = require('../../../../../../backend/lib/constants');
+const sinon = require('sinon');
+const expect = require('chai').expect;
+const _ = require('lodash');
+const CONSTANTS = require('../../../../../../backend/lib/constants');
 
 describe('The chat mentions handler', function() {
-
-  var deps, globalPublish, ChatMessageMock, dependencies;
+  let deps, globalPublish, ChatMessageMock, dependencies;
 
   beforeEach(function() {
     dependencies = function(name) {
@@ -43,11 +42,11 @@ describe('The chat mentions handler', function() {
   });
 
   it('should broadcast users_mention', function() {
-    var message = {user_mentions: ['user']};
-    var room = 1;
+    const message = {user_mentions: ['user']};
 
-    require('../../../../../../backend/lib/listener/message/handlers/mentions')(dependencies)({room: room, message: message});
-    expect(globalPublish).to.have.been.calledWith({room: room, message: message, for: 'user'});
+    require('../../../../../../backend/lib/listener/message/handlers/mentions')(dependencies)({message});
+
+    expect(globalPublish).to.have.been.calledWith({message: message, for: 'user'});
     expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.USERS_MENTION);
   });
 });
