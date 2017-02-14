@@ -57,6 +57,25 @@ before(function() {
     };
   };
 
+  const i18nMock = require('i18n');
+
+  i18nMock.setDefaultConfiguration = function(options) {
+    const i18nConfigTemplate = {
+      defaultLocale: 'en',
+      locales: ['en', 'fr', 'vi'],
+      updateFiles: false,
+      indent: '  ',
+      extension: '.json',
+      cookie: 'locale'
+    };
+
+    const i18nConfig = Object.assign({}, i18nConfigTemplate, options);
+
+    i18nMock.configure(i18nConfig);
+  };
+
+  this.helpers.i18n = i18nMock;
+
   this.helpers.resetRedis = function(callback) {
     var redisClient = redis.createClient(testEnv.redisPort);
 
