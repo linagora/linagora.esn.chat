@@ -125,7 +125,8 @@ describe('The chat API', function() {
         denormalize: function(member) {
           return Q.when(member);
         }
-      }
+      },
+      i18n: this.helpers.i18n
     };
 
     app = this.helpers.loadApplication(dependencies);
