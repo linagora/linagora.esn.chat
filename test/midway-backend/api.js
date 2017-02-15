@@ -1,6 +1,7 @@
 'use strict';
 
 const request = require('supertest');
+const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const _ = require('lodash');
@@ -14,7 +15,8 @@ const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 
 describe('The chat API', function() {
 
-  var deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient, collaborations, collaboration, writable, readable, getNewMember, userAsMember;
+  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient, collaborations, collaboration, writable, readable, getNewMember, userAsMember;
+  let userDomains, anotherUserDomains;
 
   function dependencies(name) {
     return deps[name];
@@ -66,7 +68,10 @@ describe('The chat API', function() {
           },
           countMembers: function(objectType, id, callback) {
             callback(null, 0);
-          }
+          },
+          join: sinon.spy(function(objectType, collaboration, userAuthor, userTarget, actor, callback) {
+            callback();
+          })
         },
         permission: {
           canRead: function(collaboration, tuple, callback) {
@@ -116,7 +121,8 @@ describe('The chat API', function() {
       authorizationMW: {
         requiresAPILogin: function(req, res, next) {
           req.user = {
-            _id: userId
+            _id: userId,
+            domains: userDomains
           };
           next();
         }
@@ -132,18 +138,23 @@ describe('The chat API', function() {
     app = this.helpers.loadApplication(dependencies);
     var UserSchema = mongoose.model('User');
 
+    userDomains = [{domain_id: new mongoose.Types.ObjectId()}];
+    anotherUserDomains = [{domain_id: new mongoose.Types.ObjectId()}];
+
     user = new UserSchema({
       _id: userId,
       firstname: 'Eric',
       username: 'eric.cartman',
-      lastname: 'Cartman'
+      lastname: 'Cartman',
+      domains: [userDomains]
     });
 
     anotherUser = new UserSchema({
       _id: anotherUserId,
       firstname: 'Chuck',
       username: 'Chuck Norris',
-      lastname: 'Norris'
+      lastname: 'Norris',
+      domains: [anotherUserDomains]
     });
 
     Q.all([user.save(), anotherUser.save()]).then(() => {
@@ -167,11 +178,113 @@ describe('The chat API', function() {
           }
 
           expect(res.body.length).to.equal(1);
+          expect(res.body).to.shallowDeepEqual([{name: CONSTANTS.DEFAULT_CHANNEL.name}]);
           done();
         });
     });
 
-    it('should return an array of non moderate channels', function(done) {
+    it('should not create the default channel if already exists', function(done) {
+      const options = {
+        domainId: userDomains[0].domain_id
+      };
+
+      Q.denodeify(app.lib.conversation.createDefaultChannel)(options).then(test, done);
+
+      function test(defaultChannel) {
+        if (!defaultChannel) {
+          return done(new Error('Default channel should have been created'));
+        }
+
+        request(app.express)
+          .get('/api/channels')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.length).to.equal(1);
+            expect(res.body).to.shallowDeepEqual([{_id: String(defaultChannel._id), name: CONSTANTS.DEFAULT_CHANNEL.name}]);
+            done();
+          });
+        }
+    });
+
+    it('should join the default channel if not already member', function(done) {
+      const options = {
+        domainId: userDomains[0].domain_id
+      };
+
+      deps.collaboration.member.isMember = sinon.spy(function(collaration, tuple, callback) {
+        callback(null, false);
+      });
+
+      Q.denodeify(app.lib.conversation.createDefaultChannel)(options).then(test, done);
+
+      function test(defaultChannel) {
+        if (!defaultChannel) {
+          return done(new Error('Default channel should have been created'));
+        }
+
+        request(app.express)
+          .get('/api/channels')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.length).to.equal(1);
+            expect(res.body).to.shallowDeepEqual([{name: CONSTANTS.DEFAULT_CHANNEL.name}]);
+            expect(deps.collaboration.member.isMember).to.have.been.called;
+            expect(deps.collaboration.member.join).to.have.been.called;
+            expect(deps.collaboration.member.join.firstCall.args[0]).to.equal(CONSTANTS.OBJECT_TYPES.CONVERSATION);
+            expect(String(deps.collaboration.member.join.firstCall.args[1]._id)).to.equal(String(defaultChannel._id));
+            expect(String(deps.collaboration.member.join.firstCall.args[2]._id)).to.equal(String(user._id));
+            expect(String(deps.collaboration.member.join.firstCall.args[3]._id)).to.equal(String(user._id));
+            expect(String(deps.collaboration.member.join.firstCall.args[4]._id)).to.equal(String(user._id));
+            done();
+          });
+        }
+    });
+
+    it('should not join the default channel if already member', function(done) {
+      const options = {
+        domainId: userDomains[0].domain_id
+      };
+
+      deps.collaboration.member.isMember = sinon.spy(function(collaration, tuple, callback) {
+        callback(null, true);
+      });
+
+      Q.denodeify(app.lib.conversation.createDefaultChannel)(options).then(test, done);
+
+      function test(defaultChannel) {
+        if (!defaultChannel) {
+          return done(new Error('Default channel should have been created'));
+        }
+
+        request(app.express)
+          .get('/api/channels')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.length).to.equal(1);
+            expect(res.body).to.shallowDeepEqual([{name: CONSTANTS.DEFAULT_CHANNEL.name}]);
+            expect(deps.collaboration.member.isMember).to.have.been.called;
+            expect(deps.collaboration.member.join).to.not.have.been.called;
+            done();
+          });
+        }
+    });
+
+    it('should return an array of non moderated channels', function(done) {
       function execTest(err, channel) {
         if (err) {
           return done(err);
@@ -186,8 +299,8 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            expect(res.body.length).to.equal(1);
-            expect(res.body).to.shallowDeepEqual([{_id: String(channel._id)}]);
+            expect(res.body.length).to.equal(2);
+            expect(res.body).to.shallowDeepEqual([{_id: String(channel._id)}, {name: CONSTANTS.DEFAULT_CHANNEL.name}]);
             done();
           });
       }
@@ -217,8 +330,8 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            expect(res.body.length).to.equal(2);
-            expect(res.body).to.shallowDeepEqual([{_id: String(channel1._id)}, {_id: String(channel3._id)}]);
+            expect(res.body.length).to.equal(3);
+            expect(res.body).to.shallowDeepEqual([{_id: String(channel1._id)}, {_id: String(channel3._id)}, {name: CONSTANTS.DEFAULT_CHANNEL.name}]);
             done();
           });
       }
@@ -596,14 +709,15 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            var expected = JSON.parse(JSON.stringify(mongoResult));
+            const expected = JSON.parse(JSON.stringify(mongoResult));
 
             expected.creator = {
               username: user.username,
-              _id: user._id + '',
+              _id: String(user._id),
               __v: 0
             };
-            expect(res.body).to.deep.equal([expected]);
+
+            expect(res.body).to.shallowDeepEqual([expected]);
             done();
           });
       }).catch(done);

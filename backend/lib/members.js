@@ -11,7 +11,8 @@ module.exports = function(dependencies) {
   return {
     countMembers,
     getMembers,
-    isMember
+    isMember,
+    join
   };
 
   function countMembers(conversation) {
@@ -24,5 +25,9 @@ module.exports = function(dependencies) {
 
   function isMember(conversation, user) {
     return Q.denodeify(collaborationModule.member.isMember)(conversation, {objectType: OBJECT_TYPES.USER, id: String(user._id)});
+  }
+
+  function join(conversation, user) {
+    return Q.denodeify(collaborationModule.member.join)(OBJECT_TYPES.CONVERSATION, conversation, user, user, user);
   }
 };

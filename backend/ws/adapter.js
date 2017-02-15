@@ -20,11 +20,11 @@ module.exports = (dependencies, lib) => {
   };
 
   function bindEvents(messenger) {
-    globalPubsub.topic(CONVERSATION_CREATED).subscribe(messenger.conversationCreated);
-    globalPubsub.topic(CONVERSATION_DELETED).subscribe(messenger.conversationDeleted);
-    globalPubsub.topic(CONVERSATION_UPDATED).subscribe(data => messenger.conversationUpdated(data.conversation));
+    globalPubsub.topic(CONVERSATION_CREATED).subscribe(messenger.conversationCreated.bind(messenger));
+    globalPubsub.topic(CONVERSATION_DELETED).subscribe(messenger.conversationDeleted.bind(messenger));
+    globalPubsub.topic(CONVERSATION_UPDATED).subscribe(data => messenger.conversationUpdated.bind(messenger)(data.conversation));
     globalPubsub.topic(CONVERSATION_TOPIC_UPDATED).subscribe(topicUpdated);
-    globalPubsub.topic(MEMBER_ADDED_IN_CONVERSATION).subscribe(messenger.newMemberAdded);
+    globalPubsub.topic(MEMBER_ADDED_IN_CONVERSATION).subscribe(messenger.newMemberAdded.bind(messenger));
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
 
     messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({message}));

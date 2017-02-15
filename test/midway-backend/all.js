@@ -41,7 +41,10 @@ before(function() {
 
     mongoose.model('User', new mongoose.Schema({
       _id: {type: ObjectId, required: true},
-      username: {type: String, required: true}
+      username: {type: String, required: true},
+      domains: [{
+        domain_id: {type: String}
+      }]
     }));
 
     var api = require('../../backend/webserver/api')(dependencies, lib);

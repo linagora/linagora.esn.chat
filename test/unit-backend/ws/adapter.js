@@ -110,12 +110,17 @@ describe('The chat websocket adapter', function() {
       conversation = {_id: 1, name: 'My conversation'};
       data = {conversation};
       messenger = {
-        on: sinon.spy()
+        on: sinon.spy(),
+        conversationCreated: sinon.spy(),
+        conversationDeleted: sinon.spy(),
+        conversationUpdated: sinon.spy(),
+        newMemberAdded: sinon.spy(),
+        sendMessage: sinon.spy(),
+        topicUpdated: sinon.spy()
       };
     });
 
     it('should subscribe to CONVERSATION_CREATED event', function() {
-      messenger.conversationCreated = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationCreatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -130,7 +135,6 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to CONVERSATION_DELETED event', function() {
-      messenger.conversationDeleted = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationDeletedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -145,7 +149,6 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to CONVERSATION_UPDATED event', function() {
-      messenger.conversationUpdated = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationUpdatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -169,7 +172,6 @@ describe('The chat websocket adapter', function() {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(null, result);
       });
-      messenger.topicUpdated = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationTopicUpdatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -193,7 +195,6 @@ describe('The chat websocket adapter', function() {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(error);
       });
-      messenger.topicUpdated = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationTopicUpdatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -216,7 +217,6 @@ describe('The chat websocket adapter', function() {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback();
       });
-      messenger.topicUpdated = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationTopicUpdatedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -238,7 +238,6 @@ describe('The chat websocket adapter', function() {
     });
 
     it('should subscribe to MEMBER_ADDED_IN_CONVERSATION event', function() {
-      messenger.newMemberAdded = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -257,7 +256,6 @@ describe('The chat websocket adapter', function() {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(null, conversation);
       });
-      messenger.sendMessage = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -281,7 +279,6 @@ describe('The chat websocket adapter', function() {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback(error);
       });
-      messenger.sendMessage = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
@@ -305,7 +302,6 @@ describe('The chat websocket adapter', function() {
       lib.conversation.getById = sinon.spy(function(id, callback) {
         callback();
       });
-      messenger.sendMessage = sinon.spy();
       adapter.bindEvents(messenger);
 
       expect(globalMessageReceivedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {

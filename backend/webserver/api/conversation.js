@@ -7,7 +7,12 @@ module.exports = function(dependencies, lib, router) {
   const middleware = require('../middlewares/conversation')(dependencies, lib);
   const messageController = require('../controllers/message')(dependencies, lib);
 
-  router.get('/conversations', authorizationMW.requiresAPILogin, controller.list);
+  router.get('/conversations',
+    authorizationMW.requiresAPILogin,
+    middleware.assertDefaultChannels,
+    middleware.assertUserIsMemberOfDefaultChannels,
+    controller.list);
+
   router.post('/conversations', authorizationMW.requiresAPILogin, middleware.canCreate, controller.create);
 
   router.get('/conversations/:id', authorizationMW.requiresAPILogin, middleware.load, middleware.canRead, controller.get);
@@ -25,6 +30,15 @@ module.exports = function(dependencies, lib, router) {
     middleware.canRead,
     messageController.getAttachmentsForConversation);
 
-  router.get('/user/conversations/private', authorizationMW.requiresAPILogin, controller.getUserPrivateConversations);
-  router.get('/user/conversations', authorizationMW.requiresAPILogin, controller.getUserConversations);
+  router.get('/user/conversations/private',
+    authorizationMW.requiresAPILogin,
+    middleware.assertDefaultChannels,
+    middleware.assertUserIsMemberOfDefaultChannels,
+    controller.getUserPrivateConversations);
+
+  router.get('/user/conversations',
+    authorizationMW.requiresAPILogin,
+    middleware.assertDefaultChannels,
+    middleware.assertUserIsMemberOfDefaultChannels,
+    controller.getUserConversations);
 };

@@ -36,8 +36,6 @@ module.exports = function(dependencies) {
     moderate.start();
     search.init();
     conversation.registerUserConversationFinder(Q.denodeify(conversation.listForUser));
-    conversation.init(() => {
-      callback();
-    });
+    callback();
   }
 };

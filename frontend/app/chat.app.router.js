@@ -12,6 +12,16 @@
           fn: function() {
             return { state: 'chat.channels-views' };
           }
+        },
+        resolve: {
+          ready: function($log, chatConversationActionsService) {
+            // wait for all required data to be initialized resolving other sub states
+            return chatConversationActionsService.ready.then(function() {
+              $log.debug('Chat is ready');
+
+              return;
+            });
+          }
         }
       })
       .state('chat.channels-views', {
