@@ -134,11 +134,15 @@
 
       .title {
         .flex;
-        .flex-shorthand(1);
+        .flex-grow;
+
+        white-space: nowrap;
+        overflow: hidden;
 
         .text {
-          .flex-shorthand(1);
+          .ellipsis;
 
+          overflow: hidden;
           margin-left: 5px;
           font-weight: bold;
           font-size: @esnAsideFontSize;
