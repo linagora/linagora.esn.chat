@@ -86,6 +86,7 @@ describe('The chat websocket transport', function() {
 
     beforeEach(function() {
       socket = {
+        emit: sinon.spy(),
         on: sinon.spy(),
         join: sinon.spy(),
         leave: sinon.spy()
@@ -121,6 +122,12 @@ describe('The chat websocket transport', function() {
         onSubscribeHandler(room);
 
         expect(socket.join).to.have.been.calledWith(room);
+      });
+
+      it('should emit hello on socket when receiving "subscribe" message', function() {
+        onSubscribeHandler(room);
+
+        expect(socket.emit).to.have.been.calledWith('hello');
       });
 
       it('should leave the room on socket "unsubscribe" message', function() {
