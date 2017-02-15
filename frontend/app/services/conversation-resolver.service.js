@@ -12,6 +12,14 @@
         return chatConversationActionsService.ready.then(resolve.bind(null, conversationId));
       };
 
+      function getDefaultChannel() {
+        return chatConversationsStoreService.channels[0]._id;
+      }
+
+      function isValidConversation(id) {
+        return !!chatConversationsStoreService.findConversation(id);
+      }
+
       function resolve(conversationId) {
         var deferred = $q.defer();
 
@@ -20,9 +28,9 @@
           deferred.resolve(id);
         }
 
-        if (!conversationId) {
+        if (!isValidConversation(conversationId)) {
           chatLastConversationService.get().then(function(id) {
-            if (!id) {
+            if (!isValidConversation(id)) {
               id = getDefaultChannel();
             }
 
@@ -35,10 +43,6 @@
         }
 
         return deferred.promise;
-      }
-
-      function getDefaultChannel() {
-        return chatConversationsStoreService.channels[0]._id;
       }
     }
 })();

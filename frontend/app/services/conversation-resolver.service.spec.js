@@ -16,7 +16,8 @@ describe('The chatConversationResolverService service', function() {
     chatConversationActionsService = {};
     conversationId = 'conversationTest';
     chatConversationsStoreService = {
-      channels: [{_id: conversationId}]
+      channels: [{_id: conversationId}],
+      findConversation: sinon.spy()
     };
     chatLastConversationService = {};
     successSpy = sinon.spy();
@@ -50,30 +51,39 @@ describe('The chatConversationResolverService service', function() {
   });
 
   describe('When input conversation is defined', function() {
-    it('should resolve with the input conversation when defined', function() {
+    it('should resolve with the input conversation when defined and found in store', function() {
       chatLastConversationService.get = sinon.spy();
+      chatConversationsStoreService.findConversation = sinon.spy(function() {
+        return conversationId;
+      });
 
       chatConversationResolverService(conversationId).then(successSpy, errorSpy);
       $rootScope.$digest();
 
       expect(chatLastConversationService.get).to.not.have.been.called;
+      expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(conversationId);
       expect(successSpy).to.have.been.calledWith(conversationId);
       expect(errorSpy).to.not.have.been.called;
     });
   });
 
-  describe('When input conversation is undefined', function() {
-    it('should resolve with the chatLastConversationService.get result when defined', function() {
+  describe('When input conversation is not found in store', function() {
+    it('should resolve with the chatLastConversationService.get result when defined and found in store', function() {
       var lastConversation = 'lastConversationId';
 
       chatLastConversationService.get = sinon.spy(function() {
         return $q.when(lastConversation);
       });
 
+      chatConversationsStoreService.findConversation = sinon.stub();
+      chatConversationsStoreService.findConversation.onCall(0).returns(false);
+      chatConversationsStoreService.findConversation.onCall(1).returns(true);
+
       chatConversationResolverService().then(successSpy, errorSpy);
       $rootScope.$digest();
 
       expect(chatLastConversationService.get).to.have.been.calledOnce;
+      expect(chatConversationsStoreService.findConversation).to.have.been.calledTwice;
       expect(successSpy).to.have.been.calledWith(lastConversation);
       expect(errorSpy).to.not.have.been.called;
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: lastConversation});
@@ -84,10 +94,15 @@ describe('The chatConversationResolverService service', function() {
         return $q.when();
       });
 
+      chatConversationsStoreService.findConversation = sinon.stub();
+      chatConversationsStoreService.findConversation.onCall(0).returns(false);
+      chatConversationsStoreService.findConversation.onCall(1).returns(false);
+
       chatConversationResolverService().then(successSpy, errorSpy);
       $rootScope.$digest();
 
       expect(chatLastConversationService.get).to.have.been.calledOnce;
+      expect(chatConversationsStoreService.findConversation).to.have.been.calledTwice;
       expect(successSpy).to.have.been.calledWith(conversationId);
       expect(errorSpy).to.not.have.been.called;
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: conversationId});
