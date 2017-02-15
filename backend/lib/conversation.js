@@ -8,6 +8,7 @@ const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UP
 const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
+const DEFAULT_CHANNEL = { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode };
 const SKIP_FIELDS = CONSTANTS.SKIP_FIELDS;
 
 module.exports = function(dependencies) {
@@ -28,11 +29,12 @@ module.exports = function(dependencies) {
 
   return {
     create,
+    createDefaultChannel,
     find,
     getAllForUser,
     getById,
+    getDefaultChannel,
     getOpenChannels,
-    init,
     list,
     listForUser,
     moderate,
@@ -55,18 +57,26 @@ module.exports = function(dependencies) {
 
     conversation.save((err, saved) => {
       if (!err) {
-        channelCreationTopic.publish(JSON.parse(JSON.stringify(saved)));
-        channelSavedTopic.publish(saved);
+        publishNewConversation(saved);
       }
       callback(err, saved);
     });
   }
 
-  function createDefaultChannel(callback) {
+  function createDefaultChannel(options, callback) {
+    const query = Object.assign(DEFAULT_CHANNEL, {domain_ids: [options.domainId]});
+
     Conversation.findOneAndUpdate(
-      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode},
-      { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode },
-      { new: true, upsert: true, setDefaultsOnInsert: true}, callback);
+      query,
+      query,
+      { new: true, upsert: true, setDefaultsOnInsert: true, passRawResult: true },
+      (err, conversation, raw) => {
+        if (!err && !raw.lastErrorObject.updatedExisting) {
+          publishNewConversation(conversation);
+        }
+        callback(err, conversation);
+      }
+    );
   }
 
   function getAllForUser(user, options = {}) {
@@ -85,25 +95,16 @@ module.exports = function(dependencies) {
     Conversation.findById(conversationId).exec(callback);
   }
 
+  function getDefaultChannel(options, callback) {
+    const query = Object.assign(DEFAULT_CHANNEL, {domain_ids: [options.domainId]});
+
+    Conversation.findOne(query).exec(callback);
+  }
+
   function getOpenChannels(options, callback) {
     Conversation.find({type: CONVERSATION_TYPE.OPEN, mode: CONVERSATION_MODE.CHANNEL, moderate: Boolean(options.moderate)})
       .sort('name')
-      .exec((err, channels) => {
-        channels = channels || [];
-        if (channels.length === 0) {
-          return createDefaultChannel((err, channel) => {
-            if (err) {
-              return callback(new Error('Can not create the default channel'));
-            }
-            callback(null, [channel]);
-          });
-        }
-        callback(err, channels);
-      });
-  }
-
-  function init(callback) {
-    createDefaultChannel(callback);
+      .exec(callback);
   }
 
   /**
@@ -222,6 +223,11 @@ module.exports = function(dependencies) {
     }, {
       new: true
     }, callback);
+  }
+
+  function publishNewConversation(conversation) {
+    channelCreationTopic.publish(JSON.parse(JSON.stringify(conversation)));
+    channelSavedTopic.publish(conversation);
   }
 
   function registerUserConversationFinder(finder) {

@@ -14,7 +14,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The Chat search API', function() {
 
-  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember;
+  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember, userDomains;
 
   function dependencies(name) {
     return deps[name];
@@ -33,6 +33,7 @@ describe('The Chat search API', function() {
     userId = mongoose.Types.ObjectId();
     anotherUserId = mongoose.Types.ObjectId();
     userAsMember = asMember(userId);
+    userDomains = [{domain_id: new mongoose.Types.ObjectId()}];
 
     // all the following mockery calls are here to avoid to intialize OP.core but mock what is needed by ES and pubsub modules.
     mockery.registerMock('../esn-config', function() {
@@ -99,6 +100,9 @@ describe('The Chat search API', function() {
           },
           countMembers: function(objectType, id, callback) {
             callback(null, 0);
+          },
+          join: function(objectType, collaboration, userAuthor, userTarget, actor, callback) {
+            callback();
           }
         },
         permission: {
@@ -140,7 +144,8 @@ describe('The Chat search API', function() {
       authorizationMW: {
         requiresAPILogin: function(req, res, next) {
           req.user = {
-            _id: userId
+            _id: userId,
+            domains: [userDomains]
           };
           next();
         }

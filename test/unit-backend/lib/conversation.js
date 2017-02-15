@@ -172,6 +172,74 @@ describe('The linagora.esn.chat conversation lib', function() {
     };
   });
 
+  describe('The createDefaultChannel function', function() {
+    let options, mongoOptions, conversation, query;
+
+    beforeEach(function() {
+      options = {domainId: 1};
+      conversation = {_id: 2};
+      mongoOptions = { new: true, upsert: true, setDefaultsOnInsert: true, passRawResult: true };
+      query = { domain_ids: [options.domainId], name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode };
+      modelsMock.ChatConversation = sinon.spy();
+    });
+
+    it('should not publish conversation when findOneAndUpdate fails', function(done) {
+      const error = new Error('I failed to find');
+
+      modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
+        cb(error);
+      });
+
+      require('../../../backend/lib/conversation')(dependencies, lib).createDefaultChannel(options, function(err) {
+        expect(modelsMock.ChatConversation.findOneAndUpdate).to.have.been.calledWith(query, query, mongoOptions);
+        expect(err.message).to.equals(error.message);
+        done();
+      });
+    });
+
+    it('should publish conversation when it has been created', function(done) {
+      const raw = {
+        lastErrorObject: {
+          updatedExisting: false
+        }
+      };
+
+      modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
+        cb(null, conversation, raw);
+      });
+
+      require('../../../backend/lib/conversation')(dependencies, lib).createDefaultChannel(options, function(err, result) {
+        expect(err).to.not.be.defined;
+        expect(result).to.equals(conversation);
+        expect(modelsMock.ChatConversation.findOneAndUpdate).to.have.been.calledWith(query, query, mongoOptions);
+        expect(channelCreationTopic.publish).to.have.been.calledWith(JSON.parse(JSON.stringify(conversation)));
+        expect(channelSavedTopic.publish).to.have.been.calledWith(conversation);
+        done();
+      });
+    });
+
+    it('should not publish conversation when it has not been created', function(done) {
+      const raw = {
+        lastErrorObject: {
+          updatedExisting: true
+        }
+      };
+
+      modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
+        cb(null, conversation, raw);
+      });
+
+      require('../../../backend/lib/conversation')(dependencies, lib).createDefaultChannel(options, function(err, result) {
+        expect(err).to.not.be.defined;
+        expect(result).to.equals(conversation);
+        expect(modelsMock.ChatConversation.findOneAndUpdate).to.have.been.calledWith(query, query, mongoOptions);
+        expect(channelCreationTopic.publish).to.not.have.been.called;
+        expect(channelSavedTopic.publish).to.not.have.been.called;
+        done();
+      });
+    });
+  });
+
   describe('The getOpenChannels function', function() {
 
     beforeEach(function() {
@@ -205,17 +273,24 @@ describe('The linagora.esn.chat conversation lib', function() {
         done();
       });
     });
+  });
 
-    it('should return the default channel', function(done) {
-      const module = require('../../../backend/lib/conversation')(dependencies, lib);
+  describe('The getDefaultChannel function', function() {
+    it('should call Conversation.findOne', function(done) {
+      const options = {domainId: 1};
 
-      module.getOpenChannels({}, function(err, channels) {
-        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({type: CONVERSATION_TYPE.OPEN, mode: CONVERSATION_MODE.CHANNEL, moderate: false});
-        expect(err).to.be.equal(null);
-        expect(channels).not.to.be.empty;
-        expect(channels).not.to.be.undefined;
-        expect(channels).to.be.an('Array');
-        expect(channels[0]).to.shallowDeepEqual(CONSTANTS.DEFAULT_CHANNEL);
+      modelsMock.ChatConversation.findOne = sinon.spy(function() {
+        return {
+          exec: function(cb) {
+            cb();
+          }
+        };
+      });
+
+      require('../../../backend/lib/conversation')(dependencies, lib).getDefaultChannel(options, function() {
+        expect(modelsMock.ChatConversation.findOne).to.have.been.calledWith(
+          {domain_ids: [options.domainId], name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode}
+        );
         done();
       });
     });
