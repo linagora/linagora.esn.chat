@@ -6,3 +6,11 @@ block left
       i.mdi.mdi-menu
     .title
       span.ellipsis {{ ctrl.name }}
+
+block right
+  .dropdown
+    a(href='', data-toggle='dropdown', aria-expanded='true')
+      i.mdi.mdi-dots-vertical
+
+    ul.dropdown-menu.dropdown-menu-right.clickable
+      li.action-list-container(dynamic-directive="chat-conversation-dropdown-actions")

@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationSubheaderController', ChatConversationSubheaderController);
 
-  function ChatConversationSubheaderController($stateParams, $scope, chatConversationsStoreService, chatConversationNameService) {
+  function ChatConversationSubheaderController($stateParams, chatConversationsStoreService, chatConversationNameService) {
     var self = this;
 
     self.chatConversationsStoreService = chatConversationsStoreService;
