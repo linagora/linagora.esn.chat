@@ -174,14 +174,40 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
-  describe('The getNumberOfUnreadedMessages function', function() {
+  describe('The getNumberOfUnreadMessages function', function() {
     it('should return the sum of unreads from all the stored conversations', function() {
       conversation.unreadMessageCount = 2;
       publicConversation.unreadMessageCount = 3;
 
       chatConversationsStoreService.conversations = [conversation, publicConversation, confidentialConversation];
 
-      expect(chatConversationsStoreService.getNumberOfUnreadedMessages()).to.equal(5);
+      expect(chatConversationsStoreService.getNumberOfUnreadMessages()).to.equal(5);
+    });
+  });
+
+  describe('The increaseNumberOfUnreadMessages function', function() {
+    it('should do nothing when conversation not found', function() {
+      conversation.unreadMessageCount = 0;
+      chatConversationsStoreService.conversations = [conversation];
+      chatConversationsStoreService.increaseNumberOfUnreadMessages(publicConversation._id);
+
+      expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(conversation.unreadMessageCount);
+    });
+
+    it('should increase when received message is not in the active conversation', function() {
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.increaseNumberOfUnreadMessages(publicConversation._id);
+
+      expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(1);
+    });
+
+    it('should not increase when received message is in the active conversation', function() {
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.increaseNumberOfUnreadMessages(conversation._id);
+
+      expect(chatConversationsStoreService.conversations[1].unreadMessageCount).to.equal(0);
     });
   });
 

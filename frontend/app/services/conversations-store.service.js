@@ -15,7 +15,8 @@
       deleteConversation: deleteConversation,
       findConversation: findConversation,
       find: find,
-      getNumberOfUnreadedMessages: getNumberOfUnreadedMessages,
+      getNumberOfUnreadMessages: getNumberOfUnreadMessages,
+      increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       isActiveRoom: isActiveRoom,
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
@@ -91,7 +92,7 @@
       return _.find(store.conversations, filter);
     }
 
-    function getNumberOfUnreadedMessages() {
+    function getNumberOfUnreadMessages() {
       var unreadedMessages = 0;
 
       store.conversations.forEach(function(conversation) {
@@ -111,6 +112,18 @@
       });
 
       array.splice(index, 0, conversation);
+    }
+
+    function increaseNumberOfUnreadMessages(conversationId) {
+      if (!conversationId) {
+        return $log.warn('conversationID is needed to update conversation number of unreaded messages.');
+      }
+
+      var conversation = findConversation(conversationId);
+
+      if (conversation && !isActiveRoom(conversation._id)) {
+        conversation.unreadMessageCount = (conversation.unreadMessageCount || 0) + 1;
+      }
     }
 
     function isActiveRoom(conversationId) {
