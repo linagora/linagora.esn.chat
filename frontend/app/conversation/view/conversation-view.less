@@ -9,18 +9,17 @@
     font-size: 14px;
   }
 
-  .file-overlay {
-    height: 100%;
+  .dnd-overlay {
+    height: ~"calc(100% + @{chatFooterHeight})";
     left: 0;
     pointer-events: none;
     position: absolute;
-    top: 0;
     width: 100%;
-    z-index: 6;
+    z-index: @zIndexDefault+2;
     background-color: @dimmedBackgroundColor;
     display: none;
 
-    .overlay-text {
+    .dnd-overlay-text {
       .all-centered;
 
       flex-direction: column;
@@ -38,7 +37,7 @@
   }
 
   &.show-overlay {
-    .file-overlay {
+    .dnd-overlay {
       display: block;
     }
   }
