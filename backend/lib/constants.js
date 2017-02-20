@@ -13,6 +13,7 @@ module.exports = {
   DEFAULT_OFFSET: 0,
   NOTIFICATIONS: {
     COLLABORATION_JOIN: 'collaboration:join',
+    COLLABORATION_LEAVE: 'collaboration:leave',
     CONVERSATION_CREATED: 'chat:conversation:created',
     CONVERSATION_DELETED: 'chat:conversation:deleted',
     CONVERSATION_INITIALIZED: 'chat:conversation:initialized',
@@ -57,6 +58,7 @@ module.exports = {
   },
   MESSAGE_SUBTYPE: {
     CONVERSATION_JOIN: 'conversation_join',
+    CONVERSATION_LEAVE: 'conversation_leave',
     TOPIC_UPDATE: 'topic_update'
   },
   SKIP_FIELDS: {
