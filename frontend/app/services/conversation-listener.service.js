@@ -38,6 +38,7 @@
       }
 
       chatConversationActionsService.increaseNumberOfUnreadMessages(conversation._id);
+      chatConversationActionsService.updateUserMentionsCount(conversation._id, message.user_mentions);
 
       conversation.last_message = {
         text: chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true}),

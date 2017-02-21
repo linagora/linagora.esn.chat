@@ -21,6 +21,7 @@
       unsetActive: unsetActive,
       updateConversation: updateConversation,
       updateConversationTopic: updateConversationTopic,
+      updateUserMentionsCount: updateUserMentionsCount,
       start: start
     };
 
@@ -147,6 +148,16 @@
 
         return result.data;
       });
+    }
+
+    function updateUserMentionsCount(conversationId, userMentions) {
+      if (!userMentions || userMentions.length === 0) {
+        return;
+      }
+
+      if (_.find(userMentions, {_id: session.user._id})) {
+        chatConversationsStoreService.increaseUserMentionsCount(conversationId);
+      }
     }
   }
 })();

@@ -158,6 +158,7 @@ describe('The chatConversationListenerService service', function() {
         var text = 'My parsed text';
 
         chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatConversationActionsService.updateUserMentionsCount = sinon.spy();
         chatParseMention.parseMentions = sinon.spy(function() {
           return text;
         });
@@ -183,6 +184,7 @@ describe('The chatConversationListenerService service', function() {
 
       it('should update conversation number of unreaded message', function() {
         chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatConversationActionsService.updateUserMentionsCount = sinon.spy();
         chatParseMention.parseMentions = sinon.spy();
         chatConversationsStoreService.findConversation = sinon.spy(function() {
           return conversation;
@@ -193,7 +195,25 @@ describe('The chatConversationListenerService service', function() {
         $rootScope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
         $rootScope.$digest();
 
+        expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
         expect(chatConversationActionsService.increaseNumberOfUnreadMessages).to.have.been.calledWith(conversation._id);
+      });
+
+      it('should update conversation number of user mentions', function() {
+        chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatConversationActionsService.updateUserMentionsCount = sinon.spy();
+        chatParseMention.parseMentions = sinon.spy();
+        chatConversationsStoreService.findConversation = sinon.spy(function() {
+          return conversation;
+        });
+
+        chatConversationListenerService.start();
+
+        $rootScope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+        $rootScope.$digest();
+
+        expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
+        expect(chatConversationActionsService.updateUserMentionsCount).to.have.been.calledWith(conversation._id, message.user_mentions);
       });
     });
   });
