@@ -157,6 +157,7 @@ describe('The chatConversationListenerService service', function() {
       it('should update the conversation.last_message to the received one', function() {
         var text = 'My parsed text';
 
+        chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
         chatParseMention.parseMentions = sinon.spy(function() {
           return text;
         });
@@ -178,6 +179,21 @@ describe('The chatConversationListenerService service', function() {
           user_mentions: message.user_mentions
         });
         expect(conversation.canScrollDown).to.be.true;
+      });
+
+      it('should update conversation number of unreaded message', function() {
+        chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatParseMention.parseMentions = sinon.spy();
+        chatConversationsStoreService.findConversation = sinon.spy(function() {
+          return conversation;
+        });
+
+        chatConversationListenerService.start();
+
+        $rootScope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+        $rootScope.$digest();
+
+        expect(chatConversationActionsService.increaseNumberOfUnreadMessages).to.have.been.calledWith(conversation._id);
       });
     });
   });

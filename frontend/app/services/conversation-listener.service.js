@@ -37,6 +37,8 @@
         return;
       }
 
+      chatConversationActionsService.increaseNumberOfUnreadMessages(conversation._id);
+
       conversation.last_message = {
         text: chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true}),
         date: message.timestamps.creation,

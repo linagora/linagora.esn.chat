@@ -12,6 +12,7 @@
       addPrivateConversation: addPrivateConversation,
       deleteConversation: deleteConversation,
       getConversation: getConversation,
+      increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
       markAllMessagesAsRead: markAllMessagesAsRead,
@@ -79,6 +80,10 @@
 
         return conversation;
       });
+    }
+
+    function increaseNumberOfUnreadMessages(conversationId) {
+      return chatConversationsStoreService.increaseNumberOfUnreadMessages(conversationId);
     }
 
     function joinConversation(conversation) {

@@ -146,6 +146,15 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The increaseNumberOfUnreadMessages function', function() {
+    it('should call the equivalent function in chatConversationsStoreService', function() {
+      chatConversationsStoreService.increaseNumberOfUnreadMessages = sinon.spy();
+      chatConversationActionsService.increaseNumberOfUnreadMessages(conversation._id);
+
+      expect(chatConversationsStoreService.increaseNumberOfUnreadMessages).to.have.been.calledWith(conversation._id);
+    });
+  });
+
   describe('The joinConversation function', function() {
     it('should call chatConversationService.join and chatConversationsStoreService.joinConversation', function() {
       chatConversationService.join = sinon.spy(function() {
