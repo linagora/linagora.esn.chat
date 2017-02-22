@@ -5,7 +5,8 @@ block left
     a.close.hidden-md.button(contextual-sidebar, data-content-template="/chat/app/aside/aside.html")
       i.mdi.mdi-menu
     .title
-      span.ellipsis {{ ctrl.name }}
+      span.ellipsis
+        span(ng-bind-html="ctrl.name| esnEmoticonify:{class: 'label-emoji'}" ) 
 
 block right
   .dropdown
