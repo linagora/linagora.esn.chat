@@ -3,17 +3,19 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const _ = require('lodash');
+const Q = require('q');
 const CONSTANTS = require('../../../backend/lib/constants');
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
-const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION;
+const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
+  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
 
   beforeEach(function() {
     var self = this;
@@ -50,13 +52,19 @@ describe('The chat websocket adapter', function() {
       publish: sinon.spy()
     };
 
+    conversationRemoveMemberTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
     conversationUpdatedTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
 
     lib = {
-      conversation: {}
+      conversation: {},
+      members: {}
     };
 
     logger = { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() };
@@ -84,8 +92,11 @@ describe('The chat websocket adapter', function() {
             if (name === MESSAGE_RECEIVED) {
               return globalMessageReceivedTopic;
             }
-            if (name === MEMBER_ADDED_IN_CONVERSATION) {
+            if (name === MEMBER_JOINED_CONVERSATION) {
               return conversationAddMemberTopic;
+            }
+            if (name === MEMBER_LEFT_CONVERSATION) {
+              return conversationRemoveMemberTopic;
             }
             if (name === CONVERSATION_UPDATED) {
               return conversationUpdatedTopic;
@@ -104,17 +115,19 @@ describe('The chat websocket adapter', function() {
   });
 
   describe('The bindEvents function', function() {
-    let data, subscribeCallback, messenger, conversation;
+    let data, subscribeCallback, messenger, conversation, user;
 
     beforeEach(function() {
       conversation = {_id: 1, name: 'My conversation'};
+      user = {_id: 2};
       data = {conversation};
       messenger = {
         on: sinon.spy(),
         conversationCreated: sinon.spy(),
         conversationDeleted: sinon.spy(),
         conversationUpdated: sinon.spy(),
-        newMemberAdded: sinon.spy(),
+        memberHasJoined: sinon.spy(),
+        memberHasLeft: sinon.spy(),
         sendMessage: sinon.spy(),
         topicUpdated: sinon.spy()
       };
@@ -237,18 +250,242 @@ describe('The chat websocket adapter', function() {
       });
     });
 
-    it('should subscribe to MEMBER_ADDED_IN_CONVERSATION event', function() {
+    it('should subscribe to MEMBER_JOINED_CONVERSATION event', function() {
       adapter.bindEvents(messenger);
 
-      expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
-        subscribeCallback = callback;
+      expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match.func);
+    });
 
-        return _.isFunction(callback);
-      }));
+    describe('On MEMBER_JOINED_CONVERSATION event', function() {
+      let count, member, event, joinCallback;
 
-      subscribeCallback(data);
+      beforeEach(function() {
+        count = 10;
+        event = {userId: user._id, conversationId: conversation._id};
+        member = {member: {id: user._id, objectType: 'user'}};
+      });
 
-      expect(messenger.newMemberAdded).to.have.been.calledWith(data);
+      it('should not call messenger.memberHasJoined if getConversation fails', function(done) {
+        const error = new Error('I failed to get conversation');
+
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(error);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.equals(error.message);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasJoined).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should not call messenger.memberHasJoined if getConversation can not be found', function(done) {
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback();
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.match(/Can not find conversation/);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasJoined).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should not call messenger.memberHasJoined if countMembers fails', function(done) {
+        const error = new Error('I failed to count');
+
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(null, conversation);
+        });
+
+        lib.members.countMembers = sinon.spy(function() {
+          return Q.reject(error);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.match(/I failed to count/);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(lib.members.countMembers).to.have.been.calledWith(conversation);
+          expect(messenger.memberHasJoined).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should call messenger.memberHasJoined', function(done) {
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(null, conversation);
+        });
+
+        lib.members.countMembers = sinon.spy(function() {
+          return Q.when(count);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationAddMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(lib.members.countMembers).to.have.been.calledWith(conversation);
+          expect(messenger.memberHasJoined).to.have.been.calledWith(conversation, member, count);
+          done();
+        }, done);
+      });
+    });
+
+    it('should subscribe to MEMBER_LEFT_CONVERSATION event', function() {
+      adapter.bindEvents(messenger);
+
+      expect(conversationRemoveMemberTopic.subscribe).to.have.been.calledWith(sinon.match.func);
+    });
+
+    describe('On MEMBER_LEFT_CONVERSATION event', function() {
+      let count, member, event, leaveCallback;
+
+      beforeEach(function() {
+        event = {userId: user._id, conversationId: conversation._id};
+        count = 10;
+        member = {member: {id: user._id, objectType: 'user'}};
+      });
+
+      it('should not call messenger.memberHasLeft if getConversation fails', function(done) {
+        const error = new Error('I failed to get conversation');
+
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(error);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationRemoveMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          leaveCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        leaveCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.equals(error.message);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasLeft).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should not call messenger.memberHasLeft if getConversation can not be found', function(done) {
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback();
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationRemoveMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          leaveCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        leaveCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.match(/Can not find conversation/);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasLeft).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should not call messenger.memberHasLeft if countMembers fails', function(done) {
+        const error = new Error('I failed to count');
+
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(null, conversation);
+        });
+
+        lib.members.countMembers = sinon.spy(function() {
+          return Q.reject(error);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationRemoveMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          leaveCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        leaveCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.match(/I failed to count/);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(lib.members.countMembers).to.have.been.calledWith(conversation);
+          expect(messenger.memberHasLeft).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should call messenger.memberHasLeft', function(done) {
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(null, conversation);
+        });
+
+        lib.members.countMembers = sinon.spy(function() {
+          return Q.when(count);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationRemoveMemberTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          leaveCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        leaveCallback(event).then(() => {
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(lib.members.countMembers).to.have.been.calledWith(conversation);
+          expect(messenger.memberHasLeft).to.have.been.calledWith(conversation, member, count);
+          done();
+        }, done);
+      });
     });
 
     it('should subscribe to MESSAGE_RECEIVED event', function(done) {
