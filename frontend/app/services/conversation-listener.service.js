@@ -4,14 +4,16 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationListenerService', chatConversationListenerService);
 
-  function chatConversationListenerService($rootScope, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS) {
+  function chatConversationListenerService($rootScope, session, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS, CHAT_CONVERSATION_TYPE) {
     return {
       addEventListeners: addEventListeners,
       start: start
     };
 
     function addConversation(conversation) {
-      chatConversationsStoreService.addConversation(conversation);
+      if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL || conversation.creator._id === session.user._id) {
+        chatConversationsStoreService.addConversation(conversation);
+      }
     }
 
     function addEventListeners() {
