@@ -17,6 +17,7 @@
       find: find,
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
+      increaseUserMentionsCount: increaseUserMentionsCount,
       isActiveRoom: isActiveRoom,
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
@@ -126,6 +127,18 @@
       }
     }
 
+    function increaseUserMentionsCount(conversationId) {
+      if (!conversationId) {
+        return $log.warn('conversationID is needed to update conversation number of user mentions');
+      }
+
+      var conversation = findConversation(conversationId);
+
+      if (conversation && !isActiveRoom(conversationId)) {
+        conversation.mention_count = (conversation.mention_count || 0) + 1;
+      }
+    }
+
     function isActiveRoom(conversationId) {
       if (!conversationId) {
         return false;
@@ -167,7 +180,7 @@
         return false;
       }
 
-      conversation.mentionCount = 0;
+      conversation.mention_count = 0;
       conversation.unreadMessageCount = 0;
       activeRoom = conversation;
 

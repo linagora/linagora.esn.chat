@@ -211,6 +211,32 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
+  describe('The increaseUserMentionsCount function', function() {
+    it('should do nothing when conversation not found', function() {
+      conversation.mention_count = 0;
+      chatConversationsStoreService.conversations = [conversation];
+      chatConversationsStoreService.increaseUserMentionsCount(publicConversation._id);
+
+      expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(conversation.mention_count);
+    });
+
+    it('should increase when conversation is not the active conversation', function() {
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.increaseUserMentionsCount(publicConversation._id);
+
+      expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(1);
+    });
+
+    it('should not increase when conversation is the active conversation', function() {
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.increaseUserMentionsCount(conversation._id);
+
+      expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(0);
+    });
+  });
+
   describe('The isActiveRoom function', function() {
     it('should return false when conversationId is null', function() {
       expect(chatConversationsStoreService.isActiveRoom()).to.be.false;
@@ -278,13 +304,13 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should set activeRoom to the given one, reset unreads and mentions', function() {
       conversation.unreadMessageCount = 3;
-      conversation.mentionCount = 10;
+      conversation.mention_count = 10;
       chatConversationsStoreService.conversations = [conversation, publicConversation];
 
       expect(chatConversationsStoreService.setActive(conversation._id)).to.be.true;
       expect(chatConversationsStoreService.activeRoom).to.deep.equal(conversation);
       expect(conversation.unreadMessageCount).to.equal(0);
-      expect(conversation.mentionCount).to.equal(0);
+      expect(conversation.mention_count).to.equal(0);
     });
   });
 

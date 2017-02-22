@@ -373,4 +373,30 @@ describe('The chatConversationActionsService service', function() {
       expect(errorSpy).to.have.been.called;
     });
   });
+
+  describe('The updateUserMentionsCount function', function() {
+    it('should do nothing when messageUserMentions is null', function() {
+      chatConversationsStoreService.increaseUserMentionsCount = sinon.spy();
+      chatConversationActionsService.updateUserMentionsCount(conversation._id);
+
+      expect(chatConversationsStoreService.increaseUserMentionsCount).to.not.have.been.called;
+    });
+
+    it('should do nothing without current user\'s ID in messageUserMentions', function() {
+      var anotherUser = {_id: 'anotherUser'};
+
+      chatConversationsStoreService.increaseUserMentionsCount = sinon.spy();
+      chatConversationActionsService.updateUserMentionsCount(conversation._id, [anotherUser]);
+
+      expect(chatConversationsStoreService.increaseUserMentionsCount).to.not.have.been.called;
+    });
+
+    it('should call increaseUserMentionsCount when messageUserMentions contains current user\'s ID', function() {
+      chatConversationsStoreService.increaseUserMentionsCount = sinon.spy();
+      chatConversationActionsService.updateUserMentionsCount(conversation._id, [user]);
+
+      expect(chatConversationsStoreService.increaseUserMentionsCount).to.have.been.called;
+    });
+  });
+
 });
