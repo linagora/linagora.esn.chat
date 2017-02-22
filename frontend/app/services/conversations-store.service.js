@@ -17,6 +17,7 @@
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       increaseUserMentionsCount: increaseUserMentionsCount,
+      isInactiveOpenRoom: isInactiveOpenRoom,
       isActiveRoom: isActiveRoom,
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
@@ -121,9 +122,13 @@
 
       var conversation = findConversation(conversationId);
 
-      if (conversation && !isActiveRoom(conversationId)) {
+      if (isInactiveOpenRoom(conversation)) {
         conversation.mention_count = (conversation.mention_count || 0) + 1;
       }
+    }
+
+    function isInactiveOpenRoom(conversation) {
+      return conversation && conversation.type === CHAT_CONVERSATION_TYPE.OPEN && !isActiveRoom(conversation._id);
     }
 
     function isActiveRoom(conversationId) {
