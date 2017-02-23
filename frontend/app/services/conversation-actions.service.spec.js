@@ -399,4 +399,52 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The updateMembers function', function() {
+    beforeEach(function() {
+      chatConversationsStoreService.setMembers = sinon.spy();
+      chatConversationsStoreService.updateMembersCount = sinon.spy();
+    });
+
+    it('should not set members in store if conversation is not CONFIDENTIAL', function() {
+      chatConversationActionsService.updateMembers({type: CHAT_CONVERSATION_TYPE.OPEN, members: [1]});
+
+      expect(chatConversationsStoreService.setMembers).to.not.have.been.called;
+    });
+
+    it('should not set members in store if members is not defined', function() {
+      chatConversationActionsService.updateMembers({type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL});
+
+      expect(chatConversationsStoreService.setMembers).to.not.have.been.called;
+    });
+
+    it('should set members in store if conversation type is CONFIDENTIAL and members is defined', function() {
+      var members = [1, 2, 3];
+      var conversation = {type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, members: members};
+
+      chatConversationActionsService.updateMembers(conversation);
+
+      expect(chatConversationsStoreService.setMembers).to.have.been.calledWith(conversation, members);
+    });
+
+    it('should not update the members count if not defined', function() {
+      chatConversationActionsService.updateMembers({});
+
+      expect(chatConversationsStoreService.updateMembersCount).to.not.have.been.called;
+    });
+
+    it('should not update the members count if 0', function() {
+      chatConversationActionsService.updateMembers({}, 0);
+
+      expect(chatConversationsStoreService.updateMembersCount).to.not.have.been.called;
+    });
+
+    it('should update the members count', function() {
+      var count = 10;
+      var conversation = {_id: 1};
+
+      chatConversationActionsService.updateMembers(conversation, count);
+
+      expect(chatConversationsStoreService.updateMembersCount).to.have.been.calledWith(conversation, count);
+    });
+  });
 });

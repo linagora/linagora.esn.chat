@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationListenerService service', function() {
 
-  var $rootScope, conversation, chatMessengerService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, members, chatConversationListenerService, session;
+  var $rootScope, conversation, chatMessengerService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session;
   var CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
 
   beforeEach(function() {
@@ -14,7 +14,6 @@ describe('The chatConversationListenerService service', function() {
     chatConversationActionsService = {};
     chatConversationsStoreService = {};
     chatParseMention = {};
-    members = [{_id: 'userId1'}, {_id: 'userId2'}];
 
     chatMessengerService = {
       addEventListener: sinon.spy()
@@ -51,7 +50,7 @@ describe('The chatConversationListenerService service', function() {
     it('should register event handlers', function() {
       chatConversationListenerService.addEventListeners();
 
-      expect(chatMessengerService.addEventListener.getCalls().length).to.equal(5);
+      expect(chatMessengerService.addEventListener.getCalls().length).to.equal(6);
     });
 
     describe('on CHAT_EVENTS.NEW_CONVERSATION', function() {
@@ -120,17 +119,36 @@ describe('The chatConversationListenerService service', function() {
       });
     });
 
-    describe('on CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS', function() {
-      it('should add new members in the store', function() {
-        conversation.members = members;
-        chatConversationsStoreService.addMembers = sinon.spy();
+    describe('on CHAT_EVENTS.MEMBER_JOINED_CONVERSATION', function() {
+      it('should call updateMembers action', function() {
+        var event = {conversation: conversation, members_count: 10};
+
+        chatConversationActionsService.updateMembers = sinon.spy();
 
         chatConversationListenerService.addEventListeners();
 
-        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, sinon.match.func.and(sinon.match(function(callback) {
-          callback(conversation);
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_JOINED_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
+          callback(event);
 
-          expect(chatConversationsStoreService.addMembers).to.have.been.calledWith(conversation, conversation.members);
+          expect(chatConversationActionsService.updateMembers).to.have.been.calledWith(event.conversation, event.members_count);
+
+          return true;
+        })));
+      });
+    });
+
+    describe('on CHAT_EVENTS.MEMBER_LEFT_CONVERSATION', function() {
+      it('should call updateMembers action', function() {
+        var event = {conversation: conversation, members_count: 10};
+
+        chatConversationActionsService.updateMembers = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_LEFT_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
+          callback(event);
+
+          expect(chatConversationActionsService.updateMembers).to.have.been.calledWith(event.conversation, event.members_count);
 
           return true;
         })));

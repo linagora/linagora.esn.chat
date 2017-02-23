@@ -17,6 +17,8 @@
     })
     .constant('CHAT_EVENTS', {
       CONVERSATION_TOPIC_UPDATED: 'chat:conversation:topic:updated',
+      MEMBER_JOINED_CONVERSATION: 'chat:conversation:members:joined',
+      MEMBER_LEFT_CONVERSATION: 'chat:conversation:members:left',
       MESSAGE_RECEIVED: 'chat:message:received',
       USER_CHANGE_STATE: 'user:state',
       NEW_CONVERSATION: 'chat:conversation:created',
@@ -27,7 +29,6 @@
       UNSET_ACTIVE_ROOM: 'chat:message:unset_active_room',
       CONVERSATIONS: {
         NEW: 'chat:conversations:new',
-        ADD_NEW_MEMBERS: 'chat:conversation:members:add',
         UPDATE: 'chat:conversation:update'
       }
     })

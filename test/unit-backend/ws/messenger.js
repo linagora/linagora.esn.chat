@@ -126,14 +126,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.memberHasJoined(conversation, member, members_count);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {conversation, member, members_count}, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.memberHasJoined(conversation, member, members_count);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {conversation, member, members_count}, room: DEFAULT_ROOM});
     });
   });
 
@@ -150,14 +150,14 @@ describe('The chat websocket messenger', function() {
       conversation.members = [1, 2, 3];
       messenger.memberHasLeft(conversation, member, members_count);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {conversation, member, members_count}, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.memberHasLeft(conversation, member, members_count);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {conversation, member, members_count}, room: DEFAULT_ROOM});
     });
   });
 
