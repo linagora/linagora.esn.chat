@@ -78,7 +78,7 @@
       return chatConversationService.get(conversationId).then(function(result) {
         conversation = result.data;
 
-        chatConversationsStoreService.addConversation(conversation);
+        conversation && chatConversationsStoreService.addConversation(conversation);
 
         return conversation;
       });
