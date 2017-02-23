@@ -113,20 +113,51 @@ describe('The chat websocket messenger', function() {
     });
   });
 
-  describe('The newMemberAdded function', function() {
+  describe('The memberHasJoined function', function() {
+    let member, members_count;
+
+    beforeEach(function() {
+      member = {member: {id: '1', objectType: 'user'}};
+      members_count = 10;
+    });
+
     it('should send conversation to members when conversation is confidential', function() {
       conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
       conversation.members = [1, 2, 3];
-      messenger.newMemberAdded(conversation);
+      messenger.memberHasJoined(conversation, member, members_count);
 
-      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION, {data: conversation, room: DEFAULT_ROOM});
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
     });
 
     it('should send conversation to users when conversation is not confidential', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
-      messenger.newMemberAdded(conversation);
+      messenger.memberHasJoined(conversation, member, members_count);
 
-      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION, {data: conversation, room: DEFAULT_ROOM});
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
+    });
+  });
+
+  describe('The memberHasLeft function', function() {
+    let member, members_count;
+
+    beforeEach(function() {
+      member = {member: {id: '1', objectType: 'user'}};
+      members_count = 10;
+    });
+
+    it('should send conversation to members when conversation is confidential', function() {
+      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+      conversation.members = [1, 2, 3];
+      messenger.memberHasLeft(conversation, member, members_count);
+
+      expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
+    });
+
+    it('should send conversation to users when conversation is not confidential', function() {
+      conversation.type = CONVERSATION_TYPE.OPEN;
+      messenger.memberHasLeft(conversation, member, members_count);
+
+      expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {member, members_count}, room: DEFAULT_ROOM});
     });
   });
 
