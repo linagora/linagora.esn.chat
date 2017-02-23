@@ -22,11 +22,11 @@ module.exports = function(dependencies) {
         return;
       }
 
-      return userHadLeft(event.target, event.collaboration.id);
+      return userHasLeft(event.target, event.collaboration.id);
     });
   }
 
-  function userHadLeft(userId, conversationId, timestamp = Date.now()) {
+  function userHasLeft(userId, conversationId, timestamp = Date.now()) {
     const event = {
       message: {
         text: `@${userId} has left the conversation.`,

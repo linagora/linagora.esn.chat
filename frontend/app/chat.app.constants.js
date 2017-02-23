@@ -42,7 +42,7 @@
       SYSTEM: 'system'
     })
     .constant('CHAT_MESSAGE_PREFIX', 'chat:message:')
-    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'topic_update'])
+    .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'conversation_leave', 'topic_update'])
     .constant('CHAT_MENTION_CHAR', '@')
     .constant('CHAT_NAMESPACE', '/chat')
     .constant('CHAT_NOTIF', {
