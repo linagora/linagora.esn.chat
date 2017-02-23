@@ -19,17 +19,22 @@
     function addEventListeners() {
       chatMessengerService.addEventListener(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversation);
-      chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.ADD_NEW_MEMBERS, addNewMembers);
+      chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_JOINED_CONVERSATION, memberHasJoined);
+      chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_LEFT_CONVERSATION, memberHasLeft);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
     }
 
-    function addNewMembers(conversation) {
-      chatConversationsStoreService.addMembers(conversation, conversation.members);
-    }
-
     function deleteConversation(conversation) {
       chatConversationsStoreService.deleteConversation(conversation);
+    }
+
+    function memberHasJoined(event) {
+      chatConversationActionsService.updateMembers(event.conversation, event.members_count);
+    }
+
+    function memberHasLeft(event) {
+      chatConversationActionsService.updateMembers(event.conversation, event.members_count);
     }
 
     function onMessage(message) {

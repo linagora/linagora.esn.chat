@@ -21,6 +21,7 @@
       unsetActive: unsetActive,
       updateConversation: updateConversation,
       updateConversationTopic: updateConversationTopic,
+      updateMembers: updateMembers,
       updateUserMentionsCount: updateUserMentionsCount,
       start: start
     };
@@ -148,6 +149,16 @@
 
         return result.data;
       });
+    }
+
+    function updateMembers(conversation, count) {
+      if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL && conversation.members) {
+        chatConversationsStoreService.setMembers(conversation, conversation.members);
+      }
+
+      if (count) {
+        chatConversationsStoreService.updateMembersCount(conversation, count);
+      }
     }
 
     function updateUserMentionsCount(conversationId, userMentions) {

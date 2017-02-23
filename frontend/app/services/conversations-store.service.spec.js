@@ -99,19 +99,19 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
-  describe('The addMembers function', function() {
-    it('should add members to the conversation if it already exists', function() {
+  describe('The setMembers function', function() {
+    it('should set members to the conversation if it already exists', function() {
       chatConversationsStoreService.conversations = [conversation];
-      chatConversationsStoreService.addMembers(conversation, members);
+      chatConversationsStoreService.setMembers(conversation, members);
 
       expect(chatConversationsStoreService.conversations[0].members).to.deep.equals(members);
     });
 
-    it('should add the conversation with new members if it does not exists', function() {
+    it('should not add the conversation with new members if it does not exists', function() {
       chatConversationsStoreService.conversations = [];
-      chatConversationsStoreService.addMembers(conversation, members);
+      chatConversationsStoreService.setMembers(conversation, members);
 
-      expect(chatConversationsStoreService.conversations[0].members).to.deep.equals(members);
+      expect(chatConversationsStoreService.conversations).to.deep.equals([]);
     });
   });
 

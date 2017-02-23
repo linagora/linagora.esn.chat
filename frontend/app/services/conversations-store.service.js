@@ -9,7 +9,6 @@
     var store = {
       addConversation: addConversation,
       addConversations: addConversations,
-      addMembers: addMembers,
       channels: [],
       conversations: [],
       deleteConversation: deleteConversation,
@@ -24,8 +23,10 @@
       markAllMessagesAsRead: markAllMessagesAsRead,
       privateConversations: [],
       setActive: setActive,
+      setMembers: setMembers,
       unsetActive: unsetActive,
       updateConversation: updateConversation,
+      updateMembersCount: updateMembersCount,
       updateTopic: updateTopic,
       get activeRoom() {
         return activeRoom;
@@ -51,19 +52,6 @@
       conversations && conversations.forEach(function(conversation) {
         addConversation(conversation);
       });
-    }
-
-    function addMembers(conversation, members) {
-      var conv = findConversation(conversation._id);
-
-      if (!conv) {
-        addConversation(conversation);
-        conversation.members = members;
-
-        return;
-      }
-
-      conv.members = members;
     }
 
     function deleteConversation(conversation) {
@@ -187,6 +175,16 @@
       return true;
     }
 
+    function setMembers(conversation, members) {
+      var conv = findConversation(conversation._id);
+
+      if (!conv) {
+        return;
+      }
+
+      conv.members = members;
+    }
+
     function unsetActive() {
       activeRoom = {};
     }
@@ -203,6 +201,16 @@
       conv.name = conversation.name;
       conv.members = conversation.members;
       conv.avatar = conversation.avatar;
+    }
+
+    function updateMembersCount(conversation, count) {
+      var conv = findConversation(conversation._id);
+
+      if (!conv) {
+        return;
+      }
+
+      conv.members_count = count;
     }
 
     function updateTopic(conversation, topic) {
