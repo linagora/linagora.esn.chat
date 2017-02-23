@@ -1,5 +1,8 @@
 .chat-conversation-beginning
   .title
-    h3 #{__('Beginning of')} {{::ctrl.name}}
+    h3 #{__('Beginning of')}
+      span.space-seperator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
   .text
-    span #{__('This is the start of the')} {{::ctrl.name}} conversation #{__('created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}
+    span #{__('This is the start of the')}
+      span.space-seperator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
+      | #{__('conversation created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}
