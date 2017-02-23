@@ -1,7 +1,7 @@
 .chat-conversation-list-item
   .conversation-title(ui-sref='chat.channels-views({id: ctrl.conversation._id})')
-    h3 {{::ctrl.conversation.name}}
-    span.topic {{::ctrl.conversation.topic.value}}
+    h3(ng-bind-html="ctrl.conversation.name | esnEmoticonify:{ class: 'label-emoji' }")
+    span.topic(ng-bind-html="ctrl.conversation.topic.value | esnEmoticonify:{ class: 'label-emoji' }")
 
   .conversation-actions
     chat-join-conversation(ng-if='!ctrl.isMember', conversation='ctrl.conversation', on-join='ctrl.onJoin()')
