@@ -40,11 +40,11 @@ class Messenger extends EventEmitter {
   }
 
   memberHasJoined(conversation, member, members_count) {
-    this.sendDataToClients(conversation, MEMBER_JOINED_CONVERSATION, {member, members_count});
+    this.sendDataToClients(conversation, MEMBER_JOINED_CONVERSATION, {conversation, member, members_count});
   }
 
   memberHasLeft(conversation, member, members_count) {
-    this.sendDataToClients(conversation, MEMBER_LEFT_CONVERSATION, {member, members_count});
+    this.sendDataToClients(conversation, MEMBER_LEFT_CONVERSATION, {conversation, member, members_count});
   }
 
   sendDataToClients(conversation, type, data) {
