@@ -29,34 +29,65 @@ before(function() {
     },
     removeDBConfigFile: function() {
       fs.unlinkSync(tmpPath + '/db.json');
+    },
+    writeDefaultConfigFile: function() {
+      fs.writeFileSync(tmpPath + '/default.json', JSON.stringify({
+        wsserver: {enabled: true, port: testConfig.express.port},
+        webserver: {
+          port: testConfig.express.port
+        },
+        log: {
+          console: {
+            enabled: true
+          },
+          file: {
+            enabled: false
+          },
+          rotate: {
+            enabled: false
+          }
+        }
+      }));
+    },
+    removeDefaultConfigFile: function() {
+      fs.unlinkSync(tmpPath + '/default.json');
     }
   };
   var self = this;
 
   this.helpers = {};
-  this.helpers.loadApplication = function(dependencies) {
-    var lib = require('../../backend/lib')(dependencies);
-    var mongoose = dependencies('db').mongo.mongoose;
-    var ObjectId = mongoose.Schema.ObjectId;
 
-    mongoose.model('User', new mongoose.Schema({
-      _id: {type: ObjectId, required: true},
-      username: {type: String, required: true},
-      domains: [{
-        domain_id: {type: String}
-      }]
-    }));
+  this.helpers.asMember = function(user) {
+    return {member: {id: String(user._id || user), objectType: 'user'}};
+  };
 
-    var api = require('../../backend/webserver/api')(dependencies, lib);
-    var app = require('../../backend/webserver/application')(dependencies);
+  this.helpers.loadApplication = function(dependencies, skipModels) {
+    const lib = require('../../backend/lib')(dependencies);
+    const mongoose = dependencies('db').mongo.mongoose;
+    const ObjectId = mongoose.Schema.ObjectId;
+
+    if (!skipModels) {
+      mongoose.model('User', new mongoose.Schema({
+        _id: {type: ObjectId, required: true},
+        username: {type: String, required: true},
+        domains: [{
+          domain_id: {type: String}
+        }]
+      }));
+    }
+
+    const api = require('../../backend/webserver/api')(dependencies, lib);
+    const app = require('../../backend/webserver/application')(dependencies);
+    const ws = require('../../backend/ws');
 
     app.use(bodyParser.json());
     app.use('/api', api);
 
     return {
       express: app,
-      lib: lib,
-      api: api
+      lib,
+      api,
+      ws
     };
   };
 
@@ -164,11 +195,13 @@ after(function() {
 beforeEach(function() {
   mockery.enable({warnOnReplace: false, warnOnUnregistered: false, useCleanCache: true});
   this.testEnv.writeDBConfigFile();
+  this.testEnv.writeDefaultConfigFile();
 });
 
 afterEach(function() {
   try {
     this.testEnv.removeDBConfigFile();
+    this.testEnv.removeDefaultConfigFile();
   } catch (e) {
     /*eslint no-console: ["error", { allow: ["error"] }] */
     console.error(e);

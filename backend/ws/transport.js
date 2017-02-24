@@ -17,6 +17,7 @@ class Transport extends EventEmitter {
 
       socket.on('subscribe', room => {
         this.logger.info(`Joining chat channel ${room}`);
+        socket.emit('hello');
         socket.join(room);
 
         socket.on('unsubscribe', room => {
