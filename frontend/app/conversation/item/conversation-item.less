@@ -1,0 +1,64 @@
+.chat-conversation-item {
+  .flex-grow;
+  .flex-row;
+  .flex-vertical-centered;
+
+  padding: 5px 8px;
+
+  &.selected {
+    background-color: @darkenBgColor;
+
+    .item-name .item-name-after:after {
+      background-color: @darkenBgColor;
+    }
+  }
+
+  &.unread {
+    font-weight: 700;
+  }
+
+  i.mdi-checkbox-blank-circle.connected {
+    color: @chatUserConnectedColor;
+  }
+
+  .name {
+    .flex-grow;
+    .flex-vertical-centered;
+
+    white-space: nowrap;
+    overflow: hidden;
+
+    .item-icon {
+      .flex-vertical-centered;
+
+      color: lighten(@secondaryTextColor, 10%);
+      font-size: 1.8em;
+      margin-right: 8px;
+    }
+
+    .item-name {
+      .ellipsis;
+
+      font-size: 15px;
+      overflow: hidden;
+
+      .label-emoji {
+        width: @chatLabeEmojiSize;
+      }
+    }
+  }
+
+  .mention-badge {
+    .flex-row;
+    .all-centered;
+
+    background-color: @primaryColor;
+    color: @m-white;
+    border-radius: 50%;
+    font-weight: 700;
+    height: 23px;
+    width: 23px;
+    min-width: 23px;
+    border: 5px solid @primaryColor;
+  }
+}

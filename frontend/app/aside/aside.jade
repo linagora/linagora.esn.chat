@@ -4,11 +4,10 @@
       .lv-body
         .lv-item.clickable.menu-heading
           .title(ui-sref='chat.channels-views')
-            i.menu-icon.mdi.mdi-facebook-messenger
             .text #{__('Channels')}
-          .add-folder(ng-click='ctrl.toggleNotification()')
+          .chat-aside-action(ng-click='ctrl.toggleNotification()')
             i.menu-icon.mdi(ng-class="ctrl.isNotificationEnabled() ? 'mdi-bell-outline': 'mdi-bell-off'")
-          .add-folder(ui-sref='chat.channels-add')
+          .chat-aside-action(ui-sref='chat.channels-add')
             i.menu-icon.mdi.mdi-plus
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatConversationsStoreService.channels" conversation="conversation", ng-click='$hide()')
@@ -18,9 +17,8 @@
 
         .lv-item.clickable.menu-heading
           .title(ui-sref='chat.channels-views')
-            i.menu-icon.mdi.mdi-facebook-messenger
             .text #{__('Direct Messages')}
-          .add-folder(ui-sref='chat.groups-add')
+          .chat-aside-action(ui-sref='chat.groups-add')
             i.menu-icon.mdi.mdi-plus
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatConversationsStoreService.privateConversations" conversation="conversation", ng-click='$hide()')
