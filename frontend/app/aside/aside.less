@@ -19,10 +19,6 @@
 
 .esn-aside {
 
-  i.mdi-checkbox-blank-circle.connected {
-    color: green
-  }
-
   color: @secondaryTextColor;
 
   hr {
@@ -30,85 +26,8 @@
     border-top: 1px solid @darkenBgColor;
   }
 
-  .clickable {
-    line-height: @esnAsideIconFontSize;
-
-    &.selected {
-      background-color: @darkenBgColor;
-
-      .item-name .item-name-after:after {
-        background-color: @darkenBgColor;
-      }
-    }
-  }
-
-  .item-icon {
-    font-size: @esnAsideIconFontSize;
-    vertical-align: middle;
-    font-size: 1.4em;
-  }
-
-
   chat-conversation-item {
-    .notread .item-name-inner {
-      font-weight: bold;
-      color: @m-black;
-    }
-
-    .mention-badge {
-      .flex-row;
-      .all-centered;
-
-      background-color: @primaryColor;
-      color: @m-white;
-      border-radius: 50%;
-      font-weight: 700;
-      height: 23px;
-      width: 23px;
-      border: 5px solid @primaryColor;
-    }
-  }
-
-  .item-name {
-    background-color: inherit;
-    overflow: hidden;
-    height: @esnAsideMailboxNameHeight;
-    text-align: left;
-    line-height: @esnAsideMailboxNameHeight;
-    padding-left: 5px;
-
-    .item-name-inner {
-      width: 100%;
-      white-space: nowrap;
-      text-align: left;
-      display: inline-block;
-      vertical-align: top;
-      height: @esnAsideMailboxNameHeight + 1;
-      font-size: @esnAsideItemFontSize;
-      .label-emoji {
-        width: @chatLabeEmojiSize;
-      }
-    }
-
-    .item-name-after {
-      width: 1px;
-      height: @esnAsideMailboxNameHeight + 1;
-      display: inline-block;
-      position: relative;
-    }
-
-    .item-name-after:after {
-      content: "…";
-      width: auto;
-      background-color: white;
-      margin-right: 6px;
-      position: absolute;
-      bottom: @esnAsideMailboxNameHeight + 1;
-      left: 0;
-      height: @esnAsideMailboxNameHeight + 1;
-      min-width: 1px;
-    }
-
+    .clickable;
   }
 
   .listview:not(.lv-lg):not(.lv-message) {
@@ -132,7 +51,7 @@
 
       border-left: 5px solid @primaryColor;
 
-      .add-folder {
+      .chat-aside-action {
         .transition(0.25s ease-out);
         opacity: 0.5;
 
