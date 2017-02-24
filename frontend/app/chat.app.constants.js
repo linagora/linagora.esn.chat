@@ -28,7 +28,6 @@
       SET_ACTIVE_ROOM: 'chat:message:set_active_room',
       UNSET_ACTIVE_ROOM: 'chat:message:unset_active_room',
       CONVERSATIONS: {
-        NEW: 'chat:conversations:new',
         UPDATE: 'chat:conversation:update'
       }
     })

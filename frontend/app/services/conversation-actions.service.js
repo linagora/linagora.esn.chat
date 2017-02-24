@@ -44,7 +44,6 @@
       return chatConversationService.create(conversation).then(function(result) {
         var created = result.data;
 
-        $rootScope.$broadcast(CHAT_EVENTS.CONVERSATIONS.NEW, created);
         chatConversationsStoreService.addConversation(created);
 
         return created;

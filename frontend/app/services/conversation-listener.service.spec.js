@@ -173,47 +173,6 @@ describe('The chatConversationListenerService service', function() {
   });
 
   describe('The $rootScope events', function() {
-    describe('on CHAT_EVENTS.CONVERSATIONS.NEW', function() {
-      it('should not add the public conversation to the store if user is not the creator', function() {
-        var aPublicConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.OPEN, creator: { _id: 'userId1' }};
-
-       chatConversationsStoreService.addConversation = sinon.spy();
-
-        chatConversationListenerService.start();
-
-        $rootScope.$emit(CHAT_EVENTS.CONVERSATIONS.NEW, aPublicConversation);
-        $rootScope.$digest();
-
-        expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
-      });
-
-      it('should add the public conversation to the store if I am the creator', function() {
-        var aPublicConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.OPEN, creator: { _id: '_userId' }};
-
-        chatConversationsStoreService.addConversation = sinon.spy();
-
-        chatConversationListenerService.start();
-
-        $rootScope.$emit(CHAT_EVENTS.CONVERSATIONS.NEW, aPublicConversation);
-        $rootScope.$digest();
-
-        expect(chatConversationsStoreService.addConversation).to.have.been.calledWith(aPublicConversation);
-      });
-
-      it('should add the confidential conversation to the store', function() {
-        var aConfidentialConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, creator: { _id: 'userId1' }};
-
-        chatConversationsStoreService.addConversation = sinon.spy();
-
-        chatConversationListenerService.start();
-
-        $rootScope.$emit(CHAT_EVENTS.CONVERSATIONS.NEW, aConfidentialConversation);
-        $rootScope.$digest();
-
-        expect(chatConversationsStoreService.addConversation).to.have.been.calledWith(aConfidentialConversation);
-      });
-    });
-
     describe('on CHAT_EVENTS.TEXT_MESSAGE', function() {
       var message;
 
