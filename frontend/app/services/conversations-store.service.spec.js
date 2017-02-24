@@ -10,7 +10,7 @@ describe('The chatConversationsStoreService service', function() {
   var CHAT_CONVERSATION_TYPE, CHAT_MEMBER_STATUS;
 
   beforeEach(function() {
-    conversation = {_id: 0, name: 'My conversation'};
+    conversation = {_id: 3, name: 'My conversation'};
     publicConversation = {_id: 1, name: 'My public conversation'};
     confidentialConversation = {_id: 2, name: 'My confidential conversation'};
     members = [{_id: 'userId1'}, {_id: 'userId2'}];
@@ -196,7 +196,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should increase when received message is not in the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
-      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.setActive(conversation);
       chatConversationsStoreService.increaseNumberOfUnreadMessages(publicConversation._id);
 
       expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(1);
@@ -204,7 +204,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should not increase when received message is in the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
-      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.setActive(conversation);
       chatConversationsStoreService.increaseNumberOfUnreadMessages(conversation._id);
 
       expect(chatConversationsStoreService.conversations[1].unreadMessageCount).to.equal(0);
@@ -222,7 +222,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should increase when conversation is not the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
-      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.setActive(conversation);
       chatConversationsStoreService.increaseUserMentionsCount(publicConversation._id);
 
       expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(1);
@@ -230,7 +230,7 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should not increase when conversation is the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
-      chatConversationsStoreService.setActive(conversation._id);
+      chatConversationsStoreService.setActive(conversation);
       chatConversationsStoreService.increaseUserMentionsCount(conversation._id);
 
       expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(0);
@@ -244,14 +244,14 @@ describe('The chatConversationsStoreService service', function() {
 
     it('should return true when input is equal to the activeRoom id', function() {
       chatConversationsStoreService.conversations = [conversation, publicConversation];
-      chatConversationsStoreService.setActive(publicConversation._id);
+      chatConversationsStoreService.setActive(publicConversation);
 
       expect(chatConversationsStoreService.isActiveRoom(publicConversation._id)).to.be.true;
     });
 
     it('should return false when input is not equal to the activeRoom id', function() {
       chatConversationsStoreService.conversations = [conversation, publicConversation];
-      chatConversationsStoreService.setActive(publicConversation._id);
+      chatConversationsStoreService.setActive(publicConversation);
 
       expect(chatConversationsStoreService.isActiveRoom(conversation._id)).to.be.false;
     });
@@ -298,8 +298,29 @@ describe('The chatConversationsStoreService service', function() {
   });
 
   describe('The setActive function', function() {
-    it('should return false when conversation is not found', function() {
-      expect(chatConversationsStoreService.setActive(conversation._id)).to.be.false;
+    it('should return false when conversation is undefined', function() {
+      expect(chatConversationsStoreService.setActive()).to.be.false;
+    });
+
+    it('should return true when already active room and do not change counters', function() {
+      chatConversationsStoreService.setActive(conversation);
+      conversation.unreadMessageCount = 3;
+      conversation.mention_count = 10;
+
+      expect(chatConversationsStoreService.setActive(conversation)).to.be.true;
+      expect(conversation).to.shallowDeepEqual({unreadMessageCount: 3, mention_count: 10});
+    });
+
+    it('should reuse cached conversation instead of input one', function() {
+      var keep = 'keepme';
+      var newConversation = {_id: conversation._id, foo: 'bar'};
+
+      conversation.keep = keep;
+      chatConversationsStoreService.setActive(conversation);
+
+      expect(chatConversationsStoreService.setActive(newConversation)).to.be.true;
+      expect(chatConversationsStoreService.activeRoom.keep).to.equal(keep);
+      expect(chatConversationsStoreService.activeRoom.foo).to.not.be.defined;
     });
 
     it('should set activeRoom to the given one, reset unreads and mentions', function() {
@@ -307,7 +328,7 @@ describe('The chatConversationsStoreService service', function() {
       conversation.mention_count = 10;
       chatConversationsStoreService.conversations = [conversation, publicConversation];
 
-      expect(chatConversationsStoreService.setActive(conversation._id)).to.be.true;
+      expect(chatConversationsStoreService.setActive(conversation)).to.be.true;
       expect(chatConversationsStoreService.activeRoom).to.deep.equal(conversation);
       expect(conversation.unreadMessageCount).to.equal(0);
       expect(conversation.mention_count).to.equal(0);

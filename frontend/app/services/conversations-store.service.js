@@ -168,18 +168,16 @@
       }
     }
 
-    function setActive(conversationId) {
-      var conversation;
-
-      if (isActiveRoom(conversationId)) {
-        return true;
-      }
-
-      conversation = findConversation(conversationId);
+    function setActive(conversation) {
       if (!conversation) {
         return false;
       }
 
+      if (isActiveRoom(conversation._id)) {
+        return true;
+      }
+
+      conversation = findConversation(conversation._id) || conversation;
       conversation.mention_count = 0;
       conversation.unreadMessageCount = 0;
       activeRoom = conversation;

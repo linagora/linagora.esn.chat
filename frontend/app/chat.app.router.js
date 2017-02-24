@@ -32,15 +32,19 @@
           }
         },
         resolve: {
-          conversationId: function(chatConversationResolverService, $stateParams) {
-            return chatConversationResolverService($stateParams.id);
+          conversation: function($log, $state, $stateParams, chatConversationResolverService) {
+            return chatConversationResolverService($stateParams.id)
+              .catch(function(err) {
+                $log.error('Error while resolving conversation', err.message);
+                $state.go('home');
+              });
           }
         },
-        onEnter: function(chatConversationActionsService, conversationId) {
-          chatConversationActionsService.setActive(conversationId);
+        onEnter: function(chatConversationActionsService, conversation) {
+          chatConversationActionsService.setActive(conversation);
         },
-        onExit: function(chatLastConversationService, conversationId) {
-          chatLastConversationService.set(conversationId);
+        onExit: function(chatLastConversationService, conversation) {
+          chatLastConversationService.set(conversation._id);
         }
       })
       .state('chat.channels-views.attachments', {

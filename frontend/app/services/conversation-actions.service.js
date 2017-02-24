@@ -111,9 +111,9 @@
       });
     }
 
-    function setActive(conversationId) {
-      chatConversationsStoreService.setActive(conversationId);
-      $rootScope.$broadcast(CHAT_EVENTS.SET_ACTIVE_ROOM, conversationId);
+    function setActive(conversation) {
+      chatConversationsStoreService.setActive(conversation);
+      $rootScope.$broadcast(CHAT_EVENTS.SET_ACTIVE_ROOM, conversation._id);
     }
 
     function start() {

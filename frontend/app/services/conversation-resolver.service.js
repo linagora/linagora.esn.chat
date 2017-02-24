@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationResolverService', chatConversationResolverService);
 
-    function chatConversationResolverService($q, $state, chatConversationService, chatLastConversationService, chatConversationsStoreService, chatConversationActionsService) {
+    function chatConversationResolverService($q, $log, $state, chatConversationService, chatLastConversationService, chatConversationsStoreService, chatConversationActionsService) {
 
       // we must pass value of $stateParams.id from caller due to this
       // https://github.com/angular-ui/ui-router/issues/853
@@ -12,53 +12,41 @@
         return chatConversationActionsService.ready.then(resolve.bind(null, conversationId));
       };
 
-      function getDefaultChannel() {
-        return chatConversationsStoreService.channels[0]._id;
+      function fallbackToLastConversation() {
+        return chatLastConversationService.get().then(fetchConversation);
       }
 
-      function getLastConversationOrDefault() {
-        return chatLastConversationService.get().then(function(lastConversationId) {
-          return isValidConversation(lastConversationId).then(function(isLastValid) {
-            if (!isLastValid) {
-              lastConversationId = getDefaultChannel();
-            }
+      function fallbackToLastOrDefaultConversation() {
+        return fallbackToLastConversation().then(switchTo, function(err) {
+          $log.debug('Can not get last conversation', err.message);
 
-            return lastConversationId;
-          });
+          return switchTo(getDefaultConversation());
         });
       }
 
-      function isValidConversation(id) {
+      function fetchConversation(id) {
         if (!id) {
-          return $q.when(false);
+          return $q.reject(new Error('conversation id is null'));
         }
 
-        return chatConversationService.get(id).then(function() {
-          return true;
-        }, function() {
-          return false;
-        });
+        return chatConversationService.get(id);
+      }
+
+      function getDefaultConversation() {
+        return chatConversationsStoreService.channels[0];
       }
 
       function resolve(conversationId) {
-        var deferred = $q.defer();
+        return fetchConversation(conversationId).catch(fallbackToLastOrDefaultConversation);
+      }
 
-        function done(id) {
-          $state.go('chat.channels-views', {id: id});
-          deferred.resolve(id);
+      function switchTo(conversation) {
+        if (!conversation) {
+          return $q.reject(new Error('Can not find any valid conversation to display'));
         }
+        $state.go('chat.channels-views', {id: conversation._id});
 
-        isValidConversation(conversationId).then(function(isValid) {
-          if (isValid) {
-            return deferred.resolve(conversationId);
-          }
-
-          getLastConversationOrDefault().then(done, function() {
-            done(getDefaultChannel());
-          });
-        });
-
-        return deferred.promise;
+        return conversation;
       }
     }
 })();

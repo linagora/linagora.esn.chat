@@ -255,10 +255,10 @@ describe('The chatConversationActionsService service', function() {
     it('should call chatConversationsStoreService.setActive', function() {
       chatConversationsStoreService.setActive = sinon.spy();
 
-      chatConversationActionsService.setActive(conversation._id);
+      chatConversationActionsService.setActive(conversation);
       $rootScope.$digest();
 
-      expect(chatConversationsStoreService.setActive).to.have.been.calledWith(conversation._id);
+      expect(chatConversationsStoreService.setActive).to.have.been.calledWith(conversation);
     });
   });
 
