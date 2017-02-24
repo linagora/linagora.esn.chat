@@ -57,10 +57,6 @@
     }
 
     function start() {
-      $rootScope.$on(CHAT_EVENTS.CONVERSATIONS.NEW, function(event, data) {
-        addConversation(data);
-      });
-
       $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         onMessage(message);
       });
