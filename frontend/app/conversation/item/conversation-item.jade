@@ -1,7 +1,7 @@
 .lv-item.clickable(title="{{::ctrl.name}}", ui-sref='chat.channels-views({id: ctrl.conversation._id})', ui-sref-active="selected", ng-class="{notread: ctrl.conversation.unreadMessageCount > 0}")
   .row.flex-vertical-centered
     .col-xs-2
-      i.item-icon.mdi(ng-class="{'mdi-pound': ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.OPEN, 'mdi-checkbox-blank-circle': ctrl.conversation.type !== ctrl.CHAT_CONVERSATION_TYPE.OPEN, 'connected': ctrl.connected}")
+      i.item-icon.mdi(ng-class="{'mdi-earth': ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.OPEN, 'mdi-checkbox-blank-circle': ctrl.conversation.type !== ctrl.CHAT_CONVERSATION_TYPE.OPEN, 'connected': ctrl.connected}")
     .col-xs-8.item-name
       span.item-name-inner.ellipsis
         bdi(ng-bind-html="ctrl.name| esnEmoticonify:{class: 'label-emoji'}" )
