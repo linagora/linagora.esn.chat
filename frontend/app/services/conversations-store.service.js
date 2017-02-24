@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationsStoreService', chatConversationsStoreService);
 
-  function chatConversationsStoreService($log, _, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_MEMBER_STATUS) {
+  function chatConversationsStoreService($log, _, chatConversationNameService, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_MEMBER_STATUS) {
     var activeRoom = {};
     var store = {
       addConversation: addConversation,
@@ -39,12 +39,15 @@
 
     function addConversation(conversation) {
       if (!findConversation(conversation._id)) {
-        insertConversationInSortedArray(store.conversations, conversation);
-        if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
-          insertConversationInSortedArray(store.channels, conversation);
-        } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
-          insertConversationInSortedArray(store.privateConversations, conversation);
-        }
+        chatConversationNameService.getName(conversation).then(function(name) {
+          conversation.name = name;
+          insertConversationInSortedArray(store.conversations, conversation);
+          if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
+            insertConversationInSortedArray(store.channels, conversation);
+          } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
+            insertConversationInSortedArray(store.privateConversations, conversation);
+          }
+        });
       }
     }
 
@@ -93,11 +96,7 @@
 
     function insertConversationInSortedArray(array, conversation) {
       var index = _.sortedIndex(array, conversation, function(conversation) {
-        if (!conversation.last_message || !conversation.last_message.date) {
-          return -(new Date());
-        }
-
-        return -(new Date(conversation.last_message.date));
+        return conversation.name.toLowerCase();
       });
 
       array.splice(index, 0, conversation);
