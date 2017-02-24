@@ -3,6 +3,6 @@
     h3 #{__('Beginning of')}
       span.space-seperator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
   .text
-    span #{__('This is the start of the')}
+    span #{__('This is the start of')}
       span.space-seperator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
-      | #{__('conversation created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}
+      | #{__('created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}
