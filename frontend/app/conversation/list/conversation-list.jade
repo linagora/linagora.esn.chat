@@ -1,3 +1,6 @@
+sub-header
+  chat-conversation-list-subheader
+
 .chat-conversation-list
   infinite-list(load-more-elements='ctrl.loadMoreElements()')
     chat-conversation-list-item(conversation="conversation" ng-repeat="conversation in ctrl.elements" ng-if="ctrl.elements.length > 0")
