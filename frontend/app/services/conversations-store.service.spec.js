@@ -292,6 +292,34 @@ describe('The chatConversationsStoreService service', function() {
 
       expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(0);
     });
+
+    it('should not increase number of user mentions in a confidential conversation', function() {
+      conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
+      conversation.mention_count = 0;
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(publicConversation._id);
+      chatConversationsStoreService.increaseUserMentionsCount(conversation._id);
+
+      expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(conversation.mention_count);
+    });
+  });
+
+  describe('The isInactiveOpenRoom', function() {
+    it('should be true with if the the open conversation is not active, otherwise return false', function() {
+      chatConversationsStoreService.conversations = [publicConversation, confidentialConversation];
+      chatConversationsStoreService.setActive(confidentialConversation._id);
+
+      expect(chatConversationsStoreService.isInactiveOpenRoom(publicConversation)).to.be.true;
+      expect(chatConversationsStoreService.isInactiveOpenRoom(confidentialConversation)).to.be.false;
+    });
+
+    it('should be false if the open conversation is active', function() {
+      chatConversationsStoreService.conversations = [publicConversation, confidentialConversation];
+      chatConversationsStoreService.setActive(publicConversation._id);
+
+      expect(chatConversationsStoreService.isInactiveOpenRoom(publicConversation)).to.be.false;
+      expect(chatConversationsStoreService.isInactiveOpenRoom(confidentialConversation)).to.be.false;
+    });
   });
 
   describe('The isActiveRoom function', function() {
