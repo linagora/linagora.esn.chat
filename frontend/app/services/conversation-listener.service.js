@@ -4,16 +4,16 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationListenerService', chatConversationListenerService);
 
-  function chatConversationListenerService($rootScope, session, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS, CHAT_CONVERSATION_TYPE) {
+  function chatConversationListenerService($rootScope, session, chatConversationService, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS) {
     return {
       addEventListeners: addEventListeners,
       start: start
     };
 
     function addConversation(conversation) {
-      if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL || conversation.creator._id === session.user._id) {
-        chatConversationsStoreService.addConversation(conversation);
-      }
+      // Will be fixed in CHAT-307: denormalize conversation in websocket
+      return chatConversationService.get(conversation._id)
+        .then(chatConversationActionsService.addConversationWhenCreatorOrConfidential);
     }
 
     function addEventListeners() {

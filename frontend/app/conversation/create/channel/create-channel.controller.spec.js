@@ -62,16 +62,16 @@ describe('The ChatConversationCreateChannelController controller', function() {
 
     it('should not create channel when form is invalid', function() {
       form.$invalid = true;
-      chatConversationActionsService.addChannel = sinon.spy();
+      chatConversationActionsService.createOpenConversation = sinon.spy();
       var controller = initController();
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationActionsService.addChannel).to.not.have.been.called;
+      expect(chatConversationActionsService.createOpenConversation).to.not.have.been.called;
     });
 
     it('should display a notification on creation failure', function() {
-      chatConversationActionsService.addChannel = sinon.spy(function() {
+      chatConversationActionsService.createOpenConversation = sinon.spy(function() {
         return $q.reject(new Error());
       });
       notificationFactory.weakError = sinon.spy();
@@ -80,7 +80,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationActionsService.addChannel).to.have.been.calledWith(controller.conversation);
+      expect(chatConversationActionsService.createOpenConversation).to.have.been.calledWith(controller.conversation);
       expect(notificationFactory.weakError).to.have.been.calledWith('error', 'Error while creating channel');
     });
 
@@ -88,7 +88,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
       var result = {_id: 1};
       var name = 'My conversation';
 
-      chatConversationActionsService.addChannel = sinon.spy(function() {
+      chatConversationActionsService.createOpenConversation = sinon.spy(function() {
         return $q.when(result);
       });
       notificationFactory.weakSuccess = sinon.spy();
@@ -99,7 +99,7 @@ describe('The ChatConversationCreateChannelController controller', function() {
       controller.create();
       controller.conversation.name = name;
       $rootScope.$digest();
-      expect(chatConversationActionsService.addChannel).to.have.been.calledWith({type: CHAT_CONVERSATION_TYPE.OPEN, name: name, domain: session.domain._id});
+      expect(chatConversationActionsService.createOpenConversation).to.have.been.calledWith({type: CHAT_CONVERSATION_TYPE.OPEN, name: name, domain: session.domain._id});
       expect(notificationFactory.weakSuccess).to.have.been.calledWith('success', 'Channel successfuly created');
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: result._id});
     });

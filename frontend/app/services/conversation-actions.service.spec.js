@@ -6,11 +6,12 @@ var expect = chai.expect;
 
 describe('The chatConversationActionsService service', function() {
 
-  var $q, conversation, user, result, sessionMock, chatConversationActionsService, chatConversationService, chatConversationsStoreService, $rootScope;
+  var $q, conversation, name, user, result, sessionMock, chatConversationActionsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, $rootScope;
   var CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_EVENTS;
   var error, successSpy, errorSpy;
 
   beforeEach(function() {
+    name = 'default';
     error = new Error('I failed');
     successSpy = sinon.spy();
     errorSpy = sinon.spy();
@@ -22,6 +23,11 @@ describe('The chatConversationActionsService service', function() {
     };
     chatConversationService = {};
     chatConversationsStoreService = {};
+    chatConversationNameService = {
+      getName: sinon.spy(function() {
+        return $q.when(name);
+      })
+    };
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {
@@ -31,6 +37,7 @@ describe('The chatConversationActionsService service', function() {
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('chatConversationService', chatConversationService);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
+      $provide.value('chatConversationNameService', chatConversationNameService);
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
 
@@ -50,7 +57,103 @@ describe('The chatConversationActionsService service', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
   }));
 
-  describe('The addChannel function', function() {
+  describe('The addConversation function', function() {
+    it('should reject when conversation is undefined', function() {
+      chatConversationsStoreService.addConversation = sinon.spy();
+
+      chatConversationActionsService.addConversation().then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.match(/Can not add empty conversation/);
+      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+    });
+
+    it('should reject when name can not be resolved', function() {
+      var error = new Error('I failed');
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationNameService.getName = sinon.spy(function() {
+        return $q.reject(error);
+      });
+
+      chatConversationActionsService.addConversation(conversation).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.equal(error.message);
+      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+    });
+
+    it('should add the conversation to the store', function() {
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationActionsService.addConversation(conversation).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.have.been.called;
+      expect(errorSpy).to.not.have.been.called;
+      expect(chatConversationsStoreService.addConversation).to.have.been.called;
+      expect(chatConversationsStoreService.addConversation.firstCall.args[0].name).to.equal(name);
+    });
+  });
+
+  describe('The addConversationWhenCreatorOrConfidential function', function() {
+
+    it('should reject when conversation is undefined', function() {
+      chatConversationActionsService.addConversationWhenCreatorOrConfidential().then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.match(/Can not add empty conversation/);
+    });
+
+    it('should not add the public conversation to the store if user is not the creator', function() {
+      var aPublicConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.OPEN, creator: { _id: 'userId1' }};
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationActionsService.addConversationWhenCreatorOrConfidential(aPublicConversation).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(chatConversationNameService.getName).to.not.have.been.called;
+      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.match(/Can not add such conversation/);
+    });
+
+    it('should add the open conversation to the store if current user is the creator', function() {
+      var aPublicConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.OPEN, creator: { _id: user._id }};
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationActionsService.addConversationWhenCreatorOrConfidential(aPublicConversation).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(chatConversationNameService.getName).to.have.been.called;
+      expect(chatConversationsStoreService.addConversation).to.have.been.called;
+      expect(successSpy).to.have.been.called;
+      expect(errorSpy).to.not.have.been.called;
+      expect(successSpy.firstCall.args[0].name).to.equal(name);
+    });
+
+    it('should add the confidential conversation to the store even if not creator', function() {
+      var aConfidentialConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, creator: { _id: 'userId1' }};
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationActionsService.addConversationWhenCreatorOrConfidential(aConfidentialConversation).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(chatConversationNameService.getName).to.have.been.called;
+      expect(chatConversationsStoreService.addConversation).to.have.been.called;
+      expect(successSpy).to.have.been.called;
+      expect(errorSpy).to.not.have.been.called;
+      expect(successSpy.firstCall.args[0].name).to.equal(name);
+    });
+  });
+
+  describe('The createOpenConversation function', function() {
     it('should call chatConversationService.create and save new channel in store', function() {
       chatConversationService.create = sinon.spy(function() {
         return $q.when(result);
@@ -58,7 +161,7 @@ describe('The chatConversationActionsService service', function() {
 
       chatConversationsStoreService.addConversation = sinon.spy();
 
-      chatConversationActionsService.addChannel(conversation);
+      chatConversationActionsService.createOpenConversation(conversation);
       $rootScope.$digest();
 
       expect(chatConversationService.create).to.have.been.calledWith({_id: conversation._id, name: conversation.name, type: CHAT_CONVERSATION_TYPE.OPEN, mode: CHAT_CONVERSATION_MODE.CHANNEL});
@@ -72,7 +175,7 @@ describe('The chatConversationActionsService service', function() {
 
       chatConversationsStoreService.addConversation = sinon.spy();
 
-      chatConversationActionsService.addChannel(conversation).then(successSpy, errorSpy);
+      chatConversationActionsService.createOpenConversation(conversation).then(successSpy, errorSpy);
       $rootScope.$digest();
 
       expect(chatConversationService.create).to.have.been.calledWith({_id: conversation._id, name: conversation.name, type: CHAT_CONVERSATION_TYPE.OPEN, mode: CHAT_CONVERSATION_MODE.CHANNEL});
@@ -82,7 +185,7 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
-  describe('The addPrivateConversation function', function() {
+  describe('The createConfidentialConversation function', function() {
     it('should call chatConversationService.create and save new channel in store', function() {
       chatConversationService.create = sinon.spy(function() {
         return $q.when(result);
@@ -90,7 +193,7 @@ describe('The chatConversationActionsService service', function() {
 
       chatConversationsStoreService.addConversation = sinon.spy();
 
-      chatConversationActionsService.addPrivateConversation(conversation);
+      chatConversationActionsService.createConfidentialConversation(conversation);
       $rootScope.$digest();
 
       expect(chatConversationService.create).to.have.been.calledWith({_id: conversation._id, name: conversation.name, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, mode: CHAT_CONVERSATION_MODE.CHANNEL});
@@ -104,7 +207,7 @@ describe('The chatConversationActionsService service', function() {
 
       chatConversationsStoreService.addConversation = sinon.spy();
 
-      chatConversationActionsService.addPrivateConversation(conversation).then(successSpy, errorSpy);
+      chatConversationActionsService.createConfidentialConversation(conversation).then(successSpy, errorSpy);
       $rootScope.$digest();
 
       expect(chatConversationService.create).to.have.been.calledWith({_id: conversation._id, name: conversation.name, type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, mode: CHAT_CONVERSATION_MODE.CHANNEL});
@@ -263,18 +366,24 @@ describe('The chatConversationActionsService service', function() {
   });
 
   describe('The start function', function() {
+    var conversations;
+
+    beforeEach(function() {
+      conversations = [{_id: 1}, {_id: 2}];
+    });
+
     it('should fetch all the conversations and add them to the store', function() {
       chatConversationService.listForCurrentUser = sinon.spy(function() {
-        return $q.when(result);
+        return $q.when({data: conversations});
       });
 
-      chatConversationsStoreService.addConversations = sinon.spy();
+      chatConversationsStoreService.addConversation = sinon.spy();
 
-      chatConversationActionsService.start(conversation);
+      chatConversationActionsService.start();
       $rootScope.$digest();
 
       expect(chatConversationService.listForCurrentUser).to.have.been.called;
-      expect(chatConversationsStoreService.addConversations).to.have.been.calledWith(result.data);
+      expect(chatConversationsStoreService.addConversation).to.have.been.calledTwice;
     });
 
     it('should reject when fetchAllConversations rejects', function() {
@@ -282,13 +391,13 @@ describe('The chatConversationActionsService service', function() {
         return $q.reject(error);
       });
 
-      chatConversationsStoreService.addConversations = sinon.spy();
+      chatConversationsStoreService.addConversation = sinon.spy();
 
-      chatConversationActionsService.start(conversation);
+      chatConversationActionsService.start();
       $rootScope.$digest();
 
       expect(chatConversationService.listForCurrentUser).to.have.been.called;
-      expect(chatConversationsStoreService.addConversations).to.not.have.been.called;
+      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
     });
   });
 

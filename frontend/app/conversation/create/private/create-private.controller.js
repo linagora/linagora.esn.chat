@@ -23,7 +23,7 @@
         })
       };
 
-      chatConversationActionsService.addPrivateConversation(conversation).then(function(response) {
+      chatConversationActionsService.createConfidentialConversation(conversation).then(function(response) {
         notificationFactory.weakSuccess('success', 'Private conversation successfuly created');
         $state.go('chat.channels-views', { id: response._id});
       }, function(err) {
