@@ -2,9 +2,8 @@
   .flex-column;
 
   height: 100%;
+  padding: 10px;
   background-color: @m-white;
-  max-width: @chatRightSidebarDefaultWidth;
-  min-width: @chatRightSidebarDefaultWidth;
 
   .close {
     .flex-end;
@@ -22,6 +21,7 @@
 
     height: 100%;
     padding: 0 5px;
+    overflow: auto;
 
     esn-attachment-list {
       width: 100%;
@@ -36,10 +36,4 @@
 
 .chat-messages-sidebar {
   padding-bottom: 25px;
-
-  .conversation-sidebar-attachments .list .attachment-list{
-    overflow: auto;
-    height: 100%;
-    padding: 5px;
-  }
 }
