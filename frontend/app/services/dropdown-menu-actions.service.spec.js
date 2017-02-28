@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
-  var chatConversationsStoreServiceMock, chatDropdownMenuActionsService, sessionMock, activeRoom;
+  var chatConversationsStoreServiceMock, chatDropdownMenuActionsService, sessionMock, activeRoom, chatConversationMemberService;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat')
@@ -29,12 +29,17 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
       activeRoom: activeRoom
     };
 
+    chatConversationMemberService = {
+      currentUserIsMemberOf: sinon.spy()
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', sessionMock);
       $provide.value('chatConversationsStoreService', chatConversationsStoreServiceMock);
+      $provide.value('chatConversationMemberService', chatConversationMemberService);
     });
   });
 
@@ -54,6 +59,17 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
       activeRoom.creator = sessionMock.user._id;
 
       expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.false;
+    });
+
+  });
+
+  describe('the canInjectAddMembersAction method', function() {
+
+    it('should call `chatConversationMemberService.currentUserIsMemberOf` with activeRoom', function() {
+
+      chatDropdownMenuActionsService.canInjectAddMembersAction();
+
+      expect(chatConversationMemberService.currentUserIsMemberOf).to.be.calledWith(activeRoom);
     });
 
   });
