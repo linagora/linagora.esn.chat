@@ -17,7 +17,7 @@ module.exports = function(config) {
       'frontend/components/angular-uuid4/angular-uuid4.min.js',
       'frontend/components/restangular/dist/restangular.min.js',
       'frontend/components/sinon-chai/lib/sinon-chai.js',
-      'frontend/components/sinon-1.15.4/index.js',
+      'node_modules/sinon/pkg/sinon.js',
       'frontend/components/moment/moment.js',
       'frontend/components/lodash/dist/lodash.js',
       'frontend/components/angular-moment/angular-moment.js',
