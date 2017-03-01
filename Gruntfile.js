@@ -70,6 +70,25 @@ module.exports = function(grunt) {
         configFile: './test/config/karma.conf.js',
         browsers: ['PhantomJS']
       }
+    },
+
+    i18n_checker: {
+      all: {
+        options: {
+          baseDir: __dirname,
+          dirs: [{
+            localeDir: 'backend/lib/i18n/locales',
+            templateSrc: [
+              'frontend/app/**/*.jade'
+            ],
+            core: true
+          }],
+          verifyOptions: {
+            defaultLocale: 'en',
+            locales: ['en', 'fr', 'vi']
+          }
+        }
+      }
     }
   });
 
@@ -87,10 +106,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-run-grunt');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-wait-server');
+  grunt.loadNpmTasks('grunt-i18n-checker');
 
   grunt.loadTasks('tasks');
 
-  grunt.registerTask('linters', 'Check code for lint', ['eslint:all', 'lint_pattern:all']);
+  grunt.registerTask('i18n', 'Check the translation files', ['i18n_checker']);
+  grunt.registerTask('linters', 'Check code for lint', ['eslint:all', 'lint_pattern:all', 'i18n']);
   grunt.registerTask('linters-dev', 'Check changed files for lint', ['prepare-quick-lint', 'jshint:quick', 'jscs:quick', 'lint_pattern:quick']);
   grunt.registerTask('spawn-servers', 'spawn servers', ['shell:mongo', 'shell:redis', 'shell:elasticsearch']);
   grunt.registerTask('kill-servers', 'kill servers', ['shell:mongo:kill', 'shell:redis:kill', 'shell:elasticsearch:kill']);
