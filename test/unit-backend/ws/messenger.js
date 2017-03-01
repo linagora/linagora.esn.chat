@@ -8,7 +8,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const DEFAULT_ROOM = CONSTANTS.WEBSOCKET.DEFAULT_ROOM;
 
 describe('The chat websocket messenger', function() {
-  let channel, conversation, members, message, messenger, logger, options, transport, sendDataToMembersSpy, sendDataToUsersSpy;
+  let channel, conversation, members, message, messenger, logger, options, transport, sendDataToMembersSpy, sendDataToUsersSpy, sendDataToUserSpy;
 
   beforeEach(function() {
     members = [];
@@ -18,6 +18,7 @@ describe('The chat websocket messenger', function() {
     message = {_id: 1, text: 'My message', channel: channel};
     sendDataToMembersSpy = sinon.spy();
     sendDataToUsersSpy = sinon.spy();
+    sendDataToUserSpy = sinon.spy();
 
     this.moduleHelpers.addDep('logger', logger);
     options = {
@@ -34,6 +35,10 @@ describe('The chat websocket messenger', function() {
 
       sendDataToUsers(type, data) {
         sendDataToUsersSpy(type, data);
+      }
+
+      sendDataToUser(user, type, data) {
+        sendDataToUserSpy(user, type, data);
       }
     })();
   });
@@ -218,6 +223,16 @@ describe('The chat websocket messenger', function() {
       messenger.topicUpdated(conversation);
 
       expect(sendDataToUsersSpy).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, {data: conversation, room: DEFAULT_ROOM});
+    });
+  });
+
+  describe('The sendMessageToUser function', function() {
+    it('should call transport.sendDataToUser function', function() {
+      const user = '1';
+
+      messenger.sendMessageToUser(user, message);
+
+      expect(sendDataToUserSpy).to.have.been.calledWith(user, 'message', {data: message, room: DEFAULT_ROOM});
     });
   });
 });

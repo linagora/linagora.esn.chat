@@ -51,6 +51,7 @@ module.exports = {
     JOIN: 'join'
   },
   MESSAGE_TYPE: {
+    BOT: 'bot',
     TEXT: 'text',
     USER_TYPING: 'user_typing'
   },

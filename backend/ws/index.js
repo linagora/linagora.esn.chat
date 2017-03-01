@@ -28,4 +28,9 @@ function init(dependencies, lib) {
   adapter.bindEvents(messenger);
 
   initialized = true;
+
+  return {
+    messenger,
+    transport
+  };
 }
