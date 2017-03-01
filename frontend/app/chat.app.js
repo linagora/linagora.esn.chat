@@ -20,7 +20,6 @@
     'esn.user',
     'op.dynamicDirective',
     'esn.url',
-    'angularMoment',
     'esn.lodash-wrapper',
     'esn.oembed',
     'esn.oembed.image',
