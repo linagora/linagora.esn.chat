@@ -12,6 +12,10 @@
 
     var chatLeaveConversationActionDynamicDirective = new DynamicDirective(chatDropdownMenuActionsService.canInjectLeaveAction, 'chat-leave-conversation-dropdown-action');
     dynamicDirectiveService.addInjection('chat-conversation-dropdown-actions', chatLeaveConversationActionDynamicDirective);
+
+    var chatAddMembersActionDynamicDirective = new DynamicDirective(chatDropdownMenuActionsService.canInjectAddMembersAction, 'chat-add-members-dropdown-action');
+    dynamicDirectiveService.addInjection('chat-conversation-dropdown-actions', chatAddMembersActionDynamicDirective);
+
   }
 
 })();
