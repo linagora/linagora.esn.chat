@@ -146,6 +146,61 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The getConversation function', function() {
+    it('should call chatConversationsStoreService.findConversation', function() {
+      chatConversationsStoreService.findConversation = sinon.spy(function() {
+        return conversation;
+      });
+
+      chatConversationActionsService.getConversation(conversation._id);
+      $rootScope.$digest();
+
+      expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(conversation._id);
+    });
+
+    it('should call chatConversationService.get if chatConversationsStoreService.findConversation returns nothing', function() {
+      chatConversationsStoreService.findConversation = sinon.spy();
+
+      chatConversationService.get = sinon.spy(function() {
+        return $q.when([]);
+      });
+      chatConversationActionsService.getConversation(conversation._id);
+
+      $rootScope.$digest();
+
+      expect(chatConversationService.get).to.have.been.calledWith(conversation._id);
+    });
+
+    it('should not call chatConversationsStoreService.addConversation if chatConversationService.get returns nothing', function() {
+      chatConversationsStoreService.findConversation = sinon.spy();
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationService.get = sinon.spy(function() {
+        return $q.when({});
+      });
+      chatConversationActionsService.getConversation(conversation._id);
+
+      $rootScope.$digest();
+
+      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+    });
+
+    it('should call chatConversationsStoreService.addConversation if chatConversationService.get returns conversation', function() {
+      var conversation = {_id: 1, name: 'My conversation', data: 'aSimpleData'};
+
+      chatConversationsStoreService.findConversation = sinon.spy();
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationService.get = sinon.spy(function() {
+        return $q.when(conversation);
+      });
+      chatConversationActionsService.getConversation(conversation._id);
+
+      $rootScope.$digest();
+
+      expect(chatConversationsStoreService.addConversation).to.have.been.called.once;
+    });
+  });
+
   describe('The increaseNumberOfUnreadMessages function', function() {
     it('should call the equivalent function in chatConversationsStoreService', function() {
       chatConversationsStoreService.increaseNumberOfUnreadMessages = sinon.spy();

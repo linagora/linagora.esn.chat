@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, $stateParams, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService) {
+  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, _) {
     var self = this;
 
     self.spinnerKey = 'ChatConversationSpinner';
@@ -140,11 +140,19 @@
       loadPreviousMessages(true).then(scrollDown);
     }
 
+    function isDuplicate(message) {
+      return _.find(self.messages, {_uniqId: message._uniqId});
+    }
+
     [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
       $scope.$on(eventReceived, function(event, message) {
         if (message.channel && message.channel === self.chatConversationsStoreService.activeRoom._id) {
-          self.newMessage(message);
-          scrollDown(message.creator._id === session.user._id, message.channel);
+          addUniqId(message);
+
+          if (!isDuplicate(message)) {
+            self.newMessage(message);
+            scrollDown(message.creator._id === session.user._id, message.channel);
+          }
         }
       });
     });

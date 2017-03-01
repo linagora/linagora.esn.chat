@@ -131,7 +131,7 @@ describe('The ChatConversationViewController controller', function() {
 
     beforeEach(function() {
       $stateParams.id = null;
-      message = {_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}};
+      message = {_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}, text: 'haha'};
       chatConversationServiceMock.fetchMessages = function() {
         return $q.when([]);
       };
@@ -182,6 +182,36 @@ describe('The ChatConversationViewController controller', function() {
 
       expect(scope.vm.messages).to.shallowDeepEqual([message]);
       expect(chatScrollServiceMock.setCanScrollDown).to.be.called;
+    });
+
+    it('should not add the message if already in conversation messages', function() {
+      var channel = 1;
+
+      chatConversationsStoreService.activeRoom._id = channel;
+      var ctrl = initCtrl(true);
+      var messages = [{_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}, text: 'haha', channel: channel }, {_id: 2, creator: {_id: 'userId'}, timestamps: {creation: 3}, text: 'haha', channel: channel}];
+      ctrl.messages = messages;
+
+      scope.$emit(CHAT_EVENTS.TEXT_MESSAGE, messages[0]);
+      $rootScope.$digest();
+
+      expect(scope.vm.messages).to.deep.equal(messages);
+    });
+
+    it('should add the message if not already in conversation messages', function() {
+      var channel = 1;
+
+      chatConversationsStoreService.activeRoom._id = channel;
+      message.channel = channel;
+      var ctrl = initCtrl(true);
+      ctrl.messages = [{_id: 10, creator: {_id: 'userId10'}, timestamps: {creation: 10}, text: 'haha' }, {_id: 20, creator: {_id: 'userId20'}, timestamps: {creation: 30}, text: 'haha'}];
+
+      expect(scope.vm.messages.length).to.deep.equal(2);
+      scope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+      $rootScope.$digest();
+
+      expect(scope.vm.messages.length).to.equal(3);
+      expect(scope.vm.messages).to.contain(message);
     });
   });
 
