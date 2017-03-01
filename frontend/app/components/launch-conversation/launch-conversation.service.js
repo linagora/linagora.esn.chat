@@ -21,7 +21,7 @@
 
       onSuccess = onSuccess || getDefaultSuccess;
 
-      return chatConversationActionsService.addPrivateConversation({members: userIds})
+      return chatConversationActionsService.createConfidentialConversation({members: userIds})
         .then(function(response) {
           return onSuccess(response.data);
         })

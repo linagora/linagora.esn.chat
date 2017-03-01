@@ -6,13 +6,14 @@ var expect = chai.expect;
 
 describe('The chatConversationListenerService service', function() {
 
-  var $rootScope, conversation, chatMessengerService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session;
-  var CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
+  var $rootScope, $q, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session;
+  var CHAT_EVENTS;
 
   beforeEach(function() {
     conversation = {_id: 1, name: 'My conversation'};
     chatConversationActionsService = {};
     chatConversationsStoreService = {};
+    chatConversationService = {};
     chatParseMention = {};
 
     chatMessengerService = {
@@ -35,15 +36,16 @@ describe('The chatConversationListenerService service', function() {
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatParseMention', chatParseMention);
       $provide.value('chatMessengerService', chatMessengerService);
+      $provide.value('chatConversationService', chatConversationService);
       $provide.value('session', session);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _chatConversationListenerService_, _CHAT_EVENTS_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationListenerService_, _CHAT_EVENTS_) {
+    $q = _$q_;
     $rootScope = _$rootScope_;
     chatConversationListenerService = _chatConversationListenerService_;
     CHAT_EVENTS = _CHAT_EVENTS_;
-    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
   }));
 
   describe('The addEventListeners function', function() {
@@ -54,52 +56,54 @@ describe('The chatConversationListenerService service', function() {
     });
 
     describe('on CHAT_EVENTS.NEW_CONVERSATION', function() {
-      it('should not add the public conversation to the store if user is not the creator', function() {
-        var aPublicConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.OPEN, creator: { _id: 'userId1' }};
+      it('should reject when chatConversationService.get rejects', function(done) {
+        var error = new Error('I failed');
 
-        chatConversationsStoreService.addConversation = sinon.spy();
+        chatConversationActionsService.addConversationWhenCreatorOrConfidential = sinon.spy();
+        chatConversationService.get = sinon.spy(function() {
+          return $q.reject(error);
+        });
 
         chatConversationListenerService.addEventListeners();
 
         expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.NEW_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
-          callback(aPublicConversation);
-
-          expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+          callback(conversation).then(function() {
+            done(new Error('Should not be called'));
+          }).catch(function(err) {
+            expect(err.message).to.equal(error.message);
+            expect(chatConversationService.get).to.have.been.calledWith(conversation._id);
+            expect(chatConversationActionsService.addConversationWhenCreatorOrConfidential).to.not.have.been.called;
+            done();
+          });
 
           return true;
         })));
+        $rootScope.$digest();
       });
 
-      it('should add the public conversation to the store if I am the creator', function() {
-        var aPublicConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.OPEN, creator: { _id: '_userId' }};
+      it('should call chatConversationActionsService.addConversationWhenCreatorOrConfidential with chatConversationService.get result', function(done) {
+        var result = {_id: 1, name: 'Foo'};
 
-        chatConversationsStoreService.addConversation = sinon.spy();
-
-        chatConversationListenerService.addEventListeners();
-
-        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.NEW_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
-          callback(aPublicConversation);
-
-          expect(chatConversationsStoreService.addConversation).to.have.been.calledWith(aPublicConversation);
-
-          return true;
-        })));
-      });
-
-      it('should add the confidential conversation to the store', function() {
-        var aConfidentialConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, creator: { _id: 'userId1' }};
-
-        chatConversationsStoreService.addConversation = sinon.spy();
+        chatConversationActionsService.addConversationWhenCreatorOrConfidential = sinon.spy(function() {
+          return $q.when();
+        });
+        chatConversationService.get = sinon.spy(function() {
+          return $q.when(result);
+        });
 
         chatConversationListenerService.addEventListeners();
 
         expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.NEW_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
-          callback(aConfidentialConversation);
-
-          expect(chatConversationsStoreService.addConversation).to.have.been.calledWith(aConfidentialConversation);
+          callback(conversation).then(function() {
+            expect(chatConversationService.get).to.have.been.calledWith(conversation._id);
+            expect(chatConversationActionsService.addConversationWhenCreatorOrConfidential).to.have.been.calledWith(result);
+            done();
+          }).catch(done);
 
           return true;
         })));
+        $rootScope.$digest();
+
       });
     });
 

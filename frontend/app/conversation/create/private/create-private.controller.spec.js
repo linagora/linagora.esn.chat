@@ -60,17 +60,17 @@ describe('The ChatConversationCreatePrivateController controller', function() {
 
     it('should not create channel when form is invalid', function() {
       form.$invalid = true;
-      chatConversationActionsService.addPrivateConversation = sinon.spy();
+      chatConversationActionsService.createConfidentialConversation = sinon.spy();
 
       var controller = initController();
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationActionsService.addPrivateConversation).to.not.have.been.called;
+      expect(chatConversationActionsService.createConfidentialConversation).to.not.have.been.called;
     });
 
     it('should display a notification on creation failure', function() {
-      chatConversationActionsService.addPrivateConversation = sinon.spy(function() {
+      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
         return $q.reject(new Error());
       });
       notificationFactory.weakError = sinon.spy();
@@ -79,7 +79,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
 
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationActionsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: []});
+      expect(chatConversationActionsService.createConfidentialConversation).to.have.been.calledWith({domain: session.domain._id, members: []});
       expect(notificationFactory.weakError).to.have.been.calledWith('error', 'Error while creating private conversation');
     });
 
@@ -87,7 +87,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
       var result = {_id: 1};
       var members = [{_id: 1}, {_id: 2}, {_id: 3}];
 
-      chatConversationActionsService.addPrivateConversation = sinon.spy(function() {
+      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
         return $q.when(result);
       });
       notificationFactory.weakSuccess = sinon.spy();
@@ -98,7 +98,7 @@ describe('The ChatConversationCreatePrivateController controller', function() {
       controller.members = members;
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationActionsService.addPrivateConversation).to.have.been.calledWith({domain: session.domain._id, members: [1, 2, 3]});
+      expect(chatConversationActionsService.createConfidentialConversation).to.have.been.calledWith({domain: session.domain._id, members: [1, 2, 3]});
       expect(notificationFactory.weakSuccess).to.have.been.calledWith('success', 'Private conversation successfuly created');
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: result._id});
     });

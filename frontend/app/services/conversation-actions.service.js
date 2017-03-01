@@ -4,12 +4,14 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationActionsService', chatConversationActionsService);
 
-  function chatConversationActionsService($log, $q, $rootScope, _, session, chatConversationService, chatConversationsStoreService, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE) {
+  function chatConversationActionsService($log, $q, $rootScope, _, session, chatConversationService, chatConversationsStoreService, chatConversationNameService, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE) {
     var ready = $q.defer();
 
     return {
-      addChannel: addChannel,
-      addPrivateConversation: addPrivateConversation,
+      addConversation: addConversation,
+      addConversationWhenCreatorOrConfidential: addConversationWhenCreatorOrConfidential,
+      createConfidentialConversation: createConfidentialConversation,
+      createOpenConversation: createOpenConversation,
       deleteConversation: deleteConversation,
       getConversation: getConversation,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
@@ -26,15 +28,44 @@
       start: start
     };
 
-    function addChannel(channel) {
-      channel.type = CHAT_CONVERSATION_TYPE.OPEN;
-      channel.mode = CHAT_CONVERSATION_MODE.CHANNEL;
+    function addConversation(conversation) {
+      if (!conversation) {
+        return $q.reject(new Error('Can not add empty conversation'));
+      }
 
-      return createConversation(channel);
+      return chatConversationNameService.getName(conversation).then(function(name) {
+        conversation.name = name;
+        chatConversationsStoreService.addConversation(conversation);
+
+        return conversation;
+      });
     }
 
-    function addPrivateConversation(conversation) {
+    function addConversations(conversations) {
+      return $q.all(conversations.map(addConversation));
+    }
+
+    function addConversationWhenCreatorOrConfidential(conversation) {
+      if (!conversation) {
+        return $q.reject(new Error('Can not add empty conversation'));
+      }
+
+      if (currentUserIsCreator(conversation) || conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
+        return addConversation(conversation);
+      }
+
+      return $q.reject(new Error('Can not add such conversation', conversation));
+    }
+
+    function createConfidentialConversation(conversation) {
       conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
+      conversation.mode = CHAT_CONVERSATION_MODE.CHANNEL;
+
+      return createConversation(conversation);
+    }
+
+    function createOpenConversation(conversation) {
+      conversation.type = CHAT_CONVERSATION_TYPE.OPEN;
       conversation.mode = CHAT_CONVERSATION_MODE.CHANNEL;
 
       return createConversation(conversation);
@@ -42,11 +73,7 @@
 
     function createConversation(conversation) {
       return chatConversationService.create(conversation).then(function(result) {
-        var created = result.data;
-
-        chatConversationsStoreService.addConversation(created);
-
-        return created;
+        return addConversation(result.data);
       });
     }
 
@@ -87,6 +114,10 @@
       return chatConversationsStoreService.increaseNumberOfUnreadMessages(conversationId);
     }
 
+    function currentUserIsCreator(conversation) {
+      return session.user._id === conversation.creator._id || session.user._id === conversation.creator;
+    }
+
     function joinConversation(conversation) {
       return chatConversationService.join(conversation._id, session.user._id).then(function() {
         chatConversationsStoreService.joinConversation(conversation);
@@ -118,7 +149,7 @@
 
     function start() {
       fetchAllConversations()
-        .then(chatConversationsStoreService.addConversations, function(err) {
+        .then(addConversations, function(err) {
           $log.error('Can not get user conversations', err);
 
           return $q.reject(err);
