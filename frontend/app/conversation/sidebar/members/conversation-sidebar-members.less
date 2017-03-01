@@ -1,8 +1,9 @@
 .conversation-sidebar-members {
   .flex-column;
 
-  max-width: @chatRightSidebarDefaultWidth;
-  min-width: @chatRightSidebarDefaultWidth;
+  height: 100%;
+  padding: 10px;
+  background-color: @m-white;
 
   .close {
     .flex-end;
@@ -12,18 +13,26 @@
   }
 
   .list {
-    padding: 10px;
+    .flex;
+
+    height: 100%;
+    overflow: auto;
+
+    esn-collaboration-members-list {
+      width: 100%;
+
+      member-display {
+        width: 100%;
+
+        .member-container {
+          .flex-vertical-centered;
+        }
+      }
+    }
   }
 
   @media(min-width: @screen-md-min) {
     min-width: @chatRightSidebarDesktopWidth;
     max-width: @chatRightSidebarDesktopWidth;
-  }
-}
-
-.chat-messages-sidebar {
-  .conversation-sidebar-members .list .collaboration-members-list{
-    overflow-y: scroll;
-    height: ~"calc(100vh - 309px)";
   }
 }

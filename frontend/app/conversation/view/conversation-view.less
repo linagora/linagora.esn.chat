@@ -10,7 +10,7 @@
   }
 
   .dnd-overlay {
-    height: ~"calc(100% + @{chatFooterHeight})";
+    height: ~"calc(100% - @{chatConversationIsTypingHeight})";
     left: 0;
     pointer-events: none;
     position: absolute;
@@ -21,6 +21,7 @@
 
     .dnd-overlay-text {
       .all-centered;
+
 
       flex-direction: column;
       overflow: hidden;
