@@ -41,7 +41,7 @@ describe('the chatMessageController controller', function() {
   describe('the $onInit function', function() {
 
     it('should set displayType to USER when message subtype is not SYSTEM one', function() {
-      var message = {subtype: 'abc'};
+      var message = {type: 'text', subtype: 'abc'};
       var controller = initController(message);
 
       controller.$onInit();
@@ -50,12 +50,21 @@ describe('the chatMessageController controller', function() {
     });
 
     it('should set displayType to USER when message subtype is undefined', function() {
-      var message = {};
+      var message = {type: 'text'};
       var controller = initController(message);
 
       controller.$onInit();
       $rootScope.$digest();
       expect(controller.displayType).to.equal(CHAT_MESSAGE_DISPLAYABLE_TYPES.USER);
+    });
+
+    it('should set displayType to BOT when message type is bot', function() {
+      var message = {type: CHAT_MESSAGE_DISPLAYABLE_TYPES.BOT};
+      var controller = initController(message);
+
+      controller.$onInit();
+      $rootScope.$digest();
+      expect(controller.displayType).to.equal(CHAT_MESSAGE_DISPLAYABLE_TYPES.BOT);
     });
 
     it('should set displayType to SYSTEM when message subtype is from CHAT_SYSTEM_MESSAGE_SUBTYPES', function() {
@@ -69,7 +78,7 @@ describe('the chatMessageController controller', function() {
       }
 
       CHAT_SYSTEM_MESSAGE_SUBTYPES.forEach(function(subtype) {
-        test({subtype: subtype});
+        test({type: 'text', subtype: subtype});
       });
     });
 

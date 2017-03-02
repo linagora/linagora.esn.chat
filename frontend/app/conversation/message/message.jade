@@ -1,3 +1,4 @@
 .chat-message-switch(ng-switch='ctrl.displayType')
   chat-user-message(ng-switch-when='user', message="ctrl.message")
   chat-system-message(ng-switch-when='system', message="ctrl.message")
+  chat-bot-message(ng-switch-when='bot', message="ctrl.message")

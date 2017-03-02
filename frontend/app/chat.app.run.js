@@ -4,7 +4,11 @@
   angular.module('linagora.esn.chat')
     .run(runBlock);
 
-  function runBlock(chatNotificationService, chatConversationListenerService, chatConversationActionsService, editableOptions, DynamicDirective, dynamicDirectiveService, chatDropdownMenuActionsService) {
+  function runBlock(chatNotificationService, chatConversationListenerService,
+                    chatConversationActionsService, editableOptions,
+                    DynamicDirective, dynamicDirectiveService,
+                    chatDropdownMenuActionsService, chatBotMessageService,
+                    chatBotMessageTextHandler) {
     chatNotificationService.start();
     chatConversationActionsService.start();
     chatConversationListenerService.start();
@@ -16,6 +20,7 @@
     var chatAddMembersActionDynamicDirective = new DynamicDirective(chatDropdownMenuActionsService.canInjectAddMembersAction, 'chat-add-members-dropdown-action');
     dynamicDirectiveService.addInjection('chat-conversation-dropdown-actions', chatAddMembersActionDynamicDirective);
 
+    chatBotMessageService.register(chatBotMessageTextHandler.type, chatBotMessageTextHandler.setText);
   }
 
 })();
