@@ -43,6 +43,12 @@ class Transport extends EventEmitter {
     });
   }
 
+  sendDataToUser(user, type, data) {
+    const sockets = this.helper.getUserSocketsFromNamespace(user._id || user, this.chatNamespace.sockets) || [];
+
+    sockets.forEach(socket => socket.emit(type, data));
+  }
+
   sendDataToUsers(type, data) {
     this.chatNamespace.emit(type, data);
   }

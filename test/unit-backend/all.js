@@ -12,8 +12,9 @@ before(function() {
 
 beforeEach(function() {
   mockery.enable({warnOnReplace: false, warnOnUnregistered: false, useCleanCache: true});
+  const logger = require('./fixtures/logger-noop');
   const depsStore = {
-    logger: require('./fixtures/logger-noop'),
+    logger: logger,
     errors: require('./fixtures/errors')
   };
   const dependencies = function(name) {
@@ -24,6 +25,7 @@ beforeEach(function() {
   };
 
   this.moduleHelpers = {
+    logger: logger,
     modulesPath: __dirname + '/../modules/',
     addDep: addDep,
     dependencies: dependencies

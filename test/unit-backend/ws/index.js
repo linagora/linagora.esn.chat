@@ -90,5 +90,13 @@ describe('The Websocket module', function() {
       expect(bindSpy).to.have.been.calledOnce;
       expect(logger.warn).to.have.been.calledWith('The chat websocket service is already initialized');
     });
+
+    it('should return messenger and transport', function() {
+      const module = requireModule();
+      const result = module.init(this.moduleHelpers.dependencies, lib);
+
+      expect(result.messenger).to.exist;
+      expect(result.transport).to.exist;
+    });
   });
 });

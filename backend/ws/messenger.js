@@ -64,6 +64,15 @@ class Messenger extends EventEmitter {
     this.sendDataToClients(conversation, 'message', message);
   }
 
+  sendMessageToUser(user, message) {
+    const payload = {
+      data: message,
+      room: DEFAULT_ROOM
+    };
+
+    this.transport.sendDataToUser(user, 'message', payload);
+  }
+
   topicUpdated(conversation) {
     this.sendDataToClients(conversation, CONVERSATION_TOPIC_UPDATED, conversation);
   }

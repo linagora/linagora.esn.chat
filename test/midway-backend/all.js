@@ -62,6 +62,11 @@ before(function() {
   };
 
   this.helpers.loadApplication = function(dependencies, skipModels) {
+    mockery.registerMock('./bot', function() {
+      return {
+        start: function() {}
+      };
+    });
     const lib = require('../../backend/lib')(dependencies);
     const mongoose = dependencies('db').mongo.mongoose;
     const ObjectId = mongoose.Schema.ObjectId;

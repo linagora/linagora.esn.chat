@@ -17,8 +17,10 @@ module.exports = function(dependencies) {
   const members = require('./members')(dependencies);
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies, {conversation, message});
+  const bot = require('./bot')(dependencies, {conversation, message, members});
 
   return {
+    bot: bot,
     constants,
     conversation,
     listener,
@@ -32,6 +34,7 @@ module.exports = function(dependencies) {
   };
 
   function start(callback) {
+    bot.start(this.websocket);
     listener.start();
     moderate.start();
     search.init();

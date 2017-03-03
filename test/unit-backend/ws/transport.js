@@ -69,6 +69,28 @@ describe('The chat websocket transport', function() {
     });
   });
 
+  describe('The sendDataToUser function', function() {
+    it('should emit message on each user socket', function() {
+      const user = '1';
+      const socketA = {emit: sinon.spy()};
+      const socketB = {emit: sinon.spy()};
+      const socketC = {emit: sinon.spy()};
+      const type = 'MyType';
+      const data = 'MyData';
+
+      ioHelper.getUserSocketsFromNamespace = sinon.spy(function() {
+        return [socketA, socketB, socketC];
+      });
+
+      transport.sendDataToUser(user, type, data);
+
+      expect(ioHelper.getUserSocketsFromNamespace).to.have.been.calledOnce;
+      expect(socketA.emit).to.have.been.calledWith(type, data);
+      expect(socketB.emit).to.have.been.calledWith(type, data);
+      expect(socketC.emit).to.have.been.calledWith(type, data);
+    });
+  });
+
   describe('The sendDataToUsers function', function() {
     it('should emit message on chatNamespace', function() {
       const type = 'MyType';
