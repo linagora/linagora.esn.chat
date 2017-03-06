@@ -1,0 +1,8 @@
+.lv-item.media.chat-bot-message(ng-if="!ctrl.hasBotError", desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
+  a.lv-avatar.pull-left
+    img(ng-src='{{::ctrl.botUser.avatarUrl}}', alt='')
+  .media-body
+    .chat-bot-message-title
+      span.displayname {{::ctrl.botUser.displayName}}
+      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+    .chat-bot-message-text(ng-bind-html="ctrl.parsed.text")

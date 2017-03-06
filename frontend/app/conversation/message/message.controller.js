@@ -11,8 +11,15 @@
       self.$onInit = $onInit;
 
       function $onInit() {
-        self.displayType = self.message.subtype && _.include(CHAT_SYSTEM_MESSAGE_SUBTYPES, self.message.subtype) ?
-          CHAT_MESSAGE_DISPLAYABLE_TYPES.SYSTEM : CHAT_MESSAGE_DISPLAYABLE_TYPES.USER;
+        if (self.message.type) {
+          self.displayType = CHAT_MESSAGE_DISPLAYABLE_TYPES.USER;
+
+          if (self.message.type === CHAT_MESSAGE_DISPLAYABLE_TYPES.BOT) {
+            self.displayType = CHAT_MESSAGE_DISPLAYABLE_TYPES.BOT;
+          } else if (self.message.subtype && _.include(CHAT_SYSTEM_MESSAGE_SUBTYPES, self.message.subtype)) {
+            self.displayType = CHAT_MESSAGE_DISPLAYABLE_TYPES.SYSTEM;
+          }
+        }
       }
     }
 })();

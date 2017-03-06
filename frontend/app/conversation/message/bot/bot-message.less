@@ -1,0 +1,52 @@
+.chat-bot-message {
+  &.highlight {
+    background-color: @darkenBgColor;
+  }
+
+  .lv-avatar, .chat-bot-message-time {
+    display: block;
+    margin-right: 0;
+    min-width: 55px;
+  }
+
+  .lv-avatar > img {
+    border-radius: 2px;
+    margin-right: 10px;
+  }
+
+  .pull-left {
+    text-align: left;
+    padding-right: 10px;
+  }
+
+  .chat-bot-message-time {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s linear;
+  }
+
+  .chat-bot-message-title {
+    span {
+      color: @text-color;
+    }
+
+    .displayname {
+      font-weight: 600;
+    }
+
+    .date {
+      color: @chatDateTextColor;
+      padding-left: 10px;
+      display: inline;
+    }
+  }
+
+  .chat-bot-message-text {
+    white-space: pre-wrap;
+    color: @secondaryTextColor;
+
+    .chat-emoji {
+      width: @chatLabelEmojiSize;
+    }
+  }
+}

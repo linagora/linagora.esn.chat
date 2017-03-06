@@ -24,6 +24,7 @@
       NEW_CONVERSATION: 'chat:conversation:created',
       CONVERSATION_DELETION: 'chat:conversation:deleted',
       TEXT_MESSAGE: 'chat:message:text',
+      BOT_MESSAGE: 'chat:message:bot',
       FILE_MESSAGE: 'chat:message:file',
       SET_ACTIVE_ROOM: 'chat:message:set_active_room',
       UNSET_ACTIVE_ROOM: 'chat:message:unset_active_room',
@@ -39,7 +40,8 @@
     })
     .constant('CHAT_MESSAGE_DISPLAYABLE_TYPES', {
       USER: 'user',
-      SYSTEM: 'system'
+      SYSTEM: 'system',
+      BOT: 'bot'
     })
     .constant('CHAT_MESSAGE_PREFIX', 'chat:message:')
     .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'conversation_leave', 'topic_update'])
@@ -83,5 +85,11 @@
       ARROW_UP: 38,
       ARROW_RIGHT: 39,
       ARROW_DOWN: 40
+    })
+    .constant('CHAT_BOT', {
+      MESSAGE_DEFAULT_SUBTYPES: 'text',
+      MESSAGE_SUBTYPES: {
+        TEXT: 'text'
+      }
     });
 })();
