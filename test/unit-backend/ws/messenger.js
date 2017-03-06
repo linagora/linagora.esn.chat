@@ -166,6 +166,21 @@ describe('The chat websocket messenger', function() {
     });
   });
 
+  describe('The memberHasBeenAdded function', function() {
+    let member, by_member;
+
+    beforeEach(function() {
+      member = {member: {id: '1', objectType: 'user'}};
+      by_member = {member: {id: '2', objectType: 'user'}};
+    });
+
+    it('should send conversation to user', function() {
+      messenger.memberHasBeenAdded(conversation, member, by_member);
+
+      expect(sendDataToUserSpy).to.have.been.calledWith(member.member._id, CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_TO_CONVERSATION, {data: {conversation, member, by_member}, room: DEFAULT_ROOM});
+    });
+  });
+
   describe('The sendDataToClients function', function() {
     it('should send data to members when conversation is confidential', function() {
       const type = 'MyType';
@@ -233,6 +248,17 @@ describe('The chat websocket messenger', function() {
       messenger.sendMessageToUser(user, message);
 
       expect(sendDataToUserSpy).to.have.been.calledWith(user, 'message', {data: message, room: DEFAULT_ROOM});
+    });
+  });
+
+  describe('The sendDataToUser function', function() {
+    it('should call transport.sendDataToUser function', function() {
+      const user = '1';
+      const type = 'MyType';
+
+      messenger.sendDataToUser(user, type, message);
+
+      expect(sendDataToUserSpy).to.have.been.calledWith(user, type, {data: message, room: DEFAULT_ROOM});
     });
   });
 });

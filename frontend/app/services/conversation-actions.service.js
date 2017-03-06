@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationActionsService', chatConversationActionsService);
 
-  function chatConversationActionsService($log, $q, $rootScope, _, session, chatConversationService, chatConversationsStoreService, chatConversationNameService, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE) {
+  function chatConversationActionsService($log, $state, $q, $rootScope, _, session, chatConversationService, chatConversationsStoreService, chatConversationNameService, chatNotificationService, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE) {
     var ready = $q.defer();
 
     return {
@@ -18,6 +18,7 @@
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
       markAllMessagesAsRead: markAllMessagesAsRead,
+      memberHasBeenAdded: memberHasBeenAdded,
       ready: ready.promise,
       setActive: setActive,
       unsetActive: unsetActive,
@@ -139,6 +140,19 @@
         chatConversationsStoreService.markAllMessagesAsRead(conversation);
 
         return true;
+      });
+    }
+
+    function memberHasBeenAdded(conversation, member) {
+      if (session.user._id !== member.member.id) {
+        return;
+      }
+
+      return chatConversationNameService.getName(conversation).then(function(name) {
+        chatNotificationService.notify('Welcome to ' + name, {
+          body: 'You have been added to the conversation, click to go',
+          onClick: $state.go('chat.channels-views', {id: conversation._id})
+        });
       });
     }
 

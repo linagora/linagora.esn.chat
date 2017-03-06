@@ -17,6 +17,7 @@
     })
     .constant('CHAT_EVENTS', {
       CONVERSATION_TOPIC_UPDATED: 'chat:conversation:topic:updated',
+      MEMBER_ADDED_TO_CONVERSATION: 'chat:conversation:members:added',
       MEMBER_JOINED_CONVERSATION: 'chat:conversation:members:joined',
       MEMBER_LEFT_CONVERSATION: 'chat:conversation:members:left',
       MESSAGE_RECEIVED: 'chat:message:received',
@@ -47,9 +48,9 @@
     .constant('CHAT_SYSTEM_MESSAGE_SUBTYPES', ['conversation_join', 'conversation_leave', 'topic_update'])
     .constant('CHAT_MENTION_CHAR', '@')
     .constant('CHAT_NAMESPACE', '/chat')
-    .constant('CHAT_NOTIF', {
-      CHAT_AUTO_CLOSE: 4000,
-      CHAT_DEFAULT_ICON: '/images/default_avatar.png'
+    .constant('CHAT_NOTIFICATION', {
+      AUTO_CLOSE: 4000,
+      DEFAULT_ICON: '/images/default_avatar.png'
     })
     .constant('CHAT_CONVERSATION_TYPE', {
       OPEN: 'open',

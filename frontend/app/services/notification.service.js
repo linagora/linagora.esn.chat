@@ -4,11 +4,12 @@
   angular.module('linagora.esn.chat')
     .factory('chatNotificationService', chatNotificationService);
 
-    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, CHAT_EVENTS, CHAT_NOTIF, chatConversationActionsService, chatParseMention) {
+    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, chatConversationActionsService, chatParseMention, CHAT_EVENTS, CHAT_NOTIFICATION) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
       var service = {
         isEnabled: isEnabled,
+        notify: notify,
         setNotificationStatus: setNotificationStatus,
         start: start
       };
@@ -36,6 +37,19 @@
         return enable;
       }
 
+      function notify(title, options, onShow) {
+        options = options || {};
+        options.icon = options.icon || CHAT_NOTIFICATION.DEFAULT_ICON;
+        options.autoClose = options.autoClose || CHAT_NOTIFICATION.AUTO_CLOSE;
+        onShow = onShow || function(err) {
+          if (err) {
+            err && $log.error('Unable to show notification: ' + err);
+          }
+        };
+
+        webNotification.showNotification(title, options, onShow);
+      }
+
       function setNotificationStatus(status) {
         localForage.setItem('isNotificationEnabled', JSON.stringify(status));
         enable = status;
@@ -52,7 +66,7 @@
               webNotification.showNotification('New message in ' + channelName, {
                 body: parsedText,
                 icon: '/api/users/' + message.creator + '/profile/avatar',
-                autoClose: CHAT_NOTIF.CHAT_AUTO_CLOSE
+                autoClose: CHAT_NOTIFICATION.AUTO_CLOSE
               }, function onShow(err) {
                 if (err) {
                   err && $log.error('Unable to show notification: ' + err);
