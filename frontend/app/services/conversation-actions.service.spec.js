@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationActionsService service', function() {
 
-  var $log, $q, conversation, name, user, result, sessionMock, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatNotificationService, $rootScope;
+  var $log, $q, conversation, name, user, result, sessionMock, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatDesktopNotificationService, $rootScope;
   var CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_EVENTS;
   var error, successSpy, errorSpy;
 
@@ -21,7 +21,7 @@ describe('The chatConversationActionsService service', function() {
     sessionMock = {
       ready: null
     };
-    chatNotificationService = {
+    chatDesktopNotificationService = {
       notify: sinon.spy()
     };
     chatMessageUtilsService = {};
@@ -42,7 +42,7 @@ describe('The chatConversationActionsService service', function() {
       $provide.value('chatConversationService', chatConversationService);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatConversationNameService', chatConversationNameService);
-      $provide.value('chatNotificationService', chatNotificationService);
+      $provide.value('chatDesktopNotificationService', chatDesktopNotificationService);
       $provide.value('chatMessageUtilsService', chatMessageUtilsService);
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
@@ -429,7 +429,7 @@ describe('The chatConversationActionsService service', function() {
       chatConversationActionsService.memberHasBeenAdded(conversation, member);
 
       expect(chatConversationNameService.getName).to.not.have.been.called;
-      expect(chatNotificationService.notify).to.not.have.been.called;
+      expect(chatDesktopNotificationService.notify).to.not.have.been.called;
     });
 
     it('should notify the user that he has been added even if conversation name is not resolved', function(done) {
@@ -441,8 +441,8 @@ describe('The chatConversationActionsService service', function() {
       chatConversationActionsService.memberHasBeenAdded(conversation, member)
         .then(function() {
           expect(chatConversationNameService.getName).to.have.been.called;
-          expect(chatNotificationService.notify).to.have.been.called;
-          expect(chatNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
+          expect(chatDesktopNotificationService.notify).to.have.been.called;
+          expect(chatDesktopNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
           done();
         }, done);
         $rootScope.$digest();
@@ -457,8 +457,8 @@ describe('The chatConversationActionsService service', function() {
       chatConversationActionsService.memberHasBeenAdded(conversation, member)
         .then(function() {
           expect(chatConversationNameService.getName).to.have.been.called;
-          expect(chatNotificationService.notify).to.have.been.called;
-          expect(chatNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
+          expect(chatDesktopNotificationService.notify).to.have.been.called;
+          expect(chatDesktopNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
           done();
         }, done);
         $rootScope.$digest();
@@ -475,8 +475,8 @@ describe('The chatConversationActionsService service', function() {
       chatConversationActionsService.memberHasBeenAdded(conversation, member)
         .then(function() {
           expect(chatConversationNameService.getName).to.have.been.called;
-          expect(chatNotificationService.notify).to.have.been.called;
-          expect(chatNotificationService.notify.firstCall.args[0]).to.equal('Welcome to ' + name);
+          expect(chatDesktopNotificationService.notify).to.have.been.called;
+          expect(chatDesktopNotificationService.notify.firstCall.args[0]).to.equal('Welcome to ' + name);
           done();
         }, done);
         $rootScope.$digest();
@@ -491,7 +491,7 @@ describe('The chatConversationActionsService service', function() {
       message = {_id: 1};
       broadcastSpy = sinon.spy($rootScope, '$broadcast');
       logSpy = sinon.spy($log, 'debug');
-      chatNotificationService.notifyMessage = sinon.spy();
+      chatDesktopNotificationService.notifyMessage = sinon.spy();
     });
 
     it('should skip then message is current user and user_typing', function() {
@@ -501,7 +501,7 @@ describe('The chatConversationActionsService service', function() {
       expect(chatMessageUtilsService.isMeTyping).to.have.been.calledWith(message);
       expect(logSpy).to.have.been.calledWith('Skipping own typing message');
       expect(broadcastSpy).to.not.have.been.called;
-      expect(chatNotificationService.notifyMessage).to.not.have.been.called;
+      expect(chatDesktopNotificationService.notifyMessage).to.not.have.been.called;
     });
 
     it('should broadcast the message and send it to notification service', function() {
@@ -511,7 +511,7 @@ describe('The chatConversationActionsService service', function() {
       expect(chatMessageUtilsService.isMeTyping).to.have.been.calledWith(message);
       expect(logSpy).to.not.have.been.called;
       expect(broadcastSpy).to.have.been.calledWith(type, message);
-      expect(chatNotificationService.notifyMessage).to.have.been.calledWith(message);
+      expect(chatDesktopNotificationService.notifyMessage).to.have.been.calledWith(message);
     });
   });
 

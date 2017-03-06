@@ -4,13 +4,13 @@
 
 var expect = chai.expect;
 
-describe('The chatNotificationService service', function() {
+describe('The chatDesktopNotificationService service', function() {
   var $q,
     $rootScope,
     user,
     session,
     chatConversationsStoreService,
-    chatNotificationService,
+    chatDesktopNotificationService,
     chatParseMention,
     localStorageService,
     localForage,
@@ -61,27 +61,27 @@ describe('The chatNotificationService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _$window_, _chatNotificationService_, _CHAT_LOCAL_STORAGE_, _CHAT_NOTIFICATION_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _$window_, _chatDesktopNotificationService_, _CHAT_LOCAL_STORAGE_, _CHAT_NOTIFICATION_) {
     $q = _$q_;
     $rootScope = _$rootScope_;
     $window = _$window_;
-    chatNotificationService = _chatNotificationService_;
+    chatDesktopNotificationService = _chatDesktopNotificationService_;
     CHAT_LOCAL_STORAGE = _CHAT_LOCAL_STORAGE_;
     CHAT_NOTIFICATION = _CHAT_NOTIFICATION_;
   }));
 
-  describe('chatNotificationService service', function() {
+  describe('chatDesktopNotificationService service', function() {
     describe('The start method', function() {
       it('should set the enable flag from localstorage value if found', function() {
         localForage.getItem = sinon.spy(function() {
           return $q.when(true);
         });
 
-        chatNotificationService.start();
+        chatDesktopNotificationService.start();
         $rootScope.$digest();
 
         expect(localForage.getItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION);
-        expect(chatNotificationService.isEnabled()).to.be.true;
+        expect(chatDesktopNotificationService.isEnabled()).to.be.true;
       });
 
       it('should set the enable flag to the webNotification.permissionGranted value if falsy in local storage', function() {
@@ -90,12 +90,12 @@ describe('The chatNotificationService service', function() {
         });
         webNotification.permissionGranted = true;
 
-        chatNotificationService.start();
+        chatDesktopNotificationService.start();
         $rootScope.$digest();
 
         expect(localForage.getItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION);
         expect(localForage.setItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION, JSON.stringify(webNotification.permissionGranted));
-        expect(chatNotificationService.isEnabled()).to.equal(webNotification.permissionGranted);
+        expect(chatDesktopNotificationService.isEnabled()).to.equal(webNotification.permissionGranted);
       });
 
       it('should set the enable flag to false when localstorage fails', function() {
@@ -103,11 +103,11 @@ describe('The chatNotificationService service', function() {
           return $q.reject(new Error('I failed'));
         });
 
-        chatNotificationService.start();
+        chatDesktopNotificationService.start();
         $rootScope.$digest();
 
         expect(localForage.getItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION);
-        expect(chatNotificationService.isEnabled()).to.be.false;
+        expect(chatDesktopNotificationService.isEnabled()).to.be.false;
       });
     });
 
@@ -116,9 +116,9 @@ describe('The chatNotificationService service', function() {
         $window.document.hasFocus = sinon.spy(function() {
           return false;
         });
-        chatNotificationService.setNotificationStatus(false);
+        chatDesktopNotificationService.setNotificationStatus(false);
 
-        expect(chatNotificationService.canNotify()).to.not.be.ok;
+        expect(chatDesktopNotificationService.canNotify()).to.not.be.ok;
         expect($window.document.hasFocus).to.have.been.called;
       });
 
@@ -126,9 +126,9 @@ describe('The chatNotificationService service', function() {
         $window.document.hasFocus = sinon.spy(function() {
           return true;
         });
-        chatNotificationService.setNotificationStatus(true);
+        chatDesktopNotificationService.setNotificationStatus(true);
 
-        expect(chatNotificationService.canNotify()).to.not.be.ok;
+        expect(chatDesktopNotificationService.canNotify()).to.not.be.ok;
         expect($window.document.hasFocus).to.have.been.called;
       });
 
@@ -136,9 +136,9 @@ describe('The chatNotificationService service', function() {
         $window.document.hasFocus = sinon.spy(function() {
           return false;
         });
-        chatNotificationService.setNotificationStatus(false);
+        chatDesktopNotificationService.setNotificationStatus(false);
 
-        expect(chatNotificationService.canNotify()).to.not.be.ok;
+        expect(chatDesktopNotificationService.canNotify()).to.not.be.ok;
         expect($window.document.hasFocus).to.have.been.called;
       });
 
@@ -146,9 +146,9 @@ describe('The chatNotificationService service', function() {
         $window.document.hasFocus = sinon.spy(function() {
           return false;
         });
-        chatNotificationService.setNotificationStatus(true);
+        chatDesktopNotificationService.setNotificationStatus(true);
 
-        expect(chatNotificationService.canNotify()).to.be.ok;
+        expect(chatDesktopNotificationService.canNotify()).to.be.ok;
         expect($window.document.hasFocus).to.have.been.called;
       });
     });
@@ -161,7 +161,7 @@ describe('The chatNotificationService service', function() {
       });
 
       it('should notify with default options when not defined', function() {
-        chatNotificationService.notify(title);
+        chatDesktopNotificationService.notify(title);
 
         expect(webNotification.showNotification).to.have.been.calledWith(title, {icon: CHAT_NOTIFICATION.DEFAULT_ICON, autoClose: CHAT_NOTIFICATION.AUTO_CLOSE}, sinon.match.func);
       });
@@ -169,7 +169,7 @@ describe('The chatNotificationService service', function() {
       it('should notify with icon when defined', function() {
         var icon = 'foobar';
 
-        chatNotificationService.notify(title, {icon: icon});
+        chatDesktopNotificationService.notify(title, {icon: icon});
 
         expect(webNotification.showNotification).to.have.been.called;
         expect(webNotification.showNotification.firstCall.args[1]).to.shallowDeepEqual({icon: icon});
@@ -178,7 +178,7 @@ describe('The chatNotificationService service', function() {
       it('should notify with autoClose when defined', function() {
         var autoclose = 'autocloseMe';
 
-        chatNotificationService.notify(title, {autoclose: autoclose});
+        chatDesktopNotificationService.notify(title, {autoclose: autoclose});
 
         expect(webNotification.showNotification).to.have.been.called;
         expect(webNotification.showNotification.firstCall.args[1]).to.shallowDeepEqual({autoclose: autoclose});
@@ -187,7 +187,7 @@ describe('The chatNotificationService service', function() {
       it('should notify with onShow callback when defined', function() {
         var onShow = function() {};
 
-        chatNotificationService.notify(title, {}, onShow);
+        chatDesktopNotificationService.notify(title, {}, onShow);
 
         expect(webNotification.showNotification).to.have.been.called;
         expect(webNotification.showNotification.firstCall.args[2]).to.equal(onShow);
@@ -202,13 +202,13 @@ describe('The chatNotificationService service', function() {
         $window.document.hasFocus = sinon.spy(function() {
           return false;
         });
-        chatNotificationService.setNotificationStatus(true);
+        chatDesktopNotificationService.setNotificationStatus(true);
       });
 
       it('should not notify when message is from current user', function() {
         message.creator = session.user._id;
 
-        chatNotificationService.notifyMessage(message);
+        chatDesktopNotificationService.notifyMessage(message);
 
         expect(chatConversationsStoreService.find).to.not.have.been.called;
         expect(chatParseMention.parseMentions).to.not.have.been.called;
@@ -220,7 +220,7 @@ describe('The chatNotificationService service', function() {
         message.channel = '1';
         chatConversationsStoreService.find = sinon.spy();
 
-        chatNotificationService.notifyMessage(message);
+        chatDesktopNotificationService.notifyMessage(message);
 
         expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
         expect(chatParseMention.parseMentions).to.not.have.been.called;
@@ -242,7 +242,7 @@ describe('The chatNotificationService service', function() {
           return parsedText;
         });
 
-        chatNotificationService.notifyMessage(message);
+        chatDesktopNotificationService.notifyMessage(message);
 
         expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
         expect(chatParseMention.parseMentions).to.have.been.calledWith(message.text, message.user_mentions, {skipLink: true});
@@ -259,10 +259,10 @@ describe('The chatNotificationService service', function() {
       it('should save value in local storage and in enable flag', function() {
         var value = true;
 
-        chatNotificationService.setNotificationStatus(value);
+        chatDesktopNotificationService.setNotificationStatus(value);
 
         expect(localForage.setItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION, JSON.stringify(value));
-        expect(chatNotificationService.isEnabled()).to.be.true;
+        expect(chatDesktopNotificationService.isEnabled()).to.be.true;
       });
     });
   });

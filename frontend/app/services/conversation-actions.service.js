@@ -15,7 +15,7 @@
     chatConversationService,
     chatConversationsStoreService,
     chatMessageUtilsService,
-    chatNotificationService,
+    chatDesktopNotificationService,
     CHAT_EVENTS,
     CHAT_CONVERSATION_MODE,
     CHAT_CONVERSATION_TYPE
@@ -173,7 +173,7 @@
 
       function notify(name) {
         name = name || 'new conversation';
-        chatNotificationService.notify('Welcome to ' + name, {
+        chatDesktopNotificationService.notify('Welcome to ' + name, {
           body: 'You have been added to the conversation, click to go',
           onClick: $state.go('chat.channels-views', {id: conversation._id})
         });
@@ -189,7 +189,7 @@
 
       // TODO:  The broadcast will be refactored and replaced by actions
       $rootScope.$broadcast(type, message);
-      chatNotificationService.notifyMessage(message);
+      chatDesktopNotificationService.notifyMessage(message);
     }
 
     function setActive(conversation) {

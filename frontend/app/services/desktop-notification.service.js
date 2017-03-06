@@ -2,9 +2,9 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .factory('chatNotificationService', chatNotificationService);
+    .factory('chatDesktopNotificationService', chatDesktopNotificationService);
 
-    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, chatParseMention, chatConversationsStoreService, CHAT_NOTIFICATION, CHAT_LOCAL_STORAGE) {
+    function chatDesktopNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, chatParseMention, chatConversationsStoreService, CHAT_NOTIFICATION, CHAT_LOCAL_STORAGE) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
       var service = {
