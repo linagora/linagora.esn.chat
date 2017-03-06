@@ -52,7 +52,7 @@ describe('The chatConversationListenerService service', function() {
     it('should register event handlers', function() {
       chatConversationListenerService.addEventListeners();
 
-      expect(chatMessengerService.addEventListener.getCalls().length).to.equal(6);
+      expect(chatMessengerService.addEventListener.getCalls().length).to.equal(7);
     });
 
     describe('on CHAT_EVENTS.NEW_CONVERSATION', function() {
@@ -135,6 +135,24 @@ describe('The chatConversationListenerService service', function() {
           callback(event);
 
           expect(chatConversationActionsService.updateMembers).to.have.been.calledWith(event.conversation, event.members_count);
+
+          return true;
+        })));
+      });
+    });
+
+    describe('on CHAT_EVENTS.MEMBER_ADDED_TO_CONVERSATION', function() {
+      it('should call memberHasBeenAdded action', function() {
+        var event = {conversation: conversation, member: {member: {id: 1}}, by_member: {member: {id: 1}}};
+
+        chatConversationActionsService.memberHasBeenAdded = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_ADDED_TO_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
+          callback(event);
+
+          expect(chatConversationActionsService.memberHasBeenAdded).to.have.been.calledWith(event.conversation, event.member, event.by_member);
 
           return true;
         })));

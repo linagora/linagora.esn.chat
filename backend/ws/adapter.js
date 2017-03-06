@@ -5,6 +5,7 @@ const CONSTANTS = require('../lib/constants');
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
+const MEMBER_ADDED_TO_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_TO_CONVERSATION;
 const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION;
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
@@ -25,6 +26,7 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(CONVERSATION_DELETED).subscribe(messenger.conversationDeleted.bind(messenger));
     globalPubsub.topic(CONVERSATION_UPDATED).subscribe(data => messenger.conversationUpdated.bind(messenger)(data.conversation));
     globalPubsub.topic(CONVERSATION_TOPIC_UPDATED).subscribe(topicUpdated);
+    globalPubsub.topic(MEMBER_ADDED_TO_CONVERSATION).subscribe(memberHasBeenAdded);
     globalPubsub.topic(MEMBER_JOINED_CONVERSATION).subscribe(memberHasJoined);
     globalPubsub.topic(MEMBER_LEFT_CONVERSATION).subscribe(memberHasLeft);
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
@@ -52,6 +54,18 @@ module.exports = (dependencies, lib) => {
           objectType: CONSTANTS.OBJECT_TYPES.USER
         }
       };
+    }
+
+    // Event payload is {userId, authorId, conversationId}
+    // userId: User added
+    // authorId: User who added userId
+    function memberHasBeenAdded(event) {
+      return getConversation(event.conversationId)
+        .then(conversation => messenger.memberHasBeenAdded.bind(messenger)(conversation, getMember(event.userId), getMember(event.authorId)))
+        .catch(err => {
+          logger.error(`Can not process the ${MEMBER_ADDED_TO_CONVERSATION} event correctly`, err);
+          throw err;
+        });
     }
 
     // Event payload is {userId, conversationId}

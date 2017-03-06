@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .controller('chatAsideController', chatAsideController);
 
-  function chatAsideController(chatConversationsStoreService, chatNotificationService) {
+  function chatAsideController(chatConversationsStoreService, chatDesktopNotificationService) {
     var self = this;
 
     self.chatConversationsStoreService = chatConversationsStoreService;
@@ -12,13 +12,13 @@
     self.toggleNotification = toggleNotification;
 
     function isNotificationEnabled() {
-      return chatNotificationService.isEnabled();
+      return chatDesktopNotificationService.isEnabled();
     }
 
     function toggleNotification() {
       var enable = isNotificationEnabled();
 
-      chatNotificationService.setNotificationStatus(!enable);
+      chatDesktopNotificationService.setNotificationStatus(!enable);
       self.isEnabled = !enable;
     }
   }

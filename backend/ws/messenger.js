@@ -7,6 +7,7 @@ const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
+const MEMBER_ADDED_TO_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_TO_CONVERSATION;
 const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION;
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
@@ -39,6 +40,10 @@ class Messenger extends EventEmitter {
     });
   }
 
+  memberHasBeenAdded(conversation, member, by_member) {
+    this.sendDataToUser(member.member._id, MEMBER_ADDED_TO_CONVERSATION, {conversation, member, by_member});
+  }
+
   memberHasJoined(conversation, member, members_count) {
     this.sendDataToClients(conversation, MEMBER_JOINED_CONVERSATION, {conversation, member, members_count});
   }
@@ -60,17 +65,21 @@ class Messenger extends EventEmitter {
     }
   }
 
+  sendDataToUser(user, type, data) {
+   const payload = {
+     data: data,
+     room: DEFAULT_ROOM
+   };
+
+   this.transport.sendDataToUser(user, type, payload);
+ }
+
   sendMessage(conversation, message) {
     this.sendDataToClients(conversation, 'message', message);
   }
 
   sendMessageToUser(user, message) {
-    const payload = {
-      data: message,
-      room: DEFAULT_ROOM
-    };
-
-    this.transport.sendDataToUser(user, 'message', payload);
+    this.sendDataToUser(user, 'message', message);
   }
 
   topicUpdated(conversation) {

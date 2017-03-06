@@ -4,7 +4,23 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationActionsService', chatConversationActionsService);
 
-  function chatConversationActionsService($log, $q, $rootScope, _, session, chatConversationService, chatConversationsStoreService, chatConversationNameService, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE) {
+  function chatConversationActionsService(
+    $log,
+    $q,
+    $rootScope,
+    $state,
+    _,
+    session,
+    chatConversationNameService,
+    chatConversationService,
+    chatConversationsStoreService,
+    chatMessageUtilsService,
+    chatDesktopNotificationService,
+    CHAT_EVENTS,
+    CHAT_CONVERSATION_MODE,
+    CHAT_CONVERSATION_TYPE
+  ) {
+
     var ready = $q.defer();
 
     return {
@@ -18,6 +34,8 @@
       joinConversation: joinConversation,
       leaveConversation: leaveConversation,
       markAllMessagesAsRead: markAllMessagesAsRead,
+      memberHasBeenAdded: memberHasBeenAdded,
+      onMessage: onMessage,
       ready: ready.promise,
       setActive: setActive,
       unsetActive: unsetActive,
@@ -140,6 +158,38 @@
 
         return true;
       });
+    }
+
+    function memberHasBeenAdded(conversation, member) {
+      if (session.user._id !== member.member.id) {
+        return;
+      }
+
+      return chatConversationNameService.getName(conversation)
+        .then(notify)
+        .catch(function() {
+          notify();
+        });
+
+      function notify(name) {
+        name = name || 'new conversation';
+        chatDesktopNotificationService.notify('Welcome to ' + name, {
+          body: 'You have been added to the conversation, click to go',
+          onClick: $state.go('chat.channels-views', {id: conversation._id})
+        });
+      }
+    }
+
+    function onMessage(type, message) {
+      if (chatMessageUtilsService.isMeTyping(message)) {
+        $log.debug('Skipping own typing message');
+
+        return;
+      }
+
+      // TODO:  The broadcast will be refactored and replaced by actions
+      $rootScope.$broadcast(type, message);
+      chatDesktopNotificationService.notifyMessage(message);
     }
 
     function setActive(conversation) {

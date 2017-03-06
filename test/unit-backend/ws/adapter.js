@@ -8,6 +8,7 @@ const CONSTANTS = require('../../../backend/lib/constants');
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
+const MEMBER_ADDED_TO_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_TO_CONVERSATION;
 const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION;
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
@@ -15,7 +16,7 @@ const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UP
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic;
+  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic, conversationMemberAddedTopic;
 
   beforeEach(function() {
     var self = this;
@@ -43,6 +44,11 @@ describe('The chat websocket adapter', function() {
     };
 
     conversationTopicUpdatedTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    conversationMemberAddedTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -92,6 +98,9 @@ describe('The chat websocket adapter', function() {
             if (name === MESSAGE_RECEIVED) {
               return globalMessageReceivedTopic;
             }
+            if (name === MEMBER_ADDED_TO_CONVERSATION) {
+              return conversationMemberAddedTopic;
+            }
             if (name === MEMBER_JOINED_CONVERSATION) {
               return conversationAddMemberTopic;
             }
@@ -126,6 +135,7 @@ describe('The chat websocket adapter', function() {
         conversationCreated: sinon.spy(),
         conversationDeleted: sinon.spy(),
         conversationUpdated: sinon.spy(),
+        memberHasBeenAdded: sinon.spy(),
         memberHasJoined: sinon.spy(),
         memberHasLeft: sinon.spy(),
         sendMessage: sinon.spy(),
@@ -364,6 +374,91 @@ describe('The chat websocket adapter', function() {
           expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
           expect(lib.members.countMembers).to.have.been.calledWith(conversation);
           expect(messenger.memberHasJoined).to.have.been.calledWith(conversation, member, count);
+          done();
+        }, done);
+      });
+    });
+
+    it('should subscribe to MEMBER_ADDED_TO_CONVERSATION event', function() {
+      adapter.bindEvents(messenger);
+
+      expect(conversationMemberAddedTopic.subscribe).to.have.been.calledWith(sinon.match.func);
+    });
+
+    describe('On MEMBER_ADDED_TO_CONVERSATION event', function() {
+      let member, event, joinCallback, author, authorMember;
+
+      beforeEach(function() {
+        author = {_id: 'author'};
+        event = {userId: user._id, authorId: author._id, conversationId: conversation._id};
+        member = {member: {id: user._id, objectType: 'user'}};
+        authorMember = {member: {id: author._id, objectType: 'user'}};
+      });
+
+      it('should not call messenger.memberHasBeenAdded if getConversation fails', function(done) {
+        const error = new Error('I failed to get conversation');
+
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(error);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationMemberAddedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.equals(error.message);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasBeenAdded).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should not call messenger.memberHasBeenAdded if getConversation can not be found', function(done) {
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback();
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationMemberAddedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          done(new Error('Should not be called'));
+        }, err => {
+          expect(err.message).to.match(/Can not find conversation/);
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasBeenAdded).to.not.have.been.called;
+          done();
+        });
+      });
+
+      it('should call messenger.memberHasBeenAdded', function(done) {
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(null, conversation);
+        });
+
+        adapter.bindEvents(messenger);
+
+        expect(conversationMemberAddedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+          joinCallback = callback;
+
+          return _.isFunction(callback);
+        }));
+
+        joinCallback(event).then(() => {
+          expect(lib.conversation.getById).to.have.been.calledWith(conversation._id);
+          expect(messenger.memberHasBeenAdded).to.have.been.calledWith(conversation, member, authorMember);
           done();
         }, done);
       });

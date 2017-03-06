@@ -4,7 +4,13 @@
   angular.module('linagora.esn.chat')
     .factory('chatMessageReceiverService', chatMessageReceiverService);
 
-  function chatMessageReceiverService($log, $rootScope, session, chatMessengerService, CHAT_WEBSOCKET_EVENTS, CHAT_MESSAGE_TYPE, CHAT_MESSAGE_PREFIX) {
+  function chatMessageReceiverService(
+    $log,
+    chatConversationActionsService,
+    chatMessengerService,
+    CHAT_MESSAGE_PREFIX,
+    CHAT_WEBSOCKET_EVENTS
+  ) {
 
     return {
       addEventListener: addEventListener,
@@ -13,10 +19,6 @@
 
     function addEventListener() {
       chatMessengerService.addEventListener(CHAT_WEBSOCKET_EVENTS.MESSAGE, onMessage);
-    }
-
-    function isMeTyping(message) {
-      return message.creator && message.creator === session.user._id && message.type === CHAT_MESSAGE_TYPE.USER_TYPING;
     }
 
     function isMissingType(message) {
@@ -38,13 +40,7 @@
         return;
       }
 
-      if (isMeTyping(message)) {
-        $log.debug('Skipping own message');
-
-        return;
-      }
-
-      $rootScope.$broadcast(CHAT_MESSAGE_PREFIX + message.type, message);
+      chatConversationActionsService.onMessage(CHAT_MESSAGE_PREFIX + message.type, message);
     }
   }
 })();

@@ -19,6 +19,7 @@
     function addEventListeners() {
       chatMessengerService.addEventListener(CHAT_EVENTS.NEW_CONVERSATION, addConversation);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_DELETION, deleteConversation);
+      chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_ADDED_TO_CONVERSATION, memberHasBeenAdded);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_JOINED_CONVERSATION, memberHasJoined);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_LEFT_CONVERSATION, memberHasLeft);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
@@ -27,6 +28,10 @@
 
     function deleteConversation(conversation) {
       chatConversationsStoreService.deleteConversation(conversation);
+    }
+
+    function memberHasBeenAdded(event) {
+      chatConversationActionsService.memberHasBeenAdded(event.conversation, event.member, event.by_member);
     }
 
     function memberHasJoined(event) {

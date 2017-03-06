@@ -22,6 +22,7 @@ module.exports = {
     CONVERSATION_SAVED: 'chat:conversation:saved',
     MEMBER_JOINED_CONVERSATION: 'chat:conversation:members:joined',
     MEMBER_LEFT_CONVERSATION: 'chat:conversation:members:left',
+    MEMBER_ADDED_TO_CONVERSATION: 'chat:conversation:members:added',
     MEMBERSHIP_EVENTS: 'chat:conversation:membership',
     MESSAGE_RECEIVED: 'chat:message:received',
     MESSAGE_REMOVED: 'chat:message:removed',
