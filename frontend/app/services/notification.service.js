@@ -4,12 +4,14 @@
   angular.module('linagora.esn.chat')
     .factory('chatNotificationService', chatNotificationService);
 
-    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, chatConversationActionsService, chatParseMention, CHAT_EVENTS, CHAT_NOTIFICATION) {
+    function chatNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, chatParseMention, chatConversationsStoreService, CHAT_NOTIFICATION, CHAT_LOCAL_STORAGE) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
       var service = {
+        canNotify: canNotify,
         isEnabled: isEnabled,
         notify: notify,
+        notifyMessage: notifyMessage,
         setNotificationStatus: setNotificationStatus,
         start: start
       };
@@ -18,19 +20,27 @@
 
       ////////////
 
-      function canSendNotification(message) {
-        return !$window.document.hasFocus() && enable && message.creator !== session.user._id;
+      function canNotify() {
+        return !$window.document.hasFocus() && enable;
+      }
+
+      function canNotifyOnMessage(message) {
+        return canNotify() && message.creator !== session.user._id;
       }
 
       function initLocalPermission() {
-        localForage.getItem('isNotificationEnabled').then(function(value) {
-          if (value) {
-            enable = JSON.parse(value);
-          } else {
-            localForage.setItem('isNotificationEnabled', JSON.stringify(webNotification.permissionGranted));
-            enable = webNotification.permissionGranted;
-          }
-        });
+        localForage.getItem(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION)
+          .then(function(value) {
+            if (value) {
+              enable = JSON.parse(value);
+            } else {
+              localForage.setItem(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION, JSON.stringify(webNotification.permissionGranted));
+              enable = webNotification.permissionGranted;
+            }
+          }).catch(function(err) {
+            $log.warn('Can not retrieve ' + CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION + ' from localstorage', err);
+            enable = false;
+          });
       }
 
       function isEnabled() {
@@ -50,31 +60,33 @@
         webNotification.showNotification(title, options, onShow);
       }
 
+      function notifyMessage(message) {
+        if (!canNotifyOnMessage(message)) {
+          return;
+        }
+
+        var conversation = chatConversationsStoreService.find(message.channel);
+
+        if (!conversation) {
+          return;
+        }
+
+        var name = conversation.name || CHAT_NOTIFICATION.DEFAULT_TITLE;
+        var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
+
+        return notify('New message in ' + name, {
+          body: parsedText,
+          icon: '/api/users/' + message.creator + '/profile/avatar'
+        });
+      }
+
       function setNotificationStatus(status) {
-        localForage.setItem('isNotificationEnabled', JSON.stringify(status));
+        localForage.setItem(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION, JSON.stringify(status));
         enable = status;
       }
 
       function start() {
         initLocalPermission();
-        $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-          chatConversationActionsService.getConversation(message.channel).then(function(channel) {
-            if (canSendNotification(message)) {
-              var channelName = channel.name || 'OpenPaas Chat';
-              var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
-
-              webNotification.showNotification('New message in ' + channelName, {
-                body: parsedText,
-                icon: '/api/users/' + message.creator + '/profile/avatar',
-                autoClose: CHAT_NOTIFICATION.AUTO_CLOSE
-              }, function onShow(err) {
-                if (err) {
-                  err && $log.error('Unable to show notification: ' + err);
-                }
-              });
-            }
-          });
-        });
       }
     }
 })();

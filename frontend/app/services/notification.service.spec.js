@@ -6,22 +6,18 @@ var expect = chai.expect;
 
 describe('The chatNotificationService service', function() {
   var $q,
-    CHAT_EVENTS,
-    sessionMock,
-    user,
-    livenotificationMock,
     $rootScope,
-    chatNamespace,
+    user,
+    session,
+    chatConversationsStoreService,
     chatNotificationService,
-    CHAT_CONVERSATION_TYPE,
-    chatConversationActionsService,
-    chatUsernameMock,
-    groups,
-    channels,
+    chatParseMention,
     localStorageService,
-    getItem,
-    setItem,
-    getItemResult;
+    localForage,
+    webNotification,
+    $window,
+    CHAT_NOTIFICATION,
+    CHAT_LOCAL_STORAGE;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -34,85 +30,239 @@ describe('The chatNotificationService service', function() {
   );
 
   beforeEach(function() {
-
     user = {_id: 'userId'};
-
-    chatNamespace = {on: sinon.spy()};
-
-    chatUsernameMock = {
-      generate: angular.noop
+    session = {
+      user: user
     };
-
-    sessionMock = {
-      user: user,
-      ready: {
-        then: function(callback) {
-          return callback({user: user});
-        }
-      }
+    chatConversationsStoreService = {
+      find: sinon.spy()
     };
-
-    chatConversationActionsService = {
-      getChannels: function() {
-        return $q.when(channels);
-      },
-      getPrivateConversations: function() {
-        return $q.when(groups);
-      }
+    localForage = {
+      getItem: sinon.spy(),
+      setItem: sinon.spy()
     };
-
-    getItemResult = 'true';
-    getItem = sinon.spy(function(key) {
-      return $q.when(({
-        isNotificationEnabled: getItemResult
-      })[key]);
-    });
-    setItem = sinon.spy(function() {
-      return $q.when({});
-    });
     localStorageService = {
-      getOrCreateInstance: sinon.stub().returns({
-        getItem: getItem,
-        setItem: setItem
-      })
+      getOrCreateInstance: sinon.stub().returns(localForage)
     };
-
-    function livenotificationFactory(CHAT_NAMESPACE) {
-      livenotificationMock = function(name) {
-        if (name === CHAT_NAMESPACE) {
-          return chatNamespace;
-        }
-        throw new Error(name + 'namespace has not been mocked');
-      };
-
-      return livenotificationMock;
-    }
+    webNotification = {
+      permissionGranted: true,
+      showNotification: sinon.spy()
+    };
+    chatParseMention = {
+      parseMentions: sinon.spy()
+    };
 
     angular.mock.module(function($provide) {
-      $provide.value('session', sessionMock);
-      $provide.factory('livenotification', livenotificationFactory);
-      $provide.value('chatConversationActionsService', chatConversationActionsService);
+      $provide.value('session', session);
+      $provide.value('chatParseMention', chatParseMention);
+      $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('localStorageService', localStorageService);
-      $provide.value('chatUsername', chatUsernameMock);
+      $provide.value('webNotification', webNotification);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _chatNotificationService_, _CHAT_EVENTS_, _$rootScope_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _$window_, _chatNotificationService_, _CHAT_LOCAL_STORAGE_, _CHAT_NOTIFICATION_) {
     $q = _$q_;
-    chatNotificationService = _chatNotificationService_;
-    CHAT_EVENTS = _CHAT_EVENTS_;
     $rootScope = _$rootScope_;
-    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
-    groups = [{_id: 'group1', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}, {_id: 'group2', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL}];
-    channels = [{_id: 'channel1', type: CHAT_CONVERSATION_TYPE.OPEN}, {_id: 'channel2', type: CHAT_CONVERSATION_TYPE.OPEN}];
+    $window = _$window_;
+    chatNotificationService = _chatNotificationService_;
+    CHAT_LOCAL_STORAGE = _CHAT_LOCAL_STORAGE_;
+    CHAT_NOTIFICATION = _CHAT_NOTIFICATION_;
   }));
 
   describe('chatNotificationService service', function() {
-    describe('start() method', function() {
-      it('should listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
-        $rootScope.$on = sinon.spy();
+    describe('The start method', function() {
+      it('should set the enable flag from localstorage value if found', function() {
+        localForage.getItem = sinon.spy(function() {
+          return $q.when(true);
+        });
+
         chatNotificationService.start();
-        expect($rootScope.$on).to.have.been.calledWith(CHAT_EVENTS.TEXT_MESSAGE);
+        $rootScope.$digest();
+
+        expect(localForage.getItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION);
+        expect(chatNotificationService.isEnabled()).to.be.true;
+      });
+
+      it('should set the enable flag to the webNotification.permissionGranted value if falsy in local storage', function() {
+        localForage.getItem = sinon.spy(function() {
+          return $q.when(false);
+        });
+        webNotification.permissionGranted = true;
+
+        chatNotificationService.start();
+        $rootScope.$digest();
+
+        expect(localForage.getItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION);
+        expect(localForage.setItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION, JSON.stringify(webNotification.permissionGranted));
+        expect(chatNotificationService.isEnabled()).to.equal(webNotification.permissionGranted);
+      });
+
+      it('should set the enable flag to false when localstorage fails', function() {
+        localForage.getItem = sinon.spy(function() {
+          return $q.reject(new Error('I failed'));
+        });
+
+        chatNotificationService.start();
+        $rootScope.$digest();
+
+        expect(localForage.getItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION);
+        expect(chatNotificationService.isEnabled()).to.be.false;
+      });
+    });
+
+    describe('The canNotify function', function() {
+      it('should return false when window has focus and enable is false', function() {
+        $window.document.hasFocus = sinon.spy(function() {
+          return false;
+        });
+        chatNotificationService.setNotificationStatus(false);
+
+        expect(chatNotificationService.canNotify()).to.not.be.ok;
+        expect($window.document.hasFocus).to.have.been.called;
+      });
+
+      it('should return false when window has focus and enable is true', function() {
+        $window.document.hasFocus = sinon.spy(function() {
+          return true;
+        });
+        chatNotificationService.setNotificationStatus(true);
+
+        expect(chatNotificationService.canNotify()).to.not.be.ok;
+        expect($window.document.hasFocus).to.have.been.called;
+      });
+
+      it('should return false when window does not have focus and enable is false', function() {
+        $window.document.hasFocus = sinon.spy(function() {
+          return false;
+        });
+        chatNotificationService.setNotificationStatus(false);
+
+        expect(chatNotificationService.canNotify()).to.not.be.ok;
+        expect($window.document.hasFocus).to.have.been.called;
+      });
+
+      it('should return true when window does not have focus and enable is true', function() {
+        $window.document.hasFocus = sinon.spy(function() {
+          return false;
+        });
+        chatNotificationService.setNotificationStatus(true);
+
+        expect(chatNotificationService.canNotify()).to.be.ok;
+        expect($window.document.hasFocus).to.have.been.called;
+      });
+    });
+
+    describe('The notify function', function() {
+      var title;
+
+      beforeEach(function() {
+        title = 'My Title';
+      });
+
+      it('should notify with default options when not defined', function() {
+        chatNotificationService.notify(title);
+
+        expect(webNotification.showNotification).to.have.been.calledWith(title, {icon: CHAT_NOTIFICATION.DEFAULT_ICON, autoClose: CHAT_NOTIFICATION.AUTO_CLOSE}, sinon.match.func);
+      });
+
+      it('should notify with icon when defined', function() {
+        var icon = 'foobar';
+
+        chatNotificationService.notify(title, {icon: icon});
+
+        expect(webNotification.showNotification).to.have.been.called;
+        expect(webNotification.showNotification.firstCall.args[1]).to.shallowDeepEqual({icon: icon});
+      });
+
+      it('should notify with autoClose when defined', function() {
+        var autoclose = 'autocloseMe';
+
+        chatNotificationService.notify(title, {autoclose: autoclose});
+
+        expect(webNotification.showNotification).to.have.been.called;
+        expect(webNotification.showNotification.firstCall.args[1]).to.shallowDeepEqual({autoclose: autoclose});
+      });
+
+      it('should notify with onShow callback when defined', function() {
+        var onShow = function() {};
+
+        chatNotificationService.notify(title, {}, onShow);
+
+        expect(webNotification.showNotification).to.have.been.called;
+        expect(webNotification.showNotification.firstCall.args[2]).to.equal(onShow);
+      });
+    });
+
+    describe('The notifyMessage function', function() {
+      var message;
+
+      beforeEach(function() {
+        message = {_id: 1};
+        $window.document.hasFocus = sinon.spy(function() {
+          return false;
+        });
+        chatNotificationService.setNotificationStatus(true);
+      });
+
+      it('should not notify when message is from current user', function() {
+        message.creator = session.user._id;
+
+        chatNotificationService.notifyMessage(message);
+
+        expect(chatConversationsStoreService.find).to.not.have.been.called;
+        expect(chatParseMention.parseMentions).to.not.have.been.called;
+        expect(webNotification.showNotification).to.not.have.been.called;
+      });
+
+      it('should not notify if conversation is not found in store', function() {
+        message.creator = '!' + session.user._id;
+        message.channel = '1';
+        chatConversationsStoreService.find = sinon.spy();
+
+        chatNotificationService.notifyMessage(message);
+
+        expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
+        expect(chatParseMention.parseMentions).to.not.have.been.called;
+        expect(webNotification.showNotification).to.not.have.been.called;
+      });
+
+      it('should notify with message text and user icon', function() {
+        var conversation = {_id: '123', name: 'My conversation'};
+        var parsedText = 'This is some parsed text';
+
+        message.creator = '!' + session.user._id;
+        message.channel = '1';
+        message.text = 'This is my message';
+        message.user_mentions = [1, 2, 3];
+        chatConversationsStoreService.find = sinon.spy(function() {
+          return conversation;
+        });
+        chatParseMention.parseMentions = sinon.spy(function() {
+          return parsedText;
+        });
+
+        chatNotificationService.notifyMessage(message);
+
+        expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
+        expect(chatParseMention.parseMentions).to.have.been.calledWith(message.text, message.user_mentions, {skipLink: true});
+        expect(webNotification.showNotification).to.have.been.calledWith('New message in ' + conversation.name, {
+          body: parsedText,
+          icon: '/api/users/' + message.creator + '/profile/avatar',
+          autoClose: CHAT_NOTIFICATION.AUTO_CLOSE
+        },
+        sinon.match.func);
+      });
+    });
+
+    describe('The setNotificationStatus function', function() {
+      it('should save value in local storage and in enable flag', function() {
+        var value = true;
+
+        chatNotificationService.setNotificationStatus(value);
+
+        expect(localForage.setItem).to.have.been.calledWith(CHAT_LOCAL_STORAGE.DESKTOP_NOTIFICATION, JSON.stringify(value));
+        expect(chatNotificationService.isEnabled()).to.be.true;
       });
     });
   });

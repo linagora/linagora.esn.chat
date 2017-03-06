@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationActionsService service', function() {
 
-  var $q, conversation, name, user, result, sessionMock, chatConversationActionsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, $rootScope;
+  var $log, $q, conversation, name, user, result, sessionMock, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatNotificationService, $rootScope;
   var CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_EVENTS;
   var error, successSpy, errorSpy;
 
@@ -21,6 +21,10 @@ describe('The chatConversationActionsService service', function() {
     sessionMock = {
       ready: null
     };
+    chatNotificationService = {
+      notify: sinon.spy()
+    };
+    chatMessageUtilsService = {};
     chatConversationService = {};
     chatConversationsStoreService = {};
     chatConversationNameService = {
@@ -38,6 +42,8 @@ describe('The chatConversationActionsService service', function() {
       $provide.value('chatConversationService', chatConversationService);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatConversationNameService', chatConversationNameService);
+      $provide.value('chatNotificationService', chatNotificationService);
+      $provide.value('chatMessageUtilsService', chatMessageUtilsService);
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
 
@@ -46,7 +52,8 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _chatConversationActionsService_, _$rootScope_, _CHAT_CONVERSATION_TYPE_, _CHAT_CONVERSATION_MODE_, _CHAT_EVENTS_) {
+  beforeEach(angular.mock.inject(function(_$log_, _$q_, _chatConversationActionsService_, _$rootScope_, _CHAT_CONVERSATION_TYPE_, _CHAT_CONVERSATION_MODE_, _CHAT_EVENTS_) {
+    $log = _$log_;
     $q = _$q_;
     chatConversationActionsService = _chatConversationActionsService_;
     $rootScope = _$rootScope_;
@@ -409,6 +416,105 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The memberHasBeenAdded function', function() {
+    var member;
+
+    beforeEach(function() {
+      member = {member: {id: 1}};
+    });
+
+    it('should skip when current user is not the member', function() {
+      member.member.id = '!' + sessionMock.user._id;
+
+      chatConversationActionsService.memberHasBeenAdded(conversation, member);
+
+      expect(chatConversationNameService.getName).to.not.have.been.called;
+      expect(chatNotificationService.notify).to.not.have.been.called;
+    });
+
+    it('should notify the user that he has been added even if conversation name is not resolved', function(done) {
+      member.member.id = sessionMock.user._id;
+      chatConversationNameService.getName = sinon.spy(function() {
+        return $q.when();
+      });
+
+      chatConversationActionsService.memberHasBeenAdded(conversation, member)
+        .then(function() {
+          expect(chatConversationNameService.getName).to.have.been.called;
+          expect(chatNotificationService.notify).to.have.been.called;
+          expect(chatNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
+          done();
+        }, done);
+        $rootScope.$digest();
+    });
+
+    it('should notify the user that he has been added even if conversation name rejects', function(done) {
+      member.member.id = sessionMock.user._id;
+      chatConversationNameService.getName = sinon.spy(function() {
+        return $q.reject(new Error());
+      });
+
+      chatConversationActionsService.memberHasBeenAdded(conversation, member)
+        .then(function() {
+          expect(chatConversationNameService.getName).to.have.been.called;
+          expect(chatNotificationService.notify).to.have.been.called;
+          expect(chatNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
+          done();
+        }, done);
+        $rootScope.$digest();
+    });
+
+    it('should notify the user that he has been added', function(done) {
+      var name = 'My Conversation';
+
+      member.member.id = sessionMock.user._id;
+      chatConversationNameService.getName = sinon.spy(function() {
+        return $q.when(name);
+      });
+
+      chatConversationActionsService.memberHasBeenAdded(conversation, member)
+        .then(function() {
+          expect(chatConversationNameService.getName).to.have.been.called;
+          expect(chatNotificationService.notify).to.have.been.called;
+          expect(chatNotificationService.notify.firstCall.args[0]).to.equal('Welcome to ' + name);
+          done();
+        }, done);
+        $rootScope.$digest();
+    });
+  });
+
+  describe('The onMessage function', function() {
+    var broadcastSpy, logSpy, type, message;
+
+    beforeEach(function() {
+      type = 'MyType';
+      message = {_id: 1};
+      broadcastSpy = sinon.spy($rootScope, '$broadcast');
+      logSpy = sinon.spy($log, 'debug');
+      chatNotificationService.notifyMessage = sinon.spy();
+    });
+
+    it('should skip then message is current user and user_typing', function() {
+      chatMessageUtilsService.isMeTyping = sinon.stub().returns(true);
+      chatConversationActionsService.onMessage(type, message);
+
+      expect(chatMessageUtilsService.isMeTyping).to.have.been.calledWith(message);
+      expect(logSpy).to.have.been.calledWith('Skipping own typing message');
+      expect(broadcastSpy).to.not.have.been.called;
+      expect(chatNotificationService.notifyMessage).to.not.have.been.called;
+    });
+
+    it('should broadcast the message and send it to notification service', function() {
+      chatMessageUtilsService.isMeTyping = sinon.stub().returns(false);
+      chatConversationActionsService.onMessage(type, message);
+
+      expect(chatMessageUtilsService.isMeTyping).to.have.been.calledWith(message);
+      expect(logSpy).to.not.have.been.called;
+      expect(broadcastSpy).to.have.been.calledWith(type, message);
+      expect(chatNotificationService.notifyMessage).to.have.been.calledWith(message);
+    });
+  });
+
   describe('The setActive function', function() {
     it('should call chatConversationsStoreService.setActive', function() {
       chatConversationsStoreService.setActive = sinon.spy();
@@ -458,18 +564,14 @@ describe('The chatConversationActionsService service', function() {
 
   describe('The unsetActive function', function() {
     it('should reset the activeRoom and broadcast event in the scope', function() {
-      chatConversationsStoreService.unsetActive = sinon.spy(function() {
-        chatConversationsStoreService.activeRoom = {};
-      });
-      chatConversationsStoreService.activeRoom = {_id: 1};
-      $rootScope.$broadcast = sinon.spy();
+      var broadcastSpy = sinon.spy($rootScope, '$broadcast');
+
+      chatConversationsStoreService.unsetActive = sinon.spy();
 
       chatConversationActionsService.unsetActive();
-      $rootScope.$digest();
 
       expect(chatConversationsStoreService.unsetActive).to.have.been.called;
-      expect(chatConversationsStoreService.activeRoom).to.deep.equal({});
-      expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.UNSET_ACTIVE_ROOM);
+      expect(broadcastSpy).to.have.been.calledWith(CHAT_EVENTS.UNSET_ACTIVE_ROOM);
     });
   });
 

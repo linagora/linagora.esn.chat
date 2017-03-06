@@ -13,7 +13,8 @@
       NONE: 'none'
     })
     .constant('CHAT_LOCAL_STORAGE', {
-      LAST_CONVERSATION: 'chat.last-conversation'
+      LAST_CONVERSATION: 'chat.last-conversation',
+      DESKTOP_NOTIFICATION: 'chat.desktop-notification'
     })
     .constant('CHAT_EVENTS', {
       CONVERSATION_TOPIC_UPDATED: 'chat:conversation:topic:updated',
@@ -50,7 +51,9 @@
     .constant('CHAT_NAMESPACE', '/chat')
     .constant('CHAT_NOTIFICATION', {
       AUTO_CLOSE: 4000,
-      DEFAULT_ICON: '/images/default_avatar.png'
+      DEFAULT_ICON: '/images/default_avatar.png',
+      DEFAULT_TITLE: 'OpenPaas Chat',
+      LOCAL_STORAGE_ENABLED: 'isNotificationEnabled'
     })
     .constant('CHAT_CONVERSATION_TYPE', {
       OPEN: 'open',
