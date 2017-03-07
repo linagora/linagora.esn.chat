@@ -4,7 +4,19 @@
   angular.module('linagora.esn.chat')
     .factory('chatDesktopNotificationService', chatDesktopNotificationService);
 
-    function chatDesktopNotificationService($rootScope, $window, $log, session, webNotification, localStorageService, chatParseMention, chatConversationsStoreService, CHAT_NOTIFICATION, CHAT_LOCAL_STORAGE) {
+    function chatDesktopNotificationService(
+      $log,
+      $rootScope,
+      $window,
+      localStorageService,
+      session,
+      webNotification,
+      chatConversationMemberService,
+      chatConversationsStoreService,
+      chatParseMention,
+      CHAT_LOCAL_STORAGE,
+      CHAT_NOTIFICATION
+    ) {
       var enable;
       var localForage = localStorageService.getOrCreateInstance('linagora.esn.chat');
       var service = {
@@ -67,7 +79,7 @@
 
         var conversation = chatConversationsStoreService.find(message.channel);
 
-        if (!conversation) {
+        if (!conversation || !chatConversationMemberService.currentUserIsMemberOf(conversation)) {
           return;
         }
 

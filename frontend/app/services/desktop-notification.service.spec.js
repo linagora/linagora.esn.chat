@@ -9,6 +9,7 @@ describe('The chatDesktopNotificationService service', function() {
     $rootScope,
     user,
     session,
+    chatConversationMemberService,
     chatConversationsStoreService,
     chatDesktopNotificationService,
     chatParseMention,
@@ -34,6 +35,11 @@ describe('The chatDesktopNotificationService service', function() {
     session = {
       user: user
     };
+    chatConversationMemberService = {
+      currentUserIsMemberOf: sinon.spy(function() {
+        return true;
+      })
+    };
     chatConversationsStoreService = {
       find: sinon.spy()
     };
@@ -55,6 +61,7 @@ describe('The chatDesktopNotificationService service', function() {
     angular.mock.module(function($provide) {
       $provide.value('session', session);
       $provide.value('chatParseMention', chatParseMention);
+      $provide.value('chatConversationMemberService', chatConversationMemberService);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('localStorageService', localStorageService);
       $provide.value('webNotification', webNotification);
@@ -222,6 +229,30 @@ describe('The chatDesktopNotificationService service', function() {
 
         chatDesktopNotificationService.notifyMessage(message);
 
+        expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
+        expect(chatParseMention.parseMentions).to.not.have.been.called;
+        expect(webNotification.showNotification).to.not.have.been.called;
+      });
+
+      it('should not notify if user is not conversation member', function() {
+        chatConversationMemberService.currentUserIsMemberOf = sinon.spy(function() {
+          return false;
+        });
+
+        var conversation = {_id: '123', name: 'My conversation'};
+
+        message.creator = '!' + session.user._id;
+        message.channel = '1';
+        message.text = 'This is my message';
+        message.user_mentions = [1, 2, 3];
+        chatParseMention.parseMentions = sinon.spy();
+        chatConversationsStoreService.find = sinon.spy(function() {
+          return conversation;
+        });
+
+        chatDesktopNotificationService.notifyMessage(message);
+
+        expect(chatConversationMemberService.currentUserIsMemberOf).to.have.been.calledWith(conversation);
         expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
         expect(chatParseMention.parseMentions).to.not.have.been.called;
         expect(webNotification.showNotification).to.not.have.been.called;
