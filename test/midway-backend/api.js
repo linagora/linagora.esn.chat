@@ -166,10 +166,10 @@ describe('The chat API', function() {
     async.parallel([this.helpers.mongo.dropDatabase, this.helpers.resetRedis], done);
   });
 
-  describe('GET /api/channels', function() {
+  describe('GET /api/conversations', function() {
     it('should return a default channel', function(done) {
       request(app.express)
-        .get('/api/channels')
+        .get('/api/conversations')
         .expect('Content-Type', /json/)
         .expect(200)
         .end(function(err, res) {
@@ -196,7 +196,7 @@ describe('The chat API', function() {
         }
 
         request(app.express)
-          .get('/api/channels')
+          .get('/api/conversations')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
@@ -228,7 +228,7 @@ describe('The chat API', function() {
         }
 
         request(app.express)
-          .get('/api/channels')
+          .get('/api/conversations')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
@@ -267,7 +267,7 @@ describe('The chat API', function() {
         }
 
         request(app.express)
-          .get('/api/channels')
+          .get('/api/conversations')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
@@ -285,13 +285,9 @@ describe('The chat API', function() {
     });
 
     it('should return an array of non moderated channels', function(done) {
-      function execTest(err, channel) {
-        if (err) {
-          return done(err);
-        }
-
+      function execTest(channel1, channel2, channel3) {
         request(app.express)
-          .get('/api/channels')
+          .get('/api/conversations')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
@@ -299,30 +295,35 @@ describe('The chat API', function() {
               return done(err);
             }
 
-            expect(res.body.length).to.equal(2);
-            expect(res.body).to.shallowDeepEqual([{_id: String(channel._id)}, {name: CONSTANTS.DEFAULT_CHANNEL.name}]);
+            expect(res.body.length).to.equal(3);
+            expect(res.body).to.shallowDeepEqual([{_id: String(channel2._id), moderate: false}, {_id: String(channel3._id), moderate: false}, {name: CONSTANTS.DEFAULT_CHANNEL.name, moderate: false}]);
             done();
           });
       }
 
-      app.lib.conversation.create({
-        type: CONVERSATION_TYPE.OPEN,
-        mode: CONVERSATION_MODE.CHANNEL,
-        moderate: true
-      }, function(err) {
-        err && done(err);
-        app.lib.conversation.create({
+      Q.all([
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL,
+          moderate: true
+        }),
+        Q.denodeify(app.lib.conversation.create)({
           type: CONVERSATION_TYPE.OPEN,
           mode: CONVERSATION_MODE.CHANNEL
-        }, execTest);
-      });
-
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        })
+      ])
+      .spread(execTest)
+      .catch(done);
     });
 
     it('should return an array open channels', function(done) {
       function execTest(channel1, channel2, channel3) {
         request(app.express)
-          .get('/api/channels')
+          .get('/api/conversations')
           .expect('Content-Type', /json/)
           .expect(200)
           .end(function(err, res) {
@@ -350,6 +351,76 @@ describe('The chat API', function() {
           mode: CONVERSATION_MODE.CHANNEL
         })
       ]).spread(execTest).catch(done);
+    });
+
+    it('should return the number of conversations defined by the limit parameter', function(done) {
+      function execTest() {
+        request(app.express)
+          .get('/api/conversations?limit=2')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.headers['x-esn-items-count']).to.equal('4');
+            expect(res.body.length).to.equal(2);
+            done();
+          });
+      }
+
+      Q.all([
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        })
+      ])
+      .then(execTest)
+      .catch(done);
+    });
+
+    it('should offset results from the offset parameter', function(done) {
+      function execTest() {
+        request(app.express)
+          .get('/api/conversations?offset=3')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.headers['x-esn-items-count']).to.equal('4');
+            expect(res.body.length).to.equal(1);
+            done();
+          });
+      }
+
+      Q.all([
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.OPEN,
+          mode: CONVERSATION_MODE.CHANNEL
+        })
+      ])
+      .then(execTest)
+      .catch(done);
     });
   });
 
@@ -604,7 +675,8 @@ describe('The chat API', function() {
     });
 
     it('should 200 with the message list when private conversation and user is member', function(done) {
-      var channelId;
+      let channelId;
+
       readable = true;
 
       Q.denodeify(app.lib.conversation.create)({

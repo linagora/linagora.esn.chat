@@ -6,7 +6,6 @@ module.exports = function(dependencies, lib) {
 
   const router = express.Router();
 
-  require('./channel')(dependencies, lib, router);
   require('./conversation')(dependencies, lib, router);
   require('./message')(dependencies, lib, router);
 

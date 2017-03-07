@@ -176,19 +176,29 @@ module.exports = function(dependencies) {
   }
 
   function list(options, callback) {
-    let query;
+    const query = {};
     const sort = 'timestamps.creation';
 
     options = options || {};
     options.limit = +(options.limit || CONSTANTS.DEFAULT_LIMIT);
     options.offset = +(options.offset || CONSTANTS.DEFAULT_OFFSET);
+    options.moderate = Boolean(options.moderate);
 
     if (options.creator) {
-      query = query || {};
       query.creator = options.creator;
     }
 
-    let conversationQuery = query ? Conversation.find(query) : Conversation.find();
+    if (options.mode) {
+      query.mode = options.mode;
+    }
+
+    if (options.type) {
+      query.type = options.type;
+    }
+
+    query.moderate = options.moderate;
+
+    let conversationQuery = Conversation.find(query);
 
     Conversation.find(conversationQuery).count().exec((err, count) => {
       if (err) {
