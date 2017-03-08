@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const sinon = require('sinon');
+const mockery = require('mockery');
 const _ = require('lodash');
 const Q = require('q');
 const CONSTANTS = require('../../../../backend/lib/constants');
@@ -51,6 +52,11 @@ describe('The conversation controller', function() {
         updateTopic: sinon.spy(function(channelId, topic, callback) {
           return callback(err, result);
         })
+      },
+      search: {
+        conversations: {
+          search: {}
+        }
       }
     };
   });
@@ -276,6 +282,208 @@ describe('The conversation controller', function() {
             }
           };
         }
+      });
+    });
+  });
+
+  describe('The list function', function() {
+    let headerSpy, conversations, user, searchResult, listResult, error;
+
+    beforeEach(function() {
+      error = new Error('I failed');
+      headerSpy = sinon.spy();
+      conversations = [{_id: 1}, {_id: 2}];
+      user = {_id: 'userId'};
+      searchResult = {total_count: 2, list: [{_id: 3}, {_id: 4}]};
+      listResult = {total_count: 2, list: [{_id: 3}, {_id: 4}]};
+    });
+
+    describe('when req.query.search', function() {
+      it('should search public conversations', function(done) {
+        const req = {user: user, query: {search: 'searchme'}};
+        const res = {
+          header: headerSpy
+        };
+
+        lib.conversation.getAllForUser = sinon.spy(function() {
+          return Q.resolve(conversations);
+        });
+
+        lib.search.conversations.search.searchConversations = sinon.spy(function(search, ids, callback) {
+          callback(null, searchResult);
+        });
+
+        const sendConversationResult = function(list, user) {
+          expect(list).to.equal(searchResult.list);
+          expect(user).to.equal(user);
+          expect(headerSpy).to.have.been.calledWith('X-ESN-Items-Count', searchResult.total_count);
+          expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
+          expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
+          done();
+        };
+
+        mockery.registerMock('./utils', function() {
+          return {
+            sendConversationResult: sendConversationResult
+          };
+        });
+
+        getController(this.moduleHelpers.dependencies, lib).list(req, res);
+      });
+
+      it('should HTTP 500 when get current user conversations rejects', function(done) {
+        const sendConversationResult = sinon.spy();
+        const req = {user: user, query: {search: 'searchme'}};
+        const res = {
+          header: headerSpy,
+          status: function(code) {
+            expect(code).to.equal(500);
+
+            return {
+              json: function(json) {
+                expect(json).to.shallowDeepEqual({
+                  error: {
+                    code: 500,
+                    message: 'Server Error',
+                    details: error.message
+                  }
+                });
+
+                expect(sendConversationResult).to.not.have.been.called;
+                expect(headerSpy).to.not.have.been.called;
+                expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
+                expect(lib.search.conversations.search.searchConversations).to.not.have.been.called;
+                done();
+              }
+            };
+          }
+        };
+
+        lib.conversation.getAllForUser = sinon.spy(function() {
+          return Q.reject(error);
+        });
+        lib.search.conversations.search.searchConversations = sinon.spy();
+
+        mockery.registerMock('./utils', function() {
+          return {
+            sendConversationResult: sendConversationResult
+          };
+        });
+
+        getController(this.moduleHelpers.dependencies, lib).list(req, res);
+      });
+
+      it('should HTTP 500 when searchConversations rejects', function(done) {
+        const sendConversationResult = sinon.spy();
+        const req = {user: user, query: {search: 'searchme'}};
+        const res = {
+          header: headerSpy,
+          status: function(code) {
+            expect(code).to.equal(500);
+
+            return {
+              json: function(json) {
+                expect(json).to.shallowDeepEqual({
+                  error: {
+                    code: 500,
+                    message: 'Server Error',
+                    details: error.message
+                  }
+                });
+
+                expect(sendConversationResult).to.not.have.been.called;
+                expect(headerSpy).to.not.have.been.called;
+                expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
+                expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
+                done();
+              }
+            };
+          }
+        };
+
+        lib.conversation.getAllForUser = sinon.spy(function() {
+          return Q.resolve(conversations);
+        });
+        lib.search.conversations.search.searchConversations = sinon.spy(function(query, ids, callback) {
+          callback(error);
+        });
+
+        mockery.registerMock('./utils', function() {
+          return {
+            sendConversationResult: sendConversationResult
+          };
+        });
+
+        getController(this.moduleHelpers.dependencies, lib).list(req, res);
+      });
+    });
+
+    describe('When !req.query.search', function() {
+      it('should return the conversations from lib.conversation.list', function(done) {
+        const req = {user: user, query: {limit: 10}};
+        const res = {
+          header: headerSpy
+        };
+
+        lib.conversation.list = sinon.spy(function(query, callback) {
+          callback(null, listResult);
+        });
+
+        const sendConversationResult = function(list, user) {
+          expect(list).to.equal(listResult.list);
+          expect(user).to.equal(user);
+          expect(headerSpy).to.have.been.calledWith('X-ESN-Items-Count', listResult.total_count);
+          expect(lib.conversation.list).to.have.been.calledWith({mode: 'channel', type: 'open', limit: req.query.limit}, sinon.match.func);
+          done();
+        };
+
+        mockery.registerMock('./utils', function() {
+          return {
+            sendConversationResult: sendConversationResult
+          };
+        });
+
+        getController(this.moduleHelpers.dependencies, lib).list(req, res);
+      });
+
+      it('should HTTP 500 when lib.conversation.list fails', function(done) {
+        const sendConversationResult = sinon.spy();
+        const req = {user: user, query: {limit: 10}};
+        const res = {
+          header: headerSpy,
+          status: function(code) {
+            expect(code).to.equal(500);
+
+            return {
+              json: function(json) {
+                expect(json).to.deep.equals({
+                  error: {
+                    code: 500,
+                    message: 'Server Error',
+                    details: error.message
+                  }
+                });
+
+                expect(sendConversationResult).to.not.have.been.called;
+                expect(headerSpy).to.not.have.been.called;
+                expect(lib.conversation.list).to.have.been.calledWith({mode: 'channel', type: 'open', limit: req.query.limit}, sinon.match.func);
+                done();
+              }
+            };
+          }
+        };
+
+        lib.conversation.list = sinon.spy(function(query, callback) {
+          callback(error);
+        });
+
+        mockery.registerMock('./utils', function() {
+          return {
+            sendConversationResult: sendConversationResult
+          };
+        });
+
+        getController(this.moduleHelpers.dependencies, lib).list(req, res);
       });
     });
   });
