@@ -15,7 +15,7 @@ module.exports = function(dependencies) {
 
   function start() {
     topicUpdatedTopic.subscribe(event => {
-      logger.debug('System topic update handler received an event', event);
+      logger.debug('System topic update handler received an event');
 
       return topicUpdated(event.conversationId, event.userId, event.old_topic, event.topic, event.timestamp);
     });

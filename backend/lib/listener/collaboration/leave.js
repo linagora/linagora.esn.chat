@@ -14,7 +14,7 @@ module.exports = dependencies => {
 
   function start() {
     leaveMembershipTopic.subscribe(event => {
-      logger.debug('Collaboration leave conversation handler received an event', event);
+      logger.debug('Collaboration leave conversation handler received an event');
 
       if (event.collaboration.objectType !== CONSTANTS.OBJECT_TYPES.CONVERSATION) {
         logger.debug(`Collaboration ${event.collaboration.id} is not a conversation, skipping`);

@@ -41,12 +41,7 @@ module.exports = function(dependencies) {
       }
     };
 
-    logger.debug('Searching chat conversation with options', {
-      search: query.search,
-      offset: offset,
-      limit: limit,
-      elasticsearchQuery: elasticsearchQuery
-    });
+    logger.debug(`Searching chat conversation with search: ${query.search}, limit: ${limit}, offset: ${offset}`);
 
     elasticsearch.searchDocuments({
       index: SEARCH.CONVERSATIONS.INDEX_NAME,

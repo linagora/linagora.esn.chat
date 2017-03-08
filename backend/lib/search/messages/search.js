@@ -32,12 +32,7 @@ module.exports = function(dependencies) {
       }
     };
 
-    logger.debug('Searching chat messages with options', {
-      search: query.search,
-      offset: offset,
-      limit: limit,
-      elasticsearchQuery: elasticsearchQuery
-    });
+    logger.debug(`Searching chat messages with search: ${query.search}, limit: ${limit}, offset: ${offset}`);
 
     elasticsearch.searchDocuments({
       index: SEARCH.MESSAGES.INDEX_NAME,
