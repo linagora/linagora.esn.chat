@@ -78,7 +78,7 @@ module.exports = function(dependencies, lib) {
       }
 
       return saveAsChatMessage(data).then(message => {
-        logger.debug('Chat Message saved', message);
+        logger.debug(`Chat Message saved ${message._id}`);
         publish({message});
         handleMessage({message});
 

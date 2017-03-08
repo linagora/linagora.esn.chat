@@ -15,7 +15,7 @@ module.exports = function(dependencies) {
 
   function start() {
     membershipTopic.subscribe(event => {
-      logger.debug('System join conversation handler received an event', event);
+      logger.debug('System join conversation handler received an event');
 
       if (event.collaboration.objectType !== CONSTANTS.OBJECT_TYPES.CONVERSATION) {
         logger.debug(`Collaboration ${event.collaboration.id} is not a conversation, skipping`);
