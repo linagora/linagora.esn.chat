@@ -419,19 +419,14 @@ describe('The chatConversationsStoreService service', function() {
   });
 
   describe('The updateTopic function', function() {
-    it('should add the conversation if not found', function() {
+    it('should not add the conversation if not in store', function() {
       var topic = {value: 'My new topic'};
 
       chatConversationsStoreService.conversations = [conversation];
       chatConversationsStoreService.updateTopic(publicConversation, topic);
 
-      expect(chatConversationsStoreService.channels).to.shallowDeepEqual([
-        {
-          _id: publicConversation._id,
-          name: publicConversation.name,
-          topic: topic
-        }
-      ]);
+      expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
+      expect(chatConversationsStoreService.conversations[0].topic).to.not.equals(topic);
     });
 
     it('should update the topic of the conversation', function() {
