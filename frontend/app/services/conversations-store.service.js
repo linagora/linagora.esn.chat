@@ -216,9 +216,6 @@
       var conv = findConversation(conversation._id);
 
       if (!conv) {
-        conversation.topic = topic;
-        addConversation(conversation);
-
         return;
       }
 
