@@ -37,7 +37,6 @@ module.exports = function(dependencies) {
       creator: {type: ObjectId, ref: 'User'},
       user_mentions: [{type: ObjectId, ref: 'User'}]
     },
-    domain: {type: ObjectId, ref: 'Domain'},
     membershipRequests: [
       {
         user: {type: ObjectId, ref: 'User'},

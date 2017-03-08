@@ -53,6 +53,10 @@ module.exports = function(dependencies) {
       });
     }
 
+    if (options && options.domain_ids) {
+      options.domain_ids = options.domain_ids.map(domainId => utils.ensureObjectId(domainId));
+    }
+
     const conversation = new Conversation(options);
 
     conversation.save((err, saved) => {

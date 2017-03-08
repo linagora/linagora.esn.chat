@@ -373,6 +373,43 @@ describe('The linagora.esn.chat conversation lib', function() {
       require('../../../backend/lib/conversation')(dependencies, lib).create(options, done);
     });
 
+    it('should set domain_ids instances of mongo ObjectId if domain_ids are String', function(done) {
+      const options = {id: 1, domain_ids: ['589c6a2a53bf175bd6164386']};
+      const channel = {};
+
+      function ChatConversation(opts) {
+        expect(opts).to.deep.equal(options);
+        expect(opts.domain_ids[0]).to.be.instanceof(ObjectId);
+      }
+
+      ChatConversation.prototype.save = function(cb) {
+        cb(null, channel, 1);
+      };
+
+      modelsMock.ChatConversation = ChatConversation;
+
+      require('../../../backend/lib/conversation')(dependencies, lib).create(options, done);
+    });
+
+    it('should not change domain_ids if it already instances of mongo ObjectId', function(done) {
+      const anObjectId = new ObjectId();
+      const channel = {};
+      const options = {id: 1, domain_ids: [anObjectId]};
+
+      function ChatConversation(opts) {
+        expect(opts).to.deep.equal(options);
+        expect(opts.domain_ids[0]).to.be.instanceof(ObjectId);
+      }
+
+      ChatConversation.prototype.save = function(cb) {
+        cb(null, channel, 1);
+      };
+
+      modelsMock.ChatConversation = ChatConversation;
+
+      require('../../../backend/lib/conversation')(dependencies, lib).create(options, done);
+    });
+
     it('should publish on the global CONVERSATION_CREATED topic', function(done) {
       const channel = {
         isAChannel: true
