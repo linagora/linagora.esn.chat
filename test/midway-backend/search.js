@@ -437,7 +437,7 @@ describe('The Chat search API', function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .end(function(err, res) {
-          const results = res.body.map(result => result._source.name);
+          const results = res.body.map(result => result.name);
 
           if (err) {
             return done(err);

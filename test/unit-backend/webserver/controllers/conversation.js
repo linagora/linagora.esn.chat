@@ -305,6 +305,10 @@ describe('The conversation controller', function() {
           header: headerSpy
         };
 
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(null, {_id: id});
+        });
+
         lib.conversation.getAllForUser = sinon.spy(function() {
           return Q.resolve(conversations);
         });
@@ -314,9 +318,10 @@ describe('The conversation controller', function() {
         });
 
         const sendConversationResult = function(list, user) {
-          expect(list).to.equal(searchResult.list);
+          expect(list).to.shallowDeepEqual(searchResult.list);
           expect(user).to.equal(user);
           expect(headerSpy).to.have.been.calledWith('X-ESN-Items-Count', searchResult.total_count);
+          expect(lib.conversation.getById).to.have.been.calledTwice;
           expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
           expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
           done();
@@ -406,6 +411,54 @@ describe('The conversation controller', function() {
         });
         lib.search.conversations.search.searchConversations = sinon.spy(function(query, ids, callback) {
           callback(error);
+        });
+
+        mockery.registerMock('./utils', function() {
+          return {
+            sendConversationResult: sendConversationResult
+          };
+        });
+
+        getController(this.moduleHelpers.dependencies, lib).list(req, res);
+      });
+
+      it('should HTTP 500 when lib.conversation.getById rejects', function(done) {
+        const sendConversationResult = sinon.spy();
+        const req = {user: user, query: {search: 'searchme'}};
+        const res = {
+          header: headerSpy,
+          status: function(code) {
+            expect(code).to.equal(500);
+
+            return {
+              json: function(json) {
+                expect(json).to.shallowDeepEqual({
+                  error: {
+                    code: 500,
+                    message: 'Server Error',
+                    details: error.message
+                  }
+                });
+
+                expect(sendConversationResult).to.not.have.been.called;
+                expect(headerSpy).to.not.have.been.called;
+                expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
+                expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
+                expect(lib.conversation.getById).to.have.been.called;
+                done();
+              }
+            };
+          }
+        };
+
+        lib.conversation.getById = sinon.spy(function(id, callback) {
+          callback(error);
+        });
+        lib.conversation.getAllForUser = sinon.spy(function() {
+          return Q.resolve(conversations);
+        });
+        lib.search.conversations.search.searchConversations = sinon.spy(function(query, ids, callback) {
+          callback(null, searchResult);
         });
 
         mockery.registerMock('./utils', function() {

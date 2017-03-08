@@ -23,7 +23,6 @@
             offset += response.data.length;
 
             return response.data.map(function(conversation) {
-              conversation = conversation._source;
               conversation.type = type;
               conversation.topic.value = $filter('linky')(conversation.topic.value, '_blank');
               conversation.purpose.value = $filter('linky')(conversation.purpose.value, '_blank');
