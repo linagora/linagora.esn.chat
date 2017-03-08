@@ -121,7 +121,21 @@ module.exports = function(dependencies, lib) {
       return searchForPublicConversations(req.query.search, req, res);
     }
 
-    lib.conversation.list(req.query, sendResponse(req, res));
+    lib.conversation.list(Object.assign(req.query || {}, {mode: CONSTANTS.CONVERSATION_MODE.CHANNEL, type: CONSTANTS.CONVERSATION_TYPE.OPEN}), (err, result) => {
+      if (err) {
+        logger.error('Error while getting conversations', err);
+
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting conversations'
+          }
+        });
+      }
+      res.header('X-ESN-Items-Count', result.total_count || 0);
+      utils.sendConversationResult(result.list, req.user, res);
+    });
   }
 
   function markAllMessageOfAConversationReaded(req, res) {
@@ -213,23 +227,28 @@ module.exports = function(dependencies, lib) {
   }
 
   function searchForPublicConversations(phrase, req, res) {
-    lib.conversation.getAllForUser(req.user).then(conversations => {
-      lib.search.conversations.search.searchConversations({search: phrase}, conversations.map(conversation => String(conversation._id)), (err, result) => {
-        if (err) {
-          logger.error('Error while searching conversations', err);
+    lib.conversation.getAllForUser(req.user)
+      .then(conversations => {
+        lib.search.conversations.search.searchConversations({search: phrase}, conversations.map(conversation => String(conversation._id)), (err, result) => {
+          if (err) {
+            throw err;
+          }
+          res.header('X-ESN-Items-Count', result.total_count || 0);
+          utils.sendConversationResult(result.list, req.user, res);
+        });
+      })
+      .catch(onError);
 
-          return res.status(500).json({
-            error: {
-              code: 500,
-              message: 'Server Error',
-              details: err.message || 'Error while searching conversations'
-            }
-          });
-        }
-        res.header('X-ESN-Items-Count', result.total_count || 0);
+      function onError(err) {
+        logger.error('Error while searching conversations', err);
 
-        utils.sendConversationResult(result.list, req.user, res);
-      });
-    });
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while searching conversations'
+          }
+        });
+      }
   }
 };

@@ -11,7 +11,7 @@ describe('The ChatConversationListController controller', function() {
   beforeEach(function() {
     esnPaginationtionProviderBuilder = sinon.spy();
     chatConversationService = {
-      getChannels: function() {}
+      list: function() {}
     };
   });
 
@@ -45,7 +45,7 @@ describe('The ChatConversationListController controller', function() {
   it('should call esnPaginationtionProviderBuilder with default options', function() {
     var controller = initController();
 
-    expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.getChannels, {
+    expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
       limit: CHAT.DEFAULT_FETCH_SIZE
     });
   });
@@ -54,7 +54,7 @@ describe('The ChatConversationListController controller', function() {
     var limit = 2;
     var controller = initController({elementsPerPage: limit});
 
-    expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.getChannels, {
+    expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
       limit: limit
     });
   });

@@ -10,7 +10,6 @@
         fetchMessages: fetchMessages,
         fetchAttachments: fetchAttachments,
         get: get,
-        getChannels: getChannels,
         getMessage: getMessage,
         join: join,
         leave: leave,
@@ -46,10 +45,6 @@
 
       function get(id) {
         return _getBase(id).get().then(_stripResponse);
-      }
-
-      function getChannels(options) {
-        return ChatRestangular.all('channels').getList(options);
       }
 
       function getMessage(id) {

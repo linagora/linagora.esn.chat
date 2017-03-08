@@ -10,6 +10,6 @@
       limit: self.elementsPerPage || CHAT.DEFAULT_FETCH_SIZE
     };
 
-    esnPaginationtionProviderBuilder(self, 'ChatConversationList', chatConversationService.getChannels, options);
+    esnPaginationtionProviderBuilder(self, 'ChatConversationList', chatConversationService.list, options);
   }
 })();
