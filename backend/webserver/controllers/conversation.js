@@ -57,7 +57,6 @@ module.exports = function(dependencies, lib) {
         type: req.body.type,
         mode: req.body.mode,
         creator: req.user,
-        domain: req.body.domain,
         topic: {
           value: req.body.topic,
           creator: req.user
@@ -69,6 +68,10 @@ module.exports = function(dependencies, lib) {
           creator: req.user
         }
       };
+
+      if (req.body.domain) {
+        conversation.domain_ids = [req.body.domain];
+      }
 
       lib.conversation.create(conversation, (err, result) => {
         if (err) {

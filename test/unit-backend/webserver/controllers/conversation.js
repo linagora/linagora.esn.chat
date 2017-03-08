@@ -173,7 +173,7 @@ describe('The conversation controller', function() {
               name: name,
               type: 'type',
               mode: 'mode',
-              domain: domain,
+              domain_ids: [domain],
               creator: user,
               avatar: avatar,
               topic: {
