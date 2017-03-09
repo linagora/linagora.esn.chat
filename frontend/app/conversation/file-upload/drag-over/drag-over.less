@@ -1,0 +1,28 @@
+.chat-drag-over {
+  .dnd-overlay, .dnd-overlay-not-member {
+    height: ~"calc(100% - @{chatConversationIsTypingHeight})";
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+    z-index: @zIndexDefault+2;
+    background-color: @dimmedBackgroundColor;
+    display: none;
+
+    .dnd-overlay-text {
+      .all-centered;
+      .flex-column;
+
+      color: @m-white;
+      font-size: 2em;
+      font-weight: 600;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+
+      i {
+        font-size: 5em;
+      }
+    }
+  }
+}
