@@ -63,6 +63,17 @@
           }
         }
       })
+      .state('chat.channels-views.members-add', {
+        url: '/members/add',
+        params: {
+          conversation: null
+        },
+        views: {
+          'main@chat': {
+            template: '<chat-members-add/>'
+          }
+        }
+      })
       .state('chat.groups-add', {
         url: '/groups/add',
         views: {
