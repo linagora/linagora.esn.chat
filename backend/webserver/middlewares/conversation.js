@@ -2,11 +2,13 @@
 
 const CONSTANTS = require('../../lib/constants');
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
+const CONVERSATION_OBJECT_TYPES = CONSTANTS.OBJECT_TYPES.CONVERSATION;
 const Q = require('q');
 
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
+  const user = dependencies('user');
 
   return {
     assertDefaultChannels,
@@ -16,7 +18,8 @@ module.exports = function(dependencies, lib) {
     canRead,
     canUpdate,
     canWrite,
-    load
+    load,
+    loadMember
   };
 
   function assertDefaultChannels(req, res, next) {
@@ -198,8 +201,30 @@ module.exports = function(dependencies, lib) {
         });
       }
 
+      req.params.objectType = CONVERSATION_OBJECT_TYPES;
       req.conversation = conversation;
       next();
     });
+  }
+
+  function loadMember(req, res, next) {
+    function onFind(req, res, next, err, user) {
+      if (err) {
+        return res.status(500).json({error: {code: 500, message: 'Server error', details: err.message}});
+      }
+
+      if (!user) {
+        return res.status(404).json({error: {code: 404, message: 'Not found', details: 'User not found'}});
+      }
+
+      req.member = user;
+      next();
+    }
+
+    if (!req.params.member_id) {
+      return res.status(400).json({error: {code: 400, message: 'Bad Request', details: 'uuid or email missing'}});
+    }
+
+    return user.get(req.params.member_id, onFind.bind(null, req, res, next));
   }
 };

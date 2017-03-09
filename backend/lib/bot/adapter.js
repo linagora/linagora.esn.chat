@@ -24,6 +24,9 @@ class ChatAdapter extends EventEmitter {
 
   reply(context, message) {
     message.type = MESSAGE_TYPE.BOT;
+    message.channel = context.room;
+    message.creator = context.user;
+    message.timestamps = { creation: Date.now() };
     this.messenger.sendMessageToUser(context.user, message);
   }
 

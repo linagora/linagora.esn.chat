@@ -38,5 +38,9 @@
   "is typing": "est en train d'écrire",
   "are typing": "est en train d'écrire",
   "several users are typing": "plusieurs utilisateurs sont en train d'écrire",
-  "and": "et"
+  "and": "et",
+  "You have mentioned": "Vous avez mentionné",
+  "do you want to": "voulez vous",
+  "add him/her to the conversation ?": "l'ajouter à la conversation ?",
+  "add them to the conversation ?": "les ajouter à la conversation ?"
 }

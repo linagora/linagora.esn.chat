@@ -41,7 +41,7 @@ class Messenger extends EventEmitter {
   }
 
   memberHasBeenAdded(conversation, member, by_member) {
-    this.sendDataToUser(member.member._id, MEMBER_ADDED_TO_CONVERSATION, {conversation, member, by_member});
+    this.sendDataToUser(member.member.id, MEMBER_ADDED_TO_CONVERSATION, {conversation, member, by_member});
   }
 
   memberHasJoined(conversation, member, members_count) {

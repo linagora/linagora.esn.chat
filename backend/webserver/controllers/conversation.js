@@ -10,6 +10,7 @@ module.exports = function(dependencies, lib) {
   const utils = require('./utils')(dependencies, lib);
 
   return {
+    addMember,
     create,
     get,
     getById,
@@ -21,6 +22,28 @@ module.exports = function(dependencies, lib) {
     updateTopic,
     update
   };
+
+  function addMember(req, res) {
+    function addMemberResponse(req, res) {
+      return function(err, result) {
+        if (err) {
+          logger.error('Error while adding member', err);
+
+          return res.status(500).json({
+            error: {
+              code: 500,
+              message: 'Server Error',
+              details: 'Error while adding member'
+            }
+          });
+        }
+
+        utils.sendConversationResult(result, req.user, res);
+      };
+    }
+
+    lib.members.addMember(req.conversation, req.user, req.params.member_id, addMemberResponse(req, res));
+  }
 
   function currentUserAsMember(req) {
     return {objectType: OBJECT_TYPES.USER, id: String(req.user._id)};

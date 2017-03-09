@@ -20,6 +20,9 @@ describe('The conversation controller', function() {
 
     lib = {
       members: {
+        addMember: sinon.spy(function(conversation, author, memberId, callback) {
+          return callback(err, result);
+        }),
         getMembers: sinon.spy(function(collaboration) {
           return Q.when(collaboration.members || []);
         }),
@@ -64,6 +67,46 @@ describe('The conversation controller', function() {
   function getController(dependencies, lib) {
     return require('../../../../backend/webserver/controllers/conversation')(dependencies, lib);
   }
+
+  describe('The addMember', function() {
+    it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
+      err = new Error('failed');
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      controller.addMember({ params: {} }, {
+        status: function(code) {
+          expect(code).to.equal(500);
+
+          return {
+            json: function(json) {
+              expect(lib.members.addMember).to.have.been.called;
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the lib.find result', function(done) {
+      result = [];
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      controller.addMember({ params: {} }, {
+        status: function(code) {
+          expect(code).to.equal(200);
+
+          return {
+            json: function(json) {
+              expect(lib.members.addMember).to.have.been.called;
+              expect(json).to.deep.equal(result);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
 
   describe('The getUserConversations', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
