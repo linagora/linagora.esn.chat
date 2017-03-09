@@ -2,6 +2,7 @@
 
 const CONSTANTS = require('../../lib/constants');
 const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
+const Q = require('q');
 
 module.exports = function(dependencies, lib) {
 
@@ -230,28 +231,40 @@ module.exports = function(dependencies, lib) {
   }
 
   function searchForPublicConversations(phrase, req, res) {
+
     lib.conversation.getAllForUser(req.user)
-      .then(conversations => {
-        lib.search.conversations.search.searchConversations({search: phrase}, conversations.map(conversation => String(conversation._id)), (err, result) => {
-          if (err) {
-            throw err;
-          }
-          res.header('X-ESN-Items-Count', result.total_count || 0);
-          utils.sendConversationResult(result.list, req.user, res);
-        });
-      })
+      .then(searchConversations)
+      .then(getConversationsFromSearchResult)
+      .then(sendResult)
       .catch(onError);
 
-      function onError(err) {
-        logger.error('Error while searching conversations', err);
+    function getConversation(conversation) {
+      return Q.denodeify(lib.conversation.getById)(conversation._id);
+    }
 
-        return res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Server Error',
-            details: err.message || 'Error while searching conversations'
-          }
-        });
-      }
+    function getConversationsFromSearchResult(searchResult) {
+      return Q.all(searchResult.list.map(getConversation)).then(conversations => ({list: conversations, total_count: searchResult.total_count}));
+    }
+
+    function onError(err) {
+      logger.error('Error while searching conversations', err);
+
+      return res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: err.message || 'Error while searching conversations'
+        }
+      });
+    }
+
+    function searchConversations(userConversations) {
+      return Q.denodeify(lib.search.conversations.search.searchConversations)({search: phrase}, userConversations.map(conversation => String(conversation._id)));
+    }
+
+    function sendResult(result) {
+      res.header('X-ESN-Items-Count', result.total_count || 0);
+      utils.sendConversationResult(result.list, req.user, res);
+    }
   }
 };
