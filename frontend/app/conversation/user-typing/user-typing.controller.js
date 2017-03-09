@@ -4,21 +4,21 @@
   angular.module('linagora.esn.chat')
     .controller('ChatUserTypingController', ChatUserTypingController);
 
-    function ChatUserTypingController($scope, _, session, userUtils, chatConversationsStoreService, CHAT_MESSAGE_TYPE) {
+    function ChatUserTypingController($scope, _, session, userUtils, chatConversationMemberService, chatConversationsStoreService, CHAT_MESSAGE_TYPE) {
       var self = this;
 
       self.typing = {};
       self.$onInit = $onInit;
 
       function $onInit() {
-        var userTyping = $scope.$on('chat:message:' + CHAT_MESSAGE_TYPE.USER_TYPING, onUserTyping);
-
-        $scope.$on('$destroy', function() {
-          userTyping();
-        });
+        $scope.$on('chat:message:' + CHAT_MESSAGE_TYPE.USER_TYPING, onUserTyping);
       }
 
       function onUserTyping(evt, message) {
+        if (!message || !message.creator || !message.creator._id || !chatConversationMemberService.currentUserIsMemberOf(chatConversationsStoreService.activeRoom)) {
+          return;
+        }
+
         self.typing[message.creator._id] = message;
 
         self.usersTyping = _.chain(self.typing)
