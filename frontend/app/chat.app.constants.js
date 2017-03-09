@@ -16,6 +16,10 @@
       LAST_CONVERSATION: 'chat.last-conversation',
       DESKTOP_NOTIFICATION: 'chat.desktop-notification'
     })
+    .constant('CHAT_DRAG_FILE_CLASS', {
+      IS_MEMBER: 'show-overlay',
+      IS_NOT_MEMBER: 'show-overlay-not-member'
+    })
     .constant('CHAT_EVENTS', {
       CONVERSATION_TOPIC_UPDATED: 'chat:conversation:topic:updated',
       MEMBER_ADDED_TO_CONVERSATION: 'chat:conversation:members:added',

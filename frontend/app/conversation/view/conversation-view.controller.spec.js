@@ -9,10 +9,12 @@ describe('The ChatConversationViewController controller', function() {
     $q,
     sessionMock,
     chatConversationServiceMock,
+    chatConversationMemberService,
     chatConversationActionsService,
     CHAT_EVENTS,
     CHAT,
     MESSAGE_GROUP_TIMESPAN,
+    CHAT_DRAG_FILE_CLASS,
     chatScrollServiceMock,
     chatConversationsStoreService,
     chatMessageServiceMock,
@@ -31,6 +33,8 @@ describe('The ChatConversationViewController controller', function() {
     };
 
     chatConversationServiceMock = {};
+
+    chatConversationMemberService = {};
 
     usSpinnerServiceMock = {
       spin: function() {},
@@ -89,6 +93,7 @@ describe('The ChatConversationViewController controller', function() {
       $provide.value('$stateParams', $stateParams);
       $provide.value('chatScrollService', chatScrollServiceMock);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
+      $provide.value('chatConversationMemberService', chatConversationMemberService);
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('searchProviders', searchProviders);
@@ -97,13 +102,14 @@ describe('The ChatConversationViewController controller', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _$stateParams_, _MESSAGE_GROUP_TIMESPAN_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _$stateParams_, _MESSAGE_GROUP_TIMESPAN_, _CHAT_DRAG_FILE_CLASS_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
     CHAT_EVENTS = _CHAT_EVENTS_;
     MESSAGE_GROUP_TIMESPAN = _MESSAGE_GROUP_TIMESPAN_;
+    CHAT_DRAG_FILE_CLASS = _CHAT_DRAG_FILE_CLASS_;
     $stateParams = _$stateParams_;
   }));
 
@@ -553,6 +559,30 @@ describe('The ChatConversationViewController controller', function() {
         expect(scope.vm.messages[0].sameUser).to.be.false;
         expect(scope.vm.messages[1].sameUser).to.be.true;
       });
+    });
+  });
+
+  describe('The onDragOver function', function() {
+    it('should return CHAT_DRAG_FILE_CLASS.IS_MEMBER when user is member', function() {
+      chatConversationMemberService.currentUserIsMemberOf = sinon.spy(function() {
+        return true;
+      });
+
+      initCtrl();
+
+      expect(scope.vm.onDragOver()).to.equal(CHAT_DRAG_FILE_CLASS.IS_MEMBER);
+      expect(chatConversationMemberService.currentUserIsMemberOf).to.have.been.calledOnce;
+    });
+
+    it('should return CHAT_DRAG_FILE_CLASS.IS_NOT_MEMBER when user is not member', function() {
+      chatConversationMemberService.currentUserIsMemberOf = sinon.spy(function() {
+        return false;
+      });
+
+      initCtrl();
+
+      expect(scope.vm.onDragOver()).to.equal(CHAT_DRAG_FILE_CLASS.IS_NOT_MEMBER);
+      expect(chatConversationMemberService.currentUserIsMemberOf).to.have.been.calledOnce;
     });
   });
 });

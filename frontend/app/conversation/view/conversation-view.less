@@ -9,37 +9,19 @@
     font-size: 14px;
   }
 
-  .dnd-overlay {
-    height: ~"calc(100% - @{chatConversationIsTypingHeight})";
-    left: 0;
-    pointer-events: none;
-    position: absolute;
-    width: 100%;
-    z-index: @zIndexDefault+2;
-    background-color: @dimmedBackgroundColor;
-    display: none;
-
-    .dnd-overlay-text {
-      .all-centered;
-
-
-      flex-direction: column;
-      overflow: hidden;
-      height: 100%;
-      position: relative;
-      color: @m-white;
-      font-size: 2em;
-      font-weight: 600;
-
-      i {
-        font-size: 5em;
+  &.show-overlay {
+    .chat-drag-over {
+      .dnd-overlay {
+        display: block;
       }
     }
   }
 
-  &.show-overlay {
-    .dnd-overlay {
-      display: block;
+  &.show-overlay-not-member {
+    .chat-drag-over {
+      .dnd-overlay-not-member {
+        display: block;
+      }
     }
   }
 

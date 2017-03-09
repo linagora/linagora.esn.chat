@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, _) {
+  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, chatConversationMemberService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, _, CHAT_DRAG_FILE_CLASS) {
     var self = this;
 
     self.spinnerKey = 'ChatConversationSpinner';
@@ -19,6 +19,7 @@
     self.topOfConversation = false;
     self.setLastLineInView = setLastLineInView;
     self.inview = false;
+    self.onDragOver = onDragOver;
     self.$onInit = $onInit;
 
     function addUniqId(message) {
@@ -142,6 +143,10 @@
 
     function isDuplicate(message) {
       return _.find(self.messages, {_uniqId: message._uniqId});
+    }
+
+    function onDragOver() {
+      return chatConversationMemberService.currentUserIsMemberOf(chatConversationsStoreService.activeRoom) ? CHAT_DRAG_FILE_CLASS.IS_MEMBER : CHAT_DRAG_FILE_CLASS.IS_NOT_MEMBER;
     }
 
     [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
