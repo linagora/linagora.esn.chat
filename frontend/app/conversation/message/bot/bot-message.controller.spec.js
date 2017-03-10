@@ -46,7 +46,7 @@ describe('the chatBotMessageController controller', function() {
       var message = {subtype: 'abc'};
       var controller = initController(message);
 
-      chatBotMessageService.resolve = chatBotMessageService.resolve = sinon.stub().returns($q.when([]));
+      chatBotMessageService.resolve = sinon.stub().returns($q.when([]));
 
       controller.$onInit();
       $rootScope.$digest();
@@ -60,7 +60,7 @@ describe('the chatBotMessageController controller', function() {
       var controller = initController(message);
       var text = 'text';
 
-      chatBotMessageService.resolve = chatBotMessageService.resolve = sinon.stub().returns($q.when(text));
+      chatBotMessageService.resolve = sinon.stub().returns($q.when(text));
 
       controller.$onInit();
 
@@ -81,7 +81,7 @@ describe('the chatBotMessageController controller', function() {
       var type = 'type';
       var error = 'An Error';
 
-      chatBotMessageService.resolve = chatBotMessageService.resolve = sinon.stub().returns($q.reject(error));
+      chatBotMessageService.resolve = sinon.stub().returns($q.reject(error));
 
       controller.$onInit();
 

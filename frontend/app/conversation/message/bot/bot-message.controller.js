@@ -11,8 +11,9 @@
 
       function $onInit() {
         self.botUser = {
+          avatarUrl: '/chat/images/bot-user.png',
           displayName: CHAT_MESSAGE_DISPLAYABLE_TYPES.BOT,
-          avatarUrl: '/chat/images/bot-user.png'
+          subtype: self.message.subtype
         };
 
         chatBotMessageService.resolve(self.message.subtype, self.message).then(function(message) {

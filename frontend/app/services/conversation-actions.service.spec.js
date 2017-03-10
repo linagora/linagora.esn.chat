@@ -160,6 +160,31 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The addMember function', function() {
+    it('should reject when conversation is undefined', function() {
+      chatConversationService.addMember = sinon.spy();
+      chatConversationActionsService.addMember().then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.match(/Can not add empty conversation/);
+      expect(chatConversationService.addMember).to.not.have.been.called;
+    });
+
+    it.skip('should call the chatConversationService addMember function', function() {
+      var userId = 'userId';
+
+      chatConversationService.addMember = sinon.spy();
+      chatConversationActionsService.addMember(conversation, userId).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.have.been.called;
+      expect(errorSpy).to.not.have.been.called;
+      expect(chatConversationService.addMember).to.have.been.calledWith(conversation, userId);
+    });
+  });
+
   describe('The createOpenConversation function', function() {
     it('should call chatConversationService.create and save new channel in store', function() {
       chatConversationService.create = sinon.spy(function() {
@@ -434,12 +459,15 @@ describe('The chatConversationActionsService service', function() {
 
     it('should notify the user that he has been added even if conversation name is not resolved', function(done) {
       member.member.id = sessionMock.user._id;
+      chatConversationsStoreService.joinConversation = sinon.spy();
       chatConversationNameService.getName = sinon.spy(function() {
         return $q.when();
       });
 
       chatConversationActionsService.memberHasBeenAdded(conversation, member)
         .then(function() {
+
+          expect(chatConversationsStoreService.joinConversation).to.have.been.calledWith(conversation);
           expect(chatConversationNameService.getName).to.have.been.called;
           expect(chatDesktopNotificationService.notify).to.have.been.called;
           expect(chatDesktopNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
@@ -450,12 +478,14 @@ describe('The chatConversationActionsService service', function() {
 
     it('should notify the user that he has been added even if conversation name rejects', function(done) {
       member.member.id = sessionMock.user._id;
+      chatConversationsStoreService.joinConversation = sinon.spy();
       chatConversationNameService.getName = sinon.spy(function() {
         return $q.reject(new Error());
       });
 
       chatConversationActionsService.memberHasBeenAdded(conversation, member)
         .then(function() {
+          expect(chatConversationsStoreService.joinConversation).to.have.been.calledWith(conversation);
           expect(chatConversationNameService.getName).to.have.been.called;
           expect(chatDesktopNotificationService.notify).to.have.been.called;
           expect(chatDesktopNotificationService.notify.firstCall.args[0]).to.match(/Welcome to new conversation/);
@@ -468,12 +498,14 @@ describe('The chatConversationActionsService service', function() {
       var name = 'My Conversation';
 
       member.member.id = sessionMock.user._id;
+      chatConversationsStoreService.joinConversation = sinon.spy();
       chatConversationNameService.getName = sinon.spy(function() {
         return $q.when(name);
       });
 
       chatConversationActionsService.memberHasBeenAdded(conversation, member)
         .then(function() {
+          expect(chatConversationsStoreService.joinConversation).to.have.been.calledWith(conversation);
           expect(chatConversationNameService.getName).to.have.been.called;
           expect(chatDesktopNotificationService.notify).to.have.been.called;
           expect(chatDesktopNotificationService.notify.firstCall.args[0]).to.equal('Welcome to ' + name);
