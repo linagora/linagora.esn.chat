@@ -2,11 +2,17 @@ sub-header
   chat-conversation-list-subheader
 
 .chat-conversation-list
+  .card
+    .conversations-search-form.fg-line
+      .conversations-search-input.form-control
+        form(ng-submit='ctrl.onChange()')
+          input(type="text", ng-model="ctrl.conversationSearchInput", ng-change='ctrl.onChange()', ng-model-options="{updateOn: 'default blur', debounce: {'default': 600, 'blur': 0}}")
   infinite-list(load-more-elements='ctrl.loadMoreElements()')
     chat-conversation-list-item(conversation="conversation" ng-repeat="conversation in ctrl.elements" ng-if="ctrl.elements.length > 0")
     .list-empty(ng-if="!ctrl.elements.length && ctrl.infiniteScrollCompleted")
-      i.mdi.mdi-facebook-messenger
-      .message #{__("No conversations")}
+      .conversations-empty-message
+        .empty-icon.mdi.mdi-check
+        .message #{__("No conversations")}
     ul.nav.nav-pills.nav-stacked(ng-if='ctrl.infiniteScrollDisabled')
       li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
   chat-fab-create-conversation
