@@ -34,5 +34,9 @@
   "Show members": "Show members",
   "Created on": "Created on",
   "Member Avatar": "Member Avatar",
-  "Add members": "Add members"
+  "Add members": "Add members",
+  "is typing": "is typing",
+  "are typing": "are typing",
+  "several users are typing": "several users are typing",
+  "and": "and"
 }

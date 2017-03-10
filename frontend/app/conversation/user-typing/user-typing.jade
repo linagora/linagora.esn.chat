@@ -1,4 +1,4 @@
-div.chat-message-typing
-  span(ng-if="usersTyping.length === 1") {{usersTyping[0]}} is typing
-  span(ng-if="usersTyping.length === 2") {{usersTyping[0]}} and {{usersTyping[1]}} are typing
-  span(ng-if="usersTyping.length > 2") several users are typing
+.chat-message-typing
+  span(ng-if="ctrl.usersTyping.length === 1") {{ctrl.usersTyping[0]}} #{__('is typing')}
+  span(ng-if="ctrl.usersTyping.length === 2") {{ctrl.usersTyping[0]}} #{__('and')} {{ctrl.usersTyping[1]}} #{__('are typing')}
+  span(ng-if="ctrl.usersTyping.length > 2") #{__('several users are typing')}
