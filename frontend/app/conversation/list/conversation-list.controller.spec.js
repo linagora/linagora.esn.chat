@@ -91,7 +91,7 @@ describe('The ChatConversationListController controller', function() {
     it('should call esnPaginationtionProviderBuilder with chatConversationService.list when conversationSearchInput is undefined', function() {
       controller.onChange();
       $rootScope.$digest();
-      
+
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
         limit: CHAT.DEFAULT_FETCH_SIZE
       });
