@@ -11,7 +11,8 @@
     self.$onInit = $onInit;
 
     var options = {
-      limit: self.elementsPerPage || CHAT.DEFAULT_FETCH_SIZE
+      limit: self.elementsPerPage || CHAT.DEFAULT_FETCH_SIZE,
+      offset: 0
     };
 
     function $onInit() {
@@ -39,7 +40,7 @@
       self.loadMoreElements();
     }
 
-    function search() {
+    function search(options) {
       return chatSearchConversationService.searchConversations(self.conversationSearchInput, options);
     }
   }

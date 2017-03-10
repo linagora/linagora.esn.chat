@@ -63,7 +63,8 @@ describe('The ChatConversationListController controller', function() {
       $rootScope.$digest();
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
-        limit: CHAT.DEFAULT_FETCH_SIZE
+        limit: CHAT.DEFAULT_FETCH_SIZE,
+        offset: 0
       });
     });
 
@@ -75,7 +76,8 @@ describe('The ChatConversationListController controller', function() {
       $rootScope.$digest();
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
-        limit: limit
+        limit: limit,
+        offset: 0
       });
     });
   });
@@ -93,7 +95,8 @@ describe('The ChatConversationListController controller', function() {
       $rootScope.$digest();
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
-        limit: CHAT.DEFAULT_FETCH_SIZE
+        limit: CHAT.DEFAULT_FETCH_SIZE,
+        offset: 0
       });
       expect(controller.loadMoreElements).to.have.been.calledOnce;
     });
@@ -104,7 +107,8 @@ describe('The ChatConversationListController controller', function() {
       $rootScope.$digest();
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', chatConversationService.list, {
-        limit: CHAT.DEFAULT_FETCH_SIZE
+        limit: CHAT.DEFAULT_FETCH_SIZE,
+        offset: 0
       });
       expect(controller.loadMoreElements).to.have.been.calledOnce;
     });
@@ -114,7 +118,8 @@ describe('The ChatConversationListController controller', function() {
       controller.onChange();
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', sinon.match.func, {
-        limit: CHAT.DEFAULT_FETCH_SIZE
+        limit: CHAT.DEFAULT_FETCH_SIZE,
+        offset: 0
       });
       expect(controller.loadMoreElements).to.have.been.calledOnce;
     });
@@ -123,11 +128,12 @@ describe('The ChatConversationListController controller', function() {
       controller.conversationSearchInput = 'test';
       controller.onChange();
        var search = sinon.match(function() {
-         return chatSearchConversationService.searchConversations(self.conversationSearchInput, {limit: CHAT.DEFAULT_FETCH_SIZE});
+         return chatSearchConversationService.searchConversations(self.conversationSearchInput, {limit: CHAT.DEFAULT_FETCH_SIZE, offset: 0});
        }, 'search');
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', search, {
-        limit: CHAT.DEFAULT_FETCH_SIZE
+        limit: CHAT.DEFAULT_FETCH_SIZE,
+        offset: 0
       });
       expect(controller.loadMoreElements).to.have.been.calledOnce;
     });

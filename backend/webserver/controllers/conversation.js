@@ -259,7 +259,7 @@ module.exports = function(dependencies, lib) {
     }
 
     function searchConversations(userConversations) {
-      return Q.denodeify(lib.search.conversations.search.searchConversations)({search: phrase}, userConversations.map(conversation => String(conversation._id)));
+      return Q.denodeify(lib.search.conversations.search.searchConversations)({search: phrase, limit: req.query.limit, offset: req.query.offset}, userConversations.map(conversation => String(conversation._id)));
     }
 
     function sendResult(result) {

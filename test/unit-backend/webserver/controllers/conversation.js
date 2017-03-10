@@ -300,7 +300,7 @@ describe('The conversation controller', function() {
 
     describe('when req.query.search', function() {
       it('should search public conversations', function(done) {
-        const req = {user: user, query: {search: 'searchme'}};
+        const req = {user: user, query: {search: 'searchme', limit: 20, offset: 20}};
         const res = {
           header: headerSpy
         };
@@ -322,7 +322,7 @@ describe('The conversation controller', function() {
           expect(user).to.equal(user);
           expect(headerSpy).to.have.been.calledWith('X-ESN-Items-Count', searchResult.total_count);
           expect(lib.conversation.getById).to.have.been.calledTwice;
-          expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
+          expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search, limit: req.query.limit, offset: req.query.offset}, ['1', '2'], sinon.match.func);
           expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
           done();
         };
@@ -380,7 +380,7 @@ describe('The conversation controller', function() {
 
       it('should HTTP 500 when searchConversations rejects', function(done) {
         const sendConversationResult = sinon.spy();
-        const req = {user: user, query: {search: 'searchme'}};
+        const req = {user: user, query: {search: 'searchme', limit: 20, offset: 20}};
         const res = {
           header: headerSpy,
           status: function(code) {
@@ -399,7 +399,7 @@ describe('The conversation controller', function() {
                 expect(sendConversationResult).to.not.have.been.called;
                 expect(headerSpy).to.not.have.been.called;
                 expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
-                expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
+                expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search, limit: req.query.limit, offset: req.query.offset}, ['1', '2'], sinon.match.func);
                 done();
               }
             };
@@ -424,7 +424,7 @@ describe('The conversation controller', function() {
 
       it('should HTTP 500 when lib.conversation.getById rejects', function(done) {
         const sendConversationResult = sinon.spy();
-        const req = {user: user, query: {search: 'searchme'}};
+        const req = {user: user, query: {search: 'searchme', limit: 20, offset: 20}};
         const res = {
           header: headerSpy,
           status: function(code) {
@@ -443,7 +443,7 @@ describe('The conversation controller', function() {
                 expect(sendConversationResult).to.not.have.been.called;
                 expect(headerSpy).to.not.have.been.called;
                 expect(lib.conversation.getAllForUser).to.have.been.calledWith(user);
-                expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search}, ['1', '2'], sinon.match.func);
+                expect(lib.search.conversations.search.searchConversations).to.have.been.calledWith({search: req.query.search, limit: req.query.limit, offset: req.query.offset}, ['1', '2'], sinon.match.func);
                 expect(lib.conversation.getById).to.have.been.called;
                 done();
               }
