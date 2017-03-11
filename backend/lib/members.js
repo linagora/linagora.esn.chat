@@ -9,11 +9,16 @@ module.exports = function(dependencies) {
   const collaborationModule = dependencies('collaboration');
 
   return {
+    addMember,
     countMembers,
     getMembers,
     isMember,
     join
   };
+
+  function addMember(conversation, author, memberId, callback) {
+    return Q.denodeify(collaborationModule.member.join)(OBJECT_TYPES.CONVERSATION, conversation, author.id, memberId, author, callback);
+  }
 
   function countMembers(conversation) {
     return Q.denodeify(collaborationModule.member.countMembers)(CONSTANTS.OBJECT_TYPES.CONVERSATION, conversation._id);

@@ -1,8 +1,7 @@
 (function() {
   'use strict';
 
-  angular
-    .module('linagora.esn.chat')
+  angular.module('linagora.esn.chat')
     .component('chatBotMessage', chatBotMessage());
 
     function chatBotMessage() {

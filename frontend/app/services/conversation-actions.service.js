@@ -26,6 +26,7 @@
     return {
       addConversation: addConversation,
       addConversationWhenCreatorOrConfidential: addConversationWhenCreatorOrConfidential,
+      addMember: addMember,
       createConfidentialConversation: createConfidentialConversation,
       createOpenConversation: createOpenConversation,
       deleteConversation: deleteConversation,
@@ -73,6 +74,18 @@
       }
 
       return $q.reject(new Error('Can not add such conversation', conversation));
+    }
+
+    function addMember(conversation, userId) {
+      if (!conversation) {
+        return $q.reject(new Error('Can not add empty conversation'));
+      }
+
+      if (!userId) {
+        return $q.reject(new Error('Can not add empty member'));
+      }
+
+      return chatConversationService.addMember(conversation, userId);
     }
 
     function createConfidentialConversation(conversation) {
@@ -164,6 +177,7 @@
       if (session.user._id !== member.member.id) {
         return;
       }
+      chatConversationsStoreService.joinConversation(conversation);
 
       return chatConversationNameService.getName(conversation)
         .then(notify)
@@ -175,7 +189,9 @@
         name = name || 'new conversation';
         chatDesktopNotificationService.notify('Welcome to ' + name, {
           body: 'You have been added to the conversation, click to go',
-          onClick: $state.go('chat.channels-views', {id: conversation._id})
+          onClick: function() {
+            return $state.go('chat.channels-views', {id: conversation._id});
+          }
         });
       }
     }

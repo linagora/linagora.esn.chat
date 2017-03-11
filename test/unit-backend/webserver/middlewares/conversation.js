@@ -6,19 +6,26 @@ const Q = require('q');
 
 describe('The conversation middleware', function() {
 
-  let dependencies, lib, req, res;
+  let dependencies, lib, req, res, user;
 
   beforeEach(function() {
     req = {
       user: {
         domains: [{domain_id: 1}, {domain_id: 2}]
-      }
+      },
+      params: {}
     };
     res = {};
     lib = {
       conversation: {},
       members: {}
     };
+    user = {
+      get: sinon.spy(function(memberId, callback) {
+        callback();
+      })
+    };
+    this.moduleHelpers.addDep('user', user);
     dependencies = this.moduleHelpers.dependencies;
   });
 
@@ -203,6 +210,123 @@ describe('The conversation middleware', function() {
 
       getMiddleware().assertUserIsMemberOfDefaultChannels(req, res, function() {
         done(new Error('I failed'));
+      });
+    });
+  });
+
+  describe('The loadMember function', function() {
+    it('should send back HTTP 400 when member_id is not defined', function(done) {
+      res.status = function(status) {
+        expect(status).to.equals(400);
+
+        return {
+          json: function(json) {
+            expect(user.get).to.not.have.been.called;
+            expect(json).to.deep.equals({
+              error: {
+                code: 400,
+                message: 'Bad Request',
+                details: 'uuid or email missing'
+              }
+            });
+
+            done();
+          }
+        };
+      };
+
+      getMiddleware().loadMember(req, res, function() {
+        done(new Error('I failed'));
+      });
+    });
+
+    it('should send back HTTP 500 when member_id is not defined', function(done) {
+      req.params = { member_id: 'member_id' };
+      user = {
+        get: sinon.spy(function(memberId, callback) {
+          callback(new Error('Failed to find user'));
+        })
+      };
+
+      this.moduleHelpers.addDep('user', user);
+      dependencies = this.moduleHelpers.dependencies;
+
+      res.status = function(status) {
+        expect(status).to.equals(500);
+
+        return {
+          json: function(json) {
+            expect(user.get).to.have.been.called;
+            expect(json).to.deep.equals({
+              error: {
+                code: 500,
+                message: 'Server error',
+                details: 'Failed to find user'
+              }
+            });
+
+            done();
+          }
+        };
+      };
+
+      getMiddleware().loadMember(req, res, function() {
+        done(new Error('I failed'));
+      });
+    });
+
+    it('should send back HTTP 404 when member_id is not defined', function(done) {
+      req.params = { member_id: 'member_id' };
+      user = {
+        get: sinon.spy(function(memberId, callback) {
+          callback();
+        })
+      };
+
+      this.moduleHelpers.addDep('user', user);
+      dependencies = this.moduleHelpers.dependencies;
+
+      res.status = function(status) {
+        expect(status).to.equals(404);
+
+        return {
+          json: function(json) {
+            expect(user.get).to.have.been.called;
+            expect(json).to.deep.equals({
+              error: {
+                code: 404,
+                message: 'Not found',
+                details: 'User not found'
+              }
+            });
+
+            done();
+          }
+        };
+      };
+
+      getMiddleware().loadMember(req, res, function() {
+        done(new Error('I failed'));
+      });
+    });
+
+    it('should send back HTTP 200', function(done) {
+      const userInfo = {foo: 'bar'};
+
+      req.params = { member_id: 'member_id' };
+      user = {
+        get: sinon.spy(function(memberId, callback) {
+          callback(null, userInfo);
+        })
+      };
+
+      this.moduleHelpers.addDep('user', user);
+      dependencies = this.moduleHelpers.dependencies;
+
+      getMiddleware().loadMember(req, res, function() {
+        expect(user.get).to.have.been.called;
+        expect(req.member).to.equal(userInfo);
+        done();
       });
     });
   });

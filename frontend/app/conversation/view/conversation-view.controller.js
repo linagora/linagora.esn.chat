@@ -149,7 +149,7 @@
       return chatConversationMemberService.currentUserIsMemberOf(chatConversationsStoreService.activeRoom) ? CHAT_DRAG_FILE_CLASS.IS_MEMBER : CHAT_DRAG_FILE_CLASS.IS_NOT_MEMBER;
     }
 
-    [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
+    [CHAT_EVENTS.BOT_MESSAGE, CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
       $scope.$on(eventReceived, function(event, message) {
         if (message.channel && message.channel === self.chatConversationsStoreService.activeRoom._id) {
           addUniqId(message);

@@ -177,7 +177,7 @@ describe('The chat websocket messenger', function() {
     it('should send conversation to user', function() {
       messenger.memberHasBeenAdded(conversation, member, by_member);
 
-      expect(sendDataToUserSpy).to.have.been.calledWith(member.member._id, CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_TO_CONVERSATION, {data: {conversation, member, by_member}, room: DEFAULT_ROOM});
+      expect(sendDataToUserSpy).to.have.been.calledWith(member.member.id, CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_TO_CONVERSATION, {data: {conversation, member, by_member}, room: DEFAULT_ROOM});
     });
   });
 

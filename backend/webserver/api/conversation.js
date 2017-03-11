@@ -3,6 +3,7 @@
 module.exports = function(dependencies, lib, router) {
 
   const authorizationMW = dependencies('authorizationMW');
+  const collaborationMW = dependencies('collaborationMW');
   const controller = require('../controllers/conversation')(dependencies, lib);
   const middleware = require('../middlewares/conversation')(dependencies, lib);
   const messageController = require('../controllers/message')(dependencies, lib);
@@ -29,6 +30,13 @@ module.exports = function(dependencies, lib, router) {
     middleware.load,
     middleware.canRead,
     messageController.getAttachmentsForConversation);
+
+  router.put('/conversations/:id/members/:member_id',
+    authorizationMW.requiresAPILogin,
+    middleware.load,
+    collaborationMW.load,
+    collaborationMW.requiresCollaborationMember,
+    controller.addMember);
 
   router.get('/user/conversations/private',
     authorizationMW.requiresAPILogin,

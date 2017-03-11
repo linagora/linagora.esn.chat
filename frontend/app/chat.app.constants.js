@@ -97,7 +97,8 @@
     .constant('CHAT_BOT', {
       MESSAGE_DEFAULT_SUBTYPES: 'text',
       MESSAGE_SUBTYPES: {
-        TEXT: 'text'
+        TEXT: 'text',
+        NOT_MEMBER_MENTION: 'notmember-mention'
       }
     });
 })();
