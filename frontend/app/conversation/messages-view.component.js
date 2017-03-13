@@ -16,6 +16,8 @@
         setLastLineInView: '=',
         inview: '<'
       },
+
+      controller: 'ChatMessageViewController',
       controllerAs: 'ctrl',
       templateUrl: '/chat/app/conversation/messages-view.html'
     };
