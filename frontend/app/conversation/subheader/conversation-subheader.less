@@ -25,6 +25,10 @@ chat-conversation-subheader {
     text-transform: capitalize;
   }
 
+  a.close {
+    position: absolute;
+  }
+
   &.composer {
     .mdi {
       font-size: 1.6em; // icons seem to be bigger than others, so we reduce its size
@@ -45,6 +49,12 @@ chat-conversation-subheader {
   .space-seperator {
     margin-right: 5px;
     margin-left: 5px;
+  }
+
+  @media (max-width: @screen-md-min) {
+    .ellipsis {
+      margin-left: 1.4em;
+    }
   }
 }
 
