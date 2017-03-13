@@ -111,6 +111,10 @@ describe('The Chat search API', function() {
           }
         }
       },
+      collaborationMW: {
+        load: function() {},
+        requiresCollaborationMember: function() {}
+      },
       elasticsearch: elasticsearch,
       pubsub: {
         local: localPubsub,
