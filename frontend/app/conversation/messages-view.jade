@@ -11,4 +11,4 @@
           chat-message(message="message")
       chat-message-indicator(inview = "ctrl.inview")
       chat-footer(conversation='ctrl.conversation')
-    .chat-messages-sidebar(ui-view="sidebar")
+    .chat-messages-sidebar(ui-view="sidebar", ng-class="{ 'not-member': ctrl.isMember === false }")
