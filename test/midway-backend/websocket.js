@@ -92,6 +92,10 @@ describe('The websocket API', function() {
           }
         }
       },
+      collaborationMW: {
+        load: function() {},
+        requiresCollaborationMember: function() {}
+      },
       elasticsearch: {
         listeners: {
           addListener: function() {}

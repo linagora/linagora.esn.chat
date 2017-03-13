@@ -82,6 +82,10 @@ describe('The chat API', function() {
           }
         }
       },
+      collaborationMW: {
+        load: function() {},
+        requiresCollaborationMember: function() {}
+      },
       elasticsearch: {
         listeners: {
           addListener: function() {}
