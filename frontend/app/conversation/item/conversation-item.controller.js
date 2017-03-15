@@ -7,9 +7,7 @@
 
   function ChatConversationItemController($scope, $rootScope, $q, $filter, _, CHAT_EVENTS, CHAT_CONVERSATION_TYPE, chatParseMention, userStatusService, session, moment, userUtils, chatConversationNameService) {
     var self = this;
-    var userToConnected = {};
 
-    self.connected = true;
     self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     self.$onInit = $onInit;
 
@@ -19,10 +17,6 @@
       var numberDay = moment.duration(d1.diff(d2)).asDays() + 1;
 
       return parseInt(numberDay, 10);
-    }
-
-    function updateItemConnectedStatus() {
-      self.connected = _(userToConnected).values().every();
     }
 
     function updateLastMessageInformation(message) {
@@ -51,21 +45,6 @@
         return member.member.id === session.user._id;
       });
 
-      var statesPromises = self.otherUsers.map(function(member) {
-        return userStatusService.getCurrentStatus(member.member.id).then(function(status) {
-          userToConnected[member.member.id] = status && (status.status !== 'disconnected');
-        });
-      });
-
-      $q.all(statesPromises).then(updateItemConnectedStatus);
-
-      var unbindUpdateState = $scope.$on(CHAT_EVENTS.USER_CHANGE_STATE, function(event, data) {
-        if (angular.isDefined(userToConnected[data.userId])) {
-          userToConnected[data.userId] = data.state !== 'disconnected';
-          updateItemConnectedStatus();
-        }
-      });
-
       var unbindTextMessage = $scope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
         if (message.channel === self.conversation._id) {
           updateLastMessageInformation(message);
@@ -74,7 +53,6 @@
       });
 
       $scope.$on('$destroy', function() {
-        unbindUpdateState();
         unbindTextMessage();
       });
     }

@@ -1,0 +1,4 @@
+.conversation-item-icon(ng-switch="ctrl.iconType")
+  chat-conversation-item-icon-confidential(ng-switch-when="confidential" conversation="ctrl.conversation")
+  chat-conversation-item-icon-dm(ng-switch-when="dm" conversation="ctrl.conversation")
+  chat-conversation-item-icon-open(ng-switch-default conversation="ctrl.conversation")
