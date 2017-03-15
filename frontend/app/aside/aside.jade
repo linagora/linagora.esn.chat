@@ -3,7 +3,7 @@
     .listview.p-t-5
       .lv-body
         .lv-item.clickable.menu-heading
-          .title(ui-sref='chat.channels-views')
+          .title(ui-sref='chat.channels-list')
             .text #{__('Channels')}
           .chat-aside-action(ng-click='ctrl.toggleNotification()')
             i.menu-icon.mdi(ng-class="ctrl.isNotificationEnabled() ? 'mdi-bell-outline': 'mdi-bell-off'")
@@ -16,7 +16,7 @@
           span #{__('More')}&hellip;
 
         .lv-item.clickable.menu-heading
-          .title(ui-sref='chat.channels-views')
+          .title(ui-sref='chat.groups-add')
             .text #{__('Direct Messages')}
           .chat-aside-action(ui-sref='chat.groups-add')
             i.menu-icon.mdi.mdi-plus
