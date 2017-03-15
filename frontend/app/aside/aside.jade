@@ -8,7 +8,7 @@
           .chat-aside-action(ng-click='ctrl.toggleNotification()')
             i.menu-icon.mdi(ng-class="ctrl.isNotificationEnabled() ? 'mdi-bell-outline': 'mdi-bell-off'")
           .chat-aside-action(ui-sref='chat.channels-add')
-            i.menu-icon.mdi.mdi-plus
+            i.menu-icon.mdi.mdi-plus-circle-outline
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatConversationsStoreService.channels" conversation="conversation", ng-click='$hide()')
 
@@ -19,6 +19,6 @@
           .title(ui-sref='chat.groups-add')
             .text #{__('Direct Messages')}
           .chat-aside-action(ui-sref='chat.groups-add')
-            i.menu-icon.mdi.mdi-plus
+            i.menu-icon.mdi.mdi-plus-circle-outline
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatConversationsStoreService.privateConversations" conversation="conversation", ng-click='$hide()')
