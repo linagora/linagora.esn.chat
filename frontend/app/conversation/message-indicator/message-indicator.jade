@@ -1,5 +1,5 @@
 .chat-message-indicator(ng-if="ctrl.show")
-    span.btn-fab-fixed-bottom.clickable(ng-click='ctrl.manualScrollDown()')
+    button.btn.btn-fab-fixed-bottom.clickable(ng-click='ctrl.manualScrollDown()')
       i.mdi.mdi-chevron-down
     span(ng-if="ctrl.unreads === 1")
       .indicator-message.hidden-xs
