@@ -6,7 +6,6 @@
   .lv-avatar, .chat-system-message-time {
     display: block;
     margin-right: 0;
-    min-width: 55px;
   }
 
   .lv-avatar > img {
@@ -23,29 +22,33 @@
     transition: opacity 0.5s linear;
   }
 
-  .chat-system-message-title {
+  .block-left {
+    padding-left: 15px;
 
-    span {
-      color: @text-color;
+    .chat-system-message-title {
+
+      span {
+        color: @text-color;
+      }
+
+      .displayname {
+        font-weight: 600;
+      }
+
+      .date {
+        color: @secondaryTextColor;
+        padding-left: 10px;
+        display: inline;
+      }
     }
 
-    .displayname {
-      font-weight: 600;
-    }
-
-    .date {
+    .chat-system-message-text {
+      white-space: pre-wrap;
       color: @secondaryTextColor;
-      padding-left: 10px;
-      display: inline;
-    }
-  }
 
-  .chat-system-message-text {
-    white-space: pre-wrap;
-    color: @secondaryTextColor;
-
-    .chat-emoji {
-      width: @chatLabelEmojiSize;
+      .chat-emoji {
+        width: @chatLabelEmojiSize;
+      }
     }
   }
 }
