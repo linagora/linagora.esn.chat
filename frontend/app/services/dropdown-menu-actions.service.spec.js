@@ -49,16 +49,24 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
 
   describe('the canInjectLeaveAction method', function() {
 
-    it('should return true if the user is not the channel creator', function() {
+    it('should return true if the user is a member and not the channel creator', function() {
+      chatConversationMemberService.currentUserIsMemberOf = sinon.stub().returns(true);
 
       expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.true;
+      expect(chatConversationMemberService.currentUserIsMemberOf).to.be.calledWith(activeRoom);
     });
 
     it('should return false if the user is the channel creator', function() {
-
       activeRoom.creator = sessionMock.user._id;
 
       expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.false;
+    });
+
+    it('should return false if the user is not member', function() {
+      chatConversationMemberService.currentUserIsMemberOf = sinon.stub().returns(false);
+
+      expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.false;
+      expect(chatConversationMemberService.currentUserIsMemberOf).to.be.calledWith(activeRoom);
     });
 
   });
@@ -66,7 +74,6 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
   describe('the canInjectAddMembersAction method', function() {
 
     it('should call `chatConversationMemberService.currentUserIsMemberOf` with activeRoom', function() {
-
       chatDropdownMenuActionsService.canInjectAddMembersAction();
 
       expect(chatConversationMemberService.currentUserIsMemberOf).to.be.calledWith(activeRoom);

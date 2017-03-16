@@ -15,7 +15,7 @@
     return service;
 
     function canInjectLeaveAction() {
-      return chatConversationsStoreService.activeRoom && session.user._id !== chatConversationsStoreService.activeRoom.creator;
+      return chatConversationsStoreService.activeRoom && session.user._id !== chatConversationsStoreService.activeRoom.creator && chatConversationMemberService.currentUserIsMemberOf(chatConversationsStoreService.activeRoom);
     }
 
     function canInjectAddMembersAction() {
