@@ -30,7 +30,6 @@
   "Emoji matching": "Emoji correspondant à",
   "Member matching": "Membre correspondant à",
   "Join": "Rejoindre",
-  "No conversations": "Pas de conversation",
   "Show members": "Afficher les membres",
   "Created on": "Créé sur",
   "Member Avatar": "Avatar de l'utilisateur",
@@ -43,5 +42,6 @@
   "do you want to": "voulez vous",
   "add him/her to the conversation ?": "l'ajouter à la conversation ?",
   "add them to the conversation ?": "les ajouter à la conversation ?",
-  "Back": "Retour"
+  "Back": "Retour",
+  "There are no conversations matching your search": "Il n'y a pas de conversations correspondant à votre recherche"
 }
