@@ -3,7 +3,8 @@
     img(ng-src='{{::ctrl.systemUser.avatarUrl}}', alt='')
 
   .media-body
-    .chat-system-message-title
-      span.displayname {{::ctrl.systemUser.displayName}}
-      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
-    .chat-system-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text")
+    .block-left
+      .chat-system-message-title
+        span.displayname {{::ctrl.systemUser.displayName}}
+        small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+      .chat-system-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text")
