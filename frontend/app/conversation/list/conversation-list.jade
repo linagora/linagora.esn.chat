@@ -11,8 +11,8 @@ sub-header
     chat-conversation-list-item(conversation="conversation" ng-repeat="conversation in ctrl.elements" ng-if="ctrl.elements.length > 0")
     .list-empty(ng-if="!ctrl.elements.length && ctrl.infiniteScrollCompleted")
       .conversations-empty-message
-        .empty-icon.mdi.mdi-check
-        .message #{__("No conversations")}
+        .empty-icon.mdi.mdi-magnify
+        .message #{__("There are no conversations matching your search")}
     ul.nav.nav-pills.nav-stacked(ng-if='ctrl.infiniteScrollDisabled')
       li.text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')
   chat-fab-create-conversation

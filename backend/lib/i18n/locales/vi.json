@@ -30,7 +30,6 @@
   "Emoji matching": "Biểu tượng phù hợp",
   "Member matching": "Thành viên phù hợp",
   "Join": "Tham gia",
-  "No conversations": "Không có cuộc trò chuyện nào",
   "Show members": "Xem thành viên",
   "Created on": "Được tạo vào",
   "Member Avatar": "Ảnh đại diện thành viên",
@@ -43,5 +42,6 @@
   "do you want to": "bạn có muốn",
   "add him/her to the conversation ?": "thêm người đó vào cuộc hội thoại ?",
   "add them to the conversation ?": "thêm họ vào cuộc hội thoại ?",
-  "Back": "Trở lại"
+  "Back": "Trở lại",
+  "There are no conversations matching your search": "Không tìm thấy cuộc trò chuyện phù hợp vơi từ khóa tìm kiếm"
 }

@@ -30,7 +30,6 @@
   "Emoji matching": "Emoji matching",
   "Member matching": "Member matching",
   "Join": "Join",
-  "No conversations": "No conversations",
   "Show members": "Show members",
   "Created on": "Created on",
   "Member Avatar": "Member Avatar",
@@ -43,5 +42,6 @@
   "do you want to": "do you want to",
   "add him/her to the conversation ?": "add him/her to the conversation ?",
   "add them to the conversation ?": "add them to the conversation ?",
-  "Back": "Back"
+  "Back": "Back",
+  "There are no conversations matching your search": "There are no conversations matching your search"
 }
