@@ -13,6 +13,7 @@ chat-conversation-subheader {
 }
 
 .conversation-subheader {
+  .ellipsis;
 
   .button {
 
@@ -22,6 +23,8 @@ chat-conversation-subheader {
   }
 
   .title {
+    .ellipsis;
+
     text-transform: capitalize;
   }
 
@@ -45,10 +48,12 @@ chat-conversation-subheader {
     margin-right: 2px;
     margin-left: 2px;
   }
+}
 
-  @media (max-width: @screen-md-min) {
-    .ellipsis {
-      margin-left: 1.4em;
+@media (max-width: @screen-md-min) {
+  #header .module-subheader {
+    .title {
+      margin-left: 2.4em;
     }
   }
 }
