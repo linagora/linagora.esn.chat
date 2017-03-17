@@ -1,6 +1,6 @@
 .chat-conversation-item(title="{{::ctrl.name}}", ui-sref='chat.channels-views({id: ctrl.conversation._id})', ui-sref-active="selected", ng-class="{unread: ctrl.conversation.unreadMessageCount > 0}")
   .name
-    i.item-icon.mdi(ng-class="{'mdi-earth': ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.OPEN, 'mdi-checkbox-blank-circle': ctrl.conversation.type !== ctrl.CHAT_CONVERSATION_TYPE.OPEN, 'connected': ctrl.connected}")
+    chat-conversation-item-icon(conversation="ctrl.conversation")
     span.item-name
       bdi(ng-bind-html="ctrl.name| esnEmoticonify:{class: 'label-emoji'}" )
   chat-conversation-number-badge(number='ctrl.conversation.unreadMessageCount', ng-if='ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.CONFIDENTIAL')

@@ -112,30 +112,6 @@ describe('The ChatConversationItemController controller', function() {
       };
     });
 
-    it('should initialize ctrl.connected to true only if all users other than current one are not disconnected', function() {
-      userStateResult = {2: {status: 'connected'}, 3: {status: 'connected'}};
-      userStateResult[session.user._id] = {status: 'disconnected'};
-      var controller = initController();
-
-      controller.$onInit();
-      $rootScope.$digest();
-      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(2);
-      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(3);
-      expect(controller.connected).to.be.true;
-    });
-
-    it('should initialize ctrl.connected to false only if only one user other than current one is disconnected', function() {
-      userStateResult = {2: {status: 'connected'}, 3: {status: 'disconnected'}};
-      userStateResult[session.user._id] = {status: 'disconnected'};
-      var controller = initController();
-
-      controller.$onInit();
-      $rootScope.$digest();
-      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(2);
-      expect(userStatusService.getCurrentStatus).to.have.been.calledWith(3);
-      expect(controller.connected).to.be.false;
-    });
-
     it('should set lastMessageIsMe to true if the last message is from current user', function() {
       var controller = initController();
 
@@ -199,75 +175,6 @@ describe('The ChatConversationItemController controller', function() {
 
         callback(null, message);
         expect(controller.lastMessageIsMe).to.be.equal(false);
-      });
-    });
-
-    describe('listen to CHAT_EVENTS.USER_CHANGE_STATE', function() {
-      var callback, controller;
-
-      beforeEach(function() {
-        $scope.$on = sinon.stub();
-        controller = initController();
-        controller.$onInit();
-        expect($scope.$on).to.have.been.calledWith(CHAT_EVENTS.USER_CHANGE_STATE, sinon.match.func.and(function(_callback) {
-          callback = _callback;
-
-          return true;
-        }));
-        $rootScope.$digest();
-      });
-
-      it('should set ctrl.connected to false if a user from the channel has disconnected', function() {
-        callback(null, {
-          userId: 2,
-          state: 'disconnected'
-        });
-
-        expect(controller.connected).to.be.false;
-      });
-
-      it('should ignore state change of current user', function() {
-        callback(null, {
-          userId: 'userId',
-          state: 'disconnected'
-        });
-
-        expect(controller.connected).to.be.true;
-      });
-
-      it('should ignore state change of user who is not in the group', function() {
-        callback(null, {
-          userId: 4,
-          state: 'disconnected'
-        });
-
-        expect(controller.connected).to.be.true;
-      });
-
-      it('should set state back to connected if user was the last one disconnected before he get connected', function() {
-        callback(null, {
-          userId: 2,
-          state: 'disconnected'
-        });
-
-        callback(null, {
-          userId: 1,
-          state: 'disconnected'
-        });
-
-        callback(null, {
-          userId: 1,
-          state: 'connected'
-        });
-
-        expect(controller.connected).to.be.false;
-
-        callback(null, {
-          userId: 2,
-          state: 'connected'
-        });
-
-        expect(controller.connected).to.be.true;
       });
     });
   });
