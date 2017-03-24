@@ -24,9 +24,6 @@
 
             return response.data.map(function(conversation) {
               conversation.type = type;
-              conversation.topic.value = $filter('linky')(conversation.topic.value, '_blank');
-              conversation.purpose.value = $filter('linky')(conversation.purpose.value, '_blank');
-              conversation.name = $filter('linky')(conversation.name, '_blank');
 
               return conversation;
             });
