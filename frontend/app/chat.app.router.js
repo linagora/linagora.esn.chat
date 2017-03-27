@@ -93,7 +93,7 @@
       .state('chat.channels-list', {
         url: '/channels/list',
         views: {
-          'main@chat': {
+          'full@chat': {
             template: '<chat-conversation-list/>'
           }
         }
