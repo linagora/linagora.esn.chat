@@ -65,3 +65,69 @@ ln -s path_to_chat modules/linagora.esn.chat
 ## Run
 
 Once installed, you can start OpenPaaS ESN as usual. The Chat module is available in the application grid menu.
+
+## Run in Docker
+
+**1. Run OpenPaaS**
+
+Pull docker containers and start them using docker-compose as described in the OpenPaaS documentation.
+
+```
+cd $ESN
+docker-compose -f ./docker/dockerfiles/platform/docker-compose-images.yml pull
+ESN_PATH=$PWD PROVISION=true ESN_HOST=192.168.1.17 DOCKER_IP=127.0.0.1 docker-compose -f ./docker/dockerfiles/platform/docker-compose-images.yml up
+```
+
+**2. Add emoticon and chat dependencies to OpenPaaS**
+
+- Connect to the `esn` container
+
+```
+docker exec -it esn bash
+```
+
+- Clone emoticon repository, then install dependencies
+
+```
+cd /var/www/modules
+git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.emoticon.git
+npm install --production
+bower install --production --allow-root
+```
+
+- Clone chat repository, then install dependencies
+
+```
+cd /var/www/modules
+git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.chat.git
+npm install --production
+bower install --production --allow-root
+```
+
+- Add the modules in the configuration
+
+```
+apt-get update
+apt-get install vim
+vi /var/www/config/default.json
+```
+
+Then add chat and emoticon modules in the modules list
+
+```
+"modules": [
+  "linagora.esn.core.webserver",
+  "linagora.esn.core.wsserver",
+  ...
+  "linagora.esn.emoticon",
+  "linagora.esn.chat"
+],
+```
+
+**3. Restart the ESN container**
+
+The ESN must be restarted to take new modules into account, from your terminal:
+
+ ```
+docker restart esn
+ ```
