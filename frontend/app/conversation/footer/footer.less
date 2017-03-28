@@ -91,31 +91,29 @@
 
   .lv-footer {
     .flex-start;
+    .all-centered;
 
     padding: 0;
 
     textarea {
-      .flex-grow;
-
-      margin-left: 60px;
-      margin-right: 60px;
-
       padding: 8px;
       color: @text-color;
       line-height: 20px;
       max-height: 130px;
       overflow: auto;
       background: transparent;
+      border-left: 2px solid rgba(0, 0, 0, 0.1);
     }
     .send-button {
       .visible-xs;
+
+      position: relative;
       background: transparent;
     }
 
     .send-button-left {
-      left: 0;
+      position: relative;
       background: transparent;
-      border-right: 2px solid rgba(0, 0, 0, 0.1);
     }
   }
 }

@@ -124,8 +124,6 @@
         scope.text = '';
         chatHumanizeEntitiesLabel.reset();
 
-        // hack to reset autoSize
-        $('textarea')[0].style.height = '56px';
         if (chatScrollService.canScrollDown(message.channel)) {
           chatScrollService.scrollDown();
         }

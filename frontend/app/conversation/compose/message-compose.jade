@@ -1,7 +1,7 @@
 .lv-footer.ms-reply
   button.send-button-left(type='file', chat-file-upload, ng-file-select='ctrl.onFileSelect($files)', data-multiple='true')
     i.mdi.mdi-plus
-  textarea(auto-size, ng-model='text', ng-change='onTextChanged()')
+  textarea(esn-textarea-autosize, textarea-max-rows="3", rows="1", ng-model='text', ng-change='onTextChanged()')
   button.send-button(ng-click='sendMessage()')
     i.mdi.mdi-send
   chat-emoticon-chooser
