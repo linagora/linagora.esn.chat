@@ -91,6 +91,7 @@ docker exec -it esn bash
 ```
 cd /var/www/modules
 git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.emoticon.git
+cd linagora.esn.emoticon
 npm install --production
 bower install --production --allow-root
 ```
@@ -100,6 +101,7 @@ bower install --production --allow-root
 ```
 cd /var/www/modules
 git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.chat.git
+cd linagora.esn.chat
 npm install --production
 bower install --production --allow-root
 ```
