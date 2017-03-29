@@ -4,7 +4,7 @@ sub-header
 .block-header.visible-md
   h2 #{__('Create a new channel')}
 .chat-conversation-create.configuration.card
-  form(name="createChannelForm", ng-submit="ctrl.create()")
+  form(name="createChannelForm", esn-submit="ctrl.create()")
     .form-group.fg-line
       .field-name #{__('Name')}
       input.form-control(ng-model="ctrl.conversation.name", placeholder="#{__('Enter the channel name')}", auto-focus, required)
