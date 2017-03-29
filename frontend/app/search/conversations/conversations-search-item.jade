@@ -1,7 +1,7 @@
 .chat-conversations-search
   .body
     .conversation-title
-      h4.clickable(ui-sref='chat.channels-views({id: item.channel._id})')
+      h4.clickable(ui-sref='chat.channels-views({id: item._id})')
         i.mdi.mdi-pound
         span(ng-bind-html="::item.name | esnHighlight: query")
       span(ng-bind-html="::item.topic.value | esnHighlight: query")
