@@ -6,7 +6,7 @@
     background: @m-yellow;
   }
 
-  .body {
+  .conversation-body {
     width: 80%;
 
     .conversation-title {
@@ -14,12 +14,27 @@
       color: @secondaryTextColor;
 
       h4 {
+        .flex-vertical-centered;
+
         font-size: 14px;
+        font-weight: normal;
+        line-height: 19px;
         margin-bottom: 0;
         margin-top: 0;
 
+        .conversation-info {
+          .flex-column;
+          .flex-space-between;
+        }
+
+        .creation-date {
+          font-size: 13px;
+        }
+
         i {
-          color: @secondaryTextColor;
+          color: @text-color;
+          font-size: 34px;
+          margin: 0 11px 4px 3px;
         }
       }
     }
@@ -29,12 +44,6 @@
 
       color: @text-color;
     }
-  }
-
-  .footer {
-    .flex-end;
-
-    width: 20%;
   }
 
   .chat-emoji {

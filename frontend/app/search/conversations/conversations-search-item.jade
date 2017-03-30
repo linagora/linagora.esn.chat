@@ -1,13 +1,12 @@
 .chat-conversations-search
-  .body
+  .conversation-body
     .conversation-title
       h4.clickable(ui-sref='chat.channels-views({id: item._id})')
-        i.mdi.mdi-pound
-        span(ng-bind-html="::item.name | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")")
+        i.mdi.mdi-comment-multiple-outline
+        .conversation-info
+          span(ng-bind-html="::item.name | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")")
+          .creation-date #{__("Created on")} {{::item.timestamps.creation | date: "MM/dd/yyyy"}}
       span(ng-bind-html="::item.topic.value | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")")
     
     .conversation-purpose
-      span(ng-bind-html="::item.purpose.value | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")")
-  
-  .footer 
-    | #{__("Created on")} {{::item.timestamps.creation | date: "MM/dd/yyyy"}}
+      span(ng-bind-html="::item.purpose.value | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")")  
