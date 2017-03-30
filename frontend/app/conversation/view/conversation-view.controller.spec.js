@@ -13,7 +13,7 @@ describe('The ChatConversationViewController controller', function() {
     chatConversationActionsService,
     CHAT_EVENTS,
     CHAT,
-    MESSAGE_GROUP_TIMESPAN,
+    CHAT_MESSAGE_GROUP,
     CHAT_DRAG_FILE_CLASS,
     chatScrollServiceMock,
     chatConversationsStoreService,
@@ -102,13 +102,13 @@ describe('The ChatConversationViewController controller', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _$stateParams_, _MESSAGE_GROUP_TIMESPAN_, _CHAT_DRAG_FILE_CLASS_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _$stateParams_, _CHAT_MESSAGE_GROUP_, _CHAT_DRAG_FILE_CLASS_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
     scope = $rootScope.$new();
     CHAT_EVENTS = _CHAT_EVENTS_;
-    MESSAGE_GROUP_TIMESPAN = _MESSAGE_GROUP_TIMESPAN_;
+    CHAT_MESSAGE_GROUP = _CHAT_MESSAGE_GROUP_;
     CHAT_DRAG_FILE_CLASS = _CHAT_DRAG_FILE_CLASS_;
     $stateParams = _$stateParams_;
   }));
@@ -129,6 +129,16 @@ describe('The ChatConversationViewController controller', function() {
 
   function initCtrl(callOnInit) {
     return initController('ChatConversationViewController as vm', callOnInit);
+  }
+
+  function generateMessage(creatorId, timestamps, number, startingId) {
+    var messages = [];
+
+    for (var i = 0; i < number; i++) {
+      messages.push({_id: startingId + i, creator: {_id: creatorId}, timestamps: {creation: timestamps}});
+    }
+
+    return messages;
   }
 
   describe('on $scope chat:message:text event', function() {
@@ -504,7 +514,7 @@ describe('The ChatConversationViewController controller', function() {
 
         messages = [
           {_id: 1, creator: {_id: 1}, timestamps: {creation: creationTime}},
-          {_id: 2, creator: {_id: 1}, timestamps: {creation: creationTime + MESSAGE_GROUP_TIMESPAN}}
+          {_id: 2, creator: {_id: 1}, timestamps: {creation: creationTime + CHAT_MESSAGE_GROUP.TIMESPAN}}
         ];
 
         chatConversationServiceMock.fetchMessages = sinon.spy(function() {
@@ -558,6 +568,120 @@ describe('The ChatConversationViewController controller', function() {
         expect(chatConversationServiceMock.fetchMessages).to.have.been.calledOnce;
         expect(scope.vm.messages[0].sameUser).to.be.false;
         expect(scope.vm.messages[1].sameUser).to.be.true;
+      });
+
+      it('should set `sameUser` to false when the number of messages is created by same user get to CHAT_MESSAGE_GROUP.SAME_USER_LENGTH ', function() {
+        messages = [];
+        messages = generateMessage(1, Date.now(), CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1, 0);
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(false);
+        initCtrl();
+        scope.vm.loadPreviousMessages(true);
+        $rootScope.$digest();
+
+        expect(chatMessageServiceMock.isSystemMessage).to.have.been.called;
+        expect(chatConversationServiceMock.fetchMessages).to.have.been.calledOnce;
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        for (var i = 1; i < CHAT_MESSAGE_GROUP.SAME_USER_LENGTH; i++) {
+          expect(scope.vm.messages[i].sameUser).to.be.true;
+        }
+        expect(scope.vm.messages[CHAT_MESSAGE_GROUP.SAME_USER_LENGTH].sameUser).to.be.false;
+      });
+
+      it('should set `sameUser` to false when the number of messages is created by same user get to CHAT_MESSAGE_GROUP.SAME_USER_LENGTH test with diffrent users', function() {
+        var generatedMessages = generateMessage(1, Date.now(), CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1, 3);
+
+        messages = [
+          {_id: 0, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+          {_id: 1, creator: {_id: 1}, timestamps: {creation: Date.now()}},
+          {_id: 2, creator: {_id: 2}, timestamps: {creation: Date.now()}}
+        ];
+        messages = messages.concat(generatedMessages);
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(false);
+        initCtrl();
+        scope.vm.loadPreviousMessages(true);
+        $rootScope.$digest();
+
+        expect(chatMessageServiceMock.isSystemMessage).to.have.been.called;
+        expect(chatConversationServiceMock.fetchMessages).to.have.been.calledOnce;
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.true;
+        expect(scope.vm.messages[2].sameUser).to.be.false;
+        expect(scope.vm.messages[3].sameUser).to.be.false;
+        for (var i = 4; i < CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 3; i++) {
+          expect(scope.vm.messages[i].sameUser).to.be.true;
+        }
+        expect(scope.vm.messages[CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 3].sameUser).to.be.false;
+      });
+
+      it('should set `sameUser` to false when the number of messages is created by same user get to CHAT_MESSAGE_GROUP.SAME_USER_LENGTH test with x messages from diffrent users and diffrent timestamps', function() {
+        var generatedMessages = generateMessage(1, Date.now(), CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1, 0),
+          i;
+
+        messages = [];
+        messages = messages.concat(generatedMessages);
+        generatedMessages = generateMessage(2, Date.now(), CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1, CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1);
+        messages = messages.concat(generatedMessages);
+        generatedMessages = generateMessage(2, Date.now() + CHAT_MESSAGE_GROUP.TIMESPAN, 1, 2 * CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 2);
+        messages = messages.concat(generatedMessages);
+        generatedMessages = generateMessage(1, Date.now() + CHAT_MESSAGE_GROUP.TIMESPAN, 1, 2 * CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 3);
+        messages = messages.concat(generatedMessages);
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(false);
+        initCtrl();
+        scope.vm.loadPreviousMessages(true);
+        $rootScope.$digest();
+
+        expect(chatMessageServiceMock.isSystemMessage).to.have.been.called;
+        expect(chatConversationServiceMock.fetchMessages).to.have.been.calledOnce;
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        for (i = 1; i < CHAT_MESSAGE_GROUP.SAME_USER_LENGTH; i++) {
+          expect(scope.vm.messages[i].sameUser).to.be.true;
+        }
+        expect(scope.vm.messages[CHAT_MESSAGE_GROUP.SAME_USER_LENGTH].sameUser).to.be.false;
+        expect(scope.vm.messages[CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1].sameUser).to.be.false;
+        for (i = CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 2; i < 2 * CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1; i++) {
+          expect(scope.vm.messages[i].sameUser).to.be.true;
+        }
+        expect(scope.vm.messages[2 * CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1].sameUser).to.be.false;
+        expect(scope.vm.messages[2 * CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 2].sameUser).to.be.false;
+        expect(scope.vm.messages[2 * CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 3].sameUser).to.be.false;
+      });
+
+      it('should set `sameUser` to false when the number of messages is created by same user get to CHAT_MESSAGE_GROUP.SAME_USER_LENGTH test with diffrent timestamps ', function() {
+        var generatedMessages = generateMessage(1, Date.now() + CHAT_MESSAGE_GROUP.TIMESPAN, CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1, 1);
+
+        messages = [
+          {_id: 0, creator: {_id: 1}, timestamps: {creation: Date.now()}}
+        ];
+        messages = messages.concat(generatedMessages);
+        chatConversationServiceMock.fetchMessages = sinon.spy(function() {
+          return $q.when(messages);
+        });
+
+        chatMessageServiceMock.isSystemMessage = sinon.stub().returns(false);
+        initCtrl();
+        scope.vm.loadPreviousMessages(true);
+        $rootScope.$digest();
+
+        expect(chatMessageServiceMock.isSystemMessage).to.have.been.called;
+        expect(chatConversationServiceMock.fetchMessages).to.have.been.calledOnce;
+        expect(scope.vm.messages[0].sameUser).to.be.false;
+        expect(scope.vm.messages[1].sameUser).to.be.false;
+        for (var i = 2; i < CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1; i++) {
+          expect(scope.vm.messages[i].sameUser).to.be.true;
+        }
+        expect(scope.vm.messages[CHAT_MESSAGE_GROUP.SAME_USER_LENGTH + 1].sameUser).to.be.false;
       });
     });
   });

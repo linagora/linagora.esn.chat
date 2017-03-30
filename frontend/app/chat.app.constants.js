@@ -90,7 +90,10 @@
       TEXT: 'text',
       FILE: 'file'
     })
-    .constant('MESSAGE_GROUP_TIMESPAN', 60000)
+    .constant('CHAT_MESSAGE_GROUP', {
+      SAME_USER_LENGTH: 10,
+      TIMESPAN: 60000
+    })
     .constant('KEY_CODE', {
       ENTER: 13,
       TAB: 9,
