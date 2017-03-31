@@ -8,7 +8,8 @@
                     chatConversationActionsService, editableOptions,
                     DynamicDirective, dynamicDirectiveService,
                     chatDropdownMenuActionsService, chatBotMessageService,
-                    chatBotMessageTextHandler, chatBotMessageNotMemberMentionHandler) {
+                    chatBotMessageTextHandler, chatBotMessageNotMemberMentionHandler,
+                    esnModuleRegistry, CHAT_MODULE_METADATA) {
     chatDesktopNotificationService.start();
     chatConversationActionsService.start();
     chatConversationListenerService.start();
@@ -21,6 +22,7 @@
     dynamicDirectiveService.addInjection('chat-conversation-dropdown-actions', chatAddMembersActionDynamicDirective);
     chatBotMessageService.register(chatBotMessageTextHandler.type, chatBotMessageTextHandler.setText);
     chatBotMessageService.register(chatBotMessageNotMemberMentionHandler.type, chatBotMessageNotMemberMentionHandler.setText);
+    esnModuleRegistry.add(CHAT_MODULE_METADATA);
   }
 
 })();

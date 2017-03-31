@@ -43,3 +43,7 @@ angular.module('linagora.esn.emoticon', []);
 angular.module('linagora.esn.user-status', []);
 angular.module('esn.file-preview', []);
 angular.module('luegg.directives', []);
+angular.module('esn.module-registry', [])
+  .factory('esnModuleRegistry', function() {
+    return {};
+  });
