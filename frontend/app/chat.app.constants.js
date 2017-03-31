@@ -105,5 +105,11 @@
         TEXT: 'text',
         NOT_MEMBER_MENTION: 'notmember-mention'
       }
+    })
+    .constant('CHAT_MODULE_METADATA', {
+      id: 'linagora.esn.chat',
+      title: 'Chat',
+      icon: 'chat-icon',
+      homePage: 'chat'
     });
 })();

@@ -36,6 +36,7 @@
     'esn.file-preview',
     'luegg.directives',
     'zInfiniteScroll',
-    'angular-inview'
+    'angular-inview',
+    'esn.module-registry'
   ]);
 })();
