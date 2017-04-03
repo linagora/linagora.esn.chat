@@ -196,6 +196,7 @@ describe('The ChatConversationViewController controller', function() {
       chatConversationsStoreService.activeRoom._id = channel;
       var ctrl = initCtrl(true);
       var messages = [{_id: 1, creator: {_id: 'userId'}, timestamps: {creation: 3}, text: 'haha', channel: channel }, {_id: 2, creator: {_id: 'userId'}, timestamps: {creation: 3}, text: 'haha', channel: channel}];
+
       ctrl.messages = messages;
 
       scope.$emit(CHAT_EVENTS.TEXT_MESSAGE, messages[0]);
@@ -210,6 +211,7 @@ describe('The ChatConversationViewController controller', function() {
       chatConversationsStoreService.activeRoom._id = channel;
       message.channel = channel;
       var ctrl = initCtrl(true);
+
       ctrl.messages = [{_id: 10, creator: {_id: 'userId10'}, timestamps: {creation: 10}, text: 'haha' }, {_id: 20, creator: {_id: 'userId20'}, timestamps: {creation: 30}, text: 'haha'}];
 
       expect(scope.vm.messages.length).to.deep.equal(2);

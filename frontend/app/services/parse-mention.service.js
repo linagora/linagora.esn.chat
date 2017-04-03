@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatParseMention', chatParseMention);
 
-    function chatParseMention(chatUsername, CHAT_MENTION_CHAR) {
+    function chatParseMention($q, chatUsername, CHAT_MENTION_CHAR) {
       var service = {
         parseMentions: parseMentions,
         generateProfileLink: generateProfileLink,
@@ -15,16 +15,30 @@
 
       ////////////
 
-      function generateProfileLink(user) {
-        return '<a href="#/profile/' + user._id + '/details/view">' + chatUsername.generateMention(user) + '</a>';
+      function generateProfileLink(userId) {
+        return chatUsername.getFromCache(userId).then(function(result) {
+          return '<a href="#/profile/' + userId + '/details/view">' + result + '</a>';
+        });
       }
 
       function parseMentions(text, mentions, options) {
         options = options || {};
-        var replace = options.skipLink ? chatUsername.generateMention : generateProfileLink;
+        var replace = options.skipLink ? chatUsername.getFromCache : generateProfileLink;
 
-        return (mentions || []).reduce(function(prev, user) {
-          return prev.replace(new RegExp(CHAT_MENTION_CHAR + user._id, 'g'), replace(user));
+        if (!mentions[0]) {
+          return $q.when(text);
+        }
+
+        return mentions.reduce(function(prev, user) {
+          return replace(user._id).then(function(result) {
+            if (typeof (prev) === 'string') { //prev will be a string or a promise
+              return prev.replace(new RegExp(CHAT_MENTION_CHAR + user._id, 'g'), result);
+            }
+
+            return prev.then(function(res) {
+              return res.replace(new RegExp(CHAT_MENTION_CHAR + user._id, 'g'), result);
+            });
+          });
         }, text);
       }
 

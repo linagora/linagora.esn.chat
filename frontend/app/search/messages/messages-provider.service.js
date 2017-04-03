@@ -14,18 +14,24 @@
         var offset = 0;
 
         return function() {
+          var data = [];
+
           return chatSearchMessageService.searchMessages(query, {
             offset: offset,
             limit: CHAT.DEFAULT_FETCH_SIZE
           }).then(function(response) {
             offset += response.data.length;
+            data = response.data;
 
-            return response.data.map(function(message) {
+            return $q.all(response.data.map(function(message) {
+              return chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
+            }));
+          }).then(function(results) {
+            return data.map(function(message, index) {
               message.type = type;
-              message.text = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
               message.text = $filter('linky')(message.text, '_blank');
               message.text = $filter('esnEmoticonify')(message.text, {class: 'chat-emoji'});
-              message.text = $filter('esnHighlight')(message.text, query, {ignoreEscape: true});
+              message.text = results[index];
 
               return message;
             });

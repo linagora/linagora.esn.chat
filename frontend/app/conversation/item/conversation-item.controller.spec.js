@@ -65,7 +65,9 @@ describe('The ChatConversationItemController controller', function() {
       $provide.value('userUtils', userUtils);
       $provide.value('chatConversationNameService', getConversationNameServiceMock);
       $provide.value('chatParseMention', {
-        parseMentions: sinon.spy()
+        parseMentions: sinon.spy(function() {
+          return $q.when();
+        })
       });
       $provide.value('esnEmoticonifyFilter', sinon.spy());
       $provide.factory('chatConversationsService', function($q) {

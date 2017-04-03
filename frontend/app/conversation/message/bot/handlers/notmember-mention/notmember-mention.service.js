@@ -18,9 +18,8 @@
       message.text = message.user_mentions.map(function(user) {
         return '@' + user._id;
       }).join(', ');
-      var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions);
 
-      return $q.when(parsedText);
+      return chatParseMention.parseMentions(message.text, message.user_mentions);
     }
   }
 })();

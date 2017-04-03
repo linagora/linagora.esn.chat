@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatParseMention service', function() {
-  var chatParseMention, chatUsernameMock;
+  var $rootScope, $q, chatParseMention, chatUsernameMock;
 
   beforeEach(angular.mock.module('linagora.esn.chat', function($provide) {
     $provide.value('searchProviders', {
@@ -23,33 +23,53 @@ describe('The chatParseMention service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatParseMention_) {
+  beforeEach(angular.mock.inject(function(_$rootScope_, _$q_, _chatParseMention_) {
+    $q = _$q_;
+    $rootScope = _$rootScope_;
     chatParseMention = _chatParseMention_;
   }));
 
   describe('The chatParseMention function', function() {
-    it('should replace mention with the correct link', function() {
-      chatUsernameMock.generateMention = sinon.spy(function(user) {
-        return '@' + user.firstname + '.' + user.lastname;
+    it('should replace mention with the correct link', function(done) {
+      chatUsernameMock.getFromCache = sinon.spy(function(user) {
+        return $q.when('@' + user.firstname + '.' + user.lastname);
       });
 
+      var resultOfMention;
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '<a href="#/profile/abcd/details/view">@firstname.lastname</a>';
 
-      expect(chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions)).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
-      expect(chatUsernameMock.generateMention).to.have.been.calledOnce;
-    });
+      chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions).then(function(result) {
+        resultOfMention = result;
 
-    it('should replace mention with the display name', function() {
-      chatUsernameMock.generateMention = sinon.spy(function(user) {
-        return '@' + user.firstname + '.' + user.lastname;
+        done();
       });
 
+      $rootScope.$digest();
+
+      expect(resultOfMention).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+      expect(chatUsernameMock.getFromCache).to.have.been.calledOnce;
+    });
+
+    it('should replace mention with the display name if skipLink option is true', function(done) {
+      chatUsernameMock.getFromCache = sinon.spy(function(user) {
+        return $q.when('@' + user.firstname + '.' + user.lastname);
+      });
+
+      var resultOfMention;
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '@firstname.lastname';
 
-      expect(chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions, {skipLink: true})).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
-      expect(chatUsernameMock.generateMention).to.have.been.calledOnce;
+      chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions).then(function(result) {
+        resultOfMention = result;
+
+        done();
+      });
+
+      $rootScope.$digest();
+
+      expect(resultOfMention).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+      expect(chatUsernameMock.getFromCache).to.have.been.calledOnce;
     });
   });
 

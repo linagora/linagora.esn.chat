@@ -18,10 +18,12 @@
 
         parsedText = $filter('linky')(parsedText, '_blank');
         parsedText = $filter('esnEmoticonify')(parsedText, {class: 'chat-emoji'});
-        parsedText = chatParseMention.parseMentions(parsedText, self.message.user_mentions);
-        self.parsed = {
-          text: parsedText
-        };
+        chatParseMention.parseMentions(parsedText, self.message.user_mentions).then(function(result) {
+          parsedText = result;
+          self.parsed = {
+            text: parsedText
+          };
+        });
       }
     }
 })();

@@ -55,7 +55,9 @@ describe('The chatDesktopNotificationService service', function() {
       showNotification: sinon.spy()
     };
     chatParseMention = {
-      parseMentions: sinon.spy()
+      parseMentions: sinon.spy(function() {
+        return $q.when();
+      })
     };
 
     angular.mock.module(function($provide) {
@@ -270,10 +272,12 @@ describe('The chatDesktopNotificationService service', function() {
           return conversation;
         });
         chatParseMention.parseMentions = sinon.spy(function() {
-          return parsedText;
+          return $q.when(parsedText);
         });
 
         chatDesktopNotificationService.notifyMessage(message);
+
+        $rootScope.$digest();
 
         expect(chatConversationsStoreService.find).to.have.been.calledWith(message.channel);
         expect(chatParseMention.parseMentions).to.have.been.calledWith(message.text, message.user_mentions, {skipLink: true});
