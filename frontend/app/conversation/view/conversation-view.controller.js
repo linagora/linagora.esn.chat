@@ -5,8 +5,9 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, chatConversationMemberService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, usSpinnerService, MESSAGE_GROUP_TIMESPAN, chatMessageService, _, CHAT_DRAG_FILE_CLASS) {
-    var self = this;
+  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, chatConversationMemberService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, usSpinnerService, CHAT_MESSAGE_GROUP, chatMessageService, _, CHAT_DRAG_FILE_CLASS) {
+    var self = this,
+      messageCounterFromTheSameUser = 0;
 
     self.spinnerKey = 'ChatConversationSpinner';
     self.chatConversationsStoreService = chatConversationsStoreService;
@@ -34,19 +35,24 @@
       return self.messages && self.messages[0] && self.messages[0]._id;
     }
 
+    function updateMessageSameUser(message, isTheSameUser) {
+      message.sameUser = isTheSameUser;
+      messageCounterFromTheSameUser = isTheSameUser ? messageCounterFromTheSameUser + 1 : 1;
+    }
+
     function newMessage(message) {
       addUniqId(message);
       // chances are, the new message is the most recent
       // So we traverse the array starting by the end
       for (var i = self.messages.length - 1; i > -1; i--) {
         if (self.messages[i].timestamps.creation < message.timestamps.creation) {
-          message.sameUser = isSameUser(message, self.messages[i]) && !chatMessageService.isSystemMessage(self.messages[i]);
+          updateMessageSameUser(message, isSameUser(message, self.messages[i]) && !chatMessageService.isSystemMessage(self.messages[i]));
           self.messages.splice(i + 1, 0, message);
 
           return;
         }
       }
-      message.sameUser = false;
+      updateMessageSameUser(message, false);
       self.messages.unshift(message);
     }
 
@@ -88,7 +94,9 @@
           queueOlderMessages(result, isFirstLoad);
 
           if (!isFirstLoad && lastLoaded > 0) {
-            self.messages[lastLoaded + 1].sameUser = isSameUser(self.messages[lastLoaded], self.messages[lastLoaded + 1]);
+            for (var i = lastLoaded; i < self.messages.length - lastLoaded && i < lastLoaded + CHAT_MESSAGE_GROUP.SAME_USER_LENGTH; i++) {
+              updateMessageSameUser(self.messages[i + 1], isSameUser(self.messages[i], self.messages[i + 1]));
+            }
           }
 
           return self.messages;
@@ -109,9 +117,9 @@
       messages.forEach(function(message) {
         if (!previousMessage) {
           previousMessage = message;
-          message.sameUser = false;
+          updateMessageSameUser(message, false);
         } else {
-          message.sameUser = isSameUser(previousMessage, message) && !chatMessageService.isSystemMessage(previousMessage);
+          updateMessageSameUser(message, isSameUser(previousMessage, message) && !chatMessageService.isSystemMessage(previousMessage));
           previousMessage = message;
         }
       });
@@ -134,7 +142,8 @@
 
     function isSameUser(previousMessage, nextMessage) {
       return previousMessage && nextMessage && previousMessage.creator._id === nextMessage.creator._id &&
-      Math.abs(nextMessage.timestamps.creation - previousMessage.timestamps.creation) < MESSAGE_GROUP_TIMESPAN;
+      Math.abs(nextMessage.timestamps.creation - previousMessage.timestamps.creation) < CHAT_MESSAGE_GROUP.TIMESPAN &&
+      messageCounterFromTheSameUser < CHAT_MESSAGE_GROUP.SAME_USER_LENGTH;
     }
 
     function $onInit() {
