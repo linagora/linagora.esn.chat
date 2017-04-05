@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('the chatUserMessageController controller', function() {
 
-  var $rootScope, $scope, $controller, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock;
+  var $rootScope, $scope, $q, $controller, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock;
 
   beforeEach(function() {
 
@@ -21,7 +21,7 @@ describe('the chatUserMessageController controller', function() {
 
     chatParseMentionMock = {
       parseMentions: function(text) {
-        return text;
+        return $q.when(text);
       }
     };
 
@@ -57,10 +57,11 @@ describe('the chatUserMessageController controller', function() {
       $provide.value('esnEmoticonifyFilter', esnEmoticonifyMock);
     });
 
-    angular.mock.inject(function(_$rootScope_, _$controller_) {
+    angular.mock.inject(function(_$rootScope_, _$controller_, _$q_) {
       $rootScope = _$rootScope_;
       $scope = $rootScope.$new();
       $controller = _$controller_;
+      $q = _$q_;
     });
   });
 
@@ -83,6 +84,7 @@ describe('the chatUserMessageController controller', function() {
       var controller = initController(message);
 
       controller.$onInit();
+      $rootScope.$digest();
 
       expect(controller.parsed.text).to.deep.equal('@583c5a20ec0cfe01388fecab @583c5a20ec0cfe01388fecb0');
     });
@@ -94,6 +96,7 @@ describe('the chatUserMessageController controller', function() {
 
       controller.$onInit();
       $rootScope.$digest();
+
       expect(controller.parsed.text).to.deep.equal(message.text);
     });
 
@@ -104,6 +107,7 @@ describe('the chatUserMessageController controller', function() {
 
       controller.$onInit();
       $rootScope.$digest();
+
       expect(controller.parsed.text).to.deep.equal('Hello @583c5a20ec0cfe01388fecab');
     });
 
@@ -114,6 +118,7 @@ describe('the chatUserMessageController controller', function() {
 
       controller.$onInit();
       $rootScope.$digest();
+
       expect(controller.parsed.text).to.deep.equal(message.text);
     });
 
@@ -124,6 +129,7 @@ describe('the chatUserMessageController controller', function() {
 
       controller.$onInit();
       $rootScope.$digest();
+
       expect(controller.parsed.text).to.deep.equal('Hello @583c5a20ec0cfe01388fecab @583c5a20ec0cfe01388fecb0 how are you?');
     });
 

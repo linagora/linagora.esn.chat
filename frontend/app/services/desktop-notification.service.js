@@ -84,11 +84,12 @@
         }
 
         var name = conversation.name || CHAT_NOTIFICATION.DEFAULT_TITLE;
-        var parsedText = chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true});
 
-        return notify('New message in ' + name, {
-          body: parsedText,
-          icon: '/api/users/' + message.creator + '/profile/avatar'
+        return chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true}).then(function(result) {
+          return notify('New message in ' + name, {
+            body: result,
+            icon: '/api/users/' + message.creator + '/profile/avatar'
+          });
         });
       }
 

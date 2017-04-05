@@ -6,7 +6,7 @@
 var expect = chai.expect;
 
 describe('the chatBotMessageNotMemberMentionHandler service', function() {
-  var chatParseMention, chatBotMessageService, chatBotMessageNotMemberMentionHandler, CHAT_BOT;
+  var $q, chatParseMention, chatBotMessageService, chatBotMessageNotMemberMentionHandler, CHAT_BOT;
 
   beforeEach(function() {
     chatParseMention = {};
@@ -19,7 +19,8 @@ describe('the chatBotMessageNotMemberMentionHandler service', function() {
       $provide.value('chatParseMention', chatParseMention);
     });
 
-    angular.mock.inject(function(_chatBotMessageService_, _chatBotMessageNotMemberMentionHandler_, _CHAT_BOT_) {
+    angular.mock.inject(function(_$q_, _chatBotMessageService_, _chatBotMessageNotMemberMentionHandler_, _CHAT_BOT_) {
+      $q = _$q_;
       chatBotMessageService = _chatBotMessageService_;
       chatBotMessageNotMemberMentionHandler = _chatBotMessageNotMemberMentionHandler_;
       CHAT_BOT = _CHAT_BOT_;
@@ -35,7 +36,7 @@ describe('the chatBotMessageNotMemberMentionHandler service', function() {
       var userMentionText = '@userId';
 
       chatParseMention.parseMentions = sinon.spy(function(text) {
-        return text;
+        return $q.when(text);
       });
       chatBotMessageService.register(chatBotMessageNotMemberMentionHandler.type, chatBotMessageNotMemberMentionHandler.setText);
       chatBotMessageService.resolve(message.subtype, message);
