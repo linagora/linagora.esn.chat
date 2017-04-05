@@ -7,7 +7,7 @@
   ////////////
 
   function chatSearchConversationsProviderService($q, $filter, newProvider, chatSearchConversationService, ELEMENTS_PER_REQUEST) {
-    var name = 'Chat Conversations';
+    var name = 'Chanel details';
     var type = 'chat.conversation';
 
     return newProvider({
