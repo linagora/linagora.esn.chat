@@ -29,12 +29,12 @@ module.exports = function(config) {
       'frontend/components/zInfiniteScroll/zInfiniteScroll.js',
       'frontend/components/angular-inview/angular-inview.js',
       'test/config/module.js',
-      'frontend/app/chat.app.js',
+      'frontend/app/chat.module.js',
       'frontend/app/**/*.js',
       'frontend/app/**/*.jade'
     ],
     exclude: [
-      'frontend/app/chat.app.run.js',
+      'frontend/app/chat.module.run.js',
       'frontend/app/services/messaging/messaging.run.js',
       'frontend/app/conversation/attachments/conversation-attachments.run.js'
     ],
