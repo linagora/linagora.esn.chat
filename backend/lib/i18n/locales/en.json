@@ -25,7 +25,6 @@
   "More": "More",
   "Leave conversation": "Leave conversation",
   "created on": "created on",
-  "This is the start of": "This is the start of",
   "Beginning of": "Beginning of",
   "Emoji matching": "Emoji matching",
   "Member matching": "Member matching",
@@ -47,5 +46,7 @@
   "Star": "Star",
   "Unstar": "Unstar",
   "No starred messages found": "No starred messages found",
-  "Show starred messages": "Show starred messages"
+  "Show starred messages": "Show starred messages",
+  "by": "by",
+  "This is the beginning of the conversation with": "This is the beginning of the conversation with"
 }

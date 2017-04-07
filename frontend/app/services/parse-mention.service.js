@@ -15,8 +15,8 @@
 
       ////////////
 
-      function generateProfileLink(userId) {
-        return chatUsername.getFromCache(userId).then(function(result) {
+      function generateProfileLink(userId, prependUserWithArobase) {
+        return chatUsername.getFromCache(userId, prependUserWithArobase).then(function(result) {
           return '<a href="#/profile/' + userId + '/details/view">' + result + '</a>';
         });
       }
@@ -30,7 +30,7 @@
         }
 
         return mentions.reduce(function(prev, user) {
-          return replace(user._id).then(function(result) {
+          return replace(user._id, true).then(function(result) {
             if (typeof (prev) === 'string') { //prev will be a string or a promise
               return prev.replace(new RegExp(CHAT_MENTION_CHAR + user._id, 'g'), result);
             }

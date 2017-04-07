@@ -31,45 +31,42 @@ describe('The chatParseMention service', function() {
 
   describe('The chatParseMention function', function() {
     it('should replace mention with the correct link', function(done) {
-      chatUsernameMock.getFromCache = sinon.spy(function(user) {
-        return $q.when('@' + user.firstname + '.' + user.lastname);
-      });
-
-      var resultOfMention;
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '<a href="#/profile/abcd/details/view">@firstname.lastname</a>';
 
+      chatUsernameMock.getFromCache = sinon.spy(function() {
+        return $q.when('@firstname.lastname');
+      });
+
       chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions).then(function(result) {
-        resultOfMention = result;
+        expect(result).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('abcd', true);
 
         done();
       });
 
       $rootScope.$digest();
-
-      expect(resultOfMention).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
-      expect(chatUsernameMock.getFromCache).to.have.been.calledOnce;
     });
 
     it('should replace mention with the display name if skipLink option is true', function(done) {
-      chatUsernameMock.getFromCache = sinon.spy(function(user) {
-        return $q.when('@' + user.firstname + '.' + user.lastname);
-      });
-
-      var resultOfMention;
       var user_mentions = [{firstname: 'firstname', lastname: 'lastname', _id: 'abcd'}];
       var abcdMention = '@firstname.lastname';
+      var option = {
+        skipLink: true
+      };
 
-      chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions).then(function(result) {
-        resultOfMention = result;
+      chatUsernameMock.getFromCache = sinon.spy(function() {
+        return $q.when('@firstname.lastname');
+      });
+
+      chatParseMention.parseMentions('Hi @abcd, how are you doing @abcd', user_mentions, option).then(function(result) {
+        expect(result).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('abcd', true);
 
         done();
       });
 
       $rootScope.$digest();
-
-      expect(resultOfMention).to.equal('Hi ' + abcdMention + ', how are you doing ' + abcdMention);
-      expect(chatUsernameMock.getFromCache).to.have.been.calledOnce;
     });
   });
 

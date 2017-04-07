@@ -44,6 +44,7 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
     it('should resolve with empty object when conversation is undefined', function(done) {
       chatConversationNameService.getName().then(function(name) {
         expect(name).to.not.exist;
+
         done();
       }, done);
       $rootScope.$digest();
@@ -52,6 +53,7 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
     it('should resolve with empty object when conversation does not contains name nor members', function(done) {
       chatConversationNameService.getName({}).then(function(name) {
         expect(name).to.not.exist;
+
         done();
       }, done);
       $rootScope.$digest();
@@ -62,6 +64,7 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
 
       chatConversationNameService.getName({name: name}).then(function(_name) {
         expect(_name).to.equal(name);
+
         done();
       }, done);
       $rootScope.$digest();
@@ -76,7 +79,8 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
 
       chatConversationNameService.getName({members: [{member: {id: 'id', objectType: 'user'}}]}).then(function(_name) {
         expect(_name).to.equal(name);
-        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('id');
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('id', true);
+
         done();
       }, done);
       $rootScope.$digest();
@@ -96,6 +100,9 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
       ]}).then(function(_name) {
         expect(_name === 'Bruce Willis, John Doe' || name === 'John Doe, Bruce Willis').to.be.true;
         expect(chatUsernameMock.getFromCache).to.have.been.calledTwice;
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('id1', true);
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith('id2', true);
+
         done();
       }, done);
       $rootScope.$digest();

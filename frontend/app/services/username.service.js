@@ -18,7 +18,7 @@
 
       function _userNameLoader(userId) {
         return userAPI.user(userId).then(function(response) {
-          return generateMention(response.data);
+          return generate(response.data);
         });
       }
 
@@ -26,11 +26,17 @@
         return userUtils.displayNameOf(user);
       }
 
-      function generateMention(user) {
-        return CHAT_MENTION_CHAR + generate(user);
+      function generateMention(userName) {
+        return CHAT_MENTION_CHAR + userName;
       }
 
-      function getFromCache(userId) {
+      function getFromCache(userId, prependUserWithArobase) {
+        if (prependUserWithArobase) {
+          return cache.get(userId).then(function(userName) {
+            return generateMention(userName);
+          });
+        }
+
         return cache.get(userId);
       }
     }
