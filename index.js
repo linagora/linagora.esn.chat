@@ -4,12 +4,11 @@ const AwesomeModule = require('awesome-module');
 const Dependency = AwesomeModule.AwesomeModuleDependency;
 const path = require('path');
 const glob = require('glob-all');
-const _ = require('lodash');
 
 const NAME = 'chat';
-const APP_ENTRY_POINT = NAME + '.app.js';
 const MODULE_NAME = 'linagora.esn.' + NAME;
 const FRONTEND_JS_PATH = __dirname + '/frontend/app/';
+const APP_ENTRY_POINT = path.join(FRONTEND_JS_PATH, NAME + '.module.js');
 
 const chatModule = new AwesomeModule(MODULE_NAME, {
   dependencies: [
@@ -50,16 +49,16 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
       const app = require('./backend/webserver/application')(dependencies);
       const lessFile = path.resolve(__dirname, './frontend/app/style.less');
       const resources = ['../components/zInfiniteScroll/zInfiniteScroll.js', '../components/angular-inview/angular-inview.js'];
-
-      let frontendModules = glob.sync([
+      const frontendModulesFullPath = glob.sync([
+        APP_ENTRY_POINT,
         FRONTEND_JS_PATH + '**/!(*spec).js'
-      ]).map(filepath => filepath.replace(FRONTEND_JS_PATH, ''));
-
-      _.pull(frontendModules, APP_ENTRY_POINT);
-      frontendModules = [APP_ENTRY_POINT].concat(frontendModules);
+      ]);
+      const frontendModulesUriPath = frontendModulesFullPath.map(filepath => filepath.replace(FRONTEND_JS_PATH, ''));
 
       app.use('/api', this.api.chat);
-      webserverWrapper.injectAngularAppModules(NAME, frontendModules, MODULE_NAME, ['esn']);
+      webserverWrapper.injectAngularAppModules(NAME, frontendModulesUriPath, MODULE_NAME, ['esn'], {
+        localJsFiles: frontendModulesFullPath
+      });
       webserverWrapper.injectJS(NAME, resources, 'esn');
       webserverWrapper.injectLess(NAME, [lessFile], 'esn');
       webserverWrapper.addApp(NAME, app);
