@@ -10,8 +10,8 @@
       launch: launch
     };
 
-    function getDefaultSuccess(result) {
-      return $state.go('chat.channels-views', {id: result._id});
+    function getDefaultSuccess(conversation) {
+      return $state.go('chat.channels-views', {id: conversation._id});
     }
 
     function launch(userIds, onSuccess) {
@@ -22,8 +22,8 @@
       onSuccess = onSuccess || getDefaultSuccess;
 
       return chatConversationActionsService.createConfidentialConversation({members: userIds})
-        .then(function(response) {
-          return onSuccess(response.data);
+        .then(function(conversation) {
+          return onSuccess(conversation);
         })
         .catch(function(err) {
           $log.error('Could not create conversation with members', userIds, err);
