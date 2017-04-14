@@ -1,6 +1,6 @@
 .chat-messages-search
   .message-avatar.pull-left.clickable(ui-sref='profile({user_id: item.creator._id})')
-    esn-avatar(user-id="{{item.creator._id}}")
+    img(src='/images/user.png', ng-src='/api/users/{{::item.creator._id}}/profile/avatar', alt='#{__("Member Avatar")}')
     i.mdi.mdi-facebook-messenger
 
   .message-title
