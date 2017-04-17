@@ -10,6 +10,8 @@
       self.displayFile = true;
       self.toggleFile = toggleFile;
       self.$onInit = $onInit;
+      self.toggleStar = toggleStar;
+      self.starred = self.message.starred;
 
       function sessionReady(session) {
         self.user = session.user;
@@ -17,6 +19,10 @@
 
       function toggleFile() {
         self.displayFile = !self.displayFile;
+      }
+
+      function toggleStar() {
+        self.starred = !self.starred;
       }
 
       function splitMentions(text) {

@@ -10,6 +10,7 @@
     .chat-message-title(ng-if='!ctrl.message.sameUser')
       user-profile-link.displayname(user="ctrl.message.creator")
       small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+      chat-message-star(starred = 'ctrl.starred', toggle = 'ctrl.toggleStar')
     .chat-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text", ng-class='(ctrl.user._id === ctrl.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
     .oembeds.attachment-container
       oembeds(message="ctrl.message.text")
