@@ -5,11 +5,11 @@
     .module('linagora.esn.chat')
     .directive('chatApplicationMenu', chatApplicationMenu);
 
-  function chatApplicationMenu(applicationMenuTemplateBuilder) {
+  function chatApplicationMenu(applicationMenuTemplateBuilder, CHAT_MODULE_METADATA) {
     var directive = {
       restrict: 'E',
       replace: true,
-      template: applicationMenuTemplateBuilder('/#/chat', 'chat', 'Chat')
+      template: applicationMenuTemplateBuilder('/#/chat', { url: CHAT_MODULE_METADATA.icon }, 'Chat')
     };
 
     return directive;

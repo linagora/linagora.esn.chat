@@ -112,7 +112,7 @@
     .constant('CHAT_MODULE_METADATA', {
       id: 'linagora.esn.chat',
       title: 'Chat',
-      icon: 'chat-icon',
+      icon: '/chat/images/chat-icon.svg',
       homePage: 'chat'
     });
 })();
