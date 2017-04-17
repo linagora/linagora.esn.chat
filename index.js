@@ -20,6 +20,7 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.esn-config', 'esn-config'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.webserver.middleware.authorization', 'authorizationMW'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.webserver.middleware.collaboration', 'collaborationMW'),
+    new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.webserver.middleware.resource-link', 'resourceLinkMW'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.webserver.denormalize.user', 'denormalizeUser'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.user', 'user'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.collaboration', 'collaboration'),

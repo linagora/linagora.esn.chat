@@ -1,10 +1,15 @@
 'use strict';
 
+const CONSTANTS = require('../../lib/constants');
+
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
+  const resourceLinkMiddleware = dependencies('resourceLinkMW');
 
   return {
+    canUnstar,
+    canStar,
     load,
     loadMessageConversation
   };
@@ -66,6 +71,93 @@ module.exports = function(dependencies, lib) {
 
       req.conversation = conversation;
       next();
+    });
+  }
+
+  function canStar(req, res, next) {
+    const link = req.link;
+
+    logger.debug('Check the star link', link);
+
+    if (link.target.objectType !== CONSTANTS.OBJECT_TYPES.MESSAGE) {
+      logger.debug('Wrong objectType', link.target.objectType);
+
+      return next();
+    }
+
+    if (req.user._id !== link.source.id) {
+
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad Request',
+          details: 'You cannot star a message for someone else'
+        }
+      });
+    }
+
+    lib.message.getById(link.target._id, (err, message) => {
+      if (err) {
+        logger.error('Error while loading message from message', err);
+
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: err.message || 'Error while getting message'
+          }
+        });
+      }
+      if (!message) {
+        logger.error('Can not find the message to starred');
+
+        return res.status(404).json({
+          error: {
+            code: 404,
+            message: 'message not found',
+            details: 'Can not find message to star'
+          }
+        });
+      }
+
+      req.linkable = true;
+      next();
+    });
+  }
+
+  function canUnstar(req, res, next) {
+    const link = req.link;
+
+    logger.debug('Check the unstar link', link);
+
+    if (link.target.objectType !== CONSTANTS.OBJECT_TYPES.MESSAGE) {
+      logger.debug('Wrong objectType', link.target.objectType);
+
+      return next();
+    }
+    if (req.user._id !== link.source.id) {
+
+      return res.status(400).json({
+        error: {
+          code: 400,
+          message: 'Bad Request',
+          details: 'You cannot unstar a message for someone else'
+        }
+      });
+    }
+    resourceLinkMiddleware.exists(link).then(exist => {
+      if (!exist) {
+        logger.error('Error resourceLink does not exist');
+
+        return next();
+      }
+
+      req.linkable = true;
+      next();
+    }).catch(err => {
+      logger.error('Error while checking link', err);
+
+      return res.status(500).json({error: {code: 500, message: 'Server Error', details: 'Can not check the resourceLink'}});
     });
   }
 };
