@@ -9,7 +9,8 @@
                     DynamicDirective, dynamicDirectiveService,
                     chatDropdownMenuActionsService, chatBotMessageService,
                     chatBotMessageTextHandler, chatBotMessageNotMemberMentionHandler,
-                    esnModuleRegistry, CHAT_MODULE_METADATA) {
+                    esnModuleRegistry, esnScrollListenerService,
+                    CHAT_MODULE_METADATA) {
     chatDesktopNotificationService.start();
     chatConversationActionsService.start();
     chatConversationListenerService.start();
@@ -23,6 +24,7 @@
     chatBotMessageService.register(chatBotMessageTextHandler.type, chatBotMessageTextHandler.setText);
     chatBotMessageService.register(chatBotMessageNotMemberMentionHandler.type, chatBotMessageNotMemberMentionHandler.setText);
     esnModuleRegistry.add(CHAT_MODULE_METADATA);
+    esnScrollListenerService.bindTo('.chat-messages-main .lv-body');
   }
 
 })();
