@@ -34,7 +34,7 @@ describe('The chatLaunchConversationService service', function() {
     it('should call the createConfidentialConversation with array of members even when given user is a single element', function() {
       userIds = 1;
       chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
-        return $q.when({data: conversation});
+        return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds);
@@ -46,7 +46,7 @@ describe('The chatLaunchConversationService service', function() {
     it('should call the createConfidentialConversation with given members', function() {
       userIds = [1, 2, 3];
       chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
-        return $q.when({data: conversation});
+        return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds);
@@ -60,7 +60,7 @@ describe('The chatLaunchConversationService service', function() {
 
       userIds = [1];
       chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
-        return $q.when({data: conversation});
+        return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds, successSpy);
@@ -73,7 +73,7 @@ describe('The chatLaunchConversationService service', function() {
     it('should redirect to default conversation page when onSuccess is not defined', function() {
       userIds = [1];
       chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
-        return $q.when({data: conversation});
+        return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds);
@@ -110,7 +110,7 @@ describe('The chatLaunchConversationService service', function() {
       var successSpy = sinon.spy();
 
       chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
-        return $q.when({data: conversation});
+        return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds, onSuccessSpy).then(successSpy, errorSpy);
