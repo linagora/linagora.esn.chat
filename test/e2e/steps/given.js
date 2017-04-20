@@ -7,6 +7,7 @@ module.exports = function() {
 
   this.Given('I am on Chat module page', function() {
     homePage.clickOnModuleInMenu();
+
     return this.expect(browser.getCurrentUrl()).to.eventually.match(/\/#\/chat/);
   });
 
