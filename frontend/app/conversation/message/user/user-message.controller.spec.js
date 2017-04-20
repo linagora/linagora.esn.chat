@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('the chatUserMessageController controller', function() {
 
-  var $rootScope, $scope, $q, $controller, $log, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock, chatMessageStarServiceMock;
+  var $rootScope, $scope, $q, $controller, $log, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock, chatMessageStarServiceMock, userUtilsMock;
 
   beforeEach(function() {
 
@@ -50,6 +50,10 @@ describe('the chatUserMessageController controller', function() {
       })
     };
 
+    userUtilsMock = {
+      displayNameOf: sinon.spy()
+    };
+
     $log = {
       error: sinon.spy()
     };
@@ -69,6 +73,7 @@ describe('the chatUserMessageController controller', function() {
       $provide.value('linkyFilter', linkyMock);
       $provide.value('esnEmoticonifyFilter', esnEmoticonifyMock);
       $provide.value('chatMessageStarService', chatMessageStarServiceMock);
+      $provide.value('userUtils', userUtilsMock);
       $provide.value('$log', $log);
     });
 
@@ -148,6 +153,15 @@ describe('the chatUserMessageController controller', function() {
       expect(controller.parsed.text).to.deep.equal('Hello @583c5a20ec0cfe01388fecab @583c5a20ec0cfe01388fecb0 how are you?');
     });
 
+    it('should call userUtils.displayNameOf', function() {
+      message = {text: 'Hello', user_mentions: [{}], creator: {firstname: 'John1', lastname: 'Doe1'}};
+      var controller = initController(message);
+
+      controller.$onInit();
+      $rootScope.$digest();
+
+      expect(userUtilsMock.displayNameOf).to.be.calledWith(message.creator);
+    });
   });
 
   describe('the toggle function', function() {
