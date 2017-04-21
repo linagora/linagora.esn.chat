@@ -134,4 +134,17 @@ describe('the chatUserMessageController controller', function() {
     });
 
   });
+
+  describe('the toggle function', function() {
+
+    it('should change starred value onclick ', function() {
+      var controller = initController(message);
+
+      controller.starred = false;
+
+      controller.toggleStar();
+
+      expect(controller.starred).to.be.true;
+    });
+  });
 });
