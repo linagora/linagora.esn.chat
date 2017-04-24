@@ -16,7 +16,7 @@ const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 describe('The chat API', function() {
 
   let deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient, collaborations, collaboration, writable, readable, getNewMember, userAsMember;
-  let userDomains, anotherUserDomains;
+  let userDomains, anotherUserDomains, starredMessage;
 
   function dependencies(name) {
     return deps[name];
@@ -44,8 +44,17 @@ describe('The chat API', function() {
 
     userAsMember = asMember(userId);
 
+    starredMessage = {
+      _id: '123'
+    };
+
     deps = {
       logger: require('../fixtures/logger'),
+      resourceLink: {
+        exists: function(request) {
+          return Q.when(String(request.target.id) === String(starredMessage._id));
+        }
+      },
       user: {
         moderation: {registerHandler: _.constant()},
         get: function(id, callback) {
@@ -695,7 +704,9 @@ describe('The chat API', function() {
           type: 'text',
           creator: userId
         });
-      }).then(function() {
+      }).then(function(message) {
+        starredMessage._id = message._id;
+
         return Q.denodeify(app.lib.message.create)({
           channel: channelId,
           text: 'Foo bar',
@@ -712,6 +723,8 @@ describe('The chat API', function() {
               return done(err);
             }
             expect(res.body.length).to.equal(2);
+            expect(res.body[0].isStarred).to.be.true;
+            expect(res.body[1].isStarred).to.be.false;
             done();
           });
       }).catch(done);
@@ -738,7 +751,9 @@ describe('The chat API', function() {
           type: 'text',
           creator: userId
         });
-      }).then(function() {
+      }).then(function(message) {
+        starredMessage._id = message._id;
+
         request(app.express)
           .get('/api/conversations/' + channelId + '/messages')
           .expect('Content-Type', /json/)
@@ -748,6 +763,8 @@ describe('The chat API', function() {
               return done(err);
             }
             expect(res.body.length).to.equal(2);
+            expect(res.body[0].isStarred).to.be.false;
+            expect(res.body[1].isStarred).to.be.true;
             done();
           });
       }).catch(done);
@@ -1170,6 +1187,8 @@ describe('The chat API', function() {
           creator: userId
         });
       }).then(function(mongoResult) {
+        starredMessage._id = mongoResult._id;
+
         request(app.express)
           .get('/api/messages/' + mongoResult._id)
           .expect('Content-Type', /json/)
@@ -1178,7 +1197,9 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
-            expect(res.body).to.deep.equal(JSON.parse(JSON.stringify(mongoResult)));
+            expect(res.body).to.shallowDeepEqual(JSON.parse(JSON.stringify(mongoResult)));
+            expect(res.body.isStarred).to.be.true;
+
             done();
           });
       }).catch(done);
@@ -1208,7 +1229,9 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
-            expect(res.body).to.deep.equal(JSON.parse(JSON.stringify(mongoResult)));
+            expect(res.body).to.shallowDeepEqual(JSON.parse(JSON.stringify(mongoResult)));
+            expect(res.body.isStarred).to.be.false;
+
             done();
           });
       }).catch(done);

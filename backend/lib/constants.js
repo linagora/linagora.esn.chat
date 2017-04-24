@@ -3,6 +3,7 @@
 module.exports = {
   OBJECT_TYPES: {
     CONVERSATION: 'chat.conversation',
+    MESSAGE: 'chat.message',
     USER: 'user'
   },
   WEBSOCKET: {
@@ -77,5 +78,6 @@ module.exports = {
       TYPE_NAME: 'chat.conversations',
       INDEX_NAME: 'chat.conversations.idx'
     }
-  }
+  },
+  STAR_LINK_TYPE: 'star'
 };

@@ -1,8 +1,9 @@
 'use strict';
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var _ = require('lodash');
+const expect = require('chai').expect;
+const sinon = require('sinon');
+const _ = require('lodash');
+const Q = require('q');
 
 describe('The message controller', function() {
 
@@ -19,7 +20,10 @@ describe('The message controller', function() {
         }),
         getForConversation: sinon.spy(function(channel, options, callback) {
           return callback(err, result);
-        })
+        }),
+        isStarredBy: function() {
+          return Q.when();
+        }
       }
     };
   });
