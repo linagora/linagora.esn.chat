@@ -3,6 +3,7 @@
 module.exports = {
   OBJECT_TYPES: {
     CONVERSATION: 'chat.conversation',
+    MESSAGE: 'chat.message',
     USER: 'user'
   },
   WEBSOCKET: {
