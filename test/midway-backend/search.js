@@ -115,6 +115,9 @@ describe('The Chat search API', function() {
         load: function() {},
         requiresCollaborationMember: function() {}
       },
+      resourceLinkMW: {
+        addCanCreateMiddleware: function() {}
+      },
       elasticsearch: elasticsearch,
       pubsub: {
         local: localPubsub,

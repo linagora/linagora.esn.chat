@@ -86,6 +86,9 @@ describe('The chat API', function() {
         load: function() {},
         requiresCollaborationMember: function() {}
       },
+      resourceLinkMW: {
+        addCanCreateMiddleware: function() {}
+      },
       elasticsearch: {
         listeners: {
           addListener: function() {}
