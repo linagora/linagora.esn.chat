@@ -1,4 +1,5 @@
 .chat-conversation-beginning
+  esn-avatar-list(members="ctrl.members", limit='5', ng-if="ctrl.conversation.type === ctrl.type.CONFIDENTIAL")
   .title
     h3 #{__('Beginning of')}
       span.space-seperator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
