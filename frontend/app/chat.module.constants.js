@@ -82,7 +82,8 @@
       }
     })
     .constant('CHAT_OBJECT_TYPES', {
-      CONVERSATION: 'chat.conversation'
+      CONVERSATION: 'chat.conversation',
+      MESSAGE: 'chat.message'
     })
     .constant('MENTION_CHOOSER_MAX_RESULT', 15)
     .constant('CHAT_MESSAGE_TYPE', {
@@ -114,5 +115,6 @@
       title: 'Chat',
       icon: '/chat/images/chat-icon.svg',
       homePage: 'chat'
-    });
+    })
+    .constant('STAR_LINK_TYPE', 'star');
 })();
