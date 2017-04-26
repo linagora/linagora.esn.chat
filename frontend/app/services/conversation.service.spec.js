@@ -147,11 +147,13 @@ describe('The linagora.esn.chat conversation service', function() {
 
   describe('getStarredMessages function', function() {
     it('should call the right endpoint', function() {
-      var conversationId = '1111';
+      var options = {
+        starred: true
+      };
 
-      $httpBackend.expectGET('/chat/api/user/conversations/' + conversationId + '/messages?starred=true').respond([]);
+      $httpBackend.expectGET('/chat/api/messages?starred=true').respond([]);
 
-      chatConversationService.getUserStarredMessages(conversationId);
+      chatConversationService.getUserStarredMessages(options);
 
       $httpBackend.flush();
     });

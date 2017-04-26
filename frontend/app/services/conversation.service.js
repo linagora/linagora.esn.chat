@@ -91,11 +91,11 @@
         });
       }
 
-      function getUserStarredMessages(conversationId, options) {
+      function getUserStarredMessages(options) {
         options = options || {};
         options.starred = true;
 
-        return ChatRestangular.one('user').all('conversations').one(conversationId).all('messages').getList(options);
+        return ChatRestangular.all('messages').getList(options);
       }
     }
 })();

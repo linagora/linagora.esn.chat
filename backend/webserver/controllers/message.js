@@ -1,11 +1,13 @@
 'use strict';
 
 const Q = require('q');
+const CONSTANTS = require('../../lib/constants');
 
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
   const denormalizer = require('../denormalizers/message')(dependencies, lib);
+  const resourceLink = dependencies('resourceLink');
   const utils = require('./utils')(dependencies, lib);
 
   return {
@@ -45,6 +47,34 @@ module.exports = function(dependencies, lib) {
     });
   }
 
+  function getStarredMessages(req, res) {
+    const offset = parseInt(req.query.offset || CONSTANTS.DEFAULT_OFFSET, 10);
+    const limit = parseInt(req.query.limit || CONSTANTS.DEFAULT_LIMIT, 10);
+
+    resourceLink.list({
+      type: 'star',
+      source: {
+        id: String(req.user._id),
+        objectType: 'user'
+      },
+      target: {
+        objectType: CONSTANTS.OBJECT_TYPES.MESSAGE
+      },
+      offset: offset,
+      limit: limit
+    })
+      .then(result => {
+        denormalizer.denormalizeStarredMessages(result)
+          .then(denormalized => res.status(200).json(denormalized))
+          .catch(error => {
+            sendHTTPError('Error while denormalizing starred message', error, res);
+          });
+      })
+      .catch(error => {
+        sendHTTPError('Error while fetching resourceLink', error, res);
+      });
+  }
+
   function search(req, res) {
 
     function hydrateMessage(message) {
@@ -55,16 +85,20 @@ module.exports = function(dependencies, lib) {
       sendHTTPError('Error while searching messages', err, res);
     }
 
-    lib.message.searchForUser(req.user, {search: req.query.search}, (err, result) => {
-      if (err) {
-        return sendError(err);
-      }
+    if (req.query.starred === 'true') {
+      getStarredMessages(req, res);
+    } else {
+      lib.message.searchForUser(req.user, {search: req.query.search}, (err, result) => {
+        if (err) {
+          return sendError(err);
+        }
 
-      res.header('X-ESN-Items-Count', result.total_count || 0);
-      Q.all(result.list.map(hydrateMessage))
-        .then(messages => denormalizer.denormalizeMessages(messages, req.user))
-        .then(denormalizedMessages => res.status(200).json(denormalizedMessages), sendError);
-    });
+        res.header('X-ESN-Items-Count', result.total_count || 0);
+        Q.all(result.list.map(hydrateMessage))
+          .then(messages => denormalizer.denormalizeMessages(messages, req.user))
+          .then(denormalizedMessages => res.status(200).json(denormalizedMessages), sendError);
+      });
+    }
   }
 
   function sendHTTPError(message, err, res) {

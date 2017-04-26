@@ -12,7 +12,9 @@ module.exports = function(dependencies, lib) {
     denormalizeAttachment,
     denormalizeAttachments,
     denormalizeMessage,
-    denormalizeMessages
+    denormalizeMessages,
+    denormalizeStarredMessage,
+    denormalizeStarredMessages
   };
 
   function denormalizeAttachment(attachment) {
@@ -21,6 +23,23 @@ module.exports = function(dependencies, lib) {
 
       return attachment;
     });
+  }
+
+  function denormalizeStarredMessage(ressourceLinkObject) {
+    return Q.denodeify(lib.message.getById)(ressourceLinkObject.target.id)
+      .then(message => {
+        if (typeof message.toObject === 'function') {
+          message = message.toObject();
+        }
+        message.isStarred = true;
+        ressourceLinkObject = message;
+
+        return ressourceLinkObject;
+      });
+  }
+
+  function denormalizeStarredMessages(ressourceLinkObjects) {
+    return Q.all(ressourceLinkObjects.map(denormalizeStarredMessage));
   }
 
   function denormalizeAttachments(attachments) {

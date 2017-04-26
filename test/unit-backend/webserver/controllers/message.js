@@ -4,6 +4,9 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 const _ = require('lodash');
 const Q = require('q');
+const CONSTANTS = require('../../../../backend/lib/constants');
+const DEFAULT_LIMIT = CONSTANTS.DEFAULT_LIMIT;
+const DEFAULT_OFFSET = CONSTANTS.DEFAULT_OFFSET;
 
 describe('The message controller', function() {
 
@@ -94,6 +97,94 @@ describe('The message controller', function() {
             json: function(json) {
               expect(json).to.shallowDeepEqual([msg1.dest, msg2.dest]);
               expect(lib.message.getForConversation).to.have.been.calledWith(channelId, query);
+              done();
+            }
+          };
+        }
+      });
+    });
+  });
+
+  describe('the search function', function() {
+
+    it('should send back HTTP 500 with error when error is sent back from resourceLink', function(done) {
+      const query = {
+        starred: 'true'
+      };
+      const user = {
+        _id: 'userID'
+      };
+      const req = {
+        user: user,
+        query: query
+      };
+      const resourceLink = {
+        list: sinon.spy(function() {
+          return Q.reject(new Error('failed'));
+        })
+      };
+
+      this.moduleHelpers.addDep('resourceLink', resourceLink);
+
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      controller.search(req, {
+        status: function(code) {
+          expect(code).to.equal(500);
+
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual({error: {code: 500}});
+              expect(resourceLink.list).to.have.been.calledWith({
+                type: 'star',
+                source: { id: req.user._id, objectType: 'user' },
+                target: { objectType: 'chat.message' },
+                offset: DEFAULT_OFFSET,
+                limit: DEFAULT_LIMIT
+              });
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the resourceLink.list result', function(done) {
+      const query = {
+        starred: 'true',
+        offset: '10',
+        limit: '0'
+      };
+      const user = {
+        _id: 'userID'
+      };
+      const req = {
+        user: user,
+        query: query
+      };
+      const resourceLink = {
+        list: sinon.spy(function() {
+          return Q.when([]);
+        })
+      };
+      this.moduleHelpers.addDep('resourceLink', resourceLink);
+
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      controller.search(req, {
+        status: function(code) {
+          expect(code).to.equal(200);
+
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual([]);
+              expect(resourceLink.list).to.have.been.calledWith({
+                type: 'star',
+                source: { id: req.user._id, objectType: 'user' },
+                target: { objectType: 'chat.message' },
+                offset: 10,
+                limit: 0
+              });
               done();
             }
           };
