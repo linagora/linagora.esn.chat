@@ -97,6 +97,14 @@
             template: '<chat-conversation-list/>'
           }
         }
+      })
+      .state('chat.launch', {
+        url: '/launch/:userId',
+        onEnter: function($stateParams, $state, chatLaunchConversationService) {
+          chatLaunchConversationService.launch($stateParams.userId).catch(function() {
+            $state.go('chat');
+          });
+        }
       });
   });
 })();
