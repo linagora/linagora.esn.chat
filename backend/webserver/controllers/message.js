@@ -5,7 +5,7 @@ const Q = require('q');
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
-  const denormalizer = require('../denormalizers/message')(dependencies);
+  const denormalizer = require('../denormalizers/message')(dependencies, lib);
   const utils = require('./utils')(dependencies, lib);
 
   return {
@@ -16,7 +16,7 @@ module.exports = function(dependencies, lib) {
   };
 
   function get(req, res) {
-    res.status(200).json(req.message);
+    denormalizer.denormalizeMessage(req.message, req.user).then(denormalizedMessage => res.status(200).json(denormalizedMessage));
   }
 
   function getAttachmentsForConversation(req, res) {
@@ -41,7 +41,7 @@ module.exports = function(dependencies, lib) {
         return sendHTTPError(`Error while getting messages for conversation ${req.conversation._id}`, err, res);
       }
 
-      return res.status(200).json(results);
+      return denormalizer.denormalizeMessages(results, req.user).then(denormalizedMessages => res.status(200).json(denormalizedMessages));
     });
   }
 
@@ -61,7 +61,9 @@ module.exports = function(dependencies, lib) {
       }
 
       res.header('X-ESN-Items-Count', result.total_count || 0);
-      Q.all(result.list.map(hydrateMessage)).then(messages => res.status(200).json(messages), sendError);
+      Q.all(result.list.map(hydrateMessage))
+        .then(messages => denormalizer.denormalizeMessages(messages, req.user))
+        .then(denormalizedMessages => res.status(200).json(denormalizedMessages), sendError);
     });
   }
 

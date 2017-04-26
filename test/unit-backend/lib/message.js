@@ -3,6 +3,7 @@
 const sinon = require('sinon');
 const expect = require('chai').expect;
 const _ = require('lodash');
+const Q = require('q');
 const CONSTANTS = require('../../../backend/lib/constants');
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED;
@@ -10,9 +11,12 @@ const CONVERSATION_DELETED = CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const MESSAGE_SAVED = CONSTANTS.NOTIFICATIONS.MESSAGE_SAVED;
 const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
+const OBJECT_TYPE_USER = CONSTANTS.OBJECT_TYPES.USER;
+const OBJECT_TYPE_MESSAGE = CONSTANTS.OBJECT_TYPES.MESSAGE;
+const STAR_LINK_TYPE = CONSTANTS.STAR_LINK_TYPE;
 
 describe('The linagora.esn.chat message lib', function() {
-  let deps, logger, messageSavedTopic, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic;
+  let deps, logger, messageSavedTopic, channelCreationTopic, channelAddMember, modelsMock, ObjectIdMock, mq, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, resourceLink;
 
   function dependencies(name) {
     return deps[name];
@@ -46,6 +50,10 @@ describe('The linagora.esn.chat message lib', function() {
     channelDeletionTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
+    };
+
+    resourceLink = {
+      exists: sinon.spy()
     };
 
     logger = {
@@ -372,4 +380,55 @@ describe('The linagora.esn.chat message lib', function() {
     });
   });
 
+  describe('The isStarred function', function() {
+    let message, user, expectSourceTuple, expectTargetTuple, expectRequestObject;
+
+    function requireMessageLib() {
+      return require('../../../backend/lib/message')(dependencies);
+    }
+
+    beforeEach(function() {
+      message = {
+        _id: '123'
+      };
+      user = {
+        _id: '456'
+      };
+      expectSourceTuple = {
+        objectType: OBJECT_TYPE_USER,
+        id: String(user._id)
+      };
+      expectTargetTuple = {
+        objectType: OBJECT_TYPE_MESSAGE,
+        id: String(message._id)
+      };
+      expectRequestObject = { source: expectSourceTuple, target: expectTargetTuple, type: STAR_LINK_TYPE };
+    });
+
+    it('should call resourceLink.exists function with the right params', function() {
+      deps.resourceLink = resourceLink;
+
+      requireMessageLib().isStarredBy(message, user);
+
+      expect(resourceLink.exists).to.have.been.calledWith(expectRequestObject);
+    });
+
+    it('should return the right value', function(done) {
+      const expectedResult = true;
+
+      resourceLink.exists = function() {
+        return Q.when(expectedResult);
+      };
+
+      deps.resourceLink = resourceLink;
+
+      requireMessageLib().isStarredBy(message, user)
+        .then(function(isStarred) {
+          expect(isStarred).to.be.equal(expectedResult);
+
+          done();
+        })
+        .catch(done);
+    });
+  });
 });

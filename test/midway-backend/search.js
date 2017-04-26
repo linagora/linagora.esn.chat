@@ -14,7 +14,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The Chat search API', function() {
 
-  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember, userDomains;
+  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember, userDomains, starredMessage;
 
   function dependencies(name) {
     return deps[name];
@@ -76,8 +76,17 @@ describe('The Chat search API', function() {
 
     const elasticsearch = require('linagora-rse/backend/core/elasticsearch');
 
+    starredMessage = {
+      _id: '9999'
+    };
+
     deps = {
       logger: logger,
+      resourceLink: {
+        exists: function(request) {
+          return Q.when(String(request.target.id) === String(starredMessage._id));
+        }
+      },
       user: {
         moderation: {registerHandler: _.constant()},
         get: function(id, callback) {
@@ -330,6 +339,8 @@ describe('The Chat search API', function() {
           expect((res.body[0].text === message.text && res.body[1].text === message6.text) || (res.body[0].text === message6.text && res.body[1].text === message.text)).to.be.true;
           expect(res.body[0].channel).to.be.an('object');
           expect(res.body[1].channel).to.be.an('object');
+          expect(res.body[0].isStarred).to.be.true;
+          expect(res.body[1].isStarred).to.be.false;
           done();
         });
       }
@@ -340,6 +351,8 @@ describe('The Chat search API', function() {
           type: CONSTANTS.SEARCH.MESSAGES.TYPE_NAME,
           ids: messages.map(message => message._id)
         };
+
+        starredMessage._id = messages[0]._id;
 
         return Q.nfapply(self.helpers.elasticsearch.checkDocumentsIndexed, [options]);
       }

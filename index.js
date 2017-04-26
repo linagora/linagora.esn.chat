@@ -29,6 +29,7 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.helpers', 'helpers'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.db', 'db'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.i18n', 'i18n'),
+    new Dependency(Dependency.TYPE_NAME, 'linagora.esn.core.resource-link', 'resourceLink'),
     new Dependency(Dependency.TYPE_NAME, 'linagora.esn.emoticon', 'emoticon')
   ],
   states: {

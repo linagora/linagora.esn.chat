@@ -14,6 +14,7 @@ module.exports = function(dependencies, lib) {
   const ObjectId = mongoose.Types.ObjectId;
   const Conversation = mongoose.model('ChatConversation');
   const ChatMessage = mongoose.model('ChatMessage');
+  const resourceLink = dependencies('resourceLink');
 
   return {
     count,
@@ -28,7 +29,8 @@ module.exports = function(dependencies, lib) {
     moderate,
     parseMention,
     save,
-    searchForUser
+    searchForUser,
+    isStarredBy
   };
 
   function count(conversationId, callback) {
@@ -261,5 +263,18 @@ module.exports = function(dependencies, lib) {
       logger.error('Can not search messages for user', err);
       callback(err);
     });
+  }
+
+  function isStarredBy(message, user) {
+    const sourceTuple = {
+      objectType: CONSTANTS.OBJECT_TYPES.USER,
+      id: String(user._id)
+    };
+    const targetTuple = {
+      objectType: CONSTANTS.OBJECT_TYPES.MESSAGE,
+      id: String(message._id)
+    };
+
+    return resourceLink.exists({ source: sourceTuple, target: targetTuple, type: CONSTANTS.STAR_LINK_TYPE });
   }
 };
