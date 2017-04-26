@@ -7,7 +7,7 @@ var expect = chai.expect;
 
 describe('the chatUserMessageController controller', function() {
 
-  var $rootScope, $scope, $q, $controller, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock;
+  var $rootScope, $scope, $q, $controller, $log, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock, chatMessageStarServiceMock;
 
   beforeEach(function() {
 
@@ -41,6 +41,19 @@ describe('the chatUserMessageController controller', function() {
       add: sinon.spy()
     };
 
+    chatMessageStarServiceMock = {
+      unstar: sinon.spy(function() {
+        return $q.when();
+      }),
+      star: sinon.spy(function() {
+        return $q.when();
+      })
+    };
+
+    $log = {
+      error: sinon.spy()
+    };
+
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProvidersMock);
       $provide.value('chatSearchMessagesProviderService', {});
@@ -55,6 +68,8 @@ describe('the chatUserMessageController controller', function() {
       $provide.value('oembedImageFilterFilter', oembedImageFilterMock);
       $provide.value('linkyFilter', linkyMock);
       $provide.value('esnEmoticonifyFilter', esnEmoticonifyMock);
+      $provide.value('chatMessageStarService', chatMessageStarServiceMock);
+      $provide.value('$log', $log);
     });
 
     angular.mock.inject(function(_$rootScope_, _$controller_, _$q_) {
@@ -137,14 +152,45 @@ describe('the chatUserMessageController controller', function() {
 
   describe('the toggle function', function() {
 
-    it('should change starred value onclick ', function() {
+    it('should call chatMessageStarService.unstar is the message is starred', function() {
+      message.isStarred = true;
       var controller = initController(message);
 
-      controller.starred = false;
+      controller.toggleStar();
+      $rootScope.$digest();
+
+      expect(chatMessageStarServiceMock.unstar).to.be.calledWith(message._id);
+      expect(chatMessageStarServiceMock.star).to.not.have.been.called;
+      expect(message.isStarred).to.be.false;
+    });
+
+    it('should call chatMessageStarService.star is the message is unstarred', function() {
+      message.isStarred = false;
+      var controller = initController(message);
 
       controller.toggleStar();
+      $rootScope.$digest();
 
-      expect(controller.starred).to.be.true;
+      expect(chatMessageStarServiceMock.star).to.be.calledWith(message._id);
+      expect(chatMessageStarServiceMock.unstar).to.not.have.been.called;
+      expect(message.isStarred).to.be.true;
+    });
+
+    it('should not update the isStarred flag', function() {
+      message.isStarred = true;
+      var controller = initController(message);
+
+      chatMessageStarServiceMock.unstar = sinon.spy(function() {
+        return $q.reject();
+      });
+
+      controller.toggleStar();
+      $rootScope.$digest();
+
+      expect(chatMessageStarServiceMock.star).to.not.have.been.called;
+      expect(message.isStarred).to.be.true;
+      expect($log.error).to.have.been.called;
+      expect($log.error).to.have.been.calledWith('Error while toggling star of message');
     });
   });
 });

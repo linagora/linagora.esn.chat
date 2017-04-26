@@ -4,14 +4,13 @@
   angular.module('linagora.esn.chat')
     .controller('chatUserMessageController', chatUserMessageController);
 
-    function chatUserMessageController($filter, chatParseMention, session) {
+    function chatUserMessageController($filter, $log, chatParseMention, session, chatMessageStarService) {
       var self = this;
 
       self.displayFile = true;
       self.toggleFile = toggleFile;
       self.$onInit = $onInit;
       self.toggleStar = toggleStar;
-      self.starred = self.message.starred;
 
       function sessionReady(session) {
         self.user = session.user;
@@ -22,7 +21,11 @@
       }
 
       function toggleStar() {
-        self.starred = !self.starred;
+        (self.message.isStarred ? chatMessageStarService.unstar : chatMessageStarService.star)(self.message._id).then(function() {
+          self.message.isStarred = !self.message.isStarred;
+        }).catch(function(err) {
+          $log.error('Error while toggling star of message', err);
+        });
       }
 
       function splitMentions(text) {

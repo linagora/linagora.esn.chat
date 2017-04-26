@@ -85,7 +85,7 @@ module.exports = function(dependencies, lib) {
       return next();
     }
 
-    if (req.user._id !== link.source.id) {
+    if (String(req.user._id) !== String(link.source.id)) {
 
       return res.status(400).json({
         error: {
@@ -96,7 +96,7 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    lib.message.getById(link.target._id, (err, message) => {
+    lib.message.getById(link.target.id, (err, message) => {
       if (err) {
         logger.error('Error while loading message from message', err);
 
