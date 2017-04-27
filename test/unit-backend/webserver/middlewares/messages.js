@@ -156,7 +156,7 @@ describe('The message middleware', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       const targetID = 'targetID';
 
-      link.target._id = targetID;
+      link.target.id = targetID;
       link.target.objectType = CONSTANTS.OBJECT_TYPES.MESSAGE;
       link.source.id = req.user._id;
       err = new Error('failed');
@@ -190,7 +190,7 @@ describe('The message middleware', function() {
           return {
             json: function(json) {
               expect(json).to.shallowDeepEqual({error: {code: 404, message: 'message not found', details: 'Can not find message to star'}});
-              expect(lib.message.getById).to.have.been.calledWith(link.target._id);
+              expect(lib.message.getById).to.have.been.calledWith(link.target.id);
               done();
             }
           };
