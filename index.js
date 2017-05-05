@@ -36,11 +36,13 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
     lib: function(dependencies, callback) {
       const libModule = require('./backend/lib')(dependencies);
       const chat = require('./backend/webserver/api')(dependencies, libModule);
+      const constants = require('./backend/lib/constants');
       const lib = {
         api: {
           chat: chat
         },
-        lib: libModule
+        lib: libModule,
+        constants: constants
       };
 
       callback(null, lib);
