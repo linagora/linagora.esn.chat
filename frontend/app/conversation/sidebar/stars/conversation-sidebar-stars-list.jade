@@ -1,0 +1,11 @@
+.conversation-sidebar-stars-list
+  .close.hidden-xs
+    i.mdi.mdi-close.clickable(ui-sref="chat.channels-views")
+  .list
+    infinite-list(load-more-elements='ctrl.loadMoreElements()', scroll-inside-container="true")
+      chat-user-message(message="message", ng-repeat="message in ctrl.elements | orderBy: '-timestamps.creation'", ng-if="ctrl.elements.length > 0")
+      .list-empty(ng-if="!ctrl.elements.length && ctrl.infiniteScrollCompleted")
+        i.mdi.mdi-check
+        .message #{__('No starred messages found')}
+      span(ng-if='ctrl.infiniteScrollDisabled')
+        .text-center(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.5')

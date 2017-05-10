@@ -144,4 +144,16 @@ describe('The linagora.esn.chat conversation service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('getStarredMessages function', function() {
+    it('should call the right endpoint', function() {
+      var conversationId = '1111';
+
+      $httpBackend.expectGET('/chat/api/user/conversations/' + conversationId + '/messages?starred=true').respond([]);
+
+      chatConversationService.getUserStarredMessages(conversationId);
+
+      $httpBackend.flush();
+    });
+  });
 });

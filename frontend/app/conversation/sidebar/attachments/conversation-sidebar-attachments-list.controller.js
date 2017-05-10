@@ -2,9 +2,9 @@
   'use strict';
 
   angular.module('linagora.esn.chat')
-    .controller('ChatConversationSidebarAttachmentsController', ChatConversationSidebarAttachmentsController);
+    .controller('ChatConversationSidebarAttachmentsListController', ChatConversationSidebarAttachmentsListController);
 
-  function ChatConversationSidebarAttachmentsController($stateParams, chatConversationsStoreService, CHAT, CHAT_ATTACHMENT_PROVIDER) {
+  function ChatConversationSidebarAttachmentsListController($stateParams, chatConversationsStoreService, CHAT, CHAT_ATTACHMENT_PROVIDER) {
     var self = this;
 
     self.objectType = CHAT_ATTACHMENT_PROVIDER.conversation;

@@ -51,7 +51,7 @@
         url: '/attachments',
         views: {
           'sidebar@chat.channels-views': {
-            template: '<chat-conversation-sidebar-attachments/>'
+            template: '<chat-conversation-sidebar-attachments-list/>'
           }
         }
       })
@@ -59,7 +59,15 @@
         url: '/members',
         views: {
           'sidebar@chat.channels-views': {
-            template: '<chat-conversation-sidebar-members/>'
+            template: '<chat-conversation-sidebar-members-list/>'
+          }
+        }
+      })
+      .state('chat.channels-views.stars', {
+        url: '/stars',
+        views: {
+          'sidebar@chat.channels-views': {
+            template: '<chat-conversation-sidebar-stars-list/>'
           }
         }
       })

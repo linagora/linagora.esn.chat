@@ -19,7 +19,8 @@
         markAsRead: markAsRead,
         remove: remove,
         update: update,
-        updateTopic: updateTopic
+        updateTopic: updateTopic,
+        getUserStarredMessages: getUserStarredMessages
       };
 
       return service;
@@ -88,6 +89,13 @@
         return _getBase(id).one('topic').doPUT({
           value: topic
         });
+      }
+
+      function getUserStarredMessages(conversationId, options) {
+        options = options || {};
+        options.starred = true;
+
+        return ChatRestangular.one('user').all('conversations').one(conversationId).all('messages').getList(options);
       }
     }
 })();

@@ -1,4 +1,4 @@
-.conversation-sidebar-members {
+.conversation-sidebar-stars-list {
   .flex-column;
 
   height: 100%;
@@ -13,20 +13,23 @@
   }
 
   .list {
-    .flex;
+    .flex-horizontal-centered;
 
+    padding-top: 15px;
     height: 100%;
     overflow: auto;
 
-    esn-collaboration-members-list {
-      width: 100%;
+    .list-empty {
+      .all-centered;
+      .flex-column;
 
-      member-display {
-        width: 100%;
+      color: @accentColor;
+      font-size: 8em;
+      opacity: 0.7;
 
-        .member-container {
-          .flex-vertical-centered;
-        }
+      .message {
+        color: @secondaryTextColor;
+        font-size: 16px;
       }
     }
   }

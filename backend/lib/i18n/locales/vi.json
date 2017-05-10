@@ -46,5 +46,7 @@
   "There are no conversations matching your search": "Không tìm thấy cuộc trò chuyện phù hợp vơi từ khóa tìm kiếm",
   "Chat": "Trò chuyện",
   "Star": "Gắn sao",
-  "Unstar": "Bỏ gắn sao"
+  "Unstar": "Bỏ gắn sao",
+  "No starred messages found": "Không có tin được gắn dấu sao",
+  "Show starred messages": "Hiển thị tin được gắn dấu sao"
 }
