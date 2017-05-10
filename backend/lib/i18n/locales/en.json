@@ -46,5 +46,7 @@
   "There are no conversations matching your search": "There are no conversations matching your search",
   "Chat": "Chat",
   "Star": "Star",
-  "Unstar": "Unstar"
+  "Unstar": "Unstar",
+  "No starred messages found": "No starred messages found",
+  "Show starred messages": "Show starred messages"
 }

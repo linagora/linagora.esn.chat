@@ -46,5 +46,7 @@
   "There are no conversations matching your search": "Il n'y a pas de conversations correspondant à votre recherche",
   "Chat": "Chat",
   "Star": "Suivi",
-  "Unstar": "Non-suivi"
+  "Unstar": "Non-suivi",
+  "No starred messages found": "Pas de messages suivis",
+  "Show starred messages": "Afficher les messages suivis"
 }

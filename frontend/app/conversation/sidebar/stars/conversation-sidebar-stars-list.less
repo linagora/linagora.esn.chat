@@ -1,0 +1,41 @@
+.conversation-sidebar-stars-list {
+  .flex-column;
+
+  height: 100%;
+  padding: 10px;
+  background-color: @m-white;
+
+  .close {
+    .flex-end;
+
+    font-size: 24px;
+    padding: @chatConversationSideBarClosePadding;
+  }
+
+  .list {
+    .flex-horizontal-centered;
+
+    padding-top: 15px;
+    height: 100%;
+    overflow: auto;
+
+    .list-empty {
+      .all-centered;
+      .flex-column;
+
+      color: @accentColor;
+      font-size: 8em;
+      opacity: 0.7;
+
+      .message {
+        color: @secondaryTextColor;
+        font-size: 16px;
+      }
+    }
+  }
+
+  @media(min-width: @screen-md-min) {
+    min-width: @chatRightSidebarDesktopWidth;
+    max-width: @chatRightSidebarDesktopWidth;
+  }
+}
