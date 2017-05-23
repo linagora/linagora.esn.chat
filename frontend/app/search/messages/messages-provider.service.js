@@ -32,6 +32,7 @@
               message.text = $filter('linky')(message.text, '_blank');
               message.text = $filter('esnEmoticonify')(message.text, {class: 'chat-emoji'});
               message.text = results[index];
+              message.date = message.timestamps.creation;
 
               return message;
             });
