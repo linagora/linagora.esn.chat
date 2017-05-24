@@ -24,6 +24,7 @@
 
             return response.data.map(function(conversation) {
               conversation.type = type;
+              conversation.date = conversation.timestamps.creation;
 
               return conversation;
             });
