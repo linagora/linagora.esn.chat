@@ -1,17 +1,22 @@
 .chat-conversation-beginning {
-  .flex-column;
-
-  .text {
-    font-size: 1.1em;
-    color: @chatSystemMessageTextColor;
-  }
 
   .label-emoji {
     width: @chatLabelEmojiSize;
   }
 
-  .space-seperator {
+  .name-seperator {
     margin-right: 5px;
+  }
+
+  .space-separator {
     margin-left: 5px;
+  }
+
+  .name:hover {
+    color: @primaryColor;
+  }
+
+  .capitalize {
+    text-transform: capitalize;
   }
 }

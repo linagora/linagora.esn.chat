@@ -25,7 +25,6 @@
   "More": "Thêm",
   "Leave conversation": "Rời cuộc trò chuyện",
   "created on": "được tạo vào",
-  "This is the start of": "Bắt đầu của",
   "Beginning of": "Bắt đầu của",
   "Emoji matching": "Biểu tượng phù hợp",
   "Member matching": "Thành viên phù hợp",
@@ -47,5 +46,7 @@
   "Star": "Gắn sao",
   "Unstar": "Bỏ gắn sao",
   "No starred messages found": "Không có tin được gắn dấu sao",
-  "Show starred messages": "Hiển thị tin được gắn dấu sao"
+  "Show starred messages": "Hiển thị tin được gắn dấu sao",
+  "by": "bởi",
+  "This is the beginning of the conversation with": "Đây là sự khởi đầu của cuộc trò chuyện với"
 }

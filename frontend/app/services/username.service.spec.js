@@ -5,6 +5,7 @@
 var expect = chai.expect;
 
 describe('The chatUsername service', function() {
+  var $q, $rootScope;
   var chatUsername, CHAT_MENTION_CHAR;
   var username = 'chuck';
   var Cache;
@@ -29,7 +30,9 @@ describe('The chatUsername service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatUsername_, _CHAT_MENTION_CHAR_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatUsername_, _CHAT_MENTION_CHAR_) {
+    $q = _$q_;
+    $rootScope = _$rootScope_;
     chatUsername = _chatUsername_;
     CHAT_MENTION_CHAR = _CHAT_MENTION_CHAR_;
   }));
@@ -41,19 +44,56 @@ describe('The chatUsername service', function() {
   });
 
   describe('The generateMention function', function() {
-    it('should return a value starting with @', function() {
+    it('should return a value starting with CHAT_MENTION_CHAR', function() {
       expect(chatUsername.generateMention({})[0]).to.equal(CHAT_MENTION_CHAR);
     });
   });
 
   describe('The getFromCache function', function() {
     it('should call cache.get', function() {
-      var spy = sinon.spy();
       var id = '1';
 
-      Cache.prototype.get = spy;
+      Cache.prototype.get = sinon.spy(function() {
+        return $q.when();
+      });
+
       chatUsername.getFromCache(id);
-      expect(spy).to.have.been.calledWith(id);
+
+      expect(Cache.prototype.get).to.have.been.calledWith(id);
+    });
+
+    it.only('should add CHAT_MENTION_CHAR to the user name if prependUserWithArobase is true', function(done) {
+      var id = '1';
+      var userName = 'Themothy Elliot';
+
+      Cache.prototype.get = sinon.spy(function() {
+        return $q.when(userName);
+      });
+
+      chatUsername.getFromCache(id, true).then(function(user) {
+        expect(user).to.equal(CHAT_MENTION_CHAR + 'Themothy Elliot');
+
+        done();
+      });
+
+      $rootScope.$digest();
+    });
+
+    it('should not add CHAT_MENTION_CHAR to the user name if option is false', function(done) {
+      var id = '1';
+      var userName = 'Themothy Elliot';
+
+      Cache.prototype.get = sinon.spy(function() {
+        return $q.when(userName);
+      });
+
+      chatUsername.getFromCache(id, false).then(function(user) {
+        expect(user).to.equal('Themothy Elliot');
+
+        done();
+      });
+
+      $rootScope.$digest();
     });
   });
 });

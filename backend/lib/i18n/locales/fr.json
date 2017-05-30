@@ -25,7 +25,6 @@
   "More": "Plus",
   "Leave conversation": "Quitter la conversation",
   "created on": "créé le",
-  "This is the start of": "Ceci est le début de",
   "Beginning of": "Début de",
   "Emoji matching": "Emoji correspondant à",
   "Member matching": "Membre correspondant à",
@@ -47,5 +46,7 @@
   "Star": "Suivi",
   "Unstar": "Non-suivi",
   "No starred messages found": "Pas de messages suivis",
-  "Show starred messages": "Afficher les messages suivis"
+  "Show starred messages": "Afficher les messages suivis",
+  "by": "par",
+  "This is the beginning of the conversation with": "Ceci est le début de la conversation avec"
 }

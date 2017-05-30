@@ -21,7 +21,7 @@
         }
 
         if (conversation.members.length === 1) {
-          return chatUsername.getFromCache(conversation.members[0].member.id);
+          return chatUsername.getFromCache(conversation.members[0].member.id, true);
         }
 
         var otherUsers = _.reject(conversation.members, function(member) {
@@ -29,7 +29,7 @@
         });
 
         return $q.all(otherUsers.map(function(member) {
-          return chatUsername.getFromCache(member.member.id);
+          return chatUsername.getFromCache(member.member.id, true);
         })).then(function(results) {
           return results.join(', ');
         });

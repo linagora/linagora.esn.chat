@@ -90,12 +90,35 @@ describe('The Chat Conversation Beginning Controller ', function() {
       expect(chatConversationNameService.getName).to.have.been.calledWith(controller.conversation);
     });
 
-    it('should call chatUsername.getFromCache when conversation type is confidential', function() {
+    it('should call chatUsername.getFromCache when conversation type is confidential to have the list of members', function() {
       controller.conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
       controller.$onInit();
+      $rootScope.$digest();
 
       expect(chatUsernameMock.getFromCache).to.have.been.calledWith(controller.conversation.members[0].member.id);
       expect(chatUsernameMock.getFromCache).to.have.been.calledWith(controller.conversation.members[1].member.id);
+      expect(controller.members[0].id).to.equal(1);
+      expect(controller.members[1].id).to.equal(2);
+    });
+
+    it('should call chatUsername.getFromCache with conversation.creator to have the name of the creator', function() {
+      controller.$onInit();
+
+      expect(chatUsernameMock.getFromCache).to.have.been.calledWith(controller.conversation.creator);
+    });
+
+    it('should call chatUsername.getFromCache when conversation type is equal to confidential', function() {
+      controller.conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
+      controller.$onInit();
+
+      expect(chatUsernameMock.getFromCache).to.have.been.calledThrice;
+    });
+
+    it('should call chatUsername.getFromCache just once when conversation type is not equal to confidential', function() {
+      controller.conversation.type = CHAT_CONVERSATION_TYPE.OPEN;
+      controller.$onInit();
+
+      expect(chatUsernameMock.getFromCache).to.have.been.calledOnce; // to have the name of the creator of the conversation
     });
   });
 });
