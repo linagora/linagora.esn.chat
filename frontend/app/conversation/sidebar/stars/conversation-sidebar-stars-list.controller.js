@@ -18,7 +18,14 @@
     }
 
     function getUserStarredMessages() {
-      return chatConversationService.getUserStarredMessages(chatConversationsStoreService.activeRoom._id, options)
+      return chatConversationService.getUserStarredMessages(options)
+        .then(function(response) {
+          var customizedResponse = response;
+          customizedResponse.data = customizedResponse.data.filter(function(message) {
+            return message.channel === chatConversationsStoreService.activeRoom._id;
+          });
+          return customizedResponse;
+        })
         .catch(function(err) {
           $log.error('Error while fetching starred messages', err);
 
