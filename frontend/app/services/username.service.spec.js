@@ -62,7 +62,7 @@ describe('The chatUsername service', function() {
       expect(Cache.prototype.get).to.have.been.calledWith(id);
     });
 
-    it.only('should add CHAT_MENTION_CHAR to the user name if prependUserWithArobase is true', function(done) {
+    it('should add CHAT_MENTION_CHAR to the user name if prependUserWithArobase is true', function(done) {
       var id = '1';
       var userName = 'Themothy Elliot';
 
