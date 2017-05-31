@@ -1,0 +1,23 @@
+.conversation-sidebar-member {
+  .flex-column;
+
+  height: 100%;
+  padding: 10px;
+  background-color: @m-white;
+
+  .close {
+    .flex-end;
+
+    font-size: 24px;
+    padding: @chatConversationSideBarClosePadding;
+  }
+
+  profile-overview {
+    margin: 10px;
+  }
+
+  @media(min-width: @screen-md-min) {
+    min-width: @chatRightSidebarDesktopWidth;
+    max-width: @chatRightSidebarDesktopWidth;
+  }
+}

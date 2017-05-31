@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .controller('chatUserMessageController', chatUserMessageController);
 
-    function chatUserMessageController($filter, $log, chatParseMention, session, chatMessageStarService) {
+    function chatUserMessageController($filter, $log, chatParseMention, session, userUtils, chatMessageStarService) {
       var self = this;
 
       self.displayFile = true;
@@ -47,6 +47,8 @@
             text: result
           };
         });
+
+        self.displayName = userUtils.displayNameOf(self.message.creator);
       }
     }
 })();

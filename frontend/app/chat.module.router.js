@@ -71,6 +71,14 @@
           }
         }
       })
+      .state('chat.channels-views.member', {
+        url: '/member/:memberId',
+        views: {
+          'sidebar@chat.channels-views': {
+            template: '<chat-conversation-sidebar-member/>'
+          }
+        }
+      })
       .state('chat.channels-views.members-add', {
         url: '/members/add',
         params: {
