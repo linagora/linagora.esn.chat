@@ -13,10 +13,25 @@
   }
 
   profile-overview {
-    margin: 10px;
-  }
+    .profile-overview {
+      .flex-column;
+      .flex-vertical-centered;
 
-  @media(min-width: @screen-md-min) {
+      .po-card {
+        padding: 0 30px 0 30px;
+      }
+
+      .follow-card {
+        ul {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+@media(min-width: @screen-md-min) {
+  .conversation-sidebar-member {
     min-width: @chatRightSidebarDesktopWidth;
     max-width: @chatRightSidebarDesktopWidth;
   }
