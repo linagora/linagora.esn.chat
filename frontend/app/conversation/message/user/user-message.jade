@@ -4,13 +4,13 @@
     esn-avatar(ng-if='!ctrl.message.sameUser', user-id="{{ctrl.message.creator._id}}")
 
     .message-time(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
-      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+      small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
 
   .media-body
     .chat-message-title(ng-if='!ctrl.message.sameUser')
       a.displayname.hidden-xs(ui-sref="chat.channels-views.member({memberId: ctrl.message.creator._id})") {{::ctrl.displayName }}
       user-profile-link.displayname.visible-xs(user="ctrl.message.creator")
-      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+      small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
       chat-message-star(starred = 'ctrl.message.isStarred', toggle = 'ctrl.toggleStar')
     .chat-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text", ng-class='(ctrl.user._id === ctrl.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
     .oembeds.attachment-container

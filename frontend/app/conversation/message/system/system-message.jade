@@ -6,5 +6,5 @@
     .block-left
       .chat-system-message-title
         span.displayname {{::ctrl.systemUser.displayName}}
-        small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+        small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
       .chat-system-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text")

@@ -47,3 +47,4 @@ angular.module('esn.module-registry', [])
   .factory('esnModuleRegistry', function() {
     return {};
   });
+angular.module('esn.datetime', []);

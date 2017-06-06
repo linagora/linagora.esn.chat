@@ -8,7 +8,6 @@
     var self = this;
 
     self.diffDate = diffDate;
-    self.formatDate = formatDate;
     self.sameDay = sameDay;
 
     function diffDate(timestamp) {
@@ -16,10 +15,6 @@
       var formatDate = [messageDate.year(), messageDate.month(), messageDate.date()];
 
       return moment().diff(formatDate, 'day');
-    }
-
-    function formatDate(timestamp) {
-      return moment(timestamp, 'x').format('Do MMMM');
     }
 
     function sameDay(timestampDate1, timestampDate2) {

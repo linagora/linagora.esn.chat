@@ -1,5 +1,5 @@
 .conversation-attachments-item
   .meta.ellipsis
     user-profile-link(user="ctrl.attachment.creator")
-  span.date {{::ctrl.attachment.date | amDateFormat:'MMM Do YYYY h:mm A'}}
+  span.date {{::ctrl.attachment.date | esnDatetime}}
   esn-attachment(attachment="ctrl.attachment")

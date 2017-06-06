@@ -6,16 +6,29 @@ var expect = chai.expect;
 
 describe('The linagora.esn.chat conversation-view directive', function() {
   var $compile, $rootScope, moment;
+  var formatFn, formattedDate;
 
   beforeEach(function() {
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.emoticon');
+
+    formattedDate = 'formattedDate';
+    formatFn = sinon.spy(function() {
+      return formattedDate;
+    });
+
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {
         add: sinon.spy()
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
+    });
+
+    angular.mock.module('esn.datetime', function($provide) {
+      $provide.value('esnDatetimeFilter', function() {
+        return formatFn();
+      });
     });
   });
 
@@ -64,7 +77,8 @@ describe('The linagora.esn.chat conversation-view directive', function() {
       };
       initDirective();
       expect(angular.element(element.find('.day-divider')).length).to.be.equal(1);
-      expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal(moment(currentMessage.timestamps.creation, 'x').format('Do MMMM'));
+      expect(formatFn).to.have.been.called;
+      expect(angular.element(element.find('.day-divider-label span')).text()).to.be.equal(formattedDate);
     });
 
     it('should create a message separation with value Yesterday', function() {
