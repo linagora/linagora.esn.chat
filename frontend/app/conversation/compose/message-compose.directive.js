@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .directive('chatMessageCompose', chatMessageCompose);
 
-  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatConversationsStoreService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel, chatComposerState) {
+  function chatMessageCompose($log, $rootScope, deviceDetector, session, chatConversationsStoreService, chatScrollService, chatMessageService, KEY_CODE, chatHumanizeEntitiesLabel, chatComposerState, ChatTextManipulator) {
     var directive = {
       restrict: 'E',
       templateUrl: '/chat/app/conversation/compose/message-compose.html',
@@ -132,6 +132,12 @@
         }, function(err) {
           $log.error('Error while sending message', err);
         });
+      };
+
+      scope.onEmojiSelected = function(emojiValue) {
+        if (emojiValue) {
+          scope.text = ChatTextManipulator.replaceSelectedText(emojiValue, textarea.value, textarea.selectionStart, textarea.selectionEnd);
+        }
       };
     }
   }

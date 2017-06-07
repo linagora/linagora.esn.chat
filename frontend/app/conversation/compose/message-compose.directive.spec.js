@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The message-compose directive', function() {
-  var $scope, $rootScope, $compile, $q, chatComposerState, deviceDetector, chatConversationsStoreService, chatMessageService, domainAPI;
+  var $scope, $rootScope, $compile, $q, chatComposerState, deviceDetector, chatConversationsStoreService, chatMessageService, domainAPI, ChatTextManipulator;
 
   beforeEach(function() {
     chatComposerState = {
@@ -55,10 +55,11 @@ describe('The message-compose directive', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$compile_, _$q_) {
+  beforeEach(inject(function(_$rootScope_, _$compile_, _$q_, _ChatTextManipulator_) {
     $rootScope = _$rootScope_;
     $compile = _$compile_;
     $q = _$q_;
+    ChatTextManipulator = _ChatTextManipulator_;
   }));
 
   function initDirective() {
@@ -86,5 +87,35 @@ describe('The message-compose directive', function() {
 
     $scope.$destroy();
     expect(chatComposerState.saveMessage).to.have.been.calledWith(roomId, {text: $scope.text});
+  });
+
+  it('should call replaceSelectedText when emojiValue value is defined', function() {
+    var emojiValue = 'aValue';
+
+    ChatTextManipulator.replaceSelectedText = sinon.spy();
+    initDirective();
+
+    $scope.onEmojiSelected(emojiValue);
+
+    expect(ChatTextManipulator.replaceSelectedText).to.be.called;
+  });
+
+  it('should not call replaceSelectedText when emojiValue value is undefined', function() {
+    ChatTextManipulator.replaceSelectedText = sinon.spy();
+    initDirective();
+
+    $scope.onEmojiSelected();
+
+    expect(ChatTextManipulator.replaceSelectedText).to.not.have.been.called;
+  });
+
+  it('should update scope.text with emojiValue', function() {
+    var emojiValue = 'aValue';
+
+    initDirective();
+
+    $scope.onEmojiSelected(emojiValue);
+
+    expect($scope.text).to.equal(':aValue:');
   });
 });
