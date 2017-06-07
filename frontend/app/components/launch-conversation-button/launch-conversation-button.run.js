@@ -6,7 +6,7 @@
 
   function runBlock(dynamicDirectiveService, DynamicDirective) {
     var chatLaunchConversationDynamicDirective = new DynamicDirective(true, 'chat-launch-conversation-button', {
-      attributes: [{ name: 'user-id', value: '{{user._id}}' }]
+      attributes: [{ name: 'user-id', value: '{{ctrl.user._id}}' }]
     });
 
     dynamicDirectiveService.addInjection('profile-user-actions', chatLaunchConversationDynamicDirective);
