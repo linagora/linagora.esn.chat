@@ -1,6 +1,6 @@
 .chat-bot-message-text.chat-bot-notmember-mention
   | #{__('You have mentioned')}
-  span(ng-bind-html="ctrl.parsed.text")
+  span.member-name(ng-bind-html="ctrl.parsed.text")
   |, #{__('do you want to')}
   a.add-member.clickable(ng-click="ctrl.addMembers();")
     span(ng-if="ctrl.userMentions.length > 1")
