@@ -4,6 +4,6 @@
   .media-body(ng-switch="ctrl.botUser.subtype")
     .chat-bot-message-title
       span.displayname {{::ctrl.botUser.displayName}}
-      small.date {{::ctrl.message.timestamps.creation | amDateFormat:'h:mm A'}}
+      small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
     chat-bot-message-not-member-mention(ng-switch-when="notmember-mention", parsed="ctrl.parsed", conversation-id="ctrl.message.channel", user-mentions="ctrl.message.user_mentions")
     chat-bot-text-message(ng-switch-default, parsed="ctrl.parsed")

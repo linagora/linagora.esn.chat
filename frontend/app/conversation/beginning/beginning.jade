@@ -12,6 +12,6 @@
     h4(ng-switch-when="open") #{__('Beginning of')}
       span.space-separator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
     h5  
-      span #{__('created on')} {{::ctrl.conversation.timestamps.creation | amDateFormat:'MMMM Do YYYY'}}
+      span #{__('created on')} {{::ctrl.conversation.timestamps.creation | esnDatetime:'date'}}
       span.space-separator(ng-if="ctrl.creator") #{__('by')} 
       span.name.capitalize.clickable(ng-bind-html="ctrl.creator",ui-sref="profile({user_id: ctrl.conversation.creator})") 
