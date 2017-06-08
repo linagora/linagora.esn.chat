@@ -7,7 +7,7 @@
         span.visible-xs(ng-repeat="member in ctrl.members |orderBy:'-member.memberName' ", ui-sref="profile({user_id: member.id})")
         span.hidden-xs(ng-repeat="member in ctrl.members |orderBy:'-member.memberName' ", ui-sref="chat.channels-views.member({memberId: member.id})")
           span.name-seperator(ng-if="!$first && !$last") ,
-          span.name-seperator(ng-if="!$first && $last") #{__('and')}
+          span.and-seperator(ng-if="!$first && $last") #{__('and')}
           span.name.clickable{{member.memberName}}
     h4(ng-switch-when="open") #{__('Beginning of')}
       span.space-separator(ng-bind-html="ctrl.name | esnEmoticonify:{ class: 'label-emoji' }")
