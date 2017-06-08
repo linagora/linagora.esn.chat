@@ -1,7 +1,7 @@
 .chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
 
   .chat-message-left
-    esn-avatar(ng-if='!ctrl.message.sameUser', user-id="{{ctrl.message.creator._id}}")
+    esn-avatar(ng-if='!ctrl.message.sameUser', user-id="ctrl.message.creator._id")
 
     .message-time(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
       small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
