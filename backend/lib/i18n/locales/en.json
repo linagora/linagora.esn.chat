@@ -48,5 +48,10 @@
   "No starred messages found": "No starred messages found",
   "Show starred messages": "Show starred messages",
   "by": "by",
-  "This is the beginning of the conversation with": "This is the beginning of the conversation with"
+  "This is the beginning of the conversation with": "This is the beginning of the conversation with",
+  "Channel successfuly created": "Channel successfuly created",
+  "Error while creating channel": "Error while creating channel",
+  "Private conversation successfuly created": "Private conversation successfuly created",
+  "Error while creating private conversation": "Error while creating private conversation",
+  "You can not upload files without being a member": "You can not upload files without being a member"
 }

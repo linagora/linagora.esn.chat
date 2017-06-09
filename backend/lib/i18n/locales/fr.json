@@ -48,5 +48,10 @@
   "No starred messages found": "Pas de messages suivis",
   "Show starred messages": "Afficher les messages suivis",
   "by": "par",
-  "This is the beginning of the conversation with": "Ceci est le début de la conversation avec"
+  "This is the beginning of the conversation with": "Ceci est le début de la conversation avec",
+  "Channel successfuly created": "Chaîne créée avec succès",
+  "Error while creating channel": "Erreur lors de la création du canal",
+  "Private conversation successfuly created": "Conversation privée réussie",
+  "Error while creating private conversation": "Erreur lors de la création d'une conversation privée",
+  "You can not upload files without being a member": "Vous ne pouvez pas télécharger de fichiers sans être membre"
 }
