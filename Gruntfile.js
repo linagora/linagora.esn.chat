@@ -85,7 +85,17 @@ module.exports = function(grunt) {
           }],
           verifyOptions: {
             defaultLocale: 'en',
-            locales: ['en', 'fr', 'vi']
+            locales: ['en', 'fr', 'vi'],
+            rules: [
+              'all-keys-translated',
+              'all-locales-present',
+              'default-locale-translate',
+              'key-trimmed',
+              'no-duplicate-among-modules',
+              'no-duplicate-with-core',
+              'no-untranslated-key',
+              'valid-json-file'
+            ]
           }
         }
       }
