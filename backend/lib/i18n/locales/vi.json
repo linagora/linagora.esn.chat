@@ -48,5 +48,10 @@
   "No starred messages found": "Không có tin được gắn dấu sao",
   "Show starred messages": "Hiển thị tin được gắn dấu sao",
   "by": "bởi",
-  "This is the beginning of the conversation with": "Đây là sự khởi đầu của cuộc trò chuyện với"
+  "This is the beginning of the conversation with": "Đây là sự khởi đầu của cuộc trò chuyện với",
+  "Channel successfuly created": "Tạo kênh thành công",
+  "Error while creating channel": "Xảy ra lỗi khi tạo kênh",
+  "Private conversation successfuly created": "Tạo cuộc trò chuyện riêng tư thành công",
+  "Error while creating private conversation": "Xảy ra lỗi khi tạo cuộc trò chuyện riêng tư",
+  "You can not upload files without being a member": "Bạn không thể tải file lên khi không phải thành viên"
 }
