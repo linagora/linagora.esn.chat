@@ -57,5 +57,7 @@
   "%s updated the conversation topic from %s to %s.": "%s a mis à jour le sujet de conversation de %s à %s.",
   "%s has joined the conversation.": "%s a rejoint la conversation.",
   "%s has left the conversation.": "%s a quitté la conversation.",
-  "%s had set the conversation topic to %s.": "%s avait mis le sujet de conversation à %s."
+  "%s had set the conversation topic to %s.": "%s avait mis le sujet de conversation à %s.",
+  "Chat channel details": "Détails du canal de conversation",
+  "Chat Messages": "Messages de conversation"
 }
