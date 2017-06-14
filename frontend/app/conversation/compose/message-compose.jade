@@ -2,6 +2,12 @@
   button.send-button-left(type='file', chat-file-upload, ng-file-select='ctrl.onFileSelect($files)', data-multiple='true')
     i.mdi.mdi-plus
   textarea(esn-textarea-autosize, textarea-max-rows="3", rows="1", ng-model='text', ng-change='onTextChanged()')
+  button.send-button-left
+    .dropdown.dropup
+      a(href='', data-toggle='dropdown', aria-expanded='false')
+        i.mdi.mdi-emoticon
+      ul.dropdown-menu.dropdown-menu-right.clickable
+        esn-emoticon-popup(on-emoji-selected='onEmojiSelected')
   button.send-button(ng-click='sendMessage()')
     i.mdi.mdi-send
   chat-emoticon-chooser
