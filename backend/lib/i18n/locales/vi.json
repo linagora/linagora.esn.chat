@@ -53,5 +53,9 @@
   "Error while creating channel": "Xảy ra lỗi khi tạo kênh",
   "Private conversation successfuly created": "Tạo cuộc trò chuyện riêng tư thành công",
   "Error while creating private conversation": "Xảy ra lỗi khi tạo cuộc trò chuyện riêng tư",
-  "You can not upload files without being a member": "Bạn không thể tải file lên khi không phải thành viên"
+  "You can not upload files without being a member": "Bạn không thể tải file lên khi không phải thành viên",
+  "%s updated the conversation topic from %s to %s.": "%s đã đổi chủ đề từ %s thành %s.",
+  "%s has joined the conversation.": "%s đã tham gia cuộc trò chuyện",
+  "%s has left the conversation.": "%s đã rời khỏi cuộc trò chuyện",
+  "%s had set the conversation topic to %s.": "%s đã đổi chủ để thành %s."
 }

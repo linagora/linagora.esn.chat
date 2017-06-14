@@ -30,7 +30,7 @@ module.exports = function(dependencies) {
   function userHasJoined(userId, conversationId, timestamp = Date.now()) {
     const event = {
       message: {
-        text: `@${userId} has joined the conversation.`,
+        text: `<%@${userId}%> has joined the conversation.`,
         type: 'text',
         subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_JOIN,
         creator: userId,

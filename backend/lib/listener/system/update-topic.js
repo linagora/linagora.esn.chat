@@ -24,7 +24,7 @@ module.exports = function(dependencies) {
   function topicUpdated(conversationId, userId, oldTopicName, newTopicName, timestamp = Date.now()) {
     const event = {
       message: {
-        text: oldTopicName ? `@${userId} updated the conversation topic from ${oldTopicName} to ${newTopicName}.` : `@${userId} had set the conversation topic to ${newTopicName}.`,
+        text: oldTopicName ? `<%@${userId}%> updated the conversation topic from <%${oldTopicName}%> to <%${newTopicName}%>.` : `<%@${userId}%> had set the conversation topic to <%${newTopicName}%>.`,
         type: 'text',
         subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
         creator: userId,
