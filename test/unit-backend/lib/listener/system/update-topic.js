@@ -85,7 +85,7 @@ describe('The update topic system message handler', function() {
 
       expect(newMessageTopic.publish).to.have.been.calledWith({
         message: {
-          text: `@${userId} updated the conversation topic from ${topicValue} to ${newTopicValue}.`,
+          text: `<%@${userId}%> updated the conversation topic from <%${topicValue}%> to <%${newTopicValue}%>.`,
           type: 'text',
           subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
           creator: userId,
@@ -117,7 +117,7 @@ describe('The update topic system message handler', function() {
 
       expect(newMessageTopic.publish).to.have.been.calledWith({
         message: {
-          text: `@${userId} had set the conversation topic to ${newTopicValue}.`,
+          text: `<%@${userId}%> had set the conversation topic to <%${newTopicValue}%>.`,
           type: 'text',
           subtype: CONSTANTS.MESSAGE_SUBTYPE.TOPIC_UPDATE,
           creator: userId,

@@ -29,7 +29,7 @@ module.exports = function(dependencies) {
   function userHasLeft(userId, conversationId, timestamp = Date.now()) {
     const event = {
       message: {
-        text: `@${userId} has left the conversation.`,
+        text: `<%@${userId}%> has left the conversation.`,
         type: 'text',
         subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_LEAVE,
         creator: userId,

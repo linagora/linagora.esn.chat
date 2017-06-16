@@ -72,7 +72,7 @@ describe('The leave conversation system message handler', function() {
 
       expect(newMessageTopic.publish.firstCall.args[0]).to.shallowDeepEqual({
         message: {
-          text: '@' + userId + ' has left the conversation.',
+          text: '<%@' + userId + '%> has left the conversation.',
           type: 'text',
           subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_LEAVE,
           creator: userId,

@@ -72,7 +72,7 @@ describe('The join conversation system message handler', function() {
 
       expect(newMessageTopic.publish.getCalls()[0].args[0]).to.shallowDeepEqual({
         message: {
-          text: '@' + userId + ' has joined the conversation.',
+          text: '<%@' + userId + '%> has joined the conversation.',
           type: 'text',
           subtype: CONSTANTS.MESSAGE_SUBTYPE.CONVERSATION_JOIN,
           creator: userId,

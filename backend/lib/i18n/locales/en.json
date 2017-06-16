@@ -53,5 +53,11 @@
   "Error while creating channel": "Error while creating channel",
   "Private conversation successfuly created": "Private conversation successfuly created",
   "Error while creating private conversation": "Error while creating private conversation",
-  "You can not upload files without being a member": "You can not upload files without being a member"
+  "You can not upload files without being a member": "You can not upload files without being a member",
+  "%s updated the conversation topic from %s to %s.": "%s updated the conversation topic from %s to %s.",
+  "%s has joined the conversation.": "%s has joined the conversation.",
+  "%s has left the conversation.": "%s has left the conversation.",
+  "%s had set the conversation topic to %s.": "%s had set the conversation topic to %s.",
+  "Chat channel details": "Chat channel details",
+  "Chat Messages": "Chat Messages"
 }
