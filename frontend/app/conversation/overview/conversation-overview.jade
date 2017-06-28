@@ -16,4 +16,4 @@
   .col-xs-3.group-date
     span(ng-if="vm.numberOfDays === 0") {{vm.item.last_message.date | esnDatetime:'time'}}
     span(ng-if="vm.numberOfDays === 1") #{__('Yesterday')} {{vm.item.last_message.date | esnDatetime:'time'}}
-    span(ng-if="vm.numberOfDays > 1") {{vm.item.last_message.date | esnDatetime:'date'}}
+    span(ng-if="vm.numberOfDays > 1") {{vm.item.last_message.date | esnDatetime:'mediumDate'}}
