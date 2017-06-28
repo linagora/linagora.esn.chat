@@ -6,4 +6,4 @@
       span(ng-switch-when="1")
         | #{__('Yesterday')}
       span(ng-switch-default)
-        | {{ ctrl.currentMessage.timestamps.creation | esnDatetime:'date' }}
+        | {{ ctrl.currentMessage.timestamps.creation | esnDatetime:'fullDate' }}
