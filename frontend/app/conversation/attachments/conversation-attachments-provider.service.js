@@ -16,7 +16,13 @@
 
             return attachments.data.map(function(attachment) {
               attachment.type = CHAT_ATTACHMENT_PROVIDER.conversation;
-              attachment.displayName = chatUsername.generate(attachment.creator);
+              chatUsername.getFromCache(attachment.creator._id, false).then(function(creator) {
+                if (!attachment.creator.firstname || !attachment.creator.lastname) {
+                  attachment.creator.emails = [creator];
+                }
+                attachment.displayName = creator;
+              });
+
               attachment.date = new Date(attachment.creation_date);
 
               return attachment;

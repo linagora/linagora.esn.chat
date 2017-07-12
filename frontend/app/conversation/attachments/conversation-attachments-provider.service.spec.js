@@ -3,16 +3,39 @@
 /* global expect, sinon: false */
 
 describe('The linagora.esn.chat chatConversationAttachmentsProvider', function() {
-  var $q, $rootScope, chatConversationService, limit, username, provider, CHAT_ATTACHMENT_PROVIDER;
+  var $q, $rootScope, chatConversationService, limit, user, provider, CHAT_ATTACHMENT_PROVIDER, attachmentsMock, chatUsernameMock, emails;
   /*eslint no-unused-vars: "off"*/
   var chatConversationAttachmentsProvider;
 
   beforeEach(module('linagora.esn.chat', function($provide) {
     limit = 100;
-    username = 'Bruce Willis';
+    user = {name: 'Bruce Willis'};
+    emails = ['test@test.org'];
+
+    attachmentsMock = [{
+      _id: 1,
+      creator: {
+        _id: 1,
+        emails: emails
+      }
+    },
+    {
+      _id: 2,
+      creator: {
+        _id: 2,
+        emails: emails
+      }
+    }];
+
     chatConversationService = {
       fetchAttachments: sinon.spy(function() {
         return $q.when({data: []});
+      })
+    };
+
+    chatUsernameMock = {
+      getFromCache: sinon.spy(function() {
+        return $q.when(user.name);
       })
     };
 
@@ -25,8 +48,8 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
     });
 
     $provide.value('chatUsername', {
-      generate: sinon.spy(function() {
-        return username;
+      getFromCache: sinon.spy(function() {
+        return $q.when(user.name);
       })
     });
 
@@ -40,6 +63,7 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
 
     $provide.value('chatSearchMessagesProviderService', {});
     $provide.value('chatSearchConversationsProviderService', {});
+    $provide.value('chatUsername', chatUsernameMock);
   }));
 
   beforeEach(inject(function(_$rootScope_, _$q_, _CHAT_ATTACHMENT_PROVIDER_, _chatConversationAttachmentsProvider_) {
@@ -63,15 +87,15 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
 
     it('should fill response attachments', function(done) {
       var options = {id: 1};
-      var response = [{_id: 1}, {_id: 2}];
       var paginate = provider.fetch(options);
 
       chatConversationService.fetchAttachments = sinon.spy(function() {
-        return $q.when({data: response});
+        return $q.when({data: attachmentsMock});
       });
 
       paginate().then(function(result) {
-        expect(result).to.shallowDeepEqual([{_id: 1, type: CHAT_ATTACHMENT_PROVIDER.conversation, displayName: username}, {_id: 2, type: CHAT_ATTACHMENT_PROVIDER.conversation, displayName: username}]);
+        expect(result).to.shallowDeepEqual([{_id: 1, type: CHAT_ATTACHMENT_PROVIDER.conversation, creator: {emails: emails}}, {_id: 2, type: CHAT_ATTACHMENT_PROVIDER.conversation, creator: {emails: emails}}]);
+
         done();
       });
       $rootScope.$digest();
@@ -79,11 +103,10 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
 
     it('should fetch next items on next call', function() {
       var options = {id: 1};
-      var response = [{_id: 1}, {_id: 2}];
       var paginate = provider.fetch(options);
 
       chatConversationService.fetchAttachments = sinon.spy(function() {
-        return $q.when({data: response});
+        return $q.when({data: attachmentsMock});
       });
 
       paginate();
@@ -92,7 +115,25 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
       $rootScope.$digest();
 
       expect(chatConversationService.fetchAttachments.firstCall).to.have.been.calledWith(options.id, {limit: limit, offset: 0});
-      expect(chatConversationService.fetchAttachments.secondCall).to.have.been.calledWith(options.id, {limit: limit, offset: response.length});
+      expect(chatConversationService.fetchAttachments.secondCall).to.have.been.calledWith(options.id, {limit: limit, offset: attachmentsMock.length});
+    });
+
+    it('should call chatUsername.getFromCache with attachment.creator._id to have the name of the creator', function(done) {
+      var options = {id: 1};
+      var paginate = provider.fetch(options);
+
+      chatConversationService.fetchAttachments = sinon.spy(function() {
+        return $q.when({data: attachmentsMock});
+      });
+
+      paginate().then(function(result) {
+        var attachment = result[0];
+
+        expect(chatUsernameMock.getFromCache).to.have.been.calledWith(attachment.creator._id);
+
+        done();
+      });
+      $rootScope.$digest();
     });
   });
 });

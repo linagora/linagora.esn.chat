@@ -7,7 +7,22 @@ var expect = chai.expect;
 
 describe('the chatUserMessageController controller', function() {
 
-  var $rootScope, $scope, $q, $controller, $log, sessionMock, oembedImageFilterMock, linkyMock, esnEmoticonifyMock, chatParseMentionMock, message, searchProvidersMock, chatMessageStarServiceMock, userUtilsMock;
+  var $rootScope,
+      $scope,
+      $q,
+      $controller,
+      $log,
+      sessionMock,
+      oembedImageFilterMock,
+      linkyMock,
+      esnEmoticonifyMock,
+      chatParseMentionMock,
+      message,
+      searchProvidersMock,
+      chatMessageStarServiceMock,
+      userUtilsMock,
+      user,
+      chatUsernameMock;
 
   beforeEach(function() {
 
@@ -35,6 +50,26 @@ describe('the chatUserMessageController controller', function() {
 
     esnEmoticonifyMock = function(text) {
       return text;
+    };
+
+    user = {
+      _id: 'userId',
+      name: 'userName'
+    };
+
+    message = {
+      text: 'Hello',
+      user_mentions: [{}],
+      creator: {
+        _id: '1',
+        preferredEmail: 'test@test.org'
+      }
+    };
+
+    chatUsernameMock = {
+      getFromCache: sinon.spy(function() {
+        return $q.when(user.name);
+      })
     };
 
     searchProvidersMock = {
@@ -75,6 +110,7 @@ describe('the chatUserMessageController controller', function() {
       $provide.value('chatMessageStarService', chatMessageStarServiceMock);
       $provide.value('userUtils', userUtilsMock);
       $provide.value('$log', $log);
+      $provide.value('chatUsername', chatUsernameMock);
     });
 
     angular.mock.inject(function(_$rootScope_, _$controller_, _$q_) {
@@ -99,8 +135,7 @@ describe('the chatUserMessageController controller', function() {
   describe('the $onInit function', function() {
 
     it('should separate two mentions by a space', function() {
-
-      message = {text: '@583c5a20ec0cfe01388fecab@583c5a20ec0cfe01388fecb0', user_mentions: [{}, {}]};
+      message.text = '@583c5a20ec0cfe01388fecab@583c5a20ec0cfe01388fecb0';
       var controller = initController(message);
 
       controller.$onInit();
@@ -110,8 +145,7 @@ describe('the chatUserMessageController controller', function() {
     });
 
     it('should not separate mentions when there are no user mentions in the message ', function() {
-
-      message = {text: '@ok@ok', user_mentions: [] };
+      message.text = '@okok';
       var controller = initController(message);
 
       controller.$onInit();
@@ -122,7 +156,7 @@ describe('the chatUserMessageController controller', function() {
 
     it('should separate mentions when mention is prefixed by a word', function() {
 
-      message = {text: 'Hello@583c5a20ec0cfe01388fecab', user_mentions: [{}] };
+      message.text = 'Hello@583c5a20ec0cfe01388fecab';
       var controller = initController(message);
 
       controller.$onInit();
@@ -133,7 +167,6 @@ describe('the chatUserMessageController controller', function() {
 
     it('should not separate mention when it is prefixed by a space', function() {
 
-      message = {text: 'Hello @583c5a20ec0cfe01388fecab', user_mentions: [{}] };
       var controller = initController(message);
 
       controller.$onInit();
@@ -142,25 +175,13 @@ describe('the chatUserMessageController controller', function() {
       expect(controller.parsed.text).to.deep.equal(message.text);
     });
 
-    it('should separate only mention', function() {
+    it('should call chatUsername.getFromCache with message.creator._id to have the name of the creator', function() {
 
-      message = {text: 'Hello @583c5a20ec0cfe01388fecab@583c5a20ec0cfe01388fecb0 how are you?', user_mentions: [{}] };
       var controller = initController(message);
 
       controller.$onInit();
-      $rootScope.$digest();
 
-      expect(controller.parsed.text).to.deep.equal('Hello @583c5a20ec0cfe01388fecab @583c5a20ec0cfe01388fecb0 how are you?');
-    });
-
-    it('should call userUtils.displayNameOf', function() {
-      message = {text: 'Hello', user_mentions: [{}], creator: {firstname: 'John1', lastname: 'Doe1'}};
-      var controller = initController(message);
-
-      controller.$onInit();
-      $rootScope.$digest();
-
-      expect(userUtilsMock.displayNameOf).to.be.calledWith(message.creator);
+      expect(chatUsernameMock.getFromCache).to.have.been.calledWith(controller.message.creator._id);
     });
   });
 

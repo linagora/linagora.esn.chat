@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .controller('ChatUserTypingController', ChatUserTypingController);
 
-    function ChatUserTypingController($scope, _, session, userUtils, chatConversationMemberService, chatConversationsStoreService, CHAT_MESSAGE_TYPE) {
+    function ChatUserTypingController($q, $scope, _, session, chatUsername, chatConversationMemberService, chatConversationsStoreService, CHAT_MESSAGE_TYPE) {
       var self = this;
 
       self.typing = {};
@@ -21,13 +21,19 @@
 
         self.typing[message.creator._id] = message;
 
-        self.usersTyping = _.chain(self.typing)
+        var usersTyping = _.chain(self.typing)
           .filter(function(message) {
             return message.state && chatConversationsStoreService.activeRoom._id === message.channel && message.creator._id !== session.user._id;
           })
           .map('creator')
-          .map(userUtils.displayNameOf)
           .value();
+
+        $q.all(usersTyping.map(function(user) {
+
+          return chatUsername.getFromCache(user._id, false);
+        })).then(function(usersName) {
+          self.usersTyping = usersName;
+        });
       }
     }
 })();
