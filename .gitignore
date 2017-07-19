@@ -2,3 +2,4 @@ node_modules
 frontend/components
 .idea
 npm-debug.log
+package-lock.json
