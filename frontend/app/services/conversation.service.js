@@ -12,6 +12,7 @@
         fetchAttachments: fetchAttachments,
         get: get,
         getMessage: getMessage,
+        getSummary: getSummary,
         join: join,
         leave: leave,
         list: list,
@@ -55,6 +56,10 @@
 
       function getMessage(id) {
         return _getBase(id).get().then(_stripResponse);
+      }
+
+      function getSummary(id) {
+        return _getBase(id).one('summary').get().then(_stripResponse);
       }
 
       function join(id, userId) {
