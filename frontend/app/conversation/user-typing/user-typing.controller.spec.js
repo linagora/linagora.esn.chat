@@ -6,8 +6,8 @@ var expect = chai.expect;
 
 describe('The ChatUserTypingController controller', function() {
 
-  var $rootScope, $scope, $controller;
-  var event, channelId, message, session, user, userUtils, chatConversationsStoreService, isMemberOfConversation, chatConversationMemberService, CHAT_MESSAGE_TYPE;
+  var $q, $rootScope, $scope, $controller;
+  var event, channelId, message, session, user, chatConversationsStoreService, chatUsername, isMemberOfConversation, chatConversationMemberService, CHAT_MESSAGE_TYPE;
 
   beforeEach(function() {
     isMemberOfConversation = true;
@@ -15,13 +15,17 @@ describe('The ChatUserTypingController controller', function() {
     channelId = 3;
     session = {user: user};
     message = {_id: 2, state: true, channel: channelId, creator: {_id: session.user._id}};
-    userUtils = {
-      displayNameOf: sinon.spy()
-    };
+
     chatConversationsStoreService = {
       activeRoom: {
         _id: channelId
       }
+    };
+
+    chatUsername = {
+      getFromCache: sinon.spy(function() {
+        return $q.when();
+      })
     };
 
     chatConversationMemberService = {
@@ -37,12 +41,13 @@ describe('The ChatUserTypingController controller', function() {
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatConversationMemberService', chatConversationMemberService);
-      $provide.value('userUtils', userUtils);
+      $provide.value('chatUsername', chatUsername);
       $provide.value('session', session);
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_, _CHAT_MESSAGE_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _$controller_, _CHAT_MESSAGE_TYPE_) {
+    $q = _$q_;
     $rootScope = _$rootScope_;
     $scope = $rootScope.$new();
     $controller = _$controller_;
@@ -191,17 +196,13 @@ describe('The ChatUserTypingController controller', function() {
         var controller = getController();
 
         message.creator._id = '!' + session.user._id;
-        userUtils.displayNameOf = sinon.spy(function(creator) {
-          return 'NameOf' + creator._id;
-        });
         controller.$onInit();
 
         expect(scopeOnSpy).to.have.been.calledWith(event, sinon.match.func.and(sinon.match(function(onUserTyping) {
           onUserTyping(event, message);
 
-          expect(userUtils.displayNameOf).to.have.been.calledOnce;
+          expect(chatUsername.getFromCache).to.have.been.calledWith(message.creator._id, false);
           expect(controller.typing).to.deep.equals({'!1': message});
-          expect(controller.usersTyping).to.deep.equal(['NameOf' + message.creator._id]);
 
           return true;
         })));
