@@ -62,7 +62,7 @@ GruntfileUtils.prototype.command = function command() {
       util.format('--replSet \'%s\' --smallfiles --oplogSize 128', servers.mongodb.replicat_set_name) :
       '--nojournal';
 
-    return util.format('%s --dbpath %s --port %s %s',
+    return util.format('%s --nounixsocket --dbpath %s --port %s %s',
       servers.mongodb.cmd,
       servers.mongodb.dbpath,
       (servers.mongodb.port ? servers.mongodb.port : '23456'),
