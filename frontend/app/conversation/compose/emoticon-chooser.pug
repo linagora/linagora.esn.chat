@@ -1,0 +1,30 @@
+.emoji-chooser(ng-if="ctlr.entitySelector.visible")
+  section(ng-if='!ctlr.listAllEmoticon')
+    header
+      span #{__('Emoji matching')} "#[strong {{ctlr.entitySelector.entityStart}}]"
+
+    infinite-list(load-more-elements='ctlr.entitySelector.loadMoreElements()', scroll-inside-container='true')
+      a.emoticon-info(ng-repeat="emoji in ctlr.entitySelector.entityListDisplayed",
+        ng-click='ctlr.entitySelector.select(emoji)',
+        ng-mouseover='ctlr.focusIndex = $index',
+        ng-class='{selected: ctlr.entitySelector.focusIndex === $index}')
+        esn-emoticon(emoticon="{{emoji}}")
+        span.emoji-text
+          span :
+          span(ng-bind="emoji")
+          span :
+
+  section(ng-if='ctlr.listAllEmoticon')
+    .emoticon-search
+      span
+        i.mdi.mdi-magnify
+      input(ng-model='ctlr.textInput',
+          ng-change='ctlr.searchTextChange()',
+          placeholder=__('Search for an emoticon'))
+    .all
+      infinite-list(load-more-elements='ctlr.entitySelector.loadMoreElements()', scroll-inside-container='true')
+        a.emoticon-info(ng-repeat="emoji in ctlr.entitySelector.entityListDisplayed",
+          ng-click='ctlr.entitySelector.select(emoji)',
+          ng-mouseover='ctlr.focusIndex = $index',
+          ng-class='{selected: ctlr.entitySelector.focusIndex === $index}')
+          esn-emoticon(emoticon="{{emoji}}")
