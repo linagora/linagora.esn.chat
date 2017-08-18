@@ -17,7 +17,7 @@ test:
    - npm i
    - npm update
    - bower i
-   - grunt
+   - grunt --chunk=1
 
 deploy_dev:
   stage: deploy_dev
