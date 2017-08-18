@@ -336,11 +336,10 @@ describe('The Chat search API', function() {
             return done(err);
           }
           expect(res.headers['x-esn-items-count']).to.equal('2');
-          expect((res.body[0].text === message.text && res.body[1].text === message6.text) || (res.body[0].text === message6.text && res.body[1].text === message.text)).to.be.true;
+          expect(_.find(res.body, { text: message.text, isStarred: true })).to.exist;
+          expect(_.find(res.body, { text: message6.text, isStarred: false })).to.exist;
           expect(res.body[0].channel).to.be.an('object');
           expect(res.body[1].channel).to.be.an('object');
-          expect(res.body[0].isStarred).to.be.true;
-          expect(res.body[1].isStarred).to.be.false;
           done();
         });
       }
