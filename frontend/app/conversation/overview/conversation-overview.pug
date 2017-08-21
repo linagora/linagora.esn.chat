@@ -9,8 +9,7 @@
       .col-xs-12.group-text.ellipsis
         span(ng-if="vm.lastMessageIsMe")
           | #{__('You')} :
-        span(ng-if="!vm.lastMessageIsMe")
-          {{vm.lastMessageDisplayName}} :
+        span(ng-if="!vm.lastMessageIsMe") {{vm.lastMessageDisplayName}} :
         span(ng-bind-html="vm.item.last_message.text")
 
   .col-xs-3.group-date

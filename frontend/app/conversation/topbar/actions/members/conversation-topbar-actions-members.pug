@@ -1,0 +1,4 @@
+span.members.clickable.hidden-xs(ng-click="ctrl.toggleDisplay()", title=__('Show members')) {{size = (ctrl.conversation.members_count || 0); size}}
+  i.mdi.mdi-account-outline
+span.members.clickable.hidden-md(title=__('Show members'), contextual-sidebar, data-content-template="/chat/app/conversation/sidebar/members/conversation-sidebar-members-list.html", data-placement="right", data-controller="ChatConversationSidebarMembersListController", data-controller-as="ctrl") {{size = (ctrl.conversation.members_count || 0); size}}
+  i.mdi.mdi-account-outline

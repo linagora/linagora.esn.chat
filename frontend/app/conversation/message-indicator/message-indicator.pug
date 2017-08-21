@@ -1,0 +1,13 @@
+.chat-message-indicator(ng-if="ctrl.show")
+  button.btn.btn-fab-fixed-bottom.clickable(ng-click='ctrl.manualScrollDown()')
+    i.mdi.mdi-chevron-down
+  span(ng-if="ctrl.unreads === 1")
+    .indicator-message.hidden-xs
+      | {{ctrl.unreads}} #{__('New message')}
+    .indicator-badge.hidden-md
+      | {{ctrl.unreads}}
+  span(ng-if="ctrl.unreads > 1 ")
+    .indicator-message.hidden-xs
+      | {{ctrl.unreads}} #{__('New messages')}
+    .indicator-badge.hidden-md
+      | {{ctrl.unreads}}

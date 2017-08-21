@@ -31,7 +31,7 @@ module.exports = function(config) {
       'test/config/module.js',
       'frontend/app/chat.module.js',
       'frontend/app/**/*.js',
-      'frontend/app/**/*.jade'
+      'frontend/app/**/*.pug'
     ],
     exclude: [
       'frontend/app/chat.module.run.js',
@@ -46,7 +46,7 @@ module.exports = function(config) {
     reporters: ['coverage', 'spec'],
     preprocessors: {
       'frontend/js/**/*.js': ['coverage'],
-      '**/*.jade': ['ng-jade2module']
+      '**/*.pug': ['ng-jade2module']
     },
 
     plugins: [
@@ -64,7 +64,7 @@ module.exports = function(config) {
     ngJade2ModulePreprocessor: {
       stripPrefix: 'frontend',
       cacheIdFromPath: function(filepath) {
-        var cacheId = filepath.replace(/jade$/, 'html').replace(/^frontend/, '/chat');
+        var cacheId = filepath.replace(/pug$/, 'html').replace(/^frontend/, '/chat');
 
 return cacheId;
       },

@@ -7,10 +7,10 @@ sub-header
   form(name="createChannelForm", esn-submit="ctrl.create()")
     .form-group.fg-line
       .field-name #{__('Name')}
-      input.form-control(ng-model="ctrl.conversation.name", placeholder="#{__('Enter the channel name')}", auto-focus, required)
+      input.form-control(ng-model="ctrl.conversation.name", placeholder=__('Enter the channel name'), auto-focus, required)
     .form-group.fg-line
       .field-name #{__('Topic')}
-      input.form-control(ng-model="ctrl.conversation.topic", placeholder="#{__('Add topic')}")
+      input.form-control(ng-model="ctrl.conversation.topic", placeholder=__('Add topic'))
     .form-group.fg-line
       .field-name #{__('Purpose')}
-      input.form-control(ng-model="ctrl.conversation.purpose", placeholder="#{__('Add purpose')}")
+      input.form-control(ng-model="ctrl.conversation.purpose", placeholder=__('Add purpose'))
