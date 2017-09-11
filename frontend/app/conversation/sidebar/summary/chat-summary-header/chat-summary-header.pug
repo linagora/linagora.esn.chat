@@ -1,0 +1,8 @@
+.conversation-beginning-informations
+  .summary-header
+    .summary-title.ellipsis  #{__('About')}
+      i.mdi.mdi-lock(ng-if="!ctrl.isPublicConversation")
+      i.mdi.mdi-earth(ng-if="ctrl.isPublicConversation")
+      | {{ctrl.name}}
+    .close-button.hidden-xs
+      i.mdi.mdi-close.clickable(ui-sref="chat.channels-views")

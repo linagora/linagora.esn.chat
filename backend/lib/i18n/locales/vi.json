@@ -59,5 +59,17 @@
   "%s has left the conversation.": "%s đã rời khỏi cuộc trò chuyện",
   "%s had set the conversation topic to %s.": "%s đã đổi chủ để thành %s.",
   "Chat channel details": "Kênh trò chuyện - mô tả",
-  "Chat Messages": "Tin nhắn trò chuyện"
+  "Chat Messages": "Tin nhắn trò chuyện",
+  "Show informations": "Hiển thị thông tin",
+  "About": "trong khoảng",
+  "Channel Details": "Chi tiết kênh",
+  "Created by": "Đã tạo bởi",
+  "Created": "Đã tạo",
+  "on": "vào",
+  "No topic is set": "Không có chủ đề",
+  "No purpose is set": "Không có mục đích",
+  "Members": "Thành viên",
+  "Show more": "Xem thêm",
+  "Shared files": "Tệp tin chia sẻ",
+  "No attachments": "Không có đính kèm"
 }

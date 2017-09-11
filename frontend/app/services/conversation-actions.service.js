@@ -44,7 +44,8 @@
       updateConversationTopic: updateConversationTopic,
       updateMembers: updateMembers,
       updateUserMentionsCount: updateUserMentionsCount,
-      start: start
+      start: start,
+      currentUserIsCreator: currentUserIsCreator
     };
 
     function addConversation(conversation) {

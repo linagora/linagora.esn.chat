@@ -1,0 +1,11 @@
+.conversation-members
+  .members.clickable(ng-click='ctrl.toggleDisplayMembers()')
+    .members-information
+      i.mdi.mdi-account-outline
+      span {{ctrl.membersCount}}
+      span #{__('Members')}
+    .chevron
+      i(ng-class="ctrl.displayMembers ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
+  .members-list(ng-if="ctrl.displayMembers", ng-repeat="member in ctrl.members")
+    member-display(member="member")
+  .show-more.clickable(ng-if="ctrl.displayMembers && ctrl.membersCount>ctrl.members.length", ui-sref="chat.channels-views.members({conversation: self.conversation})") #{__('Show more')}...
