@@ -59,5 +59,17 @@
   "%s has left the conversation.": "%s has left the conversation.",
   "%s had set the conversation topic to %s.": "%s had set the conversation topic to %s.",
   "Chat channel details": "Chat channel details",
-  "Chat Messages": "Chat Messages"
+  "Chat Messages": "Chat Messages",
+  "Show informations": "Show informations",
+  "About": "About",
+  "Channel Details": "Channel Details",
+  "Created by": "Created by",
+  "Created": "Created",
+  "on": "on",
+  "No topic is set": "No topic is set",
+  "No purpose is set": "No purpose is set",
+  "Members": "Members",
+  "Show more": "Show more",
+  "Shared files": "Shared files",
+  "No attachments": "No attachments"
 }

@@ -1,0 +1,225 @@
+@lighten-grey: lighten(grey, 46%);
+@darken-grey: darken(grey, 10%);
+
+.conversation-summary {
+  .flex-column;
+
+  height: 100%;
+  background-color: @m-white;
+  overflow: auto;
+
+  .show-more {
+    margin: 10px 0 0 10px;
+    color: @primaryColor;
+  }
+
+  .chevron {
+    .flex-end;
+    .flex-vertical-centered;
+
+    margin-right: 16px;
+    color: @darken-grey;
+    font-size: 20px;
+  }
+
+  .conversation-beginning-informations {
+    .summary-header {
+      .flex-row;
+      .flex-vertical-centered;
+
+      background-color: @lighten-grey;
+      padding: 10px 0 10px 0;
+
+      .close-button {
+        .flex-end;
+
+        font-size: 24px;
+        padding: @chatConversationSideBarClosePadding;
+      }
+
+      .summary-title {
+        .flex-shorthand(1);
+
+        font-weight: 500;
+        font-size: 20px;
+        padding-left: 10px;
+        width: 80%;
+
+        .mdi {
+          font-size: 13px;
+          padding-left: 8px;
+        }
+      }
+    }
+  }
+
+  .channel-details-title {
+    margin-top: 15px;
+
+    .channel-details {
+      .flex;
+      .flex-vertical-centered;
+
+      background-color: @lighten-grey;
+      padding: 20px 0 20px 0;
+
+      .channel-information {
+        .flex-shorthand(1);
+
+        color: @darken-grey;
+        font-size:  1.3em;
+        font-weight: 500;
+        padding-left: 10px;
+
+        .mdi {
+          font-size: 18px;
+          color: @primaryColor;
+          margin-right: 3px;
+        }
+      }
+    }
+
+    .first-details-informations {
+      .information-title {
+        color: @darken-grey;
+        font-weight: 500;
+        font-size: 1.1em;
+        padding-left: 10px;
+        margin-top: 5px;
+
+        span {
+          margin-right: 3px;
+        }
+      }
+
+      .channel-informations {
+        padding-left: 10px;
+        margin-bottom: 10px;
+      }
+    }
+  }
+
+
+  .conversation-members {
+    margin-top: 15px;
+
+    .members {
+      .flex;
+
+      padding: 20px 0 20px 0;
+      background-color: @lighten-grey;
+
+      color: @darken-grey;
+      font-weight: 500;
+      font-size: 1.3em;
+      padding-left: 10px;
+
+      .members-information {
+        .flex-shorthand(1);
+
+        .mdi.mdi-account-outline {
+          font-size: 18px;
+          color: @primaryColor;
+          margin-right: 3px;
+        }
+
+        span {
+          margin-right: 3px;
+
+          &.see-all {
+            font-size: 0.9em;
+            color: @primaryColor;
+          }
+        }
+      }
+    }
+
+    .members-list {
+      .flex;
+
+      padding-left: 10px;
+      margin-top: 10px;
+      img {
+        width: 64px;
+      }
+    }
+  }
+
+  .conversation-shared-files {
+    margin: 20px 0 10px 0;
+
+    .shared-files {
+      .flex;
+
+      background-color: @lighten-grey;
+      padding: 20px 0 20px 10px;
+      color: @darken-grey;
+      font-weight: 500;
+      font-size: 1.3em;
+
+      .shared-files-information {
+        .flex-shorthand(1);
+
+        .file-icon {
+          font-size: 18px;
+          color: @primaryColor;
+          margin-right: 3px;
+        }
+
+        span {
+          margin-right: 3px;
+        }
+      }
+    }
+
+    .attachment-list {
+      .flex-column;
+
+      height: 100%;
+      margin-top: 5px;
+      padding: 5px 5px 0 10px;
+
+      esn-attachment {
+        width: 100%;
+      }
+
+      .meta {
+        font-size: 13px;
+
+        .profile-link {
+          color: @text-color;
+          font-weight: 600;
+        }
+      }
+
+      .date {
+        color: @chatDateTextColor;
+      }
+
+      .esn-attachment {
+        background-color: @lightPrimaryColor;
+      }
+
+    }
+
+    .attachment-list-empty {
+      .all-centered;
+      .flex-column;
+
+      i {
+        color: @accentColor;
+        font-size: 5em;
+        opacity: 0.7;
+      }
+
+      .message {
+        color: @secondaryTextColor;
+        font-size: 14px;
+      }
+    }
+  }
+  @media(min-width: @screen-md-min) {
+    min-width: @chatRightSidebarDesktopWidth;
+    max-width: @chatRightSidebarDesktopWidth;
+  }
+}

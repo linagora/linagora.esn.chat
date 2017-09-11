@@ -1,0 +1,27 @@
+.channel-details-title.clickable(ng-click='ctrl.toggleDisplayInformation()')
+  .channel-details
+    .channel-information
+      i.mdi.mdi-information-outline
+      | #{__('Channel Details')}
+    .chevron
+      i(ng-class="ctrl.displayInformations ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
+  .first-details-informations(ng-if="ctrl.displayInformations")
+    .information-title
+      | #{__('Topic')}
+    .channel-informations(ng-if="ctrl.topic")
+      | {{ctrl.topic}}
+    .channel-informations(ng-if="!ctrl.topic")
+      | #{__('No topic is set')}
+    .information-title
+      | #{__('Purpose')}
+    .channel-informations(ng-if="ctrl.purpose")
+      | {{ctrl.purpose}}
+    .channel-informations(ng-if="!ctrl.purpose")
+      | #{__('No purpose is set')}
+    .information-title
+      span(ng-if="ctrl.creator") #{__('Created by')}
+      span(ng-if="!ctrl.creator") #{__('Created')}
+      span(ng-if="ctrl.userIsCreator") #{__('You')}
+      span(ng-if="!ctrl.userIsCreator", ng-bind-html="ctrl.creator")
+      span #{__('on')}
+      span {{::ctrl.creationDate | esnDatetime:'mediumDate'}}

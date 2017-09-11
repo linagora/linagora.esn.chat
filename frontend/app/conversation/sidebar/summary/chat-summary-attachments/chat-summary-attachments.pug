@@ -1,0 +1,16 @@
+.conversation-shared-files.clickable(ng-click='ctrl.toggleDisplayAttachment()')
+  .shared-files
+    .shared-files-information
+      i.mdi.mdi-file-outline.file-icon
+      span #{__('Shared files')}
+    .chevron
+      i(ng-class="ctrl.displayAttachments ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
+  .attachment-list(ng-repeat="attachment in ctrl.attachments", ng-if="ctrl.attachments.length > 0 && ctrl.displayAttachments")
+    .meta.ellipsis
+      user-profile-link(user="attachment.creator")
+    span.date {{::attachment.date | esnDatetime:'fullDate'}}
+    esn-attachment(attachment="attachment")
+  .attachment-list-empty(ng-if="!ctrl.attachments.length && ctrl.displayAttachments")
+    i.mdi.mdi-file-outline
+    .message #{__("No attachments")}
+  .show-more.clickable(ng-if="ctrl.displayAttachments", ui-sref="chat.channels-views.attachments({conversation: ctrl.conversation})") #{__('Show more')}...

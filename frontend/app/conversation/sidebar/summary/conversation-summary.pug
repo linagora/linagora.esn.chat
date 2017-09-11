@@ -1,0 +1,8 @@
+.conversation-summary
+  .summary-spinner
+
+  .summary-content
+    chat-summary-header(is-public-conversation="ctrl.isPublicConversation", name="summary.name")
+    chat-summary-details(conversation="ctrl.conversation", topic="summary.topic", purpose="summary.purpose", creator="summary.creator", creation-date="summary.creationDate")
+    chat-summary-members(conversation="ctrl.conversation", members="summary.members", members-count="summary.membersCount")
+    chat-summary-attachments(conversation="ctrl.conversation", attachments="summary.attachments")
