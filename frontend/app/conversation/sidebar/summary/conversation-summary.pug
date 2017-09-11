@@ -2,7 +2,7 @@
   .summary-spinner
 
   .summary-content
-    chat-summary-header(is-public-conversation="ctrl.isPublicConversation", name="summary.name")
-    chat-summary-details(conversation="ctrl.conversation", topic="summary.topic", purpose="summary.purpose", creator="summary.creator", creation-date="summary.creationDate")
-    chat-summary-members(conversation="ctrl.conversation", members="summary.members", members-count="summary.membersCount")
-    chat-summary-attachments(conversation="ctrl.conversation", attachments="summary.attachments")
+    chat-summary-header(is-public-conversation="ctrl.isPublicConversation", name="ctrl.summary.name")
+    chat-summary-details(conversation="ctrl.conversation", topic="ctrl.summary.topic", purpose="ctrl.summary.purpose", creator="ctrl.summary.creator", creation-date="ctrl.summary.creationDate")
+    chat-summary-members(conversation="ctrl.conversation", members="ctrl.summary.members", members-count="ctrl.summary.membersCount")
+    chat-summary-attachments(conversation="ctrl.conversation", attachments="ctrl.summary.attachments")

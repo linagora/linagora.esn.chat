@@ -11,12 +11,16 @@ const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 
 describe('The conversation controller', function() {
 
-  let lib, err, result, user;
+  let lib, err, result, user, attachmentsForConversationErr, attachmentsForConversationResult, newestMembersResult;
 
   beforeEach(function() {
     err = undefined;
     result = undefined;
-    user = {_id: 1};
+    user = {_id: 1, firstname: 'aFirstname', lastname: 'aLastname'};
+
+    attachmentsForConversationResult = undefined;
+    attachmentsForConversationErr = undefined;
+    newestMembersResult = undefined;
 
     lib = {
       members: {
@@ -31,6 +35,9 @@ describe('The conversation controller', function() {
         },
         countMembers: function() {
           return Q.when(1);
+        },
+        getNewestMembers: function() {
+          return Q.when(newestMembersResult);
         }
       },
       conversation: {
@@ -60,6 +67,11 @@ describe('The conversation controller', function() {
         conversations: {
           search: {}
         }
+      },
+      message: {
+        getAttachmentsForConversation: sinon.spy(function(conversationId, query, callback) {
+          return callback(attachmentsForConversationErr, attachmentsForConversationResult);
+        })
       }
     };
   });
@@ -629,4 +641,200 @@ describe('The conversation controller', function() {
       });
     });
   });
+
+  describe('The getSummaryOfConversation function', function() {
+
+    let conversationResult, userModule, denormalizeUser;
+
+    beforeEach(function() {
+      userModule = {
+        get: sinon.spy(function(userId, callback) {
+          callback(null, user);
+        })
+      };
+      this.moduleHelpers.addDep('user', userModule);
+
+      denormalizeUser = {
+        denormalize: sinon.spy(function(user) {
+          return Q.when(user);
+        })
+      };
+      this.moduleHelpers.addDep('denormalizeUser', denormalizeUser);
+    });
+
+    it('should send back HTTP 404 with error when conversation not found', function(done) {
+      const req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
+
+      conversationResult = undefined;
+
+      attachmentsForConversationResult = [
+        { _id: '59b12a42d3b81465105343d3',
+          message_id: '59b12a43d3b81465105343d5',
+          creator: '591c24736fb6de734e550137',
+          creation_date: '2017-09-07T11:15:15.098Z',
+          name: 'test1',
+          contentType: 'application/octet-stream',
+          length: 487
+        },
+        { _id: '59b12010de255f5afaf9d927',
+          message_id: '59b12010de255f5afaf9d929',
+          creator: '591c24736fb6de734e550137',
+          creation_date: '2017-09-07T10:31:44.986Z',
+          name: 'test2',
+          contentType: 'application/octet-stream',
+          length: 517
+        }
+      ];
+
+      newestMembersResult = [
+        { timestamps:
+          { creation: '2017-07-19T13:06:54.155Z' },
+          _id: '596f596e8407fd0a24b63131',
+          member:
+          { lastname: 'Doe1',
+            firstname: 'John1',
+            _id: '591c24746fb6de734e55013e' }
+        },
+        { timestamps:
+          { creation: '2017-07-19T13:07:02.971Z' },
+          _id: '596f59768407fd0a24b63135',
+          status: 'joined',
+          member:
+          { lastname: 'admin',
+            firstname: 'admin',
+            _id: '591c24736fb6de734e550137' }
+        },
+        { timestamps:
+          { creation: '2017-09-06T10:38:34.057Z' },
+            _id: '59afd02a6529493f1478304e',
+            status: 'joined',
+            member:
+          { lastname: 'Doe10',
+            firstname: 'John10',
+            _id: '591c24746fb6de734e550147' }
+        }];
+
+      newestMembersResult.total_count = 3;
+
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(null, conversationResult);
+      });
+
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      controller.getSummaryOfConversation(req, {
+        status: function(code) {
+          expect(code).to.equal(404);
+
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual({error: {code: 404, message: 'Not Found', details: 'Conversation not found'}});
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 when request succeed', function(done) {
+      const req = {body: {}, params: {id: 'channelId'}, query: {}, user: user};
+
+      conversationResult = {name: 'aConversationName', topic: {value: 'aTopic'}, purpose: {value: 'aValue'}, timestamps: {creation: '2017-09-07T11:15:15.098Z'}, creator: '596f596e8407fd0a24b63131'};
+
+      attachmentsForConversationResult = [
+        { _id: '59b12a42d3b81465105343d3',
+          message_id: '59b12a43d3b81465105343d5',
+          creator: '591c24736fb6de734e550137',
+          creation_date: '2017-09-07T11:15:15.098Z',
+          name: 'test1',
+          contentType: 'application/octet-stream',
+          length: 487
+        },
+        { _id: '59b12010de255f5afaf9d927',
+          message_id: '59b12010de255f5afaf9d929',
+          creator: '591c24736fb6de734e550137',
+          creation_date: '2017-09-07T10:31:44.986Z',
+          name: 'test2',
+          contentType: 'application/octet-stream',
+          length: 517
+        }
+      ];
+
+      newestMembersResult = [
+        { timestamps:
+          { creation: '2017-07-19T13:06:54.155Z' },
+          _id: '596f596e8407fd0a24b63131',
+          member:
+          { lastname: 'Doe1',
+            firstname: 'John1',
+            _id: '591c24746fb6de734e55013e' }
+        },
+        { timestamps:
+          { creation: '2017-07-19T13:07:02.971Z' },
+          _id: '596f59768407fd0a24b63135',
+          status: 'joined',
+          member:
+          { lastname: 'admin',
+            firstname: 'admin',
+            _id: '591c24736fb6de734e550137' }
+        },
+        { timestamps:
+          { creation: '2017-09-06T10:38:34.057Z' },
+            _id: '59afd02a6529493f1478304e',
+            status: 'joined',
+            member:
+          { lastname: 'Doe10',
+            firstname: 'John10',
+            _id: '591c24746fb6de734e550147' }
+        }];
+
+      const expectedResult = {
+        creator: 'aFirstname aLastname',
+        creationDate: '2017-09-07T11:15:15.098Z',
+        name: 'aConversationName',
+        topic: 'aTopic',
+        purpose: 'aValue',
+        members: [{ _id: 1 }, { _id: 1 }, { _id: 1 }],
+        memberCount: 3,
+        attachments:
+        [{ _id: '59b12a42d3b81465105343d3',
+        message_id: '59b12a43d3b81465105343d5',
+        creator: { _id: 1 },
+        creation_date: '2017-09-07T11:15:15.098Z',
+        name: 'test1',
+        contentType: 'application/octet-stream',
+        length: 487 },
+        { _id: '59b12010de255f5afaf9d927',
+        message_id: '59b12010de255f5afaf9d929',
+        creator: { _id: 1 },
+        creation_date: '2017-09-07T10:31:44.986Z',
+        name: 'test2',
+        contentType: 'application/octet-stream',
+        length: 517 }]
+      };
+
+      newestMembersResult.total_count = 3;
+
+      lib.conversation.getById = sinon.spy(function(id, callback) {
+        callback(null, conversationResult);
+      });
+
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      controller.getSummaryOfConversation(req, {
+        status: function(code) {
+          expect(code).to.equal(200);
+
+          return {
+            json: function(json) {
+              expect(json).to.shallowDeepEqual(expectedResult);
+              done();
+            }
+          };
+        }
+      });
+    });
+
+  });
+
 });
