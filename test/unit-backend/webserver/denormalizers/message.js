@@ -3,11 +3,7 @@ const sinon = require('sinon');
 const Q = require('q');
 
 describe('the message denormalizer', function() {
-  let lib, deps, message, user, getDenormalizer, starredMessageId;
-
-  function dependencies(name) {
-    return deps[name];
-  }
+  let lib, message, user, getDenormalizer, starredMessageId, userModule, denormalizeUserMock, dependencies, loggerMock;
 
   beforeEach(function() {
     starredMessageId = '999999';
@@ -20,11 +16,13 @@ describe('the message denormalizer', function() {
       }
     };
 
-    deps = {
-      logger: {
-        error: sinon.spy()
-      }
+    dependencies = this.moduleHelpers.dependencies;
+
+    loggerMock = {
+      error: sinon.spy()
     };
+
+    this.moduleHelpers.addDep('logger', loggerMock);
 
     message = {
       _id: '123'
@@ -80,7 +78,7 @@ describe('the message denormalizer', function() {
       getDenormalizer().denormalizeMessage(message, user)
         .catch(function(err) {
           expect(err).to.deep.equal(error);
-          expect(deps.logger.error).to.be.calledWith('Error when denormalize the message 123', error);
+          expect(loggerMock.error).to.be.calledWith('Error when denormalize the message 123', error);
           done();
         });
     });
@@ -109,4 +107,60 @@ describe('the message denormalizer', function() {
         });
     });
   });
+
+  describe('the denormalizeAttachments function', function() {
+    var creator, attachment;
+   beforeEach(function() {
+
+     creator = {
+       password: '$11111',
+       firstname: 'test',
+       lastname: 'test',
+       preferredEmail: 'test@test.org',
+       _id: '111111111'
+     };
+     attachment = {
+       creator: creator
+     };
+     denormalizeUserMock = {
+       denormalize: sinon.spy(function() {
+         return Q.when();
+       })
+     };
+
+     userModule = {};
+     this.moduleHelpers.addDep('user', userModule);
+     this.moduleHelpers.addDep('denormalizeUser', denormalizeUserMock);
+     dependencies = this.moduleHelpers.dependencies;
+
+     userModule.get = sinon.spy(function(id, callback) {
+       return callback(null, id);
+     });
+   });
+
+   it('should denormalize attachments', function(done) {
+
+     getDenormalizer().denormalizeAttachment(attachment)
+     .then(function() {
+       expect(denormalizeUserMock.denormalize).to.be.calledWith(creator);
+       done();
+     }).catch(done);
+   });
+
+   it('should throw an error if denormalizeAttachment is rejected', function(done) {
+     const error = new Error('error message');
+
+     denormalizeUserMock.denormalize = sinon.spy(function() {
+       return Q.reject(error);
+     });
+
+     getDenormalizer().denormalizeAttachment(attachment)
+       .catch(function(err) {
+        expect(denormalizeUserMock.denormalize).to.be.calledWith(creator);
+         expect(err).to.deep.equal(error);
+         done();
+       });
+   });
+ });
+
 });

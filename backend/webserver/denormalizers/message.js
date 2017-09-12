@@ -54,7 +54,7 @@ module.exports = function(dependencies, lib) {
         }
 
         return user;
-      }).then(denormalizeUser);
+      }).then(denormalizeUser.denormalize);
   }
 
   function denormalizeMessage(message, user) {
