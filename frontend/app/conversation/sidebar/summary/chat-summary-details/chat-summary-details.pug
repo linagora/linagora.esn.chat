@@ -9,13 +9,13 @@
     .information-title
       | #{__('Topic')}
     .channel-informations(ng-if="ctrl.topic")
-      | {{ctrl.topic}}
+      span(ng-bind-html="ctrl.topic| esnEmoticonify:{class: 'label-emoji'}" )
     .channel-informations(ng-if="!ctrl.topic")
       | #{__('No topic is set')}
     .information-title
       | #{__('Purpose')}
     .channel-informations(ng-if="ctrl.purpose")
-      | {{ctrl.purpose}}
+      span(ng-bind-html="ctrl.purpose| esnEmoticonify:{class: 'label-emoji'}" )
     .channel-informations(ng-if="!ctrl.purpose")
       | #{__('No purpose is set')}
     .information-title
