@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, chatConversationMemberService, CHAT_EVENTS, CHAT, chatScrollService, chatConversationsStoreService, usSpinnerService, CHAT_MESSAGE_GROUP, chatMessageService, _, CHAT_DRAG_FILE_CLASS) {
+  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, chatConversationMemberService, CHAT_EVENTS, CHAT, $timeout, chatScrollService, chatConversationsStoreService, usSpinnerService, CHAT_MESSAGE_GROUP, chatMessageService, _, CHAT_DRAG_FILE_CLASS) {
     var self = this,
       messageCounterFromTheSameUser = 0;
 
@@ -147,7 +147,11 @@
     }
 
     function $onInit() {
-      loadPreviousMessages(true).then(scrollDown);
+      loadPreviousMessages(true).then(function(isOwnerOfmessage, messageChannel) {
+        $timeout(function() {
+          scrollDown(isOwnerOfmessage, messageChannel);
+        }, 150);
+      });
     }
 
     function isDuplicate(message) {
