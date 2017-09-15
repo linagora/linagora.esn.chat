@@ -167,6 +167,7 @@ describe('The message controller', function() {
           return Q.when([]);
         })
       };
+
       this.moduleHelpers.addDep('resourceLink', resourceLink);
 
       const controller = getController(this.moduleHelpers.dependencies, lib);

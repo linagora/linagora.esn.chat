@@ -11,6 +11,7 @@ module.exports = function(dependencies) {
   return {
     addMember,
     countMembers,
+    getNewestMembers,
     getMembers,
     isMember,
     join
@@ -26,6 +27,10 @@ module.exports = function(dependencies) {
 
   function getMembers() {
     return Q([]);
+  }
+
+  function getNewestMembers(collaboration, objectType, query) {
+    return Q.denodeify(collaborationModule.member.getMembers)(collaboration, objectType, query);
   }
 
   function isMember(conversation, user) {

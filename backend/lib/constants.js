@@ -79,5 +79,9 @@ module.exports = {
       INDEX_NAME: 'chat.conversations.idx'
     }
   },
-  STAR_LINK_TYPE: 'star'
+  STAR_LINK_TYPE: 'star',
+  SORT_TYPE: {
+    ASC: -1,
+    DESC: 1
+  }
 };

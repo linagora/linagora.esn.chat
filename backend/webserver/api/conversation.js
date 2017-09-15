@@ -25,6 +25,11 @@ module.exports = function(dependencies, lib, router) {
 
   router.post('/conversations/:id/readed', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.markAllMessageOfAConversationReaded);
 
+  router.get('/conversations/:id/summary',
+    middleware.load,
+    middleware.canRead,
+    controller.getSummaryOfConversation);
+
   router.get('/conversations/:id/attachments',
     authorizationMW.requiresAPILogin,
     middleware.load,

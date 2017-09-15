@@ -7,6 +7,9 @@ const Q = require('q');
 module.exports = function(dependencies, lib) {
 
   const logger = dependencies('logger');
+  const denormalizeUser = dependencies('denormalizeUser');
+  const userModule = dependencies('user');
+  const denormalizer = require('../denormalizers/message')(dependencies, lib);
   const utils = require('./utils')(dependencies, lib);
 
   return {
@@ -16,6 +19,7 @@ module.exports = function(dependencies, lib) {
     getById,
     getUserConversations,
     getUserPrivateConversations,
+    getSummaryOfConversation,
     list,
     markAllMessageOfAConversationReaded,
     searchForPublicConversations,
@@ -141,6 +145,89 @@ module.exports = function(dependencies, lib) {
       type: CONSTANTS.CONVERSATION_TYPE.CONFIDENTIAL,
       members: [{member: currentUserAsMember(req)}]
     }, req, res);
+  }
+
+  function getSummaryOfConversation(req, res) {
+    const memberCount = {};
+
+    getConversationById(req.params.id).then(conversation => {
+      if (!conversation) {
+        logger.error('Conversation not found');
+        const error = new Error('Not Found');
+
+        error.code = 404;
+        error.details = 'Conversation not found';
+        throw error;
+      }
+
+      return Q.all([
+        conversation,
+        getCreator(conversation),
+        getNewestMembers(conversation, memberCount),
+        getNewestAttachments(conversation)
+      ]);
+    })
+    .spread((conversation, creator, members, attachments) =>
+    Q.all(members).then(members =>
+
+        res.status(200).json({
+          creator: creator.firstname + ' ' + creator.lastname,
+          creationDate: conversation.timestamps.creation,
+          name: conversation.name,
+          topic: conversation.topic.value,
+          purpose: conversation.purpose.value,
+          members: members,
+          memberCount: memberCount.number,
+          attachments: attachments
+        })
+      )
+    )
+    .catch(err => {
+      logger.error('Error while getting conversations', err);
+
+      return res.status(err.code).json({
+        error: {
+          code: err.code || 500,
+          message: err.message || 'Server Error',
+          details: err.details || 'Error while getting conversations'
+        }
+      });
+    });
+
+    function getNewestAttachments(conversation) {
+      return getAttachmentsForConversation(conversation._id, {offset: CONSTANTS.DEFAULT_OFFSET, limit: CONSTANTS.DEFAULT_LIMIT, sort: CONSTANTS.SORT_TYPE.DESC}).then(attachments =>
+        denormalizer.denormalizeAttachments(attachments)
+      );
+    }
+
+    function getNewestMembers(conversation, memberCount) {
+
+      return lib.members.getNewestMembers(conversation._id, OBJECT_TYPES.CONVERSATION, {offset: CONSTANTS.DEFAULT_OFFSET, limit: CONSTANTS.DEFAULT_LIMIT})
+      .then(members => {
+        memberCount.number = members.total_count;
+        members = members.reverse();
+
+        return members.map(newestMember =>
+          getUser(newestMember.member._id).then(denormalizeUser.denormalize)
+        );
+      });
+    }
+
+    function getCreator(conversation) {
+      return getUser(conversation.creator).then(denormalizeUser.denormalize);
+    }
+
+    function getConversationById(conversationId) {
+      return Q.denodeify(lib.conversation.getById)(conversationId);
+    }
+
+    function getUser(userId) {
+      return Q.denodeify(userModule.get)(userId);
+    }
+
+    function getAttachmentsForConversation(conversationId, query) {
+      return Q.denodeify(lib.message.getAttachmentsForConversation)(conversationId, query);
+    }
   }
 
   function list(req, res) {
