@@ -171,7 +171,7 @@ module.exports = function(dependencies, lib) {
     Q.all(members).then(members =>
 
         res.status(200).json({
-          creator: creator.firstname + ' ' + creator.lastname,
+          creator: creator && creator.firstname + ' ' + creator.lastname,
           creationDate: conversation.timestamps.creation,
           name: conversation.name,
           topic: conversation.topic.value,
@@ -214,7 +214,7 @@ module.exports = function(dependencies, lib) {
     }
 
     function getCreator(conversation) {
-      return getUser(conversation.creator).then(denormalizeUser.denormalize);
+        return conversation.creator && getUser(conversation.creator).then(denormalizeUser.denormalize);
     }
 
     function getConversationById(conversationId) {
