@@ -11,7 +11,8 @@ describe('The linagora.esn.chat chatScrollService', function() {
       chatScrollService,
       chatConversationsStoreService,
       conversation,
-      searchProviders;
+      searchProviders,
+      $timeout;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat')
@@ -44,17 +45,20 @@ describe('The linagora.esn.chat chatScrollService', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_chatScrollService_, _elementScrollService_) {
+  beforeEach(angular.mock.inject(function(_$timeout_, _chatScrollService_, _elementScrollService_) {
     chatScrollService = _chatScrollService_;
     elementScrollService = _elementScrollService_;
+    $timeout = _$timeout_;
   }));
 
   describe('The scrollDown function', function() {
 
     it('should call elementScrollService.autoScrollDown service', function() {
       chatScrollService.scrollDown();
+      $timeout.flush();
 
       expect(elementScrollService.autoScrollDown).to.have.been.called;
+
     });
   });
 
