@@ -150,7 +150,7 @@
       loadPreviousMessages(true).then(function(isOwnerOfmessage, messageChannel) {
         $timeout(function() {
           scrollDown(isOwnerOfmessage, messageChannel);
-        }, 150);
+        }, 0);
       });
     }
 

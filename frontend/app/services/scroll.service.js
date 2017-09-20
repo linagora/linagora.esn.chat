@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatScrollService', chatScrollService);
 
-    function chatScrollService(elementScrollService, chatConversationsStoreService) {
+    function chatScrollService(elementScrollService, chatConversationsStoreService, $timeout) {
 
       return {
         scrollDown: scrollDown,
@@ -13,7 +13,9 @@
       };
 
       function scrollDown() {
-        elementScrollService.autoScrollDown(angular.element('.ms-body .lv-body'));
+        $timeout(function() {
+          elementScrollService.autoScrollDown(angular.element('.ms-body .lv-body'));
+        }, 0);
       }
 
       function setCanScrollDown(conversationId, value) {
