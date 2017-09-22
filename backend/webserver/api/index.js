@@ -10,6 +10,7 @@ module.exports = function(dependencies, lib) {
 
   require('./conversation')(dependencies, lib, router);
   require('./message')(dependencies, lib, router);
+  require('./user-subscribed-private-conversation')(dependencies, lib, router);
 
   resourceLinkMiddleware.addCanCreateMiddleware('star', messageMiddleware.canStar);
   resourceLinkMiddleware.addCanCreateMiddleware('unstar', messageMiddleware.canUnstar);
