@@ -6,6 +6,7 @@ const constants = require('./constants');
 module.exports = function(dependencies) {
 
   const models = {
+    ChatUserSubscribedPrivateConversation: require('./db/models/UserSubscribedPrivateConversation')(dependencies),
     conversation: require('./db/conversation')(dependencies),
     message: require('./db/message')(dependencies)
   };
@@ -18,6 +19,7 @@ module.exports = function(dependencies) {
   const moderate = require('./moderate')(dependencies);
   const listener = require('./listener')(dependencies, {conversation, message});
   const bot = require('./bot')(dependencies, {conversation, message, members});
+  const userSubscribedPrivateConversation = require('./user-subscribed-private-conversation')(dependencies);
 
   return {
     bot: bot,
@@ -30,7 +32,8 @@ module.exports = function(dependencies) {
     models,
     search,
     start,
-    utils
+    utils,
+    userSubscribedPrivateConversation
   };
 
   function start(callback) {
