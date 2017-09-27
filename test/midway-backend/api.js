@@ -1773,4 +1773,47 @@ describe('The chat API', function() {
       }).catch(done);
     });
   });
-});
+
+  describe('GET /api/user/privateConversations/', function() {
+
+    it('should return an empty array when the subscribed conversation document does not exist', function(done) {
+
+        request(app.express)
+          .get('/api/user/privateConversations')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.shallowDeepEqual([]);
+            done();
+          });
+      });
+
+    it('should return the array of all subscribed private conversations', function(done) {
+      var conv1 = new mongoose.Types.ObjectId();
+      var conv2 = new mongoose.Types.ObjectId();
+      var conversationIds = [conv1, conv2];
+
+      app.lib.userSubscribedPrivateConversation.store(
+        userId,
+        conversationIds
+      ).then(function() {
+        request(app.express)
+          .get('/api/user/privateConversations')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            console.log(res);
+            expect(res.body).to.shallowDeepEqual([String(conv1), String(conv2)]);
+            done();
+          });
+        }).catch(done);
+      });
+
+    });
+  });
