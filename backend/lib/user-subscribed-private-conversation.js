@@ -31,7 +31,7 @@ module.exports = dependencies => {
   function _findOneAndUpdate(userId, conversationIds) {
     return userSubscribedPrivateConversation.findOneAndUpdate({_id: userId},
       {$set: {conversations: conversationIds}},
-      {upsert: true})
+      {upsert: true, new: true})
       .exec();
   }
 

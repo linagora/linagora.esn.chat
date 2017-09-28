@@ -7,6 +7,9 @@ module.exports = function(dependencies, lib, router) {
 
   router.get('/user/privateConversations',
     authorizationMW.requiresAPILogin,
-    controller.getUserSubscribedPrivateConversations);
+    controller.get);
 
+  router.put('/user/privateConversations',
+   authorizationMW.requiresAPILogin,
+   controller.store);
 };
