@@ -47,6 +47,7 @@ module.exports = {
   },
   CONVERSATION_TYPE: {
     CONFIDENTIAL: 'confidential',
+    DIRECT_MESSAGE: 'directmessage',
     OPEN: 'open'
   },
   MEMBERSHIP_ACTION: {
