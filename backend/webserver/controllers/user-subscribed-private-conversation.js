@@ -9,10 +9,9 @@ module.exports = (dependencies, lib) => {
   };
 
   function getUserSubscribedPrivateConversations(req, res) {
-    lib.userSubscribedPrivateConversation.get(req.user._id).then(conversationsObject => {
-
-      return res.status(200).json((conversationsObject && conversationsObject.conversations) ? conversationsObject.conversations : []);
-    })
+    lib.userSubscribedPrivateConversation.get(req.user._id).then(conversationsObject =>
+      res.status(200).json((conversationsObject && conversationsObject.conversations) ? conversationsObject.conversations : [])
+    )
     .catch(() => {
       logger.error('Error while getting subscribed private conversations');
 

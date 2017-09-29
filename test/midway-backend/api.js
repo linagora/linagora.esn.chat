@@ -1808,7 +1808,6 @@ describe('The chat API', function() {
             if (err) {
               return done(err);
             }
-            console.log(res);
             expect(res.body).to.shallowDeepEqual([String(conv1), String(conv2)]);
             done();
           });
