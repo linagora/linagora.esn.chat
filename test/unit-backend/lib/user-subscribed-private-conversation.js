@@ -6,7 +6,7 @@ const Q = require('q');
 
 describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', function() {
 
-  let lib, deps, mq, ObjectId, modelsMock;
+  let lib, deps, mq, mediaQuery, ObjectId, modelsMock, conversation;
 
   function dependencies(name) {
     return deps[name];
@@ -15,6 +15,8 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
   beforeEach(function() {
 
     ObjectId = require('mongoose').Types.ObjectId;
+
+    conversation = {_id: 1, name: 'My conversation'};
 
     modelsMock = {
       ChatUserSubscribedPrivateConversation: {
@@ -26,6 +28,12 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
 
           return mq;
         })
+      },
+      ChatConversation: {
+        findById: sinon.spy(function() {
+
+          return mediaQuery;
+        })
       }
     };
 
@@ -33,6 +41,12 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
       exec: sinon.spy(function() {
 
         return Q.when();
+      })
+    };
+
+    mediaQuery = {
+      exec: sinon.spy(function(cb) {
+        cb(null, conversation);
       })
     };
 
@@ -46,6 +60,24 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
             Types: {
               ObjectId: ObjectId
             }
+          }
+        }
+      },
+      pubsub: {
+        local: {
+          topic: function() {
+            return {
+              subscribe: sinon.spy(),
+              publish: sinon.spy()
+            };
+          }
+        },
+        global: {
+          topic: function() {
+            return {
+              subscribe: sinon.spy(),
+              publish: sinon.spy()
+            };
           }
         }
       }
@@ -77,7 +109,25 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
       require('../../../backend/lib/user-subscribed-private-conversation')(dependencies, lib).store(userId, conversationIds).then(function() {
         expect(modelsMock.ChatUserSubscribedPrivateConversation.findOneAndUpdate).to.have.been.calledWith({_id: userId}, {$set: {conversations: conversationIds}}, {upsert: true});
         done();
-      }).done();
+      });
+    });
+  });
+
+  describe('The getByIds function', function() {
+
+    it('should send back a promise with conversations result', function(done) {
+      const conversationIds = ['id1', 'id2'];
+      const conversationsResult = [conversation, conversation];
+
+      require('../../../backend/lib/user-subscribed-private-conversation')(dependencies).getByIds(conversationIds).then(function(result) {
+
+        conversationIds.map(function(conversationId) {
+          expect(modelsMock.ChatConversation.findById).to.have.been.calledWith(conversationId);
+        });
+
+        expect(result).to.deep.equal(conversationsResult);
+        done();
+      });
     });
   });
 
