@@ -9,11 +9,19 @@ module.exports = (dependencies, lib) => {
   };
 
   function getUserSubscribedPrivateConversations(req, res) {
-    lib.userSubscribedPrivateConversation.get(req.user._id).then(conversationsObject =>
-      res.status(200).json((conversationsObject && conversationsObject.conversations) ? conversationsObject.conversations : [])
+    lib.userSubscribedPrivateConversation.get(req.user._id)
+    .then(conversationIds => {
+      if (conversationIds) {
+        return lib.userSubscribedPrivateConversation.getByIds(conversationIds.conversations);
+      }
+
+      return [];
+    })
+    .then(conversationsObject =>
+      res.status(200).json(conversationsObject)
     )
-    .catch(() => {
-      logger.error('Error while getting subscribed private conversations');
+    .catch(error => {
+      logger.error('Error while getting subscribed private conversations', error);
 
       return res.status(500).json({
         error: {
