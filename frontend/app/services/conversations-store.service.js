@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationsStoreService', chatConversationsStoreService);
 
-  function chatConversationsStoreService($log, _, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_MEMBER_STATUS) {
+  function chatConversationsStoreService($log, _, chatPrivateConversationService, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_MEMBER_STATUS) {
     var activeRoom = {};
     var store = {
       addConversation: addConversation,
@@ -14,6 +14,7 @@
       deleteConversation: deleteConversation,
       findConversation: findConversation,
       find: find,
+      fillPrivateConversations: fillPrivateConversations,
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       increaseUserMentionsCount: increaseUserMentionsCount,
@@ -80,6 +81,12 @@
 
     function find(filter) {
       return _.find(store.conversations, filter);
+    }
+
+    function fillPrivateConversations() {
+      chatPrivateConversationService.get().then(function(conversations) {
+        store.privateConversations = conversations;
+      });
     }
 
     function getNumberOfUnreadMessages() {
