@@ -1792,26 +1792,40 @@ describe('The chat API', function() {
       });
 
     it('should return the array of all subscribed private conversations', function(done) {
-      var conv1 = new mongoose.Types.ObjectId();
-      var conv2 = new mongoose.Types.ObjectId();
-      var conversationIds = [conv1, conv2];
 
-      app.lib.userSubscribedPrivateConversation.store(
-        userId,
-        conversationIds
-      ).then(function() {
-        request(app.express)
-          .get('/api/user/privateConversations')
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            expect(res.body).to.shallowDeepEqual([String(conv1), String(conv2)]);
-            done();
-          });
-        }).catch(done);
+      Q.all([
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.DIRECT_MESSAGE,
+          mode: CONVERSATION_MODE.CHANNEL,
+          moderate: true
+        }),
+        Q.denodeify(app.lib.conversation.create)({
+          type: CONVERSATION_TYPE.DIRECT_MESSAGE,
+          mode: CONVERSATION_MODE.CHANNEL,
+          moderate: true
+        })
+      ])
+      .spread(executeTest).catch(done);
+
+      function executeTest(conversation1, conversation2) {
+        app.lib.userSubscribedPrivateConversation.store(
+          userId,
+          [conversation1._id, conversation2._id]
+        ).then(function() {
+          request(app.express)
+            .get('/api/user/privateConversations')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+
+              expect(res.body).to.shallowDeepEqual([JSON.parse(JSON.stringify(conversation1)), JSON.parse(JSON.stringify(conversation2))]);
+              done();
+            });
+          }).catch(done);
+        }
       });
 
     });

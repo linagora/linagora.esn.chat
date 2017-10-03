@@ -6,16 +6,19 @@ const Q = require('q');
 
 describe('The user-subscribed-private-conversation controller', function() {
 
-  let lib, err, subscribedConversations;
+  let lib, err, subscribedConversations, conversations;
 
   beforeEach(function() {
     err = undefined;
     subscribedConversations = undefined;
-
+    conversations = [{_id: 1, name: 'My first conversation'}, {_id: 2, name: 'My second conversation'}];
     lib = {
       userSubscribedPrivateConversation: {
         get: sinon.spy(function() {
           return Q.when(subscribedConversations);
+        }),
+        getByIds: sinon.spy(function() {
+          return Q.when(conversations);
         })
       }
     };
@@ -29,6 +32,8 @@ describe('The user-subscribed-private-conversation controller', function() {
     it('should send back HTTP 200 with an empty array when there is no subscribed conversations', function(done) {
       const controller = getController(this.moduleHelpers.dependencies, lib);
 
+      subscribedConversations = [];
+      conversations = [];
       controller.getUserSubscribedPrivateConversations({ user: {_id: '11'}}, {
         status: function(code) {
           expect(code).to.equal(200);
@@ -45,7 +50,7 @@ describe('The user-subscribed-private-conversation controller', function() {
     });
 
     it('should send back HTTP 200 with the subscribedConversations as result', function(done) {
-      subscribedConversations = {conversations: 'conversations'};
+      subscribedConversations = [];
       const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.getUserSubscribedPrivateConversations({ user: {_id: '11'}}, {
@@ -55,7 +60,7 @@ describe('The user-subscribed-private-conversation controller', function() {
           return {
             json: function(json) {
               expect(lib.userSubscribedPrivateConversation.get).to.have.been.called;
-              expect(json).to.deep.equal('conversations');
+              expect(json).to.deep.equal(conversations);
               done();
             }
           };
@@ -68,6 +73,7 @@ describe('The user-subscribed-private-conversation controller', function() {
       lib.userSubscribedPrivateConversation.get = sinon.spy(function() {
         return Q.reject(err);
       });
+      conversations = [];
       const controller = getController(this.moduleHelpers.dependencies, lib);
 
       controller.getUserSubscribedPrivateConversations({ user: {_id: '11'}}, {
