@@ -1,12 +1,12 @@
 'use strict';
 
-/* global chai: false */
+/* global chai, sinon: false */
 
 var expect = chai.expect;
 
 describe('The chatConversationsStoreService service', function() {
 
-  var members, chatConversationsStoreService, conversation, publicConversation, confidentialConversation, user;
+  var $q, $rootScope, members, chatConversationsStoreService, conversation, publicConversation, confidentialConversation, user, chatPrivateConversationService;
   var CHAT_CONVERSATION_TYPE, CHAT_MEMBER_STATUS;
 
   beforeEach(function() {
@@ -17,6 +17,12 @@ describe('The chatConversationsStoreService service', function() {
     chatConversationsStoreService = {};
     user = {_id: 'userId'};
 
+    chatPrivateConversationService = {
+      get: sinon.spy(function() {
+        return $q.when(conversation);
+      })
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {
         add: angular.noop
@@ -24,11 +30,14 @@ describe('The chatConversationsStoreService service', function() {
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('session', {user: user});
+      $provide.value('chatPrivateConversationService', chatPrivateConversationService);
     });
   });
 
   beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationsStoreService_, _CHAT_CONVERSATION_TYPE_, _CHAT_MEMBER_STATUS_) {
     chatConversationsStoreService = _chatConversationsStoreService_;
+    $q = _$q_;
+    $rootScope = _$rootScope_;
 
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     CHAT_MEMBER_STATUS = _CHAT_MEMBER_STATUS_;
@@ -199,6 +208,21 @@ describe('The chatConversationsStoreService service', function() {
       chatConversationsStoreService.conversations = [conversation, publicConversation, confidentialConversation];
 
       expect(chatConversationsStoreService.find({name: conversation.name})).to.deep.equals(conversation);
+    });
+  });
+
+  describe('The fillPrivateConversations function', function() {
+    it('should call the chatPrivateConversationService', function() {
+      chatConversationsStoreService.fillPrivateConversations();
+
+      expect(chatPrivateConversationService.get).to.be.called;
+    });
+
+    it('should fill ', function() {
+      chatConversationsStoreService.fillPrivateConversations();
+      $rootScope.$digest();
+
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals(conversation);
     });
   });
 

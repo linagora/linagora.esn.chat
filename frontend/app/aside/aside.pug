@@ -15,10 +15,8 @@
         .lv-item.clickable.more-item(ui-sref="chat.channels-list", ui-sref-active="selected")
           span #{__('More')}&hellip;
 
-        .lv-item.clickable.menu-heading
-          .title(ui-sref='chat.groups-add')
+        .lv-item.menu-heading
+          .title
             .text #{__('Direct Messages')}
-          .chat-aside-action(ui-sref='chat.groups-add')
-            i.menu-icon.mdi.mdi-plus-circle-outline
 
         chat-conversation-item(ng-repeat="conversation in ctrl.chatConversationsStoreService.privateConversations" conversation="conversation", ng-click='$hide()')
