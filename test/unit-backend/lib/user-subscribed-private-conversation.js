@@ -107,7 +107,7 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
       const conversationIds = ['Id1', 'Id2', 'Id3'];
 
       require('../../../backend/lib/user-subscribed-private-conversation')(dependencies, lib).store(userId, conversationIds).then(function() {
-        expect(modelsMock.ChatUserSubscribedPrivateConversation.findOneAndUpdate).to.have.been.calledWith({_id: userId}, {$set: {conversations: conversationIds}}, {upsert: true});
+        expect(modelsMock.ChatUserSubscribedPrivateConversation.findOneAndUpdate).to.have.been.calledWith({_id: userId}, {$set: {conversations: conversationIds}}, {upsert: true, new: true});
         done();
       });
     });

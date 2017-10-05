@@ -1827,6 +1827,118 @@ describe('The chat API', function() {
           }).catch(done);
         }
       });
+    });
+
+  describe('PUT /api/user/privateConversations/', function() {
+
+    it('should create the subscribed conversation document', function(done) {
+      const conv1 = new mongoose.Types.ObjectId();
+      const conv2 = new mongoose.Types.ObjectId();
+      const conversationIds = [conv1, conv2];
+
+        request(app.express)
+          .put('/api/user/privateConversations')
+          .send({conversationIds: conversationIds})
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.shallowDeepEqual([String(conv1), String(conv2)]);
+            done();
+          });
+      });
+
+    it('should update the array of all subscribed private conversations', function(done) {
+      const conv1 = new mongoose.Types.ObjectId();
+      const conv2 = new mongoose.Types.ObjectId();
+      const conversationIds = [conv1, conv2];
+
+      app.lib.userSubscribedPrivateConversation.store(
+        userId,
+        conversationIds
+      ).then(function() {
+        request(app.express)
+          .put('/api/user/privateConversations')
+          .send({conversationIds: [conv1]})
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.shallowDeepEqual([String(conv1)]);
+            done();
+          });
+        }).catch(done);
+      });
+
+      it('should 400 when the conversationIds is not an array', function(done) {
+
+          request(app.express)
+            .put('/api/user/privateConversations')
+            .send({conversationIds: 'notarray'})
+            .expect('Content-Type', /json/)
+            .expect(400)
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body).to.shallowDeepEqual({
+                error: {
+                  code: 400,
+                  message: 'Bad request',
+                  details: 'You should provide the private conversations ids array'
+                }
+              });
+              done();
+            });
+        });
+
+      it('should 400 when the conversationIds is not objectId convertable', function(done) {
+
+          request(app.express)
+            .put('/api/user/privateConversations')
+            .send({conversationIds: ['notid']})
+            .expect('Content-Type', /json/)
+            .expect(400)
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body).to.shallowDeepEqual({
+                error: {
+                  code: 400,
+                  message: 'Bad request',
+                  details: 'You should provide valid ids array'
+                }
+              });
+              done();
+            });
+        });
+
+      it('should 400 when there is no request body', function(done) {
+
+          request(app.express)
+            .put('/api/user/privateConversations')
+            .send()
+            .expect('Content-Type', /json/)
+            .expect(400)
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body).to.shallowDeepEqual({
+                error: {
+                  code: 400,
+                  message: 'Bad request',
+                  details: 'You should provide the private conversations ids array'
+                }
+              });
+              done();
+            });
+        });
 
     });
   });
