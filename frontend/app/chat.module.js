@@ -33,7 +33,7 @@
     'xeditable',
     'angularMoment',
     'ngSanitize',
-    'esn.file-preview',
+    'esn.attachment',
     'luegg.directives',
     'zInfiniteScroll',
     'angular-inview',
