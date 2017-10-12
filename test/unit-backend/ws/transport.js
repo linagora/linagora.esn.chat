@@ -3,9 +3,10 @@
 const _ = require('lodash');
 const sinon = require('sinon');
 const expect = require('chai').expect;
+const Q = require('q');
 
 describe('The chat websocket transport', function() {
-  let channel, ioHelper, logger, options, transport, message, chatNamespace;
+  let channel, ioHelper, logger, options, transport, message, chatNamespace, userModule, conversation, err, result, isMemberResult, membersLib;
 
   beforeEach(function() {
     channel = 123;
@@ -19,11 +20,28 @@ describe('The chat websocket transport', function() {
       getUserSocketsFromNamespace: sinon.spy(),
       getUserId: sinon.spy()
     };
-
-    this.moduleHelpers.addDep('wsserver', { ioHelper });
-    this.moduleHelpers.addDep('logger', logger);
+    userModule = {
+      get: sinon.spy(function() {
+        return Q.when({_id: 'anId'});
+      })
+    };
+    result = {_id: 123, name: 'My conversation'};
+    conversation = {
+      getById: sinon.spy(function(channel, callback) {
+        return callback(err, result);
+      })
+    };
+    membersLib = {
+      isMember: sinon.spy(function() {
+        return Q.when(isMemberResult);
+      })
+    };
     options = {
-      dependencies: this.moduleHelpers.dependencies
+      ioHelper: ioHelper,
+      logger: logger,
+      membersLib: membersLib,
+      userModule: userModule,
+      conversation: conversation
     };
   });
 
@@ -37,6 +55,9 @@ describe('The chat websocket transport', function() {
     expect(transport.chatNamespace).to.equal(chatNamespace);
     expect(transport.helper).to.equal(ioHelper);
     expect(transport.logger).to.equal(logger);
+    expect(transport.membersLib).to.equal(membersLib);
+    expect(transport.userModule).to.equal(userModule);
+    expect(transport.conversation).to.equal(conversation);
     expect(chatNamespace.on).to.have.been.calledOnce;
   });
 
@@ -163,9 +184,27 @@ describe('The chat websocket transport', function() {
         })));
       });
 
-      it('should emit an event on socket "message" message', function(done) {
+      it('should emit an event on socket "message" message, if the message type is not text', function(done) {
         transport.on('message', function(event) {
           expect(event).to.shallowDeepEqual(message);
+          done();
+        });
+
+        onSubscribeHandler(room);
+
+        expect(socket.on).to.have.been.calledWith('message', sinon.match.func.and(sinon.match(function(handler) {
+          handler(message);
+
+          return true;
+        })));
+      });
+
+      it('should emit an event on socket "message" message when user is member of the conversation', function(done) {
+        message.type = 'text';
+        isMemberResult = true;
+        transport.on('message', function(event) {
+          expect(event).to.shallowDeepEqual(message);
+
           done();
         });
 

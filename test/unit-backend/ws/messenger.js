@@ -19,10 +19,8 @@ describe('The chat websocket messenger', function() {
     sendDataToMembersSpy = sinon.spy();
     sendDataToUsersSpy = sinon.spy();
     sendDataToUserSpy = sinon.spy();
-
-    this.moduleHelpers.addDep('logger', logger);
     options = {
-      dependencies: this.moduleHelpers.dependencies
+      logger: logger
     };
   });
 
