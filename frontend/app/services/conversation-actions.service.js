@@ -27,6 +27,7 @@
       addConversation: addConversation,
       addConversationWhenCreatorOrConfidential: addConversationWhenCreatorOrConfidential,
       addMember: addMember,
+      createDirectmessageConversation: createDirectmessageConversation,
       createConfidentialConversation: createConfidentialConversation,
       createOpenConversation: createOpenConversation,
       deleteConversation: deleteConversation,
@@ -87,6 +88,13 @@
       }
 
       return chatConversationService.addMember(conversation, userId);
+    }
+
+    function createDirectmessageConversation(conversation) {
+      conversation.type = CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE;
+      conversation.mode = CHAT_CONVERSATION_MODE.CHANNEL;
+
+      return createConversation(conversation);
     }
 
     function createConfidentialConversation(conversation) {

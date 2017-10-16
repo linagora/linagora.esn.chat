@@ -66,7 +66,8 @@
     })
     .constant('CHAT_CONVERSATION_TYPE', {
       OPEN: 'open',
-      CONFIDENTIAL: 'confidential'
+      CONFIDENTIAL: 'confidential',
+      DIRECT_MESSAGE: 'directmessage'
     })
     .constant('CHAT_CONVERSATION_MODE', {
       CHANNEL: 'channel'
