@@ -217,6 +217,38 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The createDirectmessageConversation function', function() {
+    it('should call chatConversationService.create and save new channel in store', function() {
+      chatConversationService.create = sinon.spy(function() {
+        return $q.when(result);
+      });
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+
+      chatConversationActionsService.createDirectmessageConversation(conversation);
+      $rootScope.$digest();
+
+      expect(chatConversationService.create).to.have.been.calledWith({_id: conversation._id, name: conversation.name, type: CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE, mode: CHAT_CONVERSATION_MODE.CHANNEL});
+      expect(chatConversationsStoreService.addConversation).to.have.been.calledWith(result.data);
+    });
+
+    it('should reject when chatConversationService.create rejects', function() {
+      chatConversationService.create = sinon.spy(function() {
+        return $q.reject(error);
+      });
+
+      chatConversationsStoreService.addConversation = sinon.spy();
+
+      chatConversationActionsService.createDirectmessageConversation(conversation).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(chatConversationService.create).to.have.been.calledWith({_id: conversation._id, name: conversation.name, type: CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE, mode: CHAT_CONVERSATION_MODE.CHANNEL});
+      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+    });
+  });
+
   describe('The createConfidentialConversation function', function() {
     it('should call chatConversationService.create and save new channel in store', function() {
       chatConversationService.create = sinon.spy(function() {
