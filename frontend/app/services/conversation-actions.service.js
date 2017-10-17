@@ -71,7 +71,7 @@
         return $q.reject(new Error('Can not add empty conversation'));
       }
 
-      if (currentUserIsCreator(conversation) || conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
+      if (currentUserIsCreator(conversation) || conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
         return addConversation(conversation);
       }
 

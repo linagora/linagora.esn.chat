@@ -20,6 +20,9 @@ describe('The chatConversationsStoreService service', function() {
     chatPrivateConversationService = {
       get: sinon.spy(function() {
         return $q.when(conversation);
+      }),
+      store: sinon.spy(function() {
+        return $q.when();
       })
     };
 
@@ -43,7 +46,7 @@ describe('The chatConversationsStoreService service', function() {
     CHAT_MEMBER_STATUS = _CHAT_MEMBER_STATUS_;
 
     publicConversation.type = CHAT_CONVERSATION_TYPE.OPEN;
-    confidentialConversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
+    confidentialConversation.type = CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE;
   }));
 
   describe('The addConversation function', function() {
@@ -72,8 +75,8 @@ describe('The chatConversationsStoreService service', function() {
       expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
     });
 
-    it('should add the conversation in privateConversations when type is confidential', function() {
-      conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should add the conversation in privateConversations when type is directmessage', function() {
+      confidentialConversation.type = CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE;
       chatConversationsStoreService.conversations = [];
       chatConversationsStoreService.addConversation(confidentialConversation);
 
@@ -82,7 +85,7 @@ describe('The chatConversationsStoreService service', function() {
       expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation]);
     });
 
-    it('should add the conversation in channels and order by alphabetic', function() {
+    it('should add the public conversations in channels and order them by alphabetic', function() {
       var publicConversation2 = {_id: 3, name: 'The public conversation', type: CHAT_CONVERSATION_TYPE.OPEN};
       var publicConversation3 = {_id: 4, name: 'A new public conversation', type: CHAT_CONVERSATION_TYPE.OPEN};
 
@@ -94,9 +97,9 @@ describe('The chatConversationsStoreService service', function() {
       expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
     });
 
-    it('should add the conversation in channels and order by alphabetic', function() {
-      var confidentialConversation2 = {_id: 5, name: 'The confidential conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL};
-      var confidentialConversation3 = {_id: 6, name: 'A new confidential conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL};
+    it('should add the private conversations in channels and order them by alphabetic', function() {
+      var confidentialConversation2 = {_id: 5, name: 'The confidential conversation', type: CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE};
+      var confidentialConversation3 = {_id: 6, name: 'A new confidential conversation', type: CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE};
 
       chatConversationsStoreService.conversations = [];
       chatConversationsStoreService.addConversations([confidentialConversation, confidentialConversation2, confidentialConversation3]);
@@ -104,6 +107,18 @@ describe('The chatConversationsStoreService service', function() {
       expect(chatConversationsStoreService.conversations).to.deep.equals([confidentialConversation3, confidentialConversation, confidentialConversation2]);
       expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation3, confidentialConversation, confidentialConversation2]);
       expect(chatConversationsStoreService.channels).to.deep.equals([]);
+    });
+
+    it('should call the chatPrivateConversationService.store to update the private conversations', function() {
+
+      chatConversationsStoreService.addConversation(confidentialConversation);
+      var conversatrionsIds = chatConversationsStoreService.privateConversations.map(function(privateConversation) {
+        return privateConversation._id;
+      });
+
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation]);
+      expect(chatConversationsStoreService.channels).to.deep.equals([]);
+      expect(chatPrivateConversationService.store).to.be.calledWith(conversatrionsIds);
     });
   });
 
@@ -218,7 +233,7 @@ describe('The chatConversationsStoreService service', function() {
       expect(chatPrivateConversationService.get).to.be.called;
     });
 
-    it('should fill ', function() {
+    it('should fill the privateConversations array', function() {
       chatConversationsStoreService.fillPrivateConversations();
       $rootScope.$digest();
 
