@@ -98,11 +98,11 @@
           }
         }
       })
-      .state('chat.groups-add', {
-        url: '/groups/add',
+      .state('chat.direct-message-add', {
+        url: '/directmessage/add',
         views: {
           'main@chat': {
-            template: '<chat-conversation-create-private/>'
+            template: '<chat_conversation_create_direct_message/>'
           }
         }
       })
