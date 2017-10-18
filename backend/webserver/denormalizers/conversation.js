@@ -25,7 +25,7 @@ module.exports = function(dependencies, lib) {
       conversation.member_status = isMember.state === 'fulfilled' ? (isMember.value ? MEMBER_STATUS.MEMBER : MEMBER_STATUS.NONE) || MEMBER_STATUS.NONE : MEMBER_STATUS.NONE;
       conversation.members_count = numberOfMembers.state === 'fulfilled' ? numberOfMembers.value || 0 : 0;
 
-      if (conversation.type !== CONVERSATION_TYPE.CONFIDENTIAL) {
+      if (conversation.type !== CONVERSATION_TYPE.DIRECT_MESSAGE) {
         delete conversation.members;
       }
 
