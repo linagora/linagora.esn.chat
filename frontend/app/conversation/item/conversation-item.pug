@@ -3,5 +3,5 @@
     chat-conversation-item-icon(conversation="ctrl.conversation")
     span.item-name
       bdi(ng-bind-html="ctrl.name| esnEmoticonify:{class: 'label-emoji'}" )
-  chat-conversation-number-badge(number='ctrl.conversation.unreadMessageCount', ng-if='ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.CONFIDENTIAL')
+  chat-conversation-number-badge(number='ctrl.conversation.unreadMessageCount', ng-if='ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE')
   chat-conversation-number-badge(number='ctrl.conversation.mention_count', ng-if='ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.OPEN')
