@@ -7,7 +7,8 @@
     function chatPrivateConversationService(ChatRestangular) {
 
       return {
-        get: get
+        get: get,
+        store: store
       };
 
       function _stripResponse(response) {
@@ -16,6 +17,12 @@
 
       function get() {
         return ChatRestangular.one('user').all('privateConversations').getList().then(_stripResponse);
+      }
+
+      function store(conversationIds) {
+        ChatRestangular.one('user').all('privateConversations').doPUT({
+          conversationIds: conversationIds
+        });
       }
     }
 })();

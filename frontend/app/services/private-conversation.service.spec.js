@@ -50,4 +50,16 @@ describe('The chatPrivateConversationService service', function() {
       $httpBackend.flush();
     });
   });
+
+  describe('store function', function() {
+    it('should call the right endpoint', function() {
+      var conversationIds = ['A', 'B'];
+
+      $httpBackend.expectPUT('/chat/api/user/privateConversations', {conversationIds: conversationIds}).respond([]);
+
+      chatPrivateConversationService.store(conversationIds);
+      $rootScope.$digest();
+      $httpBackend.flush();
+    });
+  });
 });

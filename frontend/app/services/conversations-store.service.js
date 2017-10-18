@@ -44,10 +44,20 @@
         insertConversationInSortedArray(store.conversations, conversation);
         if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
           insertConversationInSortedArray(store.channels, conversation);
-        } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
+        } else if (conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
           insertConversationInSortedArray(store.privateConversations, conversation);
+          _updatePrivateConversations();
         }
       }
+    }
+
+    function _updatePrivateConversations() {
+      var privateConversationsIds = store.privateConversations.map(function(privateConversation) {
+
+        return privateConversation._id;
+      });
+
+      chatPrivateConversationService.store(privateConversationsIds);
     }
 
     function addConversations(conversations) {
@@ -67,7 +77,7 @@
 
       if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
         array = store.channels;
-      } else if (conversation.type === CHAT_CONVERSATION_TYPE.CONFIDENTIAL) {
+      } else if (conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
         array = store.privateConversations;
       }
 

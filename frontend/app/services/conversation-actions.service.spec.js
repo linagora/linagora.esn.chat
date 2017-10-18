@@ -146,7 +146,7 @@ describe('The chatConversationActionsService service', function() {
     });
 
     it('should add the confidential conversation to the store even if not creator', function() {
-      var aConfidentialConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.CONFIDENTIAL, creator: { _id: 'userId1' }};
+      var aConfidentialConversation = { _id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE, creator: { _id: 'userId1' }};
 
       chatConversationsStoreService.addConversation = sinon.spy();
       chatConversationActionsService.addConversationWhenCreatorOrConfidential(aConfidentialConversation).then(successSpy, errorSpy);
