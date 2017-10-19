@@ -5,6 +5,7 @@ module.exports = (dependencies, lib) => {
   const logger = dependencies('logger');
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Types.ObjectId;
+  const utils = require('./utils')(dependencies, lib);
 
   return {
     get,
@@ -21,7 +22,7 @@ module.exports = (dependencies, lib) => {
       return [];
     })
     .then(conversationsObject =>
-      res.status(200).json(conversationsObject)
+      utils.sendConversationResult(conversationsObject, req.user, res)
     )
     .catch(error => {
       logger.error('Error while getting subscribed private conversations', error);

@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const Q = require('q');
+const mockery = require('mockery');
 
 describe('The user-subscribed-private-conversation controller', function() {
 
@@ -46,9 +47,17 @@ describe('The user-subscribed-private-conversation controller', function() {
   describe('The get function', function() {
     it('should send back HTTP 200 with an empty array when there is no subscribed conversations', function(done) {
       const controller = getController(this.moduleHelpers.dependencies, lib);
+      const sendConversationResult = function() {
 
-      subscribedConversations = [];
-      conversations = [];
+        return Q.when(subscribedConversations);
+      };
+
+      mockery.registerMock('./utils', function() {
+        return {
+          sendConversationResult: sendConversationResult
+        };
+      });
+
       controller.get({ user: {_id: '11'}}, {
         status: function(code) {
           expect(code).to.equal(200);
@@ -66,7 +75,19 @@ describe('The user-subscribed-private-conversation controller', function() {
 
     it('should send back HTTP 200 with the subscribedConversations as result', function(done) {
       subscribedConversations = [];
+      conversations = [];
       const controller = getController(this.moduleHelpers.dependencies, lib);
+
+      const sendConversationResult = function() {
+
+        return Q.when(subscribedConversations);
+      };
+
+      mockery.registerMock('./utils', function() {
+        return {
+          sendConversationResult: sendConversationResult
+        };
+      });
 
       controller.get({ user: {_id: '11'}}, {
         status: function(code) {
@@ -75,7 +96,7 @@ describe('The user-subscribed-private-conversation controller', function() {
           return {
             json: function(json) {
               expect(lib.userSubscribedPrivateConversation.get).to.have.been.called;
-              expect(json).to.deep.equal(conversations);
+              expect(json).to.deep.equal(subscribedConversations);
               done();
             }
           };
