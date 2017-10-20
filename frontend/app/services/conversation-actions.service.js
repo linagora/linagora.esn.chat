@@ -41,6 +41,7 @@
       ready: ready.promise,
       setActive: setActive,
       unsetActive: unsetActive,
+      unsubscribePrivateConversation: unsubscribePrivateConversation,
       updateConversation: updateConversation,
       updateConversationTopic: updateConversationTopic,
       updateMembers: updateMembers,
@@ -237,6 +238,10 @@
     function unsetActive() {
       chatConversationsStoreService.unsetActive();
       $rootScope.$broadcast(CHAT_EVENTS.UNSET_ACTIVE_ROOM);
+    }
+
+    function unsubscribePrivateConversation(conversation) {
+      chatConversationsStoreService.unsubscribePrivateConversation(conversation);
     }
 
     function updateConversation(conversationId, modifications) {

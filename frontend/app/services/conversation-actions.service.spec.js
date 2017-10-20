@@ -704,6 +704,15 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The unsubscribePrivateConversation function', function() {
+    it('should call chatConversationsStoreService.unsubscribePrivateConversation ', function() {
+      chatConversationsStoreService.unsubscribePrivateConversation = sinon.spy();
+      chatConversationActionsService.unsubscribePrivateConversation(conversation._id);
+
+      expect(chatConversationsStoreService.unsubscribePrivateConversation).to.have.been.called;
+    });
+  });
+
   describe('The updateUserMentionsCount function', function() {
     it('should do nothing when messageUserMentions is null', function() {
       chatConversationsStoreService.increaseUserMentionsCount = sinon.spy();
