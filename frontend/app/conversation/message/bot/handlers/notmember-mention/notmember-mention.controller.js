@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .controller('chatBotMessageNotMemberMentionController', chatBotMessageNotMemberMentionController);
 
-    function chatBotMessageNotMemberMentionController($q, $log, chatBotMessageService, chatConversationActionsService) {
+    function chatBotMessageNotMemberMentionController($q, $log, $state, chatBotMessageService, chatConversationActionsService, chatConversationService, CHAT_CONVERSATION_TYPE) {
       var self = this;
 
       self.$onInit = $onInit;
@@ -22,7 +22,28 @@
           self.userMentions = [self.userMentions];
         }
 
-        self.userMentions.map(addMemberToConversation);
+        chatConversationService.get(self.conversationId).then(function(conversation) {
+          if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
+            self.userMentions.map(addMemberToConversation);
+          } else {
+            var totalMembers = conversation.members.concat(self.userMentions.map(function(userMention) {
+
+              return {member: {id: userMention._id, objectType: 'user'}};
+            })).map(function(member) {
+
+              return member.member.id;
+            });
+
+            chatConversationActionsService.createDirectmessageConversation({members: totalMembers})
+              .then(function(conversation) {
+
+                $state.go('chat.channels-views', {id: conversation._id});
+              })
+              .catch(function(err) {
+                $log.error('Could not create conversation with members', totalMembers, err);
+              });
+            }
+        });
       }
     }
 })();
