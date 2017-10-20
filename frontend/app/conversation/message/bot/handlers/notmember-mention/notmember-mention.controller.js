@@ -23,20 +23,16 @@
         }
 
         chatConversationService.get(self.conversationId).then(function(conversation) {
-          console.log('conversation ', conversation);
-          if (conversation.type == CHAT_CONVERSATION_TYPE.OPEN) {
+          if (conversation.type === CHAT_CONVERSATION_TYPE.OPEN) {
             self.userMentions.map(addMemberToConversation);
           } else {
             var totalMembers = conversation.members.concat(self.userMentions.map(function(userMention) {
 
-              return {member:{id: userMention._id, objectType: 'user'}}
-            }));
+              return {member: {id: userMention._id, objectType: 'user'}};
+            })).map(function(member) {
 
-            console.log('totalMembers ', totalMembers);
-            totalMembers = totalMembers.map(function(member) {
               return member.member.id;
             });
-            console.log('totalMembers ', totalMembers);
 
             chatConversationActionsService.createDirectmessageConversation({members: totalMembers})
               .then(function(conversation) {
