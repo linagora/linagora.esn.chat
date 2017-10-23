@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationActionsService service', function() {
 
-  var $log, $q, conversation, name, user, result, sessionMock, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatDesktopNotificationService, $rootScope;
+  var $log, $q, conversation, name, user, result, sessionMock, chatPrivateConversationService, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatDesktopNotificationService, $rootScope;
   var CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_EVENTS;
   var error, successSpy, errorSpy;
 
@@ -23,6 +23,11 @@ describe('The chatConversationActionsService service', function() {
     };
     chatDesktopNotificationService = {
       notify: sinon.spy()
+    };
+    chatPrivateConversationService = {
+      get: sinon.spy(function() {
+        return $q.when(conversation);
+      })
     };
     chatMessageUtilsService = {};
     chatConversationService = {};
@@ -44,6 +49,7 @@ describe('The chatConversationActionsService service', function() {
       $provide.value('chatConversationNameService', chatConversationNameService);
       $provide.value('chatDesktopNotificationService', chatDesktopNotificationService);
       $provide.value('chatMessageUtilsService', chatMessageUtilsService);
+      $provide.value('chatPrivateConversationService', chatPrivateConversationService);
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
 
@@ -594,7 +600,7 @@ describe('The chatConversationActionsService service', function() {
     var conversations;
 
     beforeEach(function() {
-      conversations = [{_id: 1}, {_id: 2}];
+      conversations = [{_id: 1, type: CHAT_CONVERSATION_TYPE.OPEN}];
     });
 
     it('should fetch all the conversations and add them to the store', function() {

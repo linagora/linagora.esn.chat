@@ -23,7 +23,7 @@
         })
       };
 
-      chatConversationActionsService.createDirectmessageConversation(conversation).then(function(response) {
+      return chatConversationActionsService.createDirectmessageConversation(conversation).then(function(response) {
         notificationFactory.weakSuccess('success', 'Private conversation successfuly created');
         $state.go('chat.channels-views', { id: response._id});
       }, function(err) {

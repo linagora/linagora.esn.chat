@@ -14,7 +14,6 @@
       deleteConversation: deleteConversation,
       findConversation: findConversation,
       find: find,
-      fillPrivateConversations: fillPrivateConversations,
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       increaseUserMentionsCount: increaseUserMentionsCount,
@@ -91,12 +90,6 @@
 
     function find(filter) {
       return _.find(store.conversations, filter);
-    }
-
-    function fillPrivateConversations() {
-      chatPrivateConversationService.get().then(function(conversations) {
-        store.privateConversations = conversations;
-      });
     }
 
     function getNumberOfUnreadMessages() {
