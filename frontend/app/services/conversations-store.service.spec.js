@@ -414,6 +414,27 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
+  describe('The unsubscribePrivateConversation function', function() {
+    it('should do nothing when the conversation does not exists', function() {
+      chatConversationsStoreService.conversations = [conversation, confidentialConversation];
+      chatConversationsStoreService.privateConversations = [confidentialConversation];
+      chatConversationsStoreService.unsubscribePrivateConversation(publicConversation);
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([conversation, confidentialConversation]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation]);
+    });
+
+    it('should remove conversation from conversations and privateConversations and update the subscribed conversations', function() {
+      chatConversationsStoreService.conversations = [conversation, confidentialConversation];
+      chatConversationsStoreService.privateConversations = [confidentialConversation];
+      chatConversationsStoreService.unsubscribePrivateConversation(confidentialConversation);
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
+      expect(chatPrivateConversationService.store).to.have.been.called;
+    });
+  });
+
   describe('The updateConversation function', function() {
     it('should add conversation as is when not already in store', function() {
       chatConversationsStoreService.conversations = [conversation];

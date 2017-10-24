@@ -10,6 +10,7 @@
 
     self.CHAT_CONVERSATION_TYPE = CHAT_CONVERSATION_TYPE;
     self.$onInit = $onInit;
+    self.isDirectMessage = false;
 
     function getDaysSinceMessageCreated(message) {
       var d1 = moment().startOf('day');
@@ -30,6 +31,10 @@
       chatConversationNameService.getName(self.conversation).then(function(name) {
         self.name = name;
       });
+
+      if (self.conversation.type === self.CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
+        self.isDirectMessage = true;
+      }
 
       if (self.conversation.last_message) {
         self.conversation.last_message.text = $filter('esnEmoticonify')(self.conversation.last_message.text, {class: 'chat-emoji'});

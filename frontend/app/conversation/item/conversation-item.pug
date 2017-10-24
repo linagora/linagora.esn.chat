@@ -1,7 +1,8 @@
-.chat-conversation-item(title="{{::ctrl.name}}", ui-sref='chat.channels-views({id: ctrl.conversation._id})', ui-sref-active="selected", ng-class="{unread: ctrl.conversation.unreadMessageCount > 0}")
+.chat-conversation-item(desktop-hover="isHover = hover", title="{{::ctrl.name}}", ui-sref='chat.channels-views({id: ctrl.conversation._id})', ui-sref-active="selected", ng-class="{unread: ctrl.conversation.unreadMessageCount > 0}")
   .name
     chat-conversation-item-icon(conversation="ctrl.conversation")
     span.item-name
       bdi(ng-bind-html="ctrl.name| esnEmoticonify:{class: 'label-emoji'}" )
-  chat-conversation-number-badge(number='ctrl.conversation.unreadMessageCount', ng-if='ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE')
-  chat-conversation-number-badge(number='ctrl.conversation.mention_count', ng-if='ctrl.conversation.type === ctrl.CHAT_CONVERSATION_TYPE.OPEN')
+  chat-conversation-number-badge(number='ctrl.conversation.unreadMessageCount', ng-if='ctrl.isDirectMessage')
+  chat-conversation-number-badge(number='ctrl.conversation.mention_count', ng-if='!ctrl.isDirectMessage')
+  chat-conversation-remove-cross(hover='isHover', conversation="ctrl.conversation", ng-if='ctrl.isDirectMessage')

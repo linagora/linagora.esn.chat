@@ -26,6 +26,7 @@
       setActive: setActive,
       setMembers: setMembers,
       unsetActive: unsetActive,
+      unsubscribePrivateConversation: unsubscribePrivateConversation,
       updateConversation: updateConversation,
       updateMembersCount: updateMembersCount,
       updateTopic: updateTopic,
@@ -210,6 +211,18 @@
       conv.name = conversation.name;
       conv.members = conversation.members;
       conv.avatar = conversation.avatar;
+    }
+
+    function unsubscribePrivateConversation(conversation) {
+      conversation = !conversation._id ? _.find(store.conversations, {_id: conversation}) : conversation;
+
+      if (!conversation) {
+
+        return $log.warn('Trying to unsubscribe from a conversation that does not exist');
+      }
+      _.remove(store.privateConversations, {_id: conversation._id});
+      _.remove(store.conversations, {_id: conversation._id});
+      _updatePrivateConversations();
     }
 
     function updateMembersCount(conversation, count) {
