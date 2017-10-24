@@ -16,6 +16,7 @@
     chatConversationsStoreService,
     chatMessageUtilsService,
     chatDesktopNotificationService,
+    chatPrivateConversationService,
     CHAT_EVENTS,
     CHAT_CONVERSATION_MODE,
     CHAT_CONVERSATION_TYPE
@@ -134,6 +135,30 @@
       });
     }
 
+    function _fetchOpenConversation() {
+
+      return fetchAllConversations()
+      .then(function(conversations) {
+
+        return _.filter(conversations, function(conversation) {
+
+          return conversation.type === CHAT_CONVERSATION_TYPE.OPEN;
+        });
+      });
+    }
+
+    function fetchOpenAndSubscribedConversation() {
+
+      return _fetchOpenConversation()
+      .then(function(openConversations) {
+
+        return chatPrivateConversationService.get().then(function(privateConversations) {
+
+          return openConversations.concat(privateConversations);
+        });
+      });
+    }
+
     function getConversation(conversationId) {
       var conversation = chatConversationsStoreService.findConversation(conversationId);
 
@@ -223,7 +248,7 @@
     }
 
     function start() {
-      fetchAllConversations()
+      fetchOpenAndSubscribedConversation()
         .then(addConversations, function(err) {
           $log.error('Can not get user conversations', err);
 

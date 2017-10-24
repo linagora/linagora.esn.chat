@@ -19,7 +19,7 @@
         return;
       }
 
-      chatConversationActionsService.createOpenConversation(self.conversation).then(function(response) {
+      return chatConversationActionsService.createOpenConversation(self.conversation).then(function(response) {
         notificationFactory.weakSuccess('success', 'Channel successfuly created');
         $state.go('chat.channels-views', {id: response._id});
       }, function(err) {
