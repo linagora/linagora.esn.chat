@@ -1,0 +1,8 @@
+button.btn.btn-link.chat-subheader-button(ng-click="ctrl.chatClick()", ng-disabled="ctrl.chatDisabled", ng-switch="ctrl.chatIconPosition")
+  .chat-button-icon-and-text(ng-switch-when="right")
+    span {{::ctrl.chatIconText}}
+    i.mdi(ng-class="ctrl.chatIconClass")
+
+  .chat-button-icon-and-text(ng-switch-default)
+    i.mdi(ng-class="ctrl.chatIconClass")
+    span {{::ctrl.chatIconText}}
