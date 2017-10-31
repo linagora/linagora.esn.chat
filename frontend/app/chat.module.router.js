@@ -102,7 +102,7 @@
         url: '/directmessage/add',
         views: {
           'main@chat': {
-            template: '<chat_conversation_create_direct_message/>'
+            template: '<chat-conversation-create-direct-message/>'
           }
         }
       })
