@@ -68,15 +68,15 @@ describe('The chat websocket messenger', function() {
   });
 
   describe('The conversationCreated function', function() {
-    it('should send conversation to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send conversation to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.conversationCreated(conversation);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED, {data: conversation, room: DEFAULT_ROOM});
     });
 
-    it('should send conversation to users when conversation is not confidential', function() {
+    it('should send conversation to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.conversationCreated(conversation);
 
@@ -85,15 +85,15 @@ describe('The chat websocket messenger', function() {
   });
 
   describe('The conversationDeleted function', function() {
-    it('should send conversation to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send conversation to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.conversationDeleted(conversation);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_DELETED, {data: conversation, room: DEFAULT_ROOM});
     });
 
-    it('should send conversation to users when conversation is not confidential', function() {
+    it('should send conversation to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.conversationDeleted(conversation);
 
@@ -102,15 +102,15 @@ describe('The chat websocket messenger', function() {
   });
 
   describe('The conversationUpdated function', function() {
-    it('should send conversation to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send conversation to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.conversationUpdated(conversation);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_UPDATED, {data: conversation, room: DEFAULT_ROOM});
     });
 
-    it('should send conversation to users when conversation is not confidential', function() {
+    it('should send conversation to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.conversationUpdated(conversation);
 
@@ -126,15 +126,15 @@ describe('The chat websocket messenger', function() {
       members_count = 10;
     });
 
-    it('should send conversation to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send conversation to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.memberHasJoined(conversation, member, members_count);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERSATION, {data: {conversation, member, members_count}, room: DEFAULT_ROOM});
     });
 
-    it('should send conversation to users when conversation is not confidential', function() {
+    it('should send conversation to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.memberHasJoined(conversation, member, members_count);
 
@@ -150,15 +150,15 @@ describe('The chat websocket messenger', function() {
       members_count = 10;
     });
 
-    it('should send conversation to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send conversation to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.memberHasLeft(conversation, member, members_count);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION, {data: {conversation, member, members_count}, room: DEFAULT_ROOM});
     });
 
-    it('should send conversation to users when conversation is not confidential', function() {
+    it('should send conversation to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.memberHasLeft(conversation, member, members_count);
 
@@ -182,18 +182,18 @@ describe('The chat websocket messenger', function() {
   });
 
   describe('The sendDataToClients function', function() {
-    it('should send data to members when conversation is confidential', function() {
+    it('should send data to members when conversation is directmessage', function() {
       const type = 'MyType';
       const data = {data: 'MyData'};
 
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.sendDataToClients(conversation, type, data);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, type, {data: data, room: DEFAULT_ROOM});
     });
 
-    it('should send data to users when conversation is not confidential', function() {
+    it('should send data to users when conversation is not directmessage', function() {
       const type = 'MyType';
       const data = {data: 'MyData'};
 
@@ -207,15 +207,15 @@ describe('The chat websocket messenger', function() {
   describe('The sendMessage function', function() {
     const room = 'MyRoom';
 
-    it('should send data to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send data to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       messenger.sendMessage(conversation, room, message);
 
       expect(sendDataToUsersSpy).to.not.have.been.called;
       expect(sendDataToMembersSpy).to.have.been.called;
     });
 
-    it('should send data to users when conversation is not confidential', function() {
+    it('should send data to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.sendMessage(conversation, room, message);
 
@@ -225,15 +225,15 @@ describe('The chat websocket messenger', function() {
   });
 
   describe('The topicUpdated function', function() {
-    it('should send conversation to members when conversation is confidential', function() {
-      conversation.type = CONVERSATION_TYPE.CONFIDENTIAL;
+    it('should send conversation to members when conversation is directmessage', function() {
+      conversation.type = CONVERSATION_TYPE.DIRECT_MESSAGE;
       conversation.members = [1, 2, 3];
       messenger.topicUpdated(conversation);
 
       expect(sendDataToMembersSpy).to.have.been.calledWith(conversation.members, CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED, {data: conversation, room: DEFAULT_ROOM});
     });
 
-    it('should send conversation to users when conversation is not confidential', function() {
+    it('should send conversation to users when conversation is not directmessage', function() {
       conversation.type = CONVERSATION_TYPE.OPEN;
       messenger.topicUpdated(conversation);
 

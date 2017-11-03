@@ -12,7 +12,7 @@ const CONSTANTS = require('../../backend/lib/constants');
 
 describe('The websocket API', function() {
   let app, mongoose, userId, userAsMember, pubsub, deps, collaborations, collaboration, writable, readable, wsserver;
-  let defaultChannel, confidentialConversation;
+  let defaultChannel, directMesssageConversation;
   let userA, userB, userC;
   let clientA, clientB, clientC;
 
@@ -195,12 +195,12 @@ describe('The websocket API', function() {
     Q.all([
       Q.denodeify(app.lib.conversation.createDefaultChannel)({}),
       Q.denodeify(app.lib.conversation.create)({
-        type: CONSTANTS.CONVERSATION_TYPE.CONFIDENTIAL,
+        type: CONSTANTS.CONVERSATION_TYPE.DIRECT_MESSAGE,
         members: [self.helpers.asMember(userA), self.helpers.asMember(userB)]
       })
     ]).spread((general, confidential) => {
       defaultChannel = general;
-      confidentialConversation = confidential;
+      directMesssageConversation = confidential;
       done();
     }, done);
   });
@@ -398,7 +398,7 @@ describe('The websocket API', function() {
 
       describe('On confidential conversation', function() {
         it('should be forwarded only to conversation members', function(done) {
-          const message = getUserTypingMessage(confidentialConversation, userA);
+          const message = getUserTypingMessage(directMesssageConversation, userA);
           const userTypingReceivedDeferA = Q.defer();
           const userTypingReceivedDeferB = Q.defer();
           const userTypingReceivedSpyC = sinon.spy();
@@ -485,7 +485,7 @@ describe('The websocket API', function() {
 
       describe('on confidential conversation', function() {
         it('should be forwarded only to conversation members', function(done) {
-          const message = getTextMessage('hello', confidentialConversation, userA);
+          const message = getTextMessage('hello', directMesssageConversation, userA);
           const textReceivedDeferA = Q.defer();
           const textReceivedDeferB = Q.defer();
           const textReceivedSpyC = sinon.spy();
