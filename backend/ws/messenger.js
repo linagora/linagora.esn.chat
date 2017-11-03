@@ -58,7 +58,7 @@ class Messenger extends EventEmitter {
       room: DEFAULT_ROOM
     };
 
-    if (conversation.type === CONVERSATION_TYPE.CONFIDENTIAL) {
+    if (conversation.type === CONVERSATION_TYPE.DIRECT_MESSAGE) {
       this.transport.sendDataToMembers(conversation.members, type, payload);
     } else {
       this.transport.sendDataToUsers(type, payload);
