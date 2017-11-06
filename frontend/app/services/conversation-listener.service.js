@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationListenerService', chatConversationListenerService);
 
-  function chatConversationListenerService($rootScope, session, chatConversationService, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS) {
+  function chatConversationListenerService($rootScope, session, chatConversationService, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS, CHAT_CONVERSATION_TYPE) {
     return {
       addEventListeners: addEventListeners,
       start: start
@@ -42,23 +42,36 @@
       chatConversationActionsService.updateMembers(event.conversation, event.members_count);
     }
 
+    function updateConversationOnMessage(message, conversation) {
+      chatConversationActionsService.increaseNumberOfUnreadMessages(conversation._id);
+      chatConversationActionsService.updateUserMentionsCount(conversation._id, message.user_mentions);
+      chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true}).then(function(text) {
+        conversation.last_message = {
+          text: text,
+          date: message.timestamps.creation,
+          creator: message.creator,
+          user_mentions: message.user_mentions
+        };
+      });
+      conversation.canScrollDown = true;
+    }
+
     function onMessage(message) {
       var conversation = chatConversationsStoreService.findConversation(message.channel);
 
       if (!conversation) {
-        return;
+        chatConversationActionsService.getConversation(message.channel).then(function(conversation) {
+
+        if (conversation && conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
+            chatConversationActionsService.addConversation(conversation).then(function(conversation) {
+              updateConversationOnMessage(message, conversation);
+            });
+          }
+        });
+
+      } else {
+        updateConversationOnMessage(message, conversation);
       }
-
-      chatConversationActionsService.increaseNumberOfUnreadMessages(conversation._id);
-      chatConversationActionsService.updateUserMentionsCount(conversation._id, message.user_mentions);
-
-      conversation.last_message = {
-        text: chatParseMention.parseMentions(message.text, message.user_mentions, {skipLink: true}),
-        date: message.timestamps.creation,
-        creator: message.creator,
-        user_mentions: message.user_mentions
-      };
-      conversation.canScrollDown = true;
     }
 
     function start() {

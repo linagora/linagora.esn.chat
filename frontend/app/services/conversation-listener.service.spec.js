@@ -6,15 +6,26 @@ var expect = chai.expect;
 
 describe('The chatConversationListenerService service', function() {
 
-  var $rootScope, $q, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session;
-  var CHAT_EVENTS;
+  var $rootScope, $q, text, directmessage, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session;
+  var CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
 
   beforeEach(function() {
     conversation = {_id: 1, name: 'My conversation'};
-    chatConversationActionsService = {};
+    text = 'mytext';
+    chatConversationActionsService = {
+      getConversation: sinon.spy(function() {
+        return $q.when(conversation);
+      }),
+      addConversation: sinon.spy(function() {
+        return $q.when();
+      })
+    };
     chatConversationsStoreService = {};
     chatConversationService = {};
-    chatParseMention = {};
+    chatParseMention = {
+      parseMentions: sinon.spy(function() {
+      return $q.when(text);
+    })};
 
     chatMessengerService = {
       addEventListener: sinon.spy()
@@ -41,11 +52,12 @@ describe('The chatConversationListenerService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationListenerService_, _CHAT_EVENTS_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationListenerService_, _CHAT_EVENTS_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
     $rootScope = _$rootScope_;
     chatConversationListenerService = _chatConversationListenerService_;
     CHAT_EVENTS = _CHAT_EVENTS_;
+    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
   }));
 
   describe('The addEventListeners function', function() {
@@ -211,7 +223,7 @@ describe('The chatConversationListenerService service', function() {
         };
       });
 
-      it('should do nothing when conversation is not in the store', function() {
+      it('should do nothing when conversation is not in the store and it is not a direct message', function() {
         chatConversationsStoreService.findConversation = sinon.spy(function() {});
         chatConversationsStoreService.isActiveRoom = sinon.spy();
 
@@ -223,13 +235,48 @@ describe('The chatConversationListenerService service', function() {
         expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
       });
 
+      it('should update the store when conversation is a direct message and is not in the store', function() {
+        var text = 'My parsed text';
+
+        directmessage = {_id: 1, name: 'My conversation', type: CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE};
+        chatConversationActionsService.getConversation = sinon.spy(function() {
+          return $q.when(directmessage);
+        });
+        chatConversationActionsService.addConversation = sinon.spy(function() {
+          return $q.when(directmessage);
+        });
+        chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatConversationActionsService.updateUserMentionsCount = sinon.spy();
+        chatConversationsStoreService.findConversation = sinon.spy(function() {});
+        chatConversationsStoreService.isActiveRoom = sinon.spy();
+        chatParseMention.parseMentions = sinon.spy(function() {
+          return $q.when(text);
+        });
+
+        chatConversationListenerService.start();
+
+        $rootScope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+        $rootScope.$digest();
+
+        expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
+        expect(chatConversationActionsService.addConversation).to.have.been.calledWith(directmessage);
+        expect(chatParseMention.parseMentions).to.have.been.calledWith(message.text, message.user_mentions, {skipLink: true});
+        expect(directmessage.last_message).to.shallowDeepEqual({
+          text: text,
+          date: message.timestamps.creation,
+          creator: message.creator,
+          user_mentions: message.user_mentions
+        });
+        expect(directmessage.canScrollDown).to.be.true;
+      });
+
       it('should update the conversation.last_message to the received one', function() {
         var text = 'My parsed text';
 
         chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
         chatConversationActionsService.updateUserMentionsCount = sinon.spy();
         chatParseMention.parseMentions = sinon.spy(function() {
-          return text;
+          return $q.when(text);
         });
         chatConversationsStoreService.findConversation = sinon.spy(function() {
           return conversation;
@@ -254,7 +301,6 @@ describe('The chatConversationListenerService service', function() {
       it('should update conversation number of unreaded message', function() {
         chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
         chatConversationActionsService.updateUserMentionsCount = sinon.spy();
-        chatParseMention.parseMentions = sinon.spy();
         chatConversationsStoreService.findConversation = sinon.spy(function() {
           return conversation;
         });
@@ -271,7 +317,6 @@ describe('The chatConversationListenerService service', function() {
       it('should update conversation number of user mentions', function() {
         chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
         chatConversationActionsService.updateUserMentionsCount = sinon.spy();
-        chatParseMention.parseMentions = sinon.spy();
         chatConversationsStoreService.findConversation = sinon.spy(function() {
           return conversation;
         });

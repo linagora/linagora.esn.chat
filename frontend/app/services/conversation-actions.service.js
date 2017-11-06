@@ -167,13 +167,7 @@
         return $q.when(conversation);
       }
 
-      return chatConversationService.get(conversationId).then(function(result) {
-        conversation = result.data;
-
-        conversation && chatConversationsStoreService.addConversation(conversation);
-
-        return conversation;
-      });
+      return chatConversationService.get(conversationId);
     }
 
     function increaseNumberOfUnreadMessages(conversationId) {
