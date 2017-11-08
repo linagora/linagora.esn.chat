@@ -7,6 +7,7 @@ module.exports = function(dependencies) {
 
   const models = {
     ChatUserSubscribedPrivateConversation: require('./db/models/UserSubscribedPrivateConversation')(dependencies),
+    archivedConversation: require('./db/archived-conversation')(dependencies),
     conversation: require('./db/conversation')(dependencies),
     message: require('./db/message')(dependencies)
   };

@@ -2,6 +2,7 @@
 
 module.exports = {
   OBJECT_TYPES: {
+    ARCHIVED_CONVERSATION: 'chat.archivedconversation',
     CONVERSATION: 'chat.conversation',
     MESSAGE: 'chat.message',
     USER: 'user'
