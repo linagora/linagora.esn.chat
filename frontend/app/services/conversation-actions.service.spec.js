@@ -343,35 +343,6 @@ describe('The chatConversationActionsService service', function() {
 
       expect(chatConversationService.get).to.have.been.calledWith(conversation._id);
     });
-
-    it('should not call chatConversationsStoreService.addConversation if chatConversationService.get returns nothing', function() {
-      chatConversationsStoreService.findConversation = sinon.spy();
-
-      chatConversationsStoreService.addConversation = sinon.spy();
-      chatConversationService.get = sinon.spy(function() {
-        return $q.when({});
-      });
-      chatConversationActionsService.getConversation(conversation._id);
-
-      $rootScope.$digest();
-
-      expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
-    });
-
-    it('should call chatConversationsStoreService.addConversation if chatConversationService.get returns conversation', function() {
-      var conversation = {_id: 1, name: 'My conversation', data: 'aSimpleData'};
-
-      chatConversationsStoreService.findConversation = sinon.spy();
-      chatConversationsStoreService.addConversation = sinon.spy();
-      chatConversationService.get = sinon.spy(function() {
-        return $q.when(conversation);
-      });
-      chatConversationActionsService.getConversation(conversation._id);
-
-      $rootScope.$digest();
-
-      expect(chatConversationsStoreService.addConversation).to.have.been.called.once;
-    });
   });
 
   describe('The increaseNumberOfUnreadMessages function', function() {
