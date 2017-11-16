@@ -16,6 +16,7 @@ module.exports = {
   NOTIFICATIONS: {
     COLLABORATION_JOIN: 'collaboration:join',
     COLLABORATION_LEAVE: 'collaboration:leave',
+    CONVERSATION_ARCHIVED: 'chat:conversation:archived',
     CONVERSATION_CREATED: 'chat:conversation:created',
     CONVERSATION_DELETED: 'chat:conversation:deleted',
     CONVERSATION_INITIALIZED: 'chat:conversation:initialized',

@@ -5,8 +5,6 @@ const _ = require('lodash');
 
 module.exports = function(dependencies) {
 
-  const mongoose = dependencies('db').mongo.mongoose;
-  const ObjectId = mongoose.Schema.ObjectId;
   const baseCollaboration = dependencies('db').mongo.models['base-collaboration'];
   const collaborationModule = dependencies('collaboration');
   const Conversation = require('./conversation-base')(dependencies);
