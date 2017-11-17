@@ -14,7 +14,7 @@ const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 
 describe('The Chat search API', function() {
 
-  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember, userDomains, starredMessage;
+  let deps, mongoose, userId, user, anotherUserId, anotherUser, app, userAsMember, userDomains, starredMessage, EsnConfig;
 
   function dependencies(name) {
     return deps[name];
@@ -24,7 +24,7 @@ describe('The Chat search API', function() {
     return {member: {id: String(id), objectType: 'user'}};
   }
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     const self = this;
 
     mongoose = require('mongoose');
@@ -36,22 +36,19 @@ describe('The Chat search API', function() {
     userDomains = [{domain_id: new mongoose.Types.ObjectId()}];
 
     // all the following mockery calls are here to avoid to intialize OP.core but mock what is needed by ES and pubsub modules.
-    mockery.registerMock('../esn-config', function() {
+    EsnConfig = function() {
       return {
-        get: function(callback) {
-          return callback(null,
-            {
-              _id: 'elasticsearch',
-              host: `${self.testEnv.serversConfig.host}:${self.testEnv.serversConfig.elasticsearch.port}`
-            }
-          );
+        get() {
+          return Q.when({
+            _id: 'elasticsearch',
+            host: `${self.testEnv.serversConfig.host}:${self.testEnv.serversConfig.elasticsearch.port}`
+          });
         }
       };
-    });
+    };
 
-    // for local pubsub module
-    mockery.registerMock('../../core', {
-      logger: logger
+    mockery.registerMock('../esn-config', {
+      EsnConfig: EsnConfig
     });
 
     mockery.registerMock('../config', function() {
@@ -68,11 +65,6 @@ describe('The Chat search API', function() {
     });
 
     const localPubsub = require('linagora-rse/backend/core/pubsub/local');
-
-    // for ES module
-    mockery.registerMock('../pubsub', {
-      local: localPubsub
-    });
 
     const elasticsearch = require('linagora-rse/backend/core/elasticsearch');
 
@@ -173,7 +165,16 @@ describe('The Chat search API', function() {
       },
       i18n: this.helpers.i18n
     };
+  });
+
+  beforeEach(function(done) {
     app = this.helpers.loadApplication(dependencies);
+    app.lib.start(function(err) {
+      done(err);
+    });
+  });
+
+  beforeEach(function(done) {
     const UserSchema = mongoose.model('User');
 
     user = new UserSchema({
@@ -193,12 +194,6 @@ describe('The Chat search API', function() {
     Q.all([user.save(), anotherUser.save()]).then(() => {
       done();
     }, done);
-  });
-
-  beforeEach(function(done) {
-    app.lib.start(function(err) {
-      done(err);
-    });
   });
 
   afterEach(function(done) {
