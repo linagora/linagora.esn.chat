@@ -3,6 +3,7 @@
 const Q = require('q');
 const CONSTANTS = require('../lib/constants');
 const OBJECT_TYPES = CONSTANTS.OBJECT_TYPES;
+const CONVERSATION_ARCHIVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_ARCHIVED;
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
@@ -17,8 +18,10 @@ module.exports = function(dependencies) {
   const mongoose = dependencies('db').mongo.mongoose;
   const ObjectId = mongoose.Types.ObjectId;
   const Conversation = mongoose.model('ChatConversation');
+  const ArchivedConversation = mongoose.model('ChatArchivedConversation');
   const pubsubGlobal = dependencies('pubsub').global;
   const pubsubLocal = dependencies('pubsub').local;
+  const channelArchivedLocalTopic = pubsubLocal.topic(CONVERSATION_ARCHIVED);
   const channelCreationTopic = pubsubGlobal.topic(CONVERSATION_CREATED);
   const channelTopicUpdateTopic = pubsubGlobal.topic(CONVERSATION_TOPIC_UPDATED);
   const topicUpdateTopic = pubsubLocal.topic(CONVERSATION_TOPIC_UPDATED);
@@ -28,6 +31,7 @@ module.exports = function(dependencies) {
   const userConversationsFinders = [];
 
   return {
+    archive,
     create,
     createDefaultChannel,
     find,
@@ -43,6 +47,34 @@ module.exports = function(dependencies) {
     update,
     updateTopic
   };
+
+  function archive(conversationId, userId) {
+
+    return Conversation.findById(conversationId)
+    .then(conversation => {
+      if (!conversation) {
+        throw new Error('conversation does not exist');
+      }
+
+      const archivedConversationJSON = conversation.toObject();
+
+      delete archivedConversationJSON.__v;
+
+      archivedConversationJSON.archived = {by: utils.ensureObjectId(userId)};
+
+      const archivedConversation = new ArchivedConversation(archivedConversationJSON);
+
+      return archivedConversation.save();
+    })
+    .then(archivedConversation =>
+     Conversation.remove({_id: utils.ensureObjectId(conversationId)}).then(() => archivedConversation)
+    )
+    .then(archivedConversation => {
+      publishArchivedConversation(archivedConversation);
+
+      return true;
+    });
+  }
 
   function create(options, callback) {
     if (options && options.members) {
@@ -237,6 +269,10 @@ module.exports = function(dependencies) {
     }, {
       new: true
     }, callback);
+  }
+
+  function publishArchivedConversation(archivedConversation) {
+    channelArchivedLocalTopic.forward(pubsubGlobal, JSON.parse(JSON.stringify(archivedConversation)));
   }
 
   function publishNewConversation(conversation) {

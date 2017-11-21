@@ -5,6 +5,7 @@ const expect = require('chai').expect;
 const Q = require('q');
 
 const CONSTANTS = require('../../../backend/lib/constants');
+const CONVERSATION_ARCHIVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_ARCHIVED;
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
@@ -17,13 +18,17 @@ const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  let deps, lib, logger, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic;
+  let deps, lib, logger, channelArchivedLocalTopic, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic;
 
   function dependencies(name) {
     return deps[name];
   }
 
   beforeEach(function() {
+
+    channelArchivedLocalTopic = {
+      forward: sinon.spy()
+    };
 
     channelCreationTopic = {
       publish: sinon.spy()
@@ -111,6 +116,9 @@ describe('The linagora.esn.chat conversation lib', function() {
         }),
         update: sinon.spy(function(query, action, cb) {
           cb && cb(null, mq);
+        }),
+        remove: sinon.spy(function() {
+          return Q.when();
         })
       }
     };
@@ -134,6 +142,9 @@ describe('The linagora.esn.chat conversation lib', function() {
       pubsub: {
         local: {
           topic: function(name) {
+            if (name === CONVERSATION_ARCHIVED) {
+              return channelArchivedLocalTopic;
+            }
             if (name === MEMBERSHIP_EVENTS) {
               return membershipTopic;
             }
@@ -235,6 +246,99 @@ describe('The linagora.esn.chat conversation lib', function() {
         expect(modelsMock.ChatConversation.findOneAndUpdate).to.have.been.calledWith(query, query, mongoOptions);
         expect(channelCreationTopic.publish).to.not.have.been.called;
         expect(channelSavedTopic.publish).to.not.have.been.called;
+        done();
+      });
+    });
+  });
+
+  describe('The archive function', function() {
+    let conversation, user, conversationCore;
+
+    beforeEach(function() {
+      modelsMock.ChatArchivedConversation = sinon.spy();
+      conversationCore = { _id: '123456789012304567891234', archived: {}};
+      conversation = {toObject: function() { return conversationCore;} };
+      user = {_id: '123456789012304567891234'};
+
+      modelsMock.ChatConversation.findById = sinon.spy(function() {
+        return Q.when(conversation);
+      });
+
+      modelsMock.ChatConversation.remove = sinon.spy(function() {
+        return Q.when();
+      });
+
+      modelsMock.ChatArchivedConversation = sinon.spy();
+      modelsMock.ChatArchivedConversation.prototype.save = function() {
+
+        return Q.when(conversationCore);
+      };
+
+    });
+
+    it('should delete conversation after storing ArchivedConversation', function(done) {
+
+      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).then(function() {
+        expect(modelsMock.ChatConversation.findById).to.be.called;
+        expect(modelsMock.ChatConversation.remove).to.be.called;
+        expect(channelArchivedLocalTopic.forward).to.be.called;
+        done();
+      }).catch(err => {
+        done(err);
+      });
+    });
+
+    it('should not store ArchivedConversation if the conversation is not found', function(done) {
+      modelsMock.ChatArchivedConversation.prototype.save = sinon.spy(function() {
+
+        return Q.when();
+      });
+
+      modelsMock.ChatConversation.findById = sinon.spy(function() {
+
+        return Q.when(null);
+      });
+      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).catch(err => {
+        expect(modelsMock.ChatArchivedConversation.prototype.save).to.not.have.been.called;
+        expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
+        expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
+        expect(err.message).to.be.equal('conversation does not exist');
+        done();
+      });
+    });
+
+    it('should not store ArchivedConversation if ChatConversation.findById reject the request', function(done) {
+      const error = new Error('conversation not found');
+
+      modelsMock.ChatArchivedConversation.prototype.save = sinon.spy(function() {
+
+        return Q.when();
+      });
+
+      modelsMock.ChatConversation.findById = sinon.spy(function() {
+
+        return Q.reject(error);
+      });
+      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).catch(err => {
+        expect(modelsMock.ChatArchivedConversation.prototype.save).to.not.have.been.called;
+        expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
+        expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
+        expect(err.message).to.be.equal(error.message);
+        done();
+      });
+    });
+
+    it('should not delete conversation when storing ArchivedConversation fails', function(done) {
+      const error = new Error('archive save fail');
+
+      modelsMock.ChatArchivedConversation.prototype.save = sinon.spy(function() {
+
+        return Q.reject(error);
+      });
+      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).catch(err => {
+        expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
+        expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
+        expect(err.message).to.be.equal(error.message);
         done();
       });
     });
