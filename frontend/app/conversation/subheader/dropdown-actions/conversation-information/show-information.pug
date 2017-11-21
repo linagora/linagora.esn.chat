@@ -1,4 +1,6 @@
 li.action-list-item.hidden-xs(ng-click='ctrl.toggleDisplay()')
-  | #{__('Show information')}
+  .show-text(ng-if='!ctrl.informationShown') #{__('Show information')}
+  .hide-text(ng-if='ctrl.informationShown') #{__('Hide information')}
 li.action-list-item.hidden-md(title=__('Show information'), contextual-sidebar, data-content-template="/chat/app/conversation/sidebar/summary/conversation-summary-mobile-provider.html", data-placement="right")
-  | #{__('Show information')}
+  .show-text(ng-if='!ctrl.informationShown') #{__('Show information')}
+  .hide-text(ng-if='ctrl.informationShown') #{__('Hide information')}
