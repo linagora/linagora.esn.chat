@@ -18,7 +18,7 @@ class Messenger extends EventEmitter {
   constructor(transport, options) {
     super();
     this.transport = transport;
-    this.logger = options.dependencies('logger');
+    this.logger = options.logger;
     this.listenToIncomingEvents();
   }
 
