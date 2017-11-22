@@ -15,13 +15,6 @@ function init(dependencies, lib) {
   const logger = dependencies('logger');
   const io = dependencies('wsserver').io;
   const adapter = require('./adapter')(dependencies, lib);
-  const options = {
-    ioHelper: dependencies('wsserver').ioHelper,
-    logger: dependencies('logger'),
-    userModule: dependencies('user'),
-    conversation: lib.conversation,
-    membersLib: lib.members
-  };
 
   if (initialized) {
     return logger.warn('The chat websocket service is already initialized');
@@ -29,8 +22,8 @@ function init(dependencies, lib) {
 
   chatNamespace = io.of(NAMESPACE);
 
-  const transport = new Transport(chatNamespace, options);
-  const messenger = new Messenger(transport, options);
+  const transport = new Transport(chatNamespace, {dependencies});
+  const messenger = new Messenger(transport, {dependencies});
 
   adapter.bindEvents(messenger);
 

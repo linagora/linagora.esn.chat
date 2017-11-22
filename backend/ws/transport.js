@@ -1,30 +1,14 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const Q = require('q');
 
 class Transport extends EventEmitter {
   constructor(chatNamespace, options) {
     super();
     this.chatNamespace = chatNamespace;
-    this.helper = options.ioHelper;
-    this.logger = options.logger;
-    this.membersLib = options.membersLib;
-    this.userModule = options.userModule;
-    this.conversation = options.conversation;
+    this.helper = options.dependencies('wsserver').ioHelper;
+    this.logger = options.dependencies('logger');
     this.listenToEvents();
-  }
-
-  getUser(userId) {
-    return this.userModule.get(userId);
-  }
-
-  getConversationById(conversationId) {
-    return Q.denodeify(this.conversation.getById)(conversationId);
-  }
-
-  isMember(conversation, user) {
-    return this.membersLib.isMember(conversation, user);
   }
 
   listenToEvents() {
@@ -45,21 +29,7 @@ class Transport extends EventEmitter {
           message.date = Date.now();
           message.room = room;
           message.creator = userId;
-
-          if (message.type === 'text') {
-            Q.all([this.getConversationById(message.channel), this.getUser(message.creator)])
-              .spread((conversation, user) => {
-                this.isMember(conversation, user).then(isMember => {
-                  if (isMember) {
-                    this.emit('message', message);
-                  } else {
-                    this.logger.info(`${user._id} is not a member of chat channel ${message.channel}`);
-                  }
-                });
-              });
-          } else {
-            this.emit('message', message);
-          }
+          this.emit('message', message);
         });
       });
     });
