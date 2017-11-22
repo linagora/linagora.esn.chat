@@ -13,6 +13,7 @@ module.exports = function(dependencies, lib) {
   const utils = require('./utils')(dependencies, lib);
 
   return {
+    archive,
     addMember,
     create,
     get,
@@ -26,6 +27,32 @@ module.exports = function(dependencies, lib) {
     updateTopic,
     update
   };
+
+  function archive(req, res) {
+    lib.conversation.archive(req.conversation, req.user).then(archived => {
+      if (archived) {
+        return utils.sendConversationResult({archived: archived}, req.user, res);
+      }
+
+      return res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: 'Error cannot archive conversation'
+        }
+      });
+    }).catch(err => {
+      logger.error('Error while archiving conversation', err);
+
+      return res.status(500).json({
+        error: {
+          code: 500,
+          message: 'Server Error',
+          details: 'Error while archiving conversation'
+        }
+      });
+    });
+  }
 
   function addMember(req, res) {
     function addMemberResponse(req, res) {

@@ -48,26 +48,18 @@ module.exports = function(dependencies) {
     updateTopic
   };
 
-  function archive(conversationId, userId) {
+  function archive(conversation, user) {
+    const archivedConversationJSON = conversation.toObject();
 
-    return Conversation.findById(conversationId)
-    .then(conversation => {
-      if (!conversation) {
-        throw new Error('conversation does not exist');
-      }
+    delete archivedConversationJSON.__v;
 
-      const archivedConversationJSON = conversation.toObject();
+    archivedConversationJSON.archived = {by: utils.ensureObjectId(user._id)};
 
-      delete archivedConversationJSON.__v;
+    const archivedConversation = new ArchivedConversation(archivedConversationJSON);
 
-      archivedConversationJSON.archived = {by: utils.ensureObjectId(userId)};
-
-      const archivedConversation = new ArchivedConversation(archivedConversationJSON);
-
-      return archivedConversation.save();
-    })
+    return archivedConversation.save()
     .then(archivedConversation =>
-     Conversation.remove({_id: utils.ensureObjectId(conversationId)}).then(() => archivedConversation)
+     Conversation.remove({_id: utils.ensureObjectId(conversation._id)}).then(() => archivedConversation)
     )
     .then(archivedConversation => {
       publishArchivedConversation(archivedConversation);

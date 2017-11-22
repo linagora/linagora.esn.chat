@@ -14,6 +14,7 @@ module.exports = function(dependencies) {
     getNewestMembers,
     getMembers,
     isMember,
+    isManager,
     join
   };
 
@@ -35,6 +36,10 @@ module.exports = function(dependencies) {
 
   function isMember(conversation, user) {
     return Q.denodeify(collaborationModule.member.isMember)(conversation, {objectType: OBJECT_TYPES.USER, id: String(user._id)});
+  }
+
+  function isManager(conversation, user) {
+    return Q.denodeify(collaborationModule.member.isManager)(OBJECT_TYPES.CONVERSATION, conversation, user);
   }
 
   function join(conversation, user) {

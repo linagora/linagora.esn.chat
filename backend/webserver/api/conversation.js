@@ -26,6 +26,7 @@ module.exports = function(dependencies, lib, router) {
   router.post('/conversations/:id/readed', authorizationMW.requiresAPILogin, middleware.load, middleware.canUpdate, controller.markAllMessageOfAConversationReaded);
 
   router.get('/conversations/:id/summary',
+    authorizationMW.requiresAPILogin,
     middleware.load,
     middleware.canRead,
     controller.getSummaryOfConversation);
@@ -35,6 +36,12 @@ module.exports = function(dependencies, lib, router) {
     middleware.load,
     middleware.canRead,
     messageController.getAttachmentsForConversation);
+
+  router.post('/conversations/:id/archive',
+    authorizationMW.requiresAPILogin,
+    middleware.load,
+    middleware.canArchive,
+    controller.archive);
 
   router.put('/conversations/:id/members/:member_id',
     authorizationMW.requiresAPILogin,

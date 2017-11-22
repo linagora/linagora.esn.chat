@@ -15,6 +15,7 @@ module.exports = function(dependencies) {
   const utils = require('./utils')(dependencies);
   const search = require('./search')(dependencies);
   const conversation = require('./conversation')(dependencies);
+  const domain = require('./domain')(dependencies);
   const message = require('./message')(dependencies, {conversation, search});
   const members = require('./members')(dependencies);
   const moderate = require('./moderate')(dependencies);
@@ -26,6 +27,7 @@ module.exports = function(dependencies) {
     bot: bot,
     constants,
     conversation,
+    domain,
     listener,
     members,
     message,
