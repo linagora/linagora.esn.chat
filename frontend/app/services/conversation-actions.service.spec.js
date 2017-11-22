@@ -191,6 +191,54 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
+  describe('The archiveConversation function', function() {
+
+    it('should reject when conversationId is undefined', function() {
+      chatConversationsStoreService.deleteConversation = sinon.spy();
+      chatConversationService.archive = sinon.spy();
+      chatConversationActionsService.archiveConversation().then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.match(/conversationId is required/);
+      expect(chatConversationService.archive).to.not.have.been.called;
+    });
+
+    it('should reject when chatConversationService.archive returns false', function() {
+      var conversationId = 'id';
+
+      chatConversationsStoreService.deleteConversation = sinon.spy();
+      chatConversationService.archive = sinon.spy(function() {
+        return $q.when(false);
+      });
+      chatConversationActionsService.archiveConversation(conversationId).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.not.have.been.called;
+      expect(errorSpy).to.have.been.called;
+      expect(errorSpy.firstCall.args[0].message).to.match(/could not archive the conversation/);
+      expect(chatConversationService.archive).to.have.been.called;
+      expect(chatConversationsStoreService.deleteConversation).to.not.have.been.called;
+    });
+
+    it('should call the chatConversationService.archive then delete the channel from the store ', function() {
+      var conversationId = 'id';
+
+      chatConversationsStoreService.deleteConversation = sinon.spy();
+      chatConversationService.archive = sinon.spy(function() {
+        return $q.when(true);
+      });
+      chatConversationActionsService.archiveConversation(conversationId).then(successSpy, errorSpy);
+      $rootScope.$digest();
+
+      expect(successSpy).to.have.been.called;
+      expect(errorSpy).to.not.have.been.called;
+      expect(chatConversationService.archive).to.have.been.calledWith(conversationId);
+      expect(chatConversationsStoreService.deleteConversation).to.have.been.called;
+    });
+  });
+
   describe('The createOpenConversation function', function() {
     it('should call chatConversationService.create and save new channel in store', function() {
       chatConversationService.create = sinon.spy(function() {

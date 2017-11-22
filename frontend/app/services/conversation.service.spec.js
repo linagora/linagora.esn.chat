@@ -43,6 +43,16 @@ describe('The linagora.esn.chat conversation service', function() {
     });
   });
 
+  describe('archive function', function() {
+    it('should call the right endpoint', function() {
+      $httpBackend.expectPOST('/chat/api/conversations/' + id + '/archive').respond([]);
+
+      chatConversationService.archive(id);
+      $rootScope.$digest();
+      $httpBackend.flush();
+    });
+  });
+
   describe('fetchMessages function', function() {
     it('should call the right endpoint', function() {
       $httpBackend.expectGET('/chat/api/conversations/' + id + '/messages').respond([]);
