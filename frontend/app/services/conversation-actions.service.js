@@ -28,6 +28,7 @@
       addConversation: addConversation,
       addConversationWhenCreatorOrConfidential: addConversationWhenCreatorOrConfidential,
       addMember: addMember,
+      archiveConversation: archiveConversation,
       createDirectmessageConversation: createDirectmessageConversation,
       createConfidentialConversation: createConfidentialConversation,
       createOpenConversation: createOpenConversation,
@@ -90,6 +91,21 @@
       }
 
       return chatConversationService.addMember(conversation, userId);
+    }
+
+    function archiveConversation(conversationId) {
+      if (!conversationId) {
+        return $q.reject(new Error('conversationId is required'));
+      }
+
+      return chatConversationService.archive(conversationId).then(function(archived) {
+        if (!archived) {
+          return $q.reject(new Error('could not archive the conversation'));
+        }
+        chatConversationsStoreService.deleteConversation(conversationId);
+
+        return archived;
+      });
     }
 
     function createDirectmessageConversation(conversation) {

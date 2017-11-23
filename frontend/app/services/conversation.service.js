@@ -7,6 +7,7 @@
     function chatConversationService(ChatRestangular, esnCollaborationClientService, CHAT_OBJECT_TYPES) {
       var service = {
         addMember: addMember,
+        archive: archive,
         create: create,
         fetchMessages: fetchMessages,
         fetchAttachments: fetchAttachments,
@@ -36,6 +37,10 @@
 
       function addMember(id, userId) {
         return _getBase(id).one('members').one(userId).doPUT();
+      }
+
+      function archive(id) {
+        return _getBase(id).one('archive').doPOST();
       }
 
       function create(conversation) {
