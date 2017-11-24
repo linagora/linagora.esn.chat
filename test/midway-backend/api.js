@@ -16,7 +16,7 @@ const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 describe('The chat API', function() {
 
   let deps, mongoose, userId, user, anotherUserId, anotherUser, app, redisClient, collaborations, collaboration, writable, readable, getNewMember, userAsMember;
-  let userDomains, anotherUserDomains, starredMessage;
+  let userDomains, anotherUserDomains, starredMessage, loadedDomain, isDomainAdministrator, isManager;
 
   function dependencies(name) {
     return deps[name];
@@ -37,6 +37,9 @@ describe('The chat API', function() {
     collaboration = {};
     writable = true;
     readable = true;
+    isDomainAdministrator = true;
+    isManager = true;
+    loadedDomain = { _id: 123, administrator: 123, timestamps: {} };
 
     getNewMember = function() {
       return asMember(new mongoose.Types.ObjectId());
@@ -75,6 +78,9 @@ describe('The chat API', function() {
           isMember: function(collaboration, tuple, callback) {
             callback(null, _.find(collaboration.members, userAsMember));
           },
+          isManager: function(objectType, collaboration, user, callback) {
+            callback(null, isManager);
+          },
           countMembers: function(objectType, id, callback) {
             callback(null, 0);
           },
@@ -94,6 +100,14 @@ describe('The chat API', function() {
       collaborationMW: {
         load: function() {},
         requiresCollaborationMember: function() {}
+      },
+      domain: {
+        userIsDomainAdministrator: function(user, domain, callback) {
+          callback(null, isDomainAdministrator);
+        },
+        load: function(domainId, callback) {
+          callback(null, loadedDomain);
+        }
       },
       resourceLinkMW: {
         addCanCreateMiddleware: function() {}
@@ -123,6 +137,9 @@ describe('The chat API', function() {
                   }
                 }
               ];
+
+              definition.domain_ids = [{ type: mongoose.Schema.ObjectId, ref: 'Domain'}];
+              definition.creator = [{ type: mongoose.Schema.ObjectId, ref: 'User' }];
 
               return new mongoose.Schema(definition);
             }
@@ -1546,6 +1563,81 @@ describe('The chat API', function() {
             done();
           });
       });
+    });
+  });
+
+  describe('POST /api/conversations/:id/archive', function() {
+
+    it('should 403 when conversation is not a public channel', function(done) {
+
+      app.lib.conversation.create({
+        type: CONVERSATION_TYPE.CONFIDENTIAL,
+        members: [getNewMember()],
+        numOfMessage: 1
+      }, function(err, conversation) {
+        err && done(err);
+
+        request(app.express)
+          .post('/api/conversations/' + conversation._id + '/archive')
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/Can not archive a conversation which is not an open channel/);
+            done();
+          });
+        });
+    });
+
+    it('should 403 when user is not a domain administrator nor a channel creator', function(done) {
+      isDomainAdministrator = false;
+      isManager = false;
+
+      const options = {
+        type: CONVERSATION_TYPE.OPEN,
+        domain_id: [new mongoose.Types.ObjectId()]
+      };
+
+      app.lib.conversation.create(options
+        , function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .post('/api/conversations/' + conversation._id + '/archive')
+          .expect(403)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body.error.details).to.match(/You can not archive a conversation/);
+            done();
+          });
+        });
+    });
+
+    it('should 200 when user is manager of the conversation', function(done) {
+      isDomainAdministrator = false;
+      isManager = true;
+
+      const options = {
+        type: CONVERSATION_TYPE.OPEN,
+        domain_id: ['590b25074a86f858e3ec71eb']
+      };
+
+      app.lib.conversation.create(options
+        , function(err, conversation) {
+        err && done(err);
+        request(app.express)
+          .post('/api/conversations/' + conversation._id + '/archive')
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err);
+            }
+            expect(res.body).to.shallowDeepEqual({archived: true});
+            done();
+          });
+        });
     });
   });
 

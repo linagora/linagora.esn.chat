@@ -257,7 +257,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     beforeEach(function() {
       modelsMock.ChatArchivedConversation = sinon.spy();
       conversationCore = { _id: '123456789012304567891234', archived: {}};
-      conversation = {toObject: function() { return conversationCore;} };
+      conversation = {toObject: function() { return conversationCore;}, _id: '123456789012304567891234', archived: {}};
       user = {_id: '123456789012304567891234'};
 
       modelsMock.ChatConversation.findById = sinon.spy(function() {
@@ -278,53 +278,12 @@ describe('The linagora.esn.chat conversation lib', function() {
 
     it('should delete conversation after storing ArchivedConversation', function(done) {
 
-      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).then(function() {
-        expect(modelsMock.ChatConversation.findById).to.be.called;
+      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversation, user).then(function() {
         expect(modelsMock.ChatConversation.remove).to.be.called;
         expect(channelArchivedLocalTopic.forward).to.be.called;
         done();
       }).catch(err => {
         done(err);
-      });
-    });
-
-    it('should not store ArchivedConversation if the conversation is not found', function(done) {
-      modelsMock.ChatArchivedConversation.prototype.save = sinon.spy(function() {
-
-        return Q.when();
-      });
-
-      modelsMock.ChatConversation.findById = sinon.spy(function() {
-
-        return Q.when(null);
-      });
-      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).catch(err => {
-        expect(modelsMock.ChatArchivedConversation.prototype.save).to.not.have.been.called;
-        expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
-        expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
-        expect(err.message).to.be.equal('conversation does not exist');
-        done();
-      });
-    });
-
-    it('should not store ArchivedConversation if ChatConversation.findById reject the request', function(done) {
-      const error = new Error('conversation not found');
-
-      modelsMock.ChatArchivedConversation.prototype.save = sinon.spy(function() {
-
-        return Q.when();
-      });
-
-      modelsMock.ChatConversation.findById = sinon.spy(function() {
-
-        return Q.reject(error);
-      });
-      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).catch(err => {
-        expect(modelsMock.ChatArchivedConversation.prototype.save).to.not.have.been.called;
-        expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
-        expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
-        expect(err.message).to.be.equal(error.message);
-        done();
       });
     });
 
@@ -335,7 +294,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
         return Q.reject(error);
       });
-      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversationCore._id, user._id).catch(err => {
+      require('../../../backend/lib/conversation')(dependencies, lib).archive(conversation, user).catch(err => {
         expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
         expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
         expect(err.message).to.be.equal(error.message);

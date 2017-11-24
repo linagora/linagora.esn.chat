@@ -2,6 +2,7 @@
 
 const CONSTANTS = require('../../lib/constants');
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
+const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const CONVERSATION_OBJECT_TYPES = CONSTANTS.OBJECT_TYPES.CONVERSATION;
 const Q = require('q');
 
@@ -13,6 +14,7 @@ module.exports = function(dependencies, lib) {
   return {
     assertDefaultChannels,
     assertUserIsMemberOfDefaultChannels,
+    canArchive,
     canCreate,
     canRemove,
     canRead,
@@ -69,6 +71,76 @@ module.exports = function(dependencies, lib) {
 
         return lib.members.join(conversation, req.user);
       });
+    }
+  }
+
+  function canArchive(req, res, next) {
+    if (req.conversation.type !== CONVERSATION_TYPE.OPEN) {
+
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: 'Can not archive a conversation which is not an open channel'
+        }
+      });
+    }
+
+    if (!req.conversation.creator) {
+
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: 'Can not archive the default channel'
+        }
+      });
+    }
+
+    return Q.all([
+      isAdministratorOfDomain(),
+      lib.members.isManager(req.conversation, req.user)
+    ])
+    .then(([isDomainAdministrator, isManager]) => {
+      if (isDomainAdministrator || isManager) {
+        return next();
+      }
+
+      return res.status(403).json({
+        error: {
+          code: 403,
+          message: 'Forbidden',
+          details: 'You can not archive a conversation'
+        }
+      });
+
+      }).catch(err => {
+        const msg = `Error while archiving conversation ${req.conversation.id}`;
+
+        logger.error(msg, err);
+
+        return res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Server Error',
+            details: msg
+          }
+        });
+      });
+
+    function isAdministratorOfDomain() {
+      const domainLoader = [];
+      const isDomainAdministrator = [];
+
+      req.conversation.domain_ids.forEach(domainId => domainLoader.push(lib.domain.load(domainId)));
+
+      return Q.all(domainLoader)
+      .then(domains => {
+        domains.forEach(domain => isDomainAdministrator.push(lib.domain.userIsDomainAdministrator(req.user, domain)));
+
+        return Q.all(isDomainAdministrator);
+      })
+      .then(isDomainAdministrator => isDomainAdministrator.includes(true));
     }
   }
 
