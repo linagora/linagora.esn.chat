@@ -22,6 +22,9 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
       _id: 'id',
       user: {
         _id: 'userId'
+      },
+      userIsDomainAdministrator: function() {
+        return false;
       }
     };
 
@@ -67,6 +70,37 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
 
       expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.false;
       expect(chatConversationMemberService.currentUserIsMemberOf).to.be.calledWith(activeRoom);
+    });
+
+  });
+
+  describe('the canInjectArchiveAction method', function() {
+
+    it('should return true if the user is an admin', function() {
+      sessionMock.userIsDomainAdministrator = sinon.stub().returns(true);
+
+      expect(chatDropdownMenuActionsService.canInjectArchiveAction()).to.be.true;
+      expect(sessionMock.userIsDomainAdministrator).to.be.called;
+    });
+
+    it('should return true if the user is the channel creator', function() {
+      activeRoom.creator = sessionMock.user._id;
+
+      expect(chatDropdownMenuActionsService.canInjectArchiveAction()).to.be.true;
+    });
+
+    it('should return false if the user is neather a creator or admin', function() {
+      sessionMock.userIsDomainAdministrator = sinon.stub().returns(false);
+
+      expect(chatDropdownMenuActionsService.canInjectArchiveAction()).to.be.false;
+      expect(sessionMock.userIsDomainAdministrator).to.be.called;
+    });
+
+    it('should return false if the active room is the general channel', function() {
+      delete activeRoom.creator;
+      sessionMock.userIsDomainAdministrator = sinon.stub().returns(true);
+
+      expect(chatDropdownMenuActionsService.canInjectArchiveAction()).to.be.false;
     });
 
   });

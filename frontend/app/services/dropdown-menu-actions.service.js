@@ -9,7 +9,8 @@
 
     var service = {
       canInjectAddMembersAction: canInjectAddMembersAction,
-      canInjectLeaveAction: canInjectLeaveAction
+      canInjectLeaveAction: canInjectLeaveAction,
+      canInjectArchiveAction: canInjectArchiveAction
     };
 
     return service;
@@ -20,6 +21,11 @@
 
     function canInjectAddMembersAction() {
       return chatConversationMemberService.currentUserIsMemberOf(chatConversationsStoreService.activeRoom);
+    }
+
+    function canInjectArchiveAction() {
+
+      return !!chatConversationsStoreService.activeRoom && !!chatConversationsStoreService.activeRoom.creator && (session.userIsDomainAdministrator() || session.user._id === chatConversationsStoreService.activeRoom.creator);
     }
 
   }
