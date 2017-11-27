@@ -3,10 +3,16 @@
 
   padding: 5px 20px 8px 20px;
 
+  &:hover {
+    .star-hide {
+      visibility: visible;
+    }
+  }
+
   .chat-message-left {
     .flex;
 
-    min-width: 50px;
+    min-width: 60px;
 
     .avatar-with-bubble {
       margin-right: 10px;
@@ -46,6 +52,8 @@
   }
 
   .chat-message-title {
+    display: inline-flex;
+
     a {
       color: @text-color;
     }

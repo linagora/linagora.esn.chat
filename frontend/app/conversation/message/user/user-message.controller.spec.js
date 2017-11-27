@@ -187,7 +187,7 @@ describe('the chatUserMessageController controller', function() {
 
   describe('the toggle function', function() {
 
-    it('should call chatMessageStarService.unstar is the message is starred', function() {
+    it('should call chatMessageStarService.unstar if the message is starred', function() {
       message.isStarred = true;
       var controller = initController(message);
 
@@ -199,7 +199,7 @@ describe('the chatUserMessageController controller', function() {
       expect(message.isStarred).to.be.false;
     });
 
-    it('should call chatMessageStarService.star is the message is unstarred', function() {
+    it('should call chatMessageStarService.star if the message is unstarred', function() {
       message.isStarred = false;
       var controller = initController(message);
 
@@ -226,6 +226,17 @@ describe('the chatUserMessageController controller', function() {
       expect(message.isStarred).to.be.true;
       expect($log.error).to.have.been.called;
       expect($log.error).to.have.been.calledWith('Error while toggling star of message');
+    });
+  });
+
+  describe('the selectMessage function', function() {
+    it('should change messageSelected to true', function() {
+      var controller = initController();
+
+      controller.selectMessage();
+      $rootScope.$digest();
+
+      expect(controller.messageSelected).to.be.true;
     });
   });
 });

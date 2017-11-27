@@ -7,8 +7,7 @@
     function chatMessageStar() {
       return {
         bindings: {
-          starred: '=',
-          toggle: '='
+          starred: '='
         },
         templateUrl: '/chat/app/conversation/message/actions/star/message-star.html',
         controllerAs: 'ctrl'

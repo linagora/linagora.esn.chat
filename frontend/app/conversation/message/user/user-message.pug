@@ -1,17 +1,18 @@
-.chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}')
+.chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}', ng-click="ctrl.selectMessage()")
 
   .chat-message-left
     esn-avatar(ng-if='!ctrl.message.sameUser', user-id="ctrl.message.creator._id")
 
     .message-time(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
       small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
+    chat-message-star(starred = 'ctrl.message.isStarred', ng-if='ctrl.message.sameUser', ng-class='{"visible": ctrl.messageSelected}', ng-click="ctrl.toggleStar()")
 
   .media-body
     .chat-message-title(ng-if='!ctrl.message.sameUser')
       a.displayname.hidden-xs(ui-sref="chat.channels-views.member({memberId: ctrl.message.creator._id})") {{::ctrl.displayName }}
       user-profile-link.displayname.visible-xs(user="ctrl.message.creator")
       small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
-      chat-message-star(starred = 'ctrl.message.isStarred', toggle = 'ctrl.toggleStar')
+      chat-message-star(starred = 'ctrl.message.isStarred', ng-class='{"visible": ctrl.messageSelected}', ng-click="ctrl.toggleStar()")
     .chat-message-text(ng-if='ctrl.message.type === "text"', ng-bind-html="ctrl.parsed.text", ng-class='(ctrl.user._id === ctrl.message.creator._id ? "owner-message-display" : "not-owner-message-display")')
     .oembeds.attachment-container
       oembeds(message="ctrl.message.text")
@@ -23,4 +24,4 @@
         span.clickable(ng-click='ctrl.toggleFile()')
           i(ng-class="ctrl.displayFile ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
         .attachment
-          esn-attachment(attachment="attachment", gallery="ctrl.message._id", ng-show="ctrl.displayFile")
+          file-preview(file="attachment", ng-show="ctrl.displayFile")
