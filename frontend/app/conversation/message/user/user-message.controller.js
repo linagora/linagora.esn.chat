@@ -8,12 +8,18 @@
       var self = this;
 
       self.displayFile = true;
+      self.messageSelected = false;
       self.toggleFile = toggleFile;
       self.$onInit = $onInit;
       self.toggleStar = toggleStar;
+      self.selectMessage = selectMessage;
 
       function sessionReady(session) {
         self.user = session.user;
+      }
+
+      function selectMessage() {
+        self.messageSelected = true;
       }
 
       function toggleFile() {
