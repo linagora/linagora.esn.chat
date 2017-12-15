@@ -7,7 +7,7 @@ const sinon = require('sinon');
 const expect = require('chai').expect;
 const mockery = require('mockery');
 const Emitter = require('events').EventEmitter;
-const WSClient = require('esn-chat-client').WebsocketClient;
+const WSClient = require('@linagora/esn-chat-client').WebsocketClient;
 const CONSTANTS = require('../../backend/lib/constants');
 
 describe('The websocket API', function() {
