@@ -134,6 +134,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-wait-server');
   grunt.loadNpmTasks('@linagora/grunt-i18n-checker');
   grunt.loadNpmTasks('grunt-puglint');
+  grunt.loadNpmTasks('grunt-release');
 
   grunt.loadTasks('tasks');
 
