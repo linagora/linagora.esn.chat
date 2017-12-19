@@ -5,7 +5,7 @@
 var expect = chai.expect;
 
 describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
-  var chatConversationsStoreServiceMock, chatDropdownMenuActionsService, sessionMock, activeRoom, chatConversationMemberService;
+  var chatConversationsStoreServiceMock, chatDropdownMenuActionsService, sessionMock, activeRoom, chatConversationMemberService, CHAT_CONVERSATION_TYPE;
 
   beforeEach(
     angular.mock.module('linagora.esn.chat')
@@ -15,7 +15,8 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
 
     activeRoom = {
       _id: 'roomId',
-      creator: 'aCreator'
+      creator: 'aCreator',
+      type: 'open'
     };
 
     sessionMock = {
@@ -46,13 +47,14 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
     });
   });
 
-  beforeEach(inject(function(_chatDropdownMenuActionsService_) {
+  beforeEach(inject(function(_chatDropdownMenuActionsService_, _CHAT_CONVERSATION_TYPE_) {
     chatDropdownMenuActionsService = _chatDropdownMenuActionsService_;
+    CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
   }));
 
   describe('the canInjectLeaveAction method', function() {
 
-    it('should return true if the user is a member and not the channel creator', function() {
+    it('should return true if the user is a member and not the channel creator and the conversation is not the default channel', function() {
       chatConversationMemberService.currentUserIsMemberOf = sinon.stub().returns(true);
 
       expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.true;
@@ -72,6 +74,19 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
       expect(chatConversationMemberService.currentUserIsMemberOf).to.be.calledWith(activeRoom);
     });
 
+    it('should return false if the conversation is the default channel', function() {
+      chatConversationMemberService.currentUserIsMemberOf = sinon.stub().returns(true);
+      delete activeRoom.creator;
+
+      expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.false;
+    });
+
+    it('should return false if the conversation is a private conversation', function() {
+      chatConversationMemberService.currentUserIsMemberOf = sinon.stub().returns(true);
+      activeRoom.type = CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE;
+
+      expect(chatDropdownMenuActionsService.canInjectLeaveAction()).to.be.false;
+    });
   });
 
   describe('the canInjectArchiveAction method', function() {

@@ -14,5 +14,8 @@ block right
       i.mdi.mdi-dots-vertical
 
     ul.dropdown-menu.dropdown-menu-right.clickable
-      li.action-list-container(dynamic-directive="chat-conversation-dropdown-actions")
+      li.action-list-container
         chat-show-information-dropdown-action
+        chat-add-members-dropdown-action(ng-if='ctrl.canInjectAddMembersAction')
+        chat-leave-conversation-dropdown-action(ng-if='ctrl.canInjectLeaveAction')
+        chat-archive-conversation-dropdown-action(ng-if='ctrl.canInjectArchiveAction')
