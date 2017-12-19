@@ -4,9 +4,12 @@ before_script:
 stages:
   - test
   - deploy_dev
+  - release
 
 test:
   stage: test
+  except:
+    - triggers
   tags:
     - shell
     - online.net
@@ -21,6 +24,8 @@ test:
 
 deploy_dev:
   stage: deploy_dev
+  except:
+    - triggers
   tags:
     - dev.open-paas.org
     - deployment
@@ -40,3 +45,11 @@ deploy_dev:
     - bower prune
     - git checkout -- .
     - sudo /etc/init.d/rse.dev restart
+
+release:
+  stage: release
+  only:
+    - triggers
+  script:
+    - if [ -z "${VERSION}" ]; then exit 0; fi
+    - grunt release:${VERSION}
