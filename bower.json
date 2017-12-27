@@ -1,7 +1,7 @@
 {
   "name": "linagora.esn.chat",
   "main": "index.js",
-  "version": "0.6.3-dev",
+  "version": "0.6.3",
   "authors": [
     "Linagora R&D"
   ],
