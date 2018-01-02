@@ -54,6 +54,18 @@ describe('the chatBotMessageController controller', function() {
 
   describe('the $onInit function', function() {
 
+    it('should call chatConversationService get\'s method to get the conversation', function() {
+      var userMentions = [{_id: '3'}, {_id: '4'}];
+      var controller = initController(userMentions);
+
+      controller.$onInit();
+      $rootScope.$digest();
+
+      expect(chatConversationService.get).to.have.been.calledWith(privateConversation.id);
+      expect(controller.isPublicConversation).to.have.false;
+      expect(controller.conversation).to.deep.equal(privateConversation);
+    });
+
     it('should call chatBotMessageService resolve\'s method', function() {
       var userMentions = [{_id: '3'}, {_id: '4'}];
       var controller = initController(userMentions);
@@ -61,11 +73,11 @@ describe('the chatBotMessageController controller', function() {
       privateConversation.type = CHAT_CONVERSATION_TYPE.OPEN;
       chatConversationActionsService.addMember = sinon.spy();
       controller.$onInit();
+      $rootScope.$digest();
 
       expect(controller.addMembers).to.be.an('function');
 
       controller.addMembers(userMentions);
-      $rootScope.$digest();
 
       expect(chatConversationActionsService.addMember).to.have.been.calledTwice;
     });
@@ -79,8 +91,8 @@ describe('the chatBotMessageController controller', function() {
       var controller = initController(userMentions);
 
       controller.$onInit();
-      controller.addMembers();
       $rootScope.$digest();
+      controller.addMembers();
 
       expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledWith({ members: ['1', '2', '3', '4'] });
     });
@@ -94,8 +106,8 @@ describe('the chatBotMessageController controller', function() {
       chatConversationActionsService.addMember = sinon.spy();
 
       controller.$onInit();
-      controller.addMembers();
       $rootScope.$digest();
+      controller.addMembers();
 
       expect(chatConversationActionsService.createDirectmessageConversation).to.not.have.been.called;
       expect(chatConversationActionsService.addMember).to.have.been.called;

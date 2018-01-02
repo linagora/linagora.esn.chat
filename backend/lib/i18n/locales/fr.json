@@ -41,8 +41,8 @@
   "and": "et",
   "You have mentioned": "Vous avez mentionné",
   "do you want to": "voulez vous",
-  "add him/her to the conversation ?": "l'ajouter à la conversation ?",
-  "add them to the conversation ?": "les ajouter à la conversation ?",
+  "add him/her to the conversation?": "l'ajouter à la conversation?",
+  "add them to the conversation?": "les ajouter à la conversation?",
   "Back": "Retour",
   "There are no conversations matching your search": "Il n'y a pas de conversations correspondant à votre recherche",
   "Chat": "Chat",
@@ -75,5 +75,7 @@
   "Members": "Membres",
   "Show more": "Voir plus",
   "Shared files": "Fichiés partagés",
-  "No attachments": "Aucun attachement"
+  "No attachments": "Aucun attachement",
+  "create a new private conversation with them?": "créer une nouvelle conversation privée avec eux?",
+  "create a new private conversation with him/her?": "créer une nouvelle conversation privée avec lui/elle?"
 }
