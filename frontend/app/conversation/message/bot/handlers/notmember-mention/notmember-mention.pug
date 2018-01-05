@@ -3,7 +3,13 @@
   span.member-name(ng-bind-html="ctrl.parsed.text")
   |, #{__('do you want to')}
   a.add-member.clickable(ng-click="ctrl.addMembers();")
-    span(ng-if="ctrl.userMentions.length > 1")
-      | #{__('add them to the conversation ?')}
-    span(ng-if="ctrl.userMentions.length === 1")
-      | #{__('add him/her to the conversation ?')}
+    span(ng-if="!ctrl.isPublicConversation")
+      span(ng-if="ctrl.userMentions.length > 1")
+        | #{__('create a new private conversation with them?')}
+      span(ng-if="ctrl.userMentions.length === 1")
+        | #{__('create a new private conversation with him/her?')}
+    span(ng-if="ctrl.isPublicConversation")
+      span(ng-if="ctrl.userMentions.length > 1")
+        | #{__('add them to the conversation?')}
+      span(ng-if="ctrl.userMentions.length === 1")
+        | #{__('add him/her to the conversation?')}

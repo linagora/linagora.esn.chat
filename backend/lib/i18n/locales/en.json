@@ -41,8 +41,8 @@
   "and": "and",
   "You have mentioned": "You have mentioned",
   "do you want to": "do you want to",
-  "add him/her to the conversation ?": "add him/her to the conversation ?",
-  "add them to the conversation ?": "add them to the conversation ?",
+  "add him/her to the conversation?": "add him/her to the conversation?",
+  "add them to the conversation?": "add them to the conversation?",
   "Back": "Back",
   "There are no conversations matching your search": "There are no conversations matching your search",
   "Chat": "Chat",
@@ -75,5 +75,7 @@
   "Members": "Members",
   "Show more": "Show more",
   "Shared files": "Shared files",
-  "No attachments": "No attachments"
+  "No attachments": "No attachments",
+  "create a new private conversation with them?": "create a new private conversation with them?",
+  "create a new private conversation with him/her?": "create a new private conversation with him/her?"
 }

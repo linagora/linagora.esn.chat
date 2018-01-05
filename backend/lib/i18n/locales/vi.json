@@ -41,8 +41,8 @@
   "and": "và",
   "You have mentioned": "Bạn đã nhắc đến",
   "do you want to": "bạn có muốn",
-  "add him/her to the conversation ?": "thêm người đó vào cuộc hội thoại ?",
-  "add them to the conversation ?": "thêm họ vào cuộc hội thoại ?",
+  "add him/her to the conversation?": "thêm người đó vào cuộc hội thoại?",
+  "add them to the conversation?": "thêm họ vào cuộc hội thoại?",
   "Back": "Trở lại",
   "There are no conversations matching your search": "Không tìm thấy cuộc trò chuyện phù hợp vơi từ khóa tìm kiếm",
   "Chat": "Trò chuyện",
@@ -75,5 +75,7 @@
   "Members": "Thành viên",
   "Show more": "Xem thêm",
   "Shared files": "Tệp tin chia sẻ",
-  "No attachments": "Không có đính kèm"
+  "No attachments": "Không có đính kèm",
+  "create a new private conversation with them?": "tạo một cuộc trò chuyện riêng tư với họ?",
+  "create a new private conversation with him/her?": "tạo một cuộc trò chuyện riêng tư với người đó?"
 }
