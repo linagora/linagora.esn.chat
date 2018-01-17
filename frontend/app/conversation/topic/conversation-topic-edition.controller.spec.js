@@ -11,9 +11,21 @@ describe('The ChatConversationTopicEditionController controller', function() {
     chatConversationActionsService,
     $controller;
 
+    function initController() {
+      var controller = $controller('ChatConversationTopicEditionController',
+        {$scope: $scope},
+        {conversation: conversation}
+      );
+
+      $scope.$digest();
+
+      return controller;
+    }
+
   beforeEach(function() {
     chatConversationActionsService = {};
     conversation = {_id: 1};
+    conversation.topic = {value: 'test'};
 
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
@@ -31,16 +43,6 @@ describe('The ChatConversationTopicEditionController controller', function() {
   }));
 
   describe('The updateTopic function', function() {
-    function initController() {
-      var controller = $controller('ChatConversationTopicEditionController',
-        {$scope: $scope},
-        {conversation: conversation}
-      );
-
-      $scope.$digest();
-
-      return controller;
-    }
 
     it('should call chatConversationsService.updateConversationTopic', function() {
       var topic = 'MyTopic';
@@ -53,6 +55,30 @@ describe('The ChatConversationTopicEditionController controller', function() {
       $rootScope.$digest();
 
       expect(chatConversationActionsService.updateConversationTopic).to.have.been.calledWith(conversation, topic);
+    });
+  });
+
+  describe('The $onInit function', function() {
+
+    it('should set topic to conversation.topic.value', function() {
+
+      var controller = initController();
+
+      controller.$onInit();
+
+      expect(controller.topic).to.equal(conversation.topic.value);
+    });
+  });
+
+  describe('The draft function', function() {
+
+    it('should set topic to conversation.topic.value', function() {
+      var unsavedTopic = 'Test Topic';
+      var controller = initController();
+
+      controller.draft(unsavedTopic);
+
+      expect(controller.topic).to.equal(unsavedTopic);
     });
   });
 });
