@@ -21,8 +21,7 @@ describe('The linagora.esn.chat conversation-view directive', function() {
       $provide.value('searchProviders', {
         add: sinon.spy()
       });
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
     });
 
     angular.mock.module('esn.datetime', function($provide) {

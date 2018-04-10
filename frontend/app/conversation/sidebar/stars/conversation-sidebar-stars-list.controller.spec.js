@@ -19,8 +19,7 @@ describe('The ChatConversationSidebarStars controller', function() {
       $provide.value('newProvider', function(_provider) {
         return _provider;
       });
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('chatConversationService', {});
     });
   });

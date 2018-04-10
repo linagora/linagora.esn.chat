@@ -15,8 +15,7 @@ describe('The ChatMemberAddController controller', function() {
   beforeEach(function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('$stateParams', $stateParams);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('searchProviders', {
         add: sinon.spy()
       });

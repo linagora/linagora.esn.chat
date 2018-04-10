@@ -34,8 +34,7 @@ describe('The chatConversationResolverService service', function() {
   beforeEach(function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {add: angular.noop});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('$state', $state);
       $provide.value('chatConversationActionsService', chatConversationActionsService);

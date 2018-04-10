@@ -38,8 +38,7 @@ describe('the chatMentionChooser component', function() {
     $provide.value('searchProviders', {
       add: sinon.spy()
     });
-    $provide.value('chatSearchMessagesProviderService', {});
-    $provide.value('chatSearchConversationsProviderService', {});
+    $provide.value('chatSearchProviderService', {});
     $provide.value('domainAPI', domainAPIMock);
     $provide.value('chatUsername', {generate: function() {}});
     $provide.value('ChatTextEntitySelector', ChatTextEntitySelectorMock);

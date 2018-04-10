@@ -54,7 +54,7 @@ describe('The Chat Conversation Beginning Controller ', function() {
       });
       $provide.value('chatUsername', chatUsernameMock);
       $provide.value('chatConversationNameService', chatConversationNameServiceMock);
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('session', {user: user});
     });
   });

@@ -58,8 +58,7 @@ describe('The ChatConversationItemController controller', function() {
     angular.mock.module('jadeTemplates');
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProviders);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('userStatusService', userStatusService);
       $provide.value('session', session);
       $provide.value('userUtils', userUtils);

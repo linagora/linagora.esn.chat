@@ -22,8 +22,7 @@ describe('The chatMessageUtils factory', function() {
       $provide.value('searchProviders', {
         add: sinon.spy()
       });
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('session', session);
     });
   });

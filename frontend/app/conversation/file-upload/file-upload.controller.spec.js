@@ -54,8 +54,7 @@ describe('the chatFileUploadController controller', function() {
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('notificationFactory', notificationFactory);
       $provide.value('chatConversationMemberService', chatConversationMemberService);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('session', session);
     });
 

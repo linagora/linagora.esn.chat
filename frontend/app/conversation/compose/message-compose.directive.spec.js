@@ -44,8 +44,7 @@ describe('The message-compose directive', function() {
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatMessageService', chatMessageService);
       $provide.value('domainAPI', domainAPI);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('session', {user: {_id: ''}});
       $provide.value('chatUsername', {generate: function() {}});
       $provide.value('chatScrollService', {scrollDown: sinon.spy()});

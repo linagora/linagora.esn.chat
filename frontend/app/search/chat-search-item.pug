@@ -1,0 +1,29 @@
+.chat-search(ng-switch="::item.type")
+
+  .chat-messages-search(ng-switch-when="chat.message")
+
+    .message-avatar.pull-left.clickable(ui-sref='profile({user_id: item.creator._id})')
+      esn-avatar(user-id="item.creator._id")
+      i.mdi.mdi-facebook-messenger
+
+    .message-title
+      .data
+        h4.clickable(ui-sref='profile({user_id: item.creator._id})') {{::item.creator.firstname}} {{::item.creator.lastname}}
+        .channel.clickable(ui-sref='chat.channels-views({id: item.channel._id})') {{::item.channel.name}}
+      .date {{::item.timestamps.creation | date: "MM/dd/yyyy h:mma"}}
+
+    a.message-content.clickable(ui-sref='chat.channels-views({id: item.channel._id})')
+      span(ng-bind-html="::item.text")
+
+  .chat-conversations-search(ng-switch-when="chat.conversation")
+    .conversation-body
+      .conversation-title
+        h4.clickable(ui-sref='chat.channels-views({id: item._id})')
+          i.mdi.mdi-comment-multiple-outline
+          .conversation-info
+            span(ng-bind-html="::item.name | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")
+            .creation-date #{__("Created on")} {{::item.timestamps.creation | date: "MM/dd/yyyy"}}
+        span(ng-bind-html="::item.topic.value | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")
+
+      .conversation-purpose
+        span(ng-bind-html="::item.purpose.value | linky: '_blank' | esnEmoticonify:{ class: 'chat-emoji' } | esnHighlight: query: { ignoreEscape: true }")

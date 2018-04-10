@@ -16,8 +16,7 @@ describe('the chatBotMessageController controller', function() {
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('chatBotMessageService', chatBotMessageService);
       $provide.value('searchProviders', {add: sinon.spy()});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
     });
 
     angular.mock.inject(function(_$q_, _$rootScope_, _$controller_, _chatBotMessageService_, _CHAT_MESSAGE_DISPLAYABLE_TYPES_) {

@@ -43,8 +43,8 @@ describe('The chatSummaryDetailsController Controller ', function() {
       });
       $provide.value('chatUsername', chatUsernameMock);
       $provide.value('session', {user: user});
-      $provide.value('chatSearchConversationsProviderService', {});
       $provide.value('chatConversationActionsService', chatConversationActionsServiceMock);
+      $provide.value('chatSearchProviderService', {});
     });
   });
 

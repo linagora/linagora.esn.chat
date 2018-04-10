@@ -19,8 +19,7 @@ describe('The chatLaunchConversationService service', function() {
     $provide.value('searchProviders', {
       add: sinon.spy()
     });
-    $provide.value('chatSearchMessagesProviderService', {});
-    $provide.value('chatSearchConversationsProviderService', {});
+    $provide.value('chatSearchProviderService', {});
   }));
 
   beforeEach(inject(function(_$rootScope_, _$q_, _chatLaunchConversationService_) {

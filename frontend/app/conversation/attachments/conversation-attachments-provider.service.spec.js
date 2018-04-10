@@ -60,9 +60,7 @@ describe('The linagora.esn.chat chatConversationAttachmentsProvider', function()
     });
 
     $provide.value('ELEMENTS_PER_REQUEST', limit);
-
-    $provide.value('chatSearchMessagesProviderService', {});
-    $provide.value('chatSearchConversationsProviderService', {});
+    $provide.value('chatSearchProviderService', {});
     $provide.value('chatUsername', chatUsernameMock);
   }));
 

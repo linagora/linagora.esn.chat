@@ -21,8 +21,7 @@ describe('The chatPrivateConversationService service', function() {
       $provide.value('searchProviders', {
         add: sinon.spy()
       });
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('esnCollaborationClientService', {});
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
