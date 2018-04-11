@@ -31,35 +31,35 @@ describe('The chatLaunchConversationService service', function() {
 
   describe('The launch function', function() {
 
-    it('should call the createConfidentialConversation with array of members even when given user is a single element', function() {
+    it('should call the createDirectmessageConversation with array of members even when given user is a single element', function() {
       userIds = 1;
-      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds);
       $rootScope.$digest();
 
-      expect(chatConversationActionsService.createConfidentialConversation).to.have.been.calledWith({members: [userIds]});
+      expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledWith({members: [userIds]});
     });
 
-    it('should call the createConfidentialConversation with given members', function() {
+    it('should call the createDirectmessageConversation with given members', function() {
       userIds = [1, 2, 3];
-      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.when(conversation);
       });
 
       chatLaunchConversationService.launch(userIds);
       $rootScope.$digest();
 
-      expect(chatConversationActionsService.createConfidentialConversation).to.have.been.calledWith({members: userIds});
+      expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledWith({members: userIds});
     });
 
     it('should call the given onSuccess handler on success', function() {
       var successSpy = sinon.spy();
 
       userIds = [1];
-      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.when(conversation);
       });
 
@@ -72,7 +72,7 @@ describe('The chatLaunchConversationService service', function() {
 
     it('should redirect to default conversation page when onSuccess is not defined', function() {
       userIds = [1];
-      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.when(conversation);
       });
 
@@ -82,19 +82,19 @@ describe('The chatLaunchConversationService service', function() {
       expect($state.go).to.have.been.calledWith('chat.channels-views', {id: conversation._id});
     });
 
-    it('should reject when chatConversationsService.createConfidentialConversation rejects', function() {
+    it('should reject when chatConversationsService.createDirectmessageConversation rejects', function() {
       var error = new Error('I failed');
       var errorSpy = sinon.spy();
       var successSpy = sinon.spy();
 
-      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.reject(error);
       });
 
       chatLaunchConversationService.launch(userIds).then(successSpy, errorSpy);
       $rootScope.$digest();
 
-      expect(chatConversationActionsService.createConfidentialConversation).to.have.been.calledOnce;
+      expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledOnce;
       expect($state.go).to.not.have.been.called;
       expect(errorSpy).to.have.been.calledOnce;
       expect(errorSpy.getCalls()[0].args[0].message).to.equal(error.message);
@@ -109,7 +109,7 @@ describe('The chatLaunchConversationService service', function() {
       var errorSpy = sinon.spy();
       var successSpy = sinon.spy();
 
-      chatConversationActionsService.createConfidentialConversation = sinon.spy(function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.when(conversation);
       });
 
@@ -117,7 +117,7 @@ describe('The chatLaunchConversationService service', function() {
       $rootScope.$digest();
 
       expect(onSuccessSpy).to.have.been.calledOnce;
-      expect(chatConversationActionsService.createConfidentialConversation).to.have.been.calledOnce;
+      expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledOnce;
       expect($state.go).to.not.have.been.called;
       expect(errorSpy).to.have.been.calledOnce;
       expect(errorSpy.getCalls()[0].args[0].message).to.equal(error.message);
