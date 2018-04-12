@@ -348,7 +348,7 @@ describe('The conversation controller', function() {
       error = new Error('I failed');
       headerSpy = sinon.spy();
       conversations = [{_id: 1}, {_id: 2}];
-      user = {_id: 'userId'};
+      user = {_id: 'userId', preferredDomainId: '123'};
       searchResult = {total_count: 2, list: [{_id: 3}, {_id: 4}]};
       listResult = {total_count: 2, list: [{_id: 3}, {_id: 4}]};
     });
@@ -541,7 +541,7 @@ describe('The conversation controller', function() {
           expect(list).to.equal(listResult.list);
           expect(user).to.equal(user);
           expect(headerSpy).to.have.been.calledWith('X-ESN-Items-Count', listResult.total_count);
-          expect(lib.conversation.list).to.have.been.calledWith({mode: 'channel', type: 'open', limit: req.query.limit}, sinon.match.func);
+          expect(lib.conversation.list).to.have.been.calledWith({domain_ids: '123', mode: 'channel', type: 'open', limit: req.query.limit}, sinon.match.func);
           done();
         };
 
@@ -574,7 +574,7 @@ describe('The conversation controller', function() {
 
                 expect(sendConversationResult).to.not.have.been.called;
                 expect(headerSpy).to.not.have.been.called;
-                expect(lib.conversation.list).to.have.been.calledWith({mode: 'channel', type: 'open', limit: req.query.limit}, sinon.match.func);
+                expect(lib.conversation.list).to.have.been.calledWith({domain_ids: '123', mode: 'channel', type: 'open', limit: req.query.limit}, sinon.match.func);
                 done();
               }
             };
