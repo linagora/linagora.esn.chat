@@ -262,7 +262,13 @@ module.exports = function(dependencies, lib) {
       return searchForPublicConversations(req.query.search, req, res);
     }
 
-    lib.conversation.list(Object.assign(req.query || {}, {mode: CONSTANTS.CONVERSATION_MODE.CHANNEL, type: CONSTANTS.CONVERSATION_TYPE.OPEN}), (err, result) => {
+    const queryOverrides = {
+      mode: CONSTANTS.CONVERSATION_MODE.CHANNEL,
+      type: CONSTANTS.CONVERSATION_TYPE.OPEN,
+      domain_ids: req.user.preferredDomainId
+    };
+
+    lib.conversation.list(Object.assign(req.query || {}, queryOverrides), (err, result) => {
       if (err) {
         logger.error('Error while getting conversations', err);
 
