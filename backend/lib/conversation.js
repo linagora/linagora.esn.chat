@@ -224,6 +224,10 @@ module.exports = function(dependencies) {
       query.type = options.type;
     }
 
+    if (options.domain_ids) {
+      query.domain_ids = options.domain_ids;
+    }
+
     query.moderate = options.moderate;
 
     let conversationQuery = Conversation.find(query);
