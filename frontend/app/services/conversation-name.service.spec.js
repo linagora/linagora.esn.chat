@@ -26,8 +26,7 @@ describe('The linagora.esn.chat chatConversationNameService', function() {
       $provide.value('searchProviders', {
         add: sinon.spy()
       });
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('chatUsername', chatUsernameMock);
       $provide.value('session', {user: user});
     });

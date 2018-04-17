@@ -1,0 +1,14 @@
+.chat-messages-search
+
+  .message-avatar.pull-left.clickable(ui-sref='profile({user_id: ctrl.creator.id})')
+    esn-avatar(user-id="ctrl.creator.id")
+    i.mdi.mdi-facebook-messenger
+
+  .message-title
+    .data
+      h4.clickable(ui-sref='profile({user_id: ctrl.creator.id})') {{ ctrl.creator.displayName }}
+      .channel.clickable(ui-sref='chat.channels-views({id: ctrl.channel.id})') {{ctrl.channel.name}}
+    .date {{ctrl.creationDate | date: "MM/dd/yyyy h:mma"}}
+
+  a.message-content.clickable(ui-sref='chat.channels-views({id: ctrl.channel.id})')
+    span(ng-bind-html="ctrl.text")

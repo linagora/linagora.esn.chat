@@ -9,8 +9,7 @@ describe('The ChatLaunchConversationController controller', function() {
     chatLaunchConversationServiceMock = {};
 
     module('linagora.esn.chat', function($provide) {
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('chatLaunchConversationService', chatLaunchConversationServiceMock);
       $provide.value('searchProviders', {add: angular.noop});
     });

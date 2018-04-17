@@ -47,8 +47,7 @@ describe('the ChatLeaveConversationDropdownActionController controller', functio
     };
 
     angular.mock.module('linagora.esn.chat', function($provide) {
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('$stateParams', $stateParams);
       $provide.value('chatConversationNameService', chatConversationNameServiceMock);

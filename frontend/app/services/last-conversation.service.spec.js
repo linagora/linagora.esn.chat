@@ -41,8 +41,7 @@ describe('The chatLastConversationService service', function() {
   beforeEach(function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {add: angular.noop});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('searchProviders', {add: sinon.spy()});
       $provide.value('localStorageService', localStorageService);
       $provide.value('session', {user: {_id: userId}});

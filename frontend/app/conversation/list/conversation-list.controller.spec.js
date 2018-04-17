@@ -29,8 +29,7 @@ describe('The ChatConversationListController controller', function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('esnPaginationtionProviderBuilder', esnPaginationtionProviderBuilder);
       $provide.value('chatConversationService', chatConversationService);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('searchProviders', {
         add: sinon.spy()
       });

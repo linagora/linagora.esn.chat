@@ -23,8 +23,7 @@ describe('The chatUsername service', function() {
         displayNameOf: function() { return username; }
       });
       $provide.value('searchProviders', {add: sinon.spy()});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('Cache', Cache);
       $provide.value('userAPI', userAPIMock);
     });

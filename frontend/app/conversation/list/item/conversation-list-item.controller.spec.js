@@ -17,8 +17,7 @@ describe('The ChatConversationListItemController controller', function() {
 
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {add: angular.noop});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('$state', $state);
     });
 

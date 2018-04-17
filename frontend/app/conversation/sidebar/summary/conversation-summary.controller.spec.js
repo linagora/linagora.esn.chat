@@ -43,7 +43,7 @@ describe('The chatConversationSidebarSummaryController Controller ', function() 
       $provide.value('chatUsername', chatUsernameMock);
       $provide.value('chatConversationsStoreService', chatConversationsStoreServiceMock);
       $provide.value('chatConversationService', chatConversationServiceMock);
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
     });
   });
 

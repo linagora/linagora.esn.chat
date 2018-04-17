@@ -28,6 +28,7 @@ describe('The chatWebsocketMessengerService factory', function() {
       });
       $provide.value('chatSearchMessagesProviderService', {});
       $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('ChatWebsocketTransportService', ChatWebsocketTransportService);
       $provide.value('session', session);
     });

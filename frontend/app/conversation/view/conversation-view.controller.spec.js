@@ -94,8 +94,7 @@ describe('The ChatConversationViewController controller', function() {
       $provide.value('chatScrollService', chatScrollServiceMock);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatConversationMemberService', chatConversationMemberService);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatMessageService', chatMessageServiceMock);
       $provide.constant('CHAT', CHAT);

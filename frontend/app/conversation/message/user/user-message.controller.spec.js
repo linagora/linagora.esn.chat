@@ -95,8 +95,7 @@ describe('the chatUserMessageController controller', function() {
 
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProvidersMock);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.factory('session', function(_$q_) {
 
         sessionMock.ready = _$q_.when(sessionMock);

@@ -28,8 +28,7 @@ describe('the chatBotMessageController controller', function() {
       $provide.value('chatConversationActionsService', chatConversationActionsService);
       $provide.value('chatConversationService', chatConversationService);
       $provide.value('searchProviders', {add: sinon.spy()});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
     });
 
     angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_CONVERSATION_TYPE_) {

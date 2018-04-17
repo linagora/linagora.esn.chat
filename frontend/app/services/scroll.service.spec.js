@@ -40,8 +40,7 @@ describe('The linagora.esn.chat chatScrollService', function() {
       $provide.value('elementScrollService', elementScrollServiceMock);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('searchProviders', searchProviders);
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
     });
   });
 

@@ -30,8 +30,7 @@ describe('The chatConversationsStoreService service', function() {
       $provide.value('searchProviders', {
         add: angular.noop
       });
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('session', {user: user});
       $provide.value('chatPrivateConversationService', chatPrivateConversationService);
     });

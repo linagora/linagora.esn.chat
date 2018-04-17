@@ -39,8 +39,7 @@ describe('The linagora.esn.chat chatDropdownMenuActionsService', function() {
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', {add: sinon.spy()});
-      $provide.value('chatSearchMessagesProviderService', {});
-      $provide.value('chatSearchConversationsProviderService', {});
+      $provide.value('chatSearchProviderService', {});
       $provide.value('session', sessionMock);
       $provide.value('chatConversationsStoreService', chatConversationsStoreServiceMock);
       $provide.value('chatConversationMemberService', chatConversationMemberService);

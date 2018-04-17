@@ -1,0 +1,5 @@
+.chat-search(ng-switch="::item.type")
+  chat-messages-search-item(result-item="item" ng-switch-when="chat.message")
+  chat-conversations-search-item(result-item="item", ng-switch-when="chat.conversation")
+
+
