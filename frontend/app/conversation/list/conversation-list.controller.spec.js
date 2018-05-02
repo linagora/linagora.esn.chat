@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The ChatConversationListController controller', function() {
 
-  var $q, $rootScope, scope, $controller, esnPaginationtionProviderBuilder, chatConversationService, CHAT, chatSearchConversationService, result;
+  var $q, $rootScope, scope, $controller, esnPaginationtionProviderBuilder, chatConversationService, CHAT, chatSearchConversationsService, result;
 
   beforeEach(function() {
     esnPaginationtionProviderBuilder = sinon.spy();
@@ -18,7 +18,7 @@ describe('The ChatConversationListController controller', function() {
       data: []
     };
 
-    chatSearchConversationService = {
+    chatSearchConversationsService = {
       searchConversations: sinon.spy(function() {
         return $q.when(result);
       })
@@ -33,7 +33,7 @@ describe('The ChatConversationListController controller', function() {
       $provide.value('searchProviders', {
         add: sinon.spy()
       });
-      $provide.value('chatSearchConversationService', chatSearchConversationService);
+      $provide.value('chatSearchConversationsService', chatSearchConversationsService);
     });
   });
 
@@ -127,7 +127,7 @@ describe('The ChatConversationListController controller', function() {
       controller.conversationSearchInput = 'test';
       controller.onChange();
        var search = sinon.match(function() {
-         return chatSearchConversationService.searchConversations(self.conversationSearchInput, {limit: CHAT.DEFAULT_FETCH_SIZE, offset: 0});
+         return chatSearchConversationsService.searchConversations(self.conversationSearchInput, {limit: CHAT.DEFAULT_FETCH_SIZE, offset: 0});
        }, 'search');
 
       expect(esnPaginationtionProviderBuilder).to.have.been.calledWith(controller, 'ChatConversationList', search, {
