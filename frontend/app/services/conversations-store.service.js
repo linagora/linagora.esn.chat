@@ -46,7 +46,6 @@
           insertConversationInSortedArray(store.channels, conversation);
         } else if (conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
           insertConversationInSortedArray(store.privateConversations, conversation);
-          _updatePrivateConversations();
         }
       }
     }

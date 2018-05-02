@@ -43,7 +43,8 @@ describe('The linagora.esn.chat lib message listener module', function() {
               if (name === 'ChatMessage') {
                 return ChatMessageMock;
               }
-            })
+            }),
+            Types: {}
           }
         }
       },
@@ -171,6 +172,75 @@ describe('The linagora.esn.chat lib message listener module', function() {
           expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED);
           expect(data).to.be.deep.equals({message: createMessageResult});
           expect(conversationMock.getById).to.have.been.calledWith(conversation);
+          done();
+        };
+
+        messageReceivedListener(data);
+      });
+
+      it('should handle subscription of members to private conversation if there is a sent direct message', function(done) {
+        user = { _id: creator };
+        const conversationData = {
+          members: [
+            { member: { id: creator } },
+            { member: { id: 'memberId' } }
+          ],
+          type: CONSTANTS.CONVERSATION_TYPE.DIRECT_MESSAGE,
+          _id: 'conversationId'
+        };
+        const createMessageResult = 'createMessageResult';
+        const conversationMock = {
+          getById: sinon.spy((id, callback) => callback(null, conversationData)),
+          permission: {
+            userCanWrite: () => Q.when(true)
+          }
+        };
+        const messageMock = {
+          create: sinon.spy((_m, callback) => {
+            callback(null, createMessageResult);
+          })
+        };
+
+        const userSubscribedPrivateConversationMock = {
+          get: sinon.spy(userId => {
+            if (userId === creator) {
+              return Q.when({
+                _id: creator,
+                conversations: [conversationData._id]
+              });
+            }
+
+            return Q.when();
+          }),
+          store: sinon.stub().returns(Q.when())
+        };
+
+        mockery.registerMock('../../user-subscribed-private-conversation', () => userSubscribedPrivateConversationMock);
+        const module = require('../../../../../backend/lib/listener/message')(dependencies, {
+          conversation: conversationMock,
+          message: messageMock
+        });
+
+        module.start();
+
+        globalPublish = () => {
+          expect(messageMock.create).to.have.been.calledWith({
+            type: type,
+            subtype: subtype,
+            text: text,
+            date: date,
+            creator: creator,
+            channel: conversation,
+            attachments: attachments
+          });
+
+          expect(userSubscribedPrivateConversationMock.get).to.have.been.calledTwice;
+          expect(userSubscribedPrivateConversationMock.get).to.have.been.calledWith(conversationData.members[0].member.id);
+          expect(userSubscribedPrivateConversationMock.get).to.have.been.calledWith(conversationData.members[1].member.id);
+
+          expect(userSubscribedPrivateConversationMock.store).to.have.been.calledOnce;
+          expect(userSubscribedPrivateConversationMock.store).to.have.been.calledWith(conversationData.members[1].member.id, [conversationData._id]);
+
           done();
         };
 

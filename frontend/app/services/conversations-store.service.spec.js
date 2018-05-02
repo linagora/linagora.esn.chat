@@ -106,18 +106,6 @@ describe('The chatConversationsStoreService service', function() {
       expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation3, confidentialConversation, confidentialConversation2]);
       expect(chatConversationsStoreService.channels).to.deep.equals([]);
     });
-
-    it('should call the chatPrivateConversationService.store to update the private conversations', function() {
-
-      chatConversationsStoreService.addConversation(confidentialConversation);
-      var conversatrionsIds = chatConversationsStoreService.privateConversations.map(function(privateConversation) {
-        return privateConversation._id;
-      });
-
-      expect(chatConversationsStoreService.privateConversations).to.deep.equals([confidentialConversation]);
-      expect(chatConversationsStoreService.channels).to.deep.equals([]);
-      expect(chatPrivateConversationService.store).to.be.calledWith(conversatrionsIds);
-    });
   });
 
   describe('The addConversations function', function() {
