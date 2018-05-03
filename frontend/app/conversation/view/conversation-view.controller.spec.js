@@ -42,7 +42,8 @@ describe('The ChatConversationViewController controller', function() {
     };
 
     chatConversationActionsService = {
-      setActive: sinon.spy()
+      setActive: sinon.spy(),
+      markAllMessagesAsRead: sinon.spy()
     };
 
     chatScrollServiceMock = {
@@ -290,6 +291,17 @@ describe('The ChatConversationViewController controller', function() {
       $rootScope.$digest();
 
       expect(chatConversationServiceMock.fetchMessages).to.have.been.called.once;
+    });
+
+    it('should mark all messages in the conversation as read', function() {
+      chatConversationsStoreService.activeRoom = { _id: channelId };
+      chatConversationServiceMock.fetchMessages = sinon.stub().returns($q.when([]));
+      var ctrl = initCtrl();
+
+      ctrl.$onInit();
+      $rootScope.$digest();
+
+      expect(chatConversationActionsService.markAllMessagesAsRead).to.have.been.calledWith({ _id: channelId });
     });
   });
 
