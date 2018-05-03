@@ -622,6 +622,15 @@ describe('The chatConversationActionsService service', function() {
     });
 
     it('should fetch all the conversations and add them to the store', function() {
+      conversations = [
+        {
+          _id: 1,
+          type: CHAT_CONVERSATION_TYPE.OPEN,
+          numOfMessage: 10,
+          numOfReadedMessage: {}
+        }
+      ];
+      conversations[0].numOfReadedMessage[user.id] = 8;
       chatConversationService.listForCurrentUser = sinon.spy(function() {
         return $q.when({data: conversations});
       });
@@ -633,6 +642,25 @@ describe('The chatConversationActionsService service', function() {
 
       expect(chatConversationService.listForCurrentUser).to.have.been.called;
       expect(chatConversationsStoreService.addConversation).to.have.been.calledTwice;
+    });
+
+    it('should calculate unread message after fetch conversations', function() {
+      conversations = [
+        {
+          _id: 1,
+          type: CHAT_CONVERSATION_TYPE.OPEN,
+          numOfMessage: 10,
+          numOfReadedMessage: {}
+        }
+      ];
+      conversations[0].numOfReadedMessage[user.id] = 8;
+      chatConversationService.listForCurrentUser = sinon.stub().returns($q.when({ data: conversations }));
+      chatConversationsStoreService.addConversation = sinon.spy();
+      chatConversationActionsService.start();
+      $rootScope.$digest();
+
+      expect(chatConversationsStoreService.addConversation).to.have.been.calledTwice;
+      expect(conversations[0].unreadMessageCount).to.equal(2);
     });
 
     it('should reject when fetchAllConversations rejects', function() {

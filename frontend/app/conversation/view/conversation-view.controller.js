@@ -147,6 +147,7 @@
     }
 
     function $onInit() {
+      chatConversationActionsService.markAllMessagesAsRead(chatConversationsStoreService.activeRoom);
       loadPreviousMessages(true).then(function(isOwnerOfmessage, messageChannel) {
         $timeout(function() {
           scrollDown(isOwnerOfmessage, messageChannel);
