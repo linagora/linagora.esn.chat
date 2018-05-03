@@ -8,7 +8,8 @@
     var type = 'chat.conversation';
 
     return {
-      buildFetcher: buildFetcher
+      buildFetcher: buildFetcher,
+      searchConversations: searchConversations
     };
 
     ////////////
@@ -17,7 +18,7 @@
       var offset = 0;
 
       return function() {
-        return _searchConversations(query, {
+        return searchConversations(query, {
           offset: offset,
           limit: ELEMENTS_PER_REQUEST
         }).then(function(response) {
@@ -33,7 +34,7 @@
       };
     }
 
-    function _searchConversations(term, options) {
+    function searchConversations(term, options) {
       options = angular.extend({search: term}, options);
 
       return ChatRestangular.all('conversations').getList(options);

@@ -4,7 +4,7 @@
   angular.module('linagora.esn.chat')
     .controller('ChatConversationListController', ChatConversationListController);
 
-  function ChatConversationListController(esnPaginationtionProviderBuilder, chatConversationService, CHAT, chatSearchConversationService) {
+  function ChatConversationListController(esnPaginationtionProviderBuilder, chatConversationService, CHAT, chatSearchConversationsService) {
     var self = this;
 
     self.onChange = onChange;
@@ -41,7 +41,7 @@
     }
 
     function search(options) {
-      return chatSearchConversationService.searchConversations(self.conversationSearchInput, options);
+      return chatSearchConversationsService.searchConversations(self.conversationSearchInput, options);
     }
   }
 })();

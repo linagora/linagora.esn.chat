@@ -53,4 +53,14 @@ describe('The linagora.esn.chat chatSearchConversationsService', function() {
     });
 
   });
+
+  describe('The searchConversations function', function() {
+    it('should call the search API endpoint', function() {
+      var query = 'searchme';
+
+      $httpBackend.expectGET('/chat/api/conversations?search=' + query).respond([]);
+      chatSearchConversationsService.searchConversations(query);
+      $httpBackend.flush();
+    });
+  });
 });
