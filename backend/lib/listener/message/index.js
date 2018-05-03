@@ -9,6 +9,9 @@ module.exports = function(dependencies, lib) {
   const globalPubsub = dependencies('pubsub').global;
   const logger = dependencies('logger');
   const userModule = dependencies('user');
+
+  const userSubscribedPrivateConversation = require('../../user-subscribed-private-conversation')(dependencies);
+
   const forwardHandlers = {};
   const messageHandlers = [];
 
@@ -141,6 +144,16 @@ module.exports = function(dependencies, lib) {
             if (err) {
               return defer.reject(err);
             }
+
+            // Handle subscription to a private conversation when there is a sent direct message
+            if (data.message.type === CONSTANTS.MESSAGE_TYPE.TEXT && conversation.type === CONSTANTS.CONVERSATION_TYPE.DIRECT_MESSAGE) {
+              return membersSubscribeToPrivateConversation(conversation)
+                .then(
+                  () => defer.resolve(createdMessage),
+                  err => defer.reject(err)
+                );
+            }
+
             defer.resolve(createdMessage);
           });
 
@@ -151,6 +164,26 @@ module.exports = function(dependencies, lib) {
         });
 
         return defer.promise;
+      }
+
+      function membersSubscribeToPrivateConversation(conversation) {
+        const memberIds = conversation.members.map(member => String(member.member.id));
+
+        return Q.all(
+          memberIds.map(memberId => userSubscribedPrivateConversation.get(memberId)
+            .then(doc => {
+              const conversations = doc && doc.conversations ? doc.conversations : [];
+
+              if (conversations.indexOf(conversation._id) === -1) {
+                conversations.push(conversation._id);
+
+                return userSubscribedPrivateConversation.store(memberId, conversations);
+              }
+
+              return;
+            })
+          ).filter(Boolean)
+        );
       }
     }
   }
