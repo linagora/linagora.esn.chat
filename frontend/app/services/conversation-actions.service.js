@@ -167,13 +167,23 @@
     function fetchOpenAndSubscribedConversation() {
 
       return _fetchOpenConversation()
-      .then(function(openConversations) {
-
-        return chatPrivateConversationService.get().then(function(privateConversations) {
-
-          return openConversations.concat(privateConversations);
+        .then(_calculateUnreadMessage)
+        .then(function(openConversations) {
+          return chatPrivateConversationService.get().then(function(privateConversations) {
+            return openConversations.concat(privateConversations);
+          });
         });
-      });
+    }
+
+    function _calculateUnreadMessage(conversations) {
+      return $q.when(conversations.map(function(conversation) {
+        var numOfMessage = conversation.numOfMessage;
+        var numOfReadedMessage = conversation.numOfReadedMessage[session.user.id];
+
+        conversation.unreadMessageCount = numOfMessage - numOfReadedMessage;
+
+        return conversation;
+      }));
     }
 
     function getConversation(conversationId) {
