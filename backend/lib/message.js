@@ -64,7 +64,7 @@ module.exports = function(dependencies, lib) {
         $inc: {
           numOfMessage: 1
         }
-      }, (err, conversation) => {
+      }, { new: true }, (err, conversation) => {
         if (err) {
           logger.error('Can not update channel with last_update', err);
         }
@@ -221,7 +221,7 @@ module.exports = function(dependencies, lib) {
 
     Conversation.findByIdAndUpdate(conversation._id, {
       $max: updateMaxOperation
-    }, callback);
+    }, null, callback);
   }
 
   function markAllAsReadById(userId, conversationId, callback) {

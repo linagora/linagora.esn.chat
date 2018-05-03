@@ -174,7 +174,7 @@ describe('The linagora.esn.chat message lib', function() {
         cb(null, message);
       });
 
-      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, updates, options, cb) {
         cb(null, message);
       };
 
@@ -236,13 +236,13 @@ describe('The linagora.esn.chat message lib', function() {
         cb(null, conversation);
       };
 
-      modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+      modelsMock.ChatConversation.findByIdAndUpdate = function(id, updates, options, cb) {
         expect(id).to.deep.equals(channelId);
-        expect(options).to.deep.equals({
+        expect(updates).to.deep.equals({
           $set: {last_message: {text: message.text, creator: message.creator, user_mentions: message.user_mentions, date: message.timestamps.creation}},
           $inc: {numOfMessage: 1}
         });
-        modelsMock.ChatConversation.findByIdAndUpdate = function(id, options, cb) {
+        modelsMock.ChatConversation.findByIdAndUpdate = function(id, updates, options, cb) {
           cb();
         };
         cb(null, conversation);
@@ -366,9 +366,9 @@ describe('The linagora.esn.chat message lib', function() {
         callback(null, {_id: channelId, numOfMessage: numOfMessage});
       };
 
-      modelsMock.ChatConversation.update = function(query, options, callback) {
-        expect(query).to.deep.equals({_id: channelId});
-        expect(options).to.deep.equals({
+      modelsMock.ChatConversation.findByIdAndUpdate = function(query, updates, options, callback) {
+        expect(query).to.deep.equals(channelId);
+        expect(updates).to.deep.equals({
           $max: {
             'numOfReadedMessage.userId': 42
           }
