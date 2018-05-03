@@ -15,10 +15,11 @@ const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
+const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  let deps, lib, logger, channelArchivedLocalTopic, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic;
+  let deps, lib, logger, channelArchivedLocalTopic, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic, setMemberUnreadMessagesCount;
 
   function dependencies(name) {
     return deps[name];
@@ -66,6 +67,10 @@ describe('The linagora.esn.chat conversation lib', function() {
 
     membershipTopic = {
       subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
+    setMemberUnreadMessagesCount = {
       publish: sinon.spy()
     };
 
@@ -172,6 +177,9 @@ describe('The linagora.esn.chat conversation lib', function() {
             }
             if (name === CONVERSATION_DELETED) {
               return channelDeletionTopic;
+            }
+            if (name === MEMBER_UNREAD_MESSAGES_COUNT) {
+              return setMemberUnreadMessagesCount;
             }
           }
         }
@@ -566,6 +574,52 @@ describe('The linagora.esn.chat conversation lib', function() {
         expect(result).to.deep.equals(conversations);
         expect(finder1).to.have.been.calledWith(user, options);
         expect(finder2).to.have.been.calledWith(user, options);
+        done();
+      });
+    });
+  });
+
+  describe('The markUserAsReadAllMessages function', function() {
+    it('should call Conversation.findByIdAndUpdate with the correct parameter', function(done) {
+      const conversation = {
+        _id: 'conversationId',
+        numOfMessage: 9001
+      };
+      const userId = 'userId';
+
+      modelsMock.ChatConversation.findByIdAndUpdate = function(conversationId, update, cb) {
+        expect(conversationId).to.equal(conversation._id);
+        expect(update).to.deep.equals({
+          $max: {'memberStates.userId.numOfReadMessages': 9001}
+        });
+
+        cb(null);
+      };
+
+      require('../../../backend/lib/conversation')(dependencies, lib).markUserAsReadAllMessages(userId, conversation, done);
+    });
+
+    it('should publish on MEMBER_UNREAD_MESSAGES_COUNT topic', function(done) {
+      const conversation = {
+        _id: 'conversationId',
+        numOfMessage: 9001
+      };
+      const userId = 'userId';
+
+      modelsMock.ChatConversation.findByIdAndUpdate = (conversationId, update, cb) => {
+        cb(null);
+      };
+
+      require('../../../backend/lib/conversation')(dependencies, lib).markUserAsReadAllMessages(userId, conversation, err => {
+        if (err) {
+          done(err);
+        }
+
+        expect(setMemberUnreadMessagesCount.publish).to.have.been.calledWith({
+          userId,
+          conversationId: conversation._id,
+          unreadMessageCount: 0
+        });
         done();
       });
     });

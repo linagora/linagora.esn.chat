@@ -476,4 +476,13 @@ describe('The chatConversationsStoreService service', function() {
       ]);
     });
   });
+
+  describe('The setNumberOfUnreadMessages function', function() {
+    it('should set the number of unread messages of a conversation', function() {
+      chatConversationsStoreService.conversations = [conversation];
+      chatConversationsStoreService.setNumberOfUnreadMessages(conversation._id, 10);
+
+      expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(10);
+    });
+  });
 });

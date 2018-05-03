@@ -22,7 +22,7 @@ module.exports = function(dependencies, lib) {
     getUserPrivateConversations,
     getSummaryOfConversation,
     list,
-    markAllMessageOfAConversationReaded,
+    markUserAsReadAllMessages,
     searchForPublicConversations,
     updateTopic,
     update
@@ -285,22 +285,20 @@ module.exports = function(dependencies, lib) {
     });
   }
 
-  function markAllMessageOfAConversationReaded(req, res) {
-    lib.message.markAllAsReadById(req.user._id, req.conversation._id, err => {
-      if (err) {
-        logger.error('Error while marking messages as read', err);
+  function markUserAsReadAllMessages(req, res) {
+    return Q.denodeify(lib.conversation.markUserAsReadAllMessages)(req.user._id, req.conversation)
+      .then(() => res.status(204).end())
+      .catch(err => {
+        logger.error('Error while marking user as read all messages', err);
 
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: 'Error while marking all messages as read'
+            details: 'Error while marking user as read all messages'
           }
         });
-      }
-
-      res.status(204).end();
-    });
+      });
   }
 
   function sendResponse(req, res) {

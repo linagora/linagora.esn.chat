@@ -60,12 +60,6 @@ describe('The chatConversationListenerService service', function() {
   }));
 
   describe('The addEventListeners function', function() {
-    it('should register event handlers', function() {
-      chatConversationListenerService.addEventListeners();
-
-      expect(chatMessengerService.addEventListener.getCalls().length).to.equal(7);
-    });
-
     describe('on CHAT_EVENTS.NEW_CONVERSATION', function() {
       it('should reject when chatConversationService.get rejects', function(done) {
         var error = new Error('I failed');
@@ -198,6 +192,27 @@ describe('The chatConversationListenerService service', function() {
           callback(conversation);
 
           expect(chatConversationsStoreService.updateConversation).to.have.been.calledWith(conversation);
+
+          return true;
+        })));
+      });
+    });
+
+    describe('on CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT', function() {
+      it('should update number of unread messages of a conversation', function() {
+        var eventPayload = {
+          conversationId: 'converationid',
+          unreadMessageCount: 0
+        };
+
+        chatConversationsStoreService.setNumberOfUnreadMessages = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT, sinon.match.func.and(sinon.match(function(callback) {
+          callback(eventPayload);
+
+          expect(chatConversationsStoreService.setNumberOfUnreadMessages).to.have.been.calledWith(eventPayload.conversationId, eventPayload.unreadMessageCount);
 
           return true;
         })));

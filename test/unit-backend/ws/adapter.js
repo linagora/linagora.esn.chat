@@ -13,10 +13,11 @@ const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERS
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
+const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic, conversationMemberAddedTopic;
+  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic, conversationMemberAddedTopic, setUserUnreadMessagesCountTopic;
 
   beforeEach(function() {
     var self = this;
@@ -68,6 +69,11 @@ describe('The chat websocket adapter', function() {
       publish: sinon.spy()
     };
 
+    setUserUnreadMessagesCountTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
     lib = {
       conversation: {},
       members: {}
@@ -110,6 +116,9 @@ describe('The chat websocket adapter', function() {
             if (name === CONVERSATION_UPDATED) {
               return conversationUpdatedTopic;
             }
+            if (name === MEMBER_UNREAD_MESSAGES_COUNT) {
+              return setUserUnreadMessagesCountTopic;
+            }
           }
         }
       },
@@ -139,7 +148,8 @@ describe('The chat websocket adapter', function() {
         memberHasJoined: sinon.spy(),
         memberHasLeft: sinon.spy(),
         sendMessage: sinon.spy(),
-        topicUpdated: sinon.spy()
+        topicUpdated: sinon.spy(),
+        sendDataToUser: sinon.spy()
       };
     });
 
@@ -667,6 +677,29 @@ describe('The chat websocket adapter', function() {
 
         return true;
       })));
+    });
+
+    it('should subscribe to MEMBER_UNREAD_MESSAGES_COUNT event', function() {
+      data = {
+        userId: 'user-id',
+        conversationId: conversation._id,
+        unreadMessageCount: 10
+      };
+
+      adapter.bindEvents(messenger);
+
+      expect(setUserUnreadMessagesCountTopic.subscribe).to.have.been.calledWith(sinon.match(callback => {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      expect(messenger.sendDataToUser).to.have.been.calledWith(data.userId, MEMBER_UNREAD_MESSAGES_COUNT, {
+        conversationId: data.conversationId,
+        unreadMessageCount: data.unreadMessageCount
+      });
     });
   });
 });
