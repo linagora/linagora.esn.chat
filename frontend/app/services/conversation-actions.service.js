@@ -166,13 +166,11 @@
 
     function fetchOpenAndSubscribedConversation() {
 
-      return _fetchOpenConversation()
-        .then(_calculateUnreadMessage)
-        .then(function(openConversations) {
-          return chatPrivateConversationService.get().then(function(privateConversations) {
-            return openConversations.concat(privateConversations);
-          });
-        });
+      return $q.all([_fetchOpenConversation(), chatPrivateConversationService.get()])
+        .then(function(result) {
+          return result[0].concat(result[1]);
+        })
+        .then(_calculateUnreadMessage);
     }
 
     function _calculateUnreadMessage(conversations) {
