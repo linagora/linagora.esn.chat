@@ -658,6 +658,12 @@ describe('The chatConversationActionsService service', function() {
           type: CHAT_CONVERSATION_TYPE.OPEN,
           numOfMessage: 10,
           numOfReadedMessage: {}
+        },
+        {
+          _id: 2,
+          type: CHAT_CONVERSATION_TYPE.OPEN,
+          numOfMessage: 12,
+          numOfReadedMessage: {}
         }
       ];
       conversations[0].numOfReadedMessage[user.id] = 8;
@@ -666,8 +672,9 @@ describe('The chatConversationActionsService service', function() {
       chatConversationActionsService.start();
       $rootScope.$digest();
 
-      expect(chatConversationsStoreService.addConversation).to.have.been.calledTwice;
+      expect(chatConversationsStoreService.addConversation).to.have.been.calledThrice;
       expect(conversations[0].unreadMessageCount).to.equal(2);
+      expect(conversations[1].unreadMessageCount).to.equal(12);
       expect(privateConversation.unreadMessageCount).to.equal(5);
     });
 
