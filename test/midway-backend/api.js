@@ -329,7 +329,15 @@ describe('The chat API', function() {
             }
 
             expect(res.body.length).to.equal(3);
-            expect(res.body).to.shallowDeepEqual([{_id: String(channel2._id), moderate: false}, {_id: String(channel3._id), moderate: false}, {name: CONSTANTS.DEFAULT_CHANNEL.name, moderate: false}]);
+
+            const channel1InBody = res.body.find(conversation => (conversation._id === String(channel1._id)));
+            const channel2InBody = res.body.find(conversation => (conversation._id === String(channel2._id)));
+            const channel3InBody = res.body.find(conversation => (conversation._id === String(channel3._id)));
+
+            expect(channel1InBody).to.not.exist;
+            expect(channel2InBody).to.exist;
+            expect(channel3InBody).to.exist;
+
             done();
           });
       }
