@@ -45,7 +45,7 @@ module.exports = function(dependencies) {
       }
     ],
     schemaVersion: {type: Number, default: 1},
-    numOfReadedMessage: mongoose.Schema.Types.Mixed, // this will be a map that associate a num of unread message to a userId (ie: { 'userId1': 0, 'userId2': 2, 'userId3': 3})
+    memberStates: mongoose.Schema.Types.Mixed, // this will be a map that associates a state of a member to his id (ie: { 'userId1': { 'numOfReadMessages': 3, 'numberOfUnseenMentions': 2 } })
     numOfMessage: {type: Number, default: 0}
   };
 

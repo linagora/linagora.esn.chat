@@ -1693,10 +1693,13 @@ describe('The chat API', function() {
       }).then(function() {
         return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
-        var wanted = {};
+        const expected = {
+          [String(userId)]: {
+            numOfReadMessages: numOfMessage
+          }
+        };
 
-        wanted[String(userId)] = numOfMessage;
-        expect(channel.numOfReadedMessage).to.deep.equal(wanted);
+        expect(channel.memberStates).to.deep.equal(expected);
         done();
       }).catch(done);
     });
@@ -1720,10 +1723,13 @@ describe('The chat API', function() {
       }).then(function() {
         return Q.denodeify(app.lib.conversation.getById)(channelId);
       }).then(function(channel) {
-        var wanted = {};
+        const expected = {
+          [String(userId)]: {
+            numOfReadMessages: numOfMessage
+          }
+        };
 
-        wanted[String(userId)] = numOfMessage;
-        expect(channel.numOfReadedMessage).to.deep.equal(wanted);
+        expect(channel.memberStates).to.deep.equal(expected);
         done();
       }).catch(done);
     });

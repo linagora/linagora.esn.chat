@@ -216,7 +216,7 @@ module.exports = function(dependencies, lib) {
     const updateMaxOperation = {};
 
     userIds.forEach(function(userId) {
-      updateMaxOperation['numOfReadedMessage.' + String(userId)] = conversation.numOfMessage;
+      updateMaxOperation[`memberStates.${String(userId)}.numOfReadMessages`] = conversation.numOfMessage;
     });
 
     Conversation.findByIdAndUpdate(conversation._id, {
