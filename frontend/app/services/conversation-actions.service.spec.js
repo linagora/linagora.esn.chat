@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationActionsService service', function() {
 
-  var $log, $q, conversation, name, user, result, sessionMock, chatPrivateConversationService, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatDesktopNotificationService, $rootScope;
+  var $log, $q, privateConversation, conversation, name, user, result, sessionMock, chatPrivateConversationService, chatConversationActionsService, chatMessageUtilsService, chatConversationNameService, chatConversationService, chatConversationsStoreService, chatDesktopNotificationService, $rootScope;
   var CHAT_CONVERSATION_TYPE, CHAT_CONVERSATION_MODE, CHAT_EVENTS;
   var error, successSpy, errorSpy;
 
@@ -16,7 +16,18 @@ describe('The chatConversationActionsService service', function() {
     successSpy = sinon.spy();
     errorSpy = sinon.spy();
     conversation = {_id: 1, name: 'My conversation'};
-    user = {_id: 'userId'};
+    privateConversation = {
+      _id: 2,
+      name: 'My private conversation',
+      numOfMessage: 15,
+      numOfReadedMessage: {
+        userId: 10
+      }
+    };
+    user = {
+      _id: 'userId',
+      id: 'userId'
+    };
     result = {data: {foo: 'bar'}};
     sessionMock = {
       ready: null
@@ -26,7 +37,7 @@ describe('The chatConversationActionsService service', function() {
     };
     chatPrivateConversationService = {
       get: sinon.spy(function() {
-        return $q.when(conversation);
+        return $q.when(privateConversation);
       })
     };
     chatMessageUtilsService = {};
@@ -617,10 +628,6 @@ describe('The chatConversationActionsService service', function() {
   describe('The start function', function() {
     var conversations;
 
-    beforeEach(function() {
-      conversations = [{_id: 1, type: CHAT_CONVERSATION_TYPE.OPEN}];
-    });
-
     it('should fetch all the conversations and add them to the store', function() {
       conversations = [
         {
@@ -651,6 +658,12 @@ describe('The chatConversationActionsService service', function() {
           type: CHAT_CONVERSATION_TYPE.OPEN,
           numOfMessage: 10,
           numOfReadedMessage: {}
+        },
+        {
+          _id: 2,
+          type: CHAT_CONVERSATION_TYPE.OPEN,
+          numOfMessage: 12,
+          numOfReadedMessage: {}
         }
       ];
       conversations[0].numOfReadedMessage[user.id] = 8;
@@ -659,8 +672,10 @@ describe('The chatConversationActionsService service', function() {
       chatConversationActionsService.start();
       $rootScope.$digest();
 
-      expect(chatConversationsStoreService.addConversation).to.have.been.calledTwice;
+      expect(chatConversationsStoreService.addConversation).to.have.been.calledThrice;
       expect(conversations[0].unreadMessageCount).to.equal(2);
+      expect(conversations[1].unreadMessageCount).to.equal(12);
+      expect(privateConversation.unreadMessageCount).to.equal(5);
     });
 
     it('should reject when fetchAllConversations rejects', function() {
