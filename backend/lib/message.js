@@ -24,8 +24,6 @@ module.exports = function(dependencies, lib) {
     getByIdAndPopulate,
     getForConversation,
     list,
-    markAllAsReadById,
-    markAllAsRead,
     moderate,
     parseMention,
     save,
@@ -77,7 +75,7 @@ module.exports = function(dependencies, lib) {
         return callback(null, message);
       }
 
-      markAllAsRead(message.creator, conversation, err => {
+      lib.conversation.markUserAsReadAllMessages(message.creator, conversation, err => {
         callback(err, message);
       });
     }
@@ -208,29 +206,6 @@ module.exports = function(dependencies, lib) {
           list: messages || []
         });
       });
-    });
-  }
-
-  function markAllAsRead(userIds, conversation, callback) {
-    userIds = _.isArray(userIds) ? userIds : [userIds];
-    const updateMaxOperation = {};
-
-    userIds.forEach(function(userId) {
-      updateMaxOperation[`memberStates.${String(userId)}.numOfReadMessages`] = conversation.numOfMessage;
-    });
-
-    Conversation.findByIdAndUpdate(conversation._id, {
-      $max: updateMaxOperation
-    }, null, callback);
-  }
-
-  function markAllAsReadById(userId, conversationId, callback) {
-    Conversation.findOne({_id: conversationId}, function(err, conversation) {
-      if (err) {
-        return callback(err);
-      }
-
-      markAllAsRead(userId, conversation, callback);
     });
   }
 

@@ -10,6 +10,7 @@ const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERS
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
+const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
 
 module.exports = (dependencies, lib) => {
   const logger = dependencies('logger');
@@ -30,6 +31,7 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(MEMBER_JOINED_CONVERSATION).subscribe(memberHasJoined);
     globalPubsub.topic(MEMBER_LEFT_CONVERSATION).subscribe(memberHasLeft);
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
+    globalPubsub.topic(MEMBER_UNREAD_MESSAGES_COUNT).subscribe(setUserUnreadMessagesCount);
 
     messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({message}));
 
@@ -112,6 +114,16 @@ module.exports = (dependencies, lib) => {
         .catch(err => {
           logger.error('Error while getting conversation for topic update', err);
         });
+    }
+
+    /**
+     * Event payload is {conversationId, unreadMessageCount}
+     */
+    function setUserUnreadMessagesCount(event) {
+      messenger.sendDataToUser(event.userId, MEMBER_UNREAD_MESSAGES_COUNT, {
+        conversationId: event.conversationId,
+        unreadMessageCount: event.unreadMessageCount
+      });
     }
   }
 };

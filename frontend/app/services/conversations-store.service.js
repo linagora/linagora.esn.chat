@@ -15,6 +15,7 @@
       findConversation: findConversation,
       find: find,
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
+      setNumberOfUnreadMessages: setNumberOfUnreadMessages,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       increaseUserMentionsCount: increaseUserMentionsCount,
       isInactiveOpenRoom: isInactiveOpenRoom,
@@ -100,6 +101,16 @@
       });
 
       return unreadedMessages;
+    }
+
+    function setNumberOfUnreadMessages(conversationId, unreadMessageCount) {
+      var conversation = _.find(store.conversations, function(conversation) {
+        return conversation._id === conversationId;
+      });
+
+      if (conversation) {
+        conversation.unreadMessageCount = unreadMessageCount;
+      }
     }
 
     function insertConversationInSortedArray(array, conversation) {
