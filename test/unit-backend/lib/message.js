@@ -211,9 +211,10 @@ describe('The linagora.esn.chat message lib', function() {
     });
 
     it('should add the last message in the channel document and inc num of message and readed num of message for the author', function(done) {
-      var channelId = 'channelId';
-      var conversation = {_id: channelId, numOfMessage: 42};
-      var message = {id: 1, creator: 'userId', channel: channelId, text: '', user_mentions: ['@userId'], timestamps: {creation: '0405'}};
+      const channelId = 'channelId';
+      const userId = 'userId';
+      const conversation = {_id: channelId, numOfMessage: 42};
+      const message = {id: 1, creator: userId, channel: channelId, text: '', user_mentions: ['@userId'], timestamps: {creation: '0405'}};
 
       modelsMock.ChatMessage = function(msg) {
         expect(msg).to.be.deep.equal(message);
@@ -231,7 +232,7 @@ describe('The linagora.esn.chat message lib', function() {
       modelsMock.ChatConversation.update = function(query, options, cb) {
         expect(query).to.deep.equal({_id: channelId});
         expect(options).to.deep.equal({
-          $max: {'numOfReadedMessage.userId': conversation.numOfMessage}
+          $max: { [`memberStates.${userId}.numOfReadMessages`]: conversation.numOfMessage }
         });
         cb(null, conversation);
       };
@@ -370,7 +371,7 @@ describe('The linagora.esn.chat message lib', function() {
         expect(query).to.deep.equals(channelId);
         expect(updates).to.deep.equals({
           $max: {
-            'numOfReadedMessage.userId': 42
+            [`memberStates.${userId}.numOfReadMessages`]: 42
           }
         });
         callback();

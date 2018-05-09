@@ -20,13 +20,14 @@ describe('The chatConversationActionsService service', function() {
       _id: 2,
       name: 'My private conversation',
       numOfMessage: 15,
-      numOfReadedMessage: {
-        userId: 10
-      }
+      memberStates: {}
     };
     user = {
       _id: 'userId',
       id: 'userId'
+    };
+    privateConversation.memberStates[user.id] = {
+      numOfReadMessages: 10
     };
     result = {data: {foo: 'bar'}};
     sessionMock = {
@@ -634,10 +635,12 @@ describe('The chatConversationActionsService service', function() {
           _id: 1,
           type: CHAT_CONVERSATION_TYPE.OPEN,
           numOfMessage: 10,
-          numOfReadedMessage: {}
+          memberStates: {}
         }
       ];
-      conversations[0].numOfReadedMessage[user.id] = 8;
+      conversations[0].memberStates[user.id] = {
+        numOfReadMessages: 8
+      };
       chatConversationService.listForCurrentUser = sinon.spy(function() {
         return $q.when({data: conversations});
       });
@@ -657,16 +660,18 @@ describe('The chatConversationActionsService service', function() {
           _id: 1,
           type: CHAT_CONVERSATION_TYPE.OPEN,
           numOfMessage: 10,
-          numOfReadedMessage: {}
+          memberStates: {}
         },
         {
           _id: 2,
           type: CHAT_CONVERSATION_TYPE.OPEN,
           numOfMessage: 12,
-          numOfReadedMessage: {}
+          memberStates: {}
         }
       ];
-      conversations[0].numOfReadedMessage[user.id] = 8;
+      conversations[0].memberStates[user.id] = {
+        numOfReadMessages: 8
+      };
       chatConversationService.listForCurrentUser = sinon.stub().returns($q.when({ data: conversations }));
       chatConversationsStoreService.addConversation = sinon.spy();
       chatConversationActionsService.start();

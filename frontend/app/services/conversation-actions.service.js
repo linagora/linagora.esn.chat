@@ -176,9 +176,9 @@
     function _calculateUnreadMessage(conversations) {
       return $q.when(conversations.map(function(conversation) {
         var numOfMessage = conversation.numOfMessage;
-        var numOfReadedMessage = conversation.numOfReadedMessage[session.user.id] || 0;
+        var numOfReadMessages = conversation.memberStates && conversation.memberStates[session.user.id] && conversation.memberStates[session.user.id].numOfReadMessages || 0;
 
-        conversation.unreadMessageCount = numOfMessage - numOfReadedMessage;
+        conversation.unreadMessageCount = numOfMessage - numOfReadMessages;
 
         return conversation;
       }));
