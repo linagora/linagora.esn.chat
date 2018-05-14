@@ -1,52 +1,127 @@
 'use strict';
 
+const mockery = require('mockery');
 const sinon = require('sinon');
 const expect = require('chai').expect;
-const _ = require('lodash');
-const CONSTANTS = require('../../../../../../backend/lib/constants');
 
 describe('The chat mentions handler', function() {
-  let deps, globalPublish, ChatMessageMock, dependencies;
+  let dependencies;
 
   beforeEach(function() {
-    dependencies = function(name) {
-      return deps[name];
-    };
-
-    ChatMessageMock = sinon.spy(function() {
-      this.populate = ChatMessageMock.populate;
-    });
-
-    ChatMessageMock.populate = sinon.spy(_.identity);
-
-    globalPublish = sinon.spy();
-    deps = {
-      pubsub: {
-        local: {
-          topic: function() {
-            return {
-              subscribe: function() {
-              }
-            };
-          }
-        },
-        global: {
-          topic: sinon.spy(function() {
-            return {
-              publish: globalPublish
-            };
-          })
-        }
-      }
-    };
+    dependencies = () => {};
   });
 
-  it('should broadcast users_mention', function() {
-    const message = {user_mentions: ['user']};
+  const getModule = () => require('../../../../../../backend/lib/listener/message/handlers/mentions')(dependencies);
 
-    require('../../../../../../backend/lib/listener/message/handlers/mentions')(dependencies)({message});
+  it('should do nothing if conversation is not found', function(done) {
+    const conversationId = '123';
+    const message = {
+      channel: conversationId,
+      user_mentions: [{}]
+    };
+    const getSpy = sinon.spy();
+    const increaseNumberOfUnseenMentionsOfMembersSpy = sinon.spy();
 
-    expect(globalPublish).to.have.been.calledWith({message: message, for: 'user'});
-    expect(deps.pubsub.global.topic).to.have.been.calledWith(CONSTANTS.NOTIFICATIONS.USERS_MENTION);
+    mockery.registerMock('../../../conversation', () => ({
+      getById: (conversationId, callback) => {
+        getSpy(conversationId);
+
+        callback(null);
+      },
+      increaseNumberOfUnseenMentionsOfMembers: increaseNumberOfUnseenMentionsOfMembersSpy
+    }));
+
+    getModule()({ message })
+      .catch(() => {
+        expect(getSpy).to.have.been.calledWith(conversationId);
+        expect(increaseNumberOfUnseenMentionsOfMembersSpy).to.not.have.been.called;
+        done();
+      });
+  });
+
+  it('should do nothing if there is no mentions in the sent message', function(done) {
+    const conversationId = '123';
+    const message = {
+      channel: conversationId,
+      user_mentions: []
+    };
+    const getSpy = sinon.spy();
+    const increaseNumberOfUnseenMentionsOfMembersSpy = sinon.spy();
+
+    mockery.registerMock('../../../conversation', () => ({
+      getById: (conversationId, callback) => {
+        getSpy(conversationId);
+
+        callback(null, {
+          members: []
+        });
+      },
+      increaseNumberOfUnseenMentionsOfMembers: increaseNumberOfUnseenMentionsOfMembersSpy
+    }));
+
+    getModule()({ message })
+      .then(() => {
+        expect(getSpy).to.not.have.been.called;
+        expect(increaseNumberOfUnseenMentionsOfMembersSpy).to.not.have.been.called;
+        done();
+      });
+  });
+
+  it('should do nothing if the sent message mentioned users who are not the members ', function(done) {
+    const user = { _id: 'userId' };
+    const conversationId = '123';
+    const message = {
+      channel: conversationId,
+      user_mentions: [user]
+    };
+    const getSpy = sinon.spy();
+    const increaseNumberOfUnseenMentionsOfMembersSpy = sinon.spy();
+
+    mockery.registerMock('../../../conversation', () => ({
+      getById: (conversationId, callback) => {
+        getSpy(conversationId);
+
+        callback(null, {
+          members: []
+        });
+      },
+      increaseNumberOfUnseenMentionsOfMembers: increaseNumberOfUnseenMentionsOfMembersSpy
+    }));
+
+    getModule()({ message })
+      .then(() => {
+        expect(getSpy).to.have.been.calledWith(conversationId);
+        expect(increaseNumberOfUnseenMentionsOfMembersSpy).to.not.have.been.called;
+        done();
+      });
+  });
+
+  it('should call lib.conversation.increaseNumberOfUnseenMentionsOfMembers to increase unseen mention counts of members', function(done) {
+    const user = { _id: 'userId' };
+    const conversationId = '123';
+    const message = {
+      channel: conversationId,
+      user_mentions: [user]
+    };
+    const getSpy = sinon.spy();
+    const increaseNumberOfUnseenMentionsOfMembersSpy = sinon.spy();
+
+    mockery.registerMock('../../../conversation', () => ({
+      getById: (conversationId, callback) => {
+        getSpy(conversationId);
+
+        callback(null, {
+          members: [{ member: { id: user._id } }]
+        });
+      },
+      increaseNumberOfUnseenMentionsOfMembers: increaseNumberOfUnseenMentionsOfMembersSpy
+    }));
+
+    getModule()({ message })
+      .then(() => {
+        expect(getSpy).to.have.been.calledWith(conversationId);
+        expect(increaseNumberOfUnseenMentionsOfMembersSpy).to.have.been.calledWith(conversationId, [user._id]);
+        done();
+      });
   });
 });

@@ -112,7 +112,7 @@ module.exports = function(dependencies, lib) {
       function getUser() {
         return Q.denodeify(userModule.get)(data.message.creator).then(user => {
           if (!user) {
-            return Q.reject(new Error(`No such user ${data.creator}`));
+            return Q.reject(new Error(`No such user ${data.message.creator}`));
           }
 
           return user;

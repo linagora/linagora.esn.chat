@@ -41,6 +41,7 @@ module.exports = function(dependencies) {
     getById,
     getDefaultChannel,
     getOpenChannels,
+    increaseNumberOfUnseenMentionsOfMembers,
     list,
     listForUser,
     moderate,
@@ -313,14 +314,23 @@ module.exports = function(dependencies) {
     });
   }
 
+  function increaseNumberOfUnseenMentionsOfMembers(conversationId, mentionedMemberIds) {
+    const increasingQuery = {};
+
+    mentionedMemberIds.forEach(mentionedMemberId => {
+      increasingQuery[`memberStates.${mentionedMemberId}.numOfUnseenMentions`] = 1;
+    });
+
+    return Conversation.findByIdAndUpdate(conversationId, { $inc: increasingQuery });
+  }
+
   function markUserAsReadAllMessages(userId, conversation, callback) {
-    const updateMaxOperation = {
-      [`memberStates.${String(userId)}.numOfReadMessages`]: conversation.numOfMessage
+    const updates = {
+      [`memberStates.${String(userId)}.numOfReadMessages`]: conversation.numOfMessage,
+      [`memberStates.${String(userId)}.numOfUnseenMentions`]: 0
     };
 
-    return Conversation.findByIdAndUpdate(conversation._id, {
-      $max: updateMaxOperation
-    }, err => {
+    return Conversation.findByIdAndUpdate(conversation._id, updates, err => {
       if (!err) {
         setMemberUnreadMessagesCountTopic.publish({
           userId,

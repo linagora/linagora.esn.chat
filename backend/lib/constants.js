@@ -34,8 +34,7 @@ module.exports = {
     MESSAGE_UPDATED: 'chat:message:updated',
     USER_STATE: 'user:state',
     USER_CONNECTION: 'user:connection',
-    USER_DISCONNECTION: 'user:disconnection',
-    USERS_MENTION: 'chat:users_mention'
+    USER_DISCONNECTION: 'user:disconnection'
   },
   DEFAULT_CHANNEL: {
     name: 'general',
