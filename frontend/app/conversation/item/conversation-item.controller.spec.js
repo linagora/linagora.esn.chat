@@ -130,6 +130,20 @@ describe('The ChatConversationItemController controller', function() {
       expect(controller.lastMessageIsMe).to.be.equal(false);
     });
 
+    it('should set mention_count if user has unseen mentions', function() {
+      var numOfUnseenMentions = 5;
+
+      conversation.memberStates = {};
+      conversation.memberStates[user._id] = {
+        numOfUnseenMentions: numOfUnseenMentions
+      };
+      var controller = initController();
+
+      controller.$onInit();
+      $rootScope.$digest();
+      expect(controller.conversation.mention_count).to.be.equal(numOfUnseenMentions);
+    });
+
     describe('listen to CHAT_EVENTS.TEXT_MESSAGE', function() {
       var callback, destroy, controller, message;
 
