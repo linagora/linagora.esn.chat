@@ -519,11 +519,35 @@ describe('The websocket API', function() {
       });
     });
 
-    describe.skip('When user is mentioning someone', function() {
-      describe('on open conversation', function() {
-      });
+    describe('When user is mentioning someone', function() {
+      it('should increase number of unseen mentions of mentioned members', function(done) {
+        const self = this;
 
-      describe('on confidential conversation', function() {
+        Q.ninvoke(app.lib.conversation, 'create', {
+          type: CONSTANTS.CONVERSATION_TYPE.OPEN,
+          members: [self.helpers.asMember(userA), self.helpers.asMember(userB)]
+        }).then(conversation => {
+          const message = getTextMessage(`Hello @${userB._id}`, conversation, userA);
+
+          const userReceivedDeferA = Q.defer();
+
+          clientA.on('message', message => {
+            userReceivedDeferA.resolve(message);
+          });
+
+          waitToBeConnected([clientA])
+            .then(() => clientA.send('message', message))
+            .then(() => userReceivedDeferA.promise)
+            .then(checkMessageSaved)
+            .catch(done);
+
+            function checkMessageSaved() {
+              return Q.denodeify(app.lib.conversation.getById)(conversation._id).then(modifiedConversation => {
+                expect(modifiedConversation.memberStates[String(userB._id)].numOfUnseenMentions).to.equal(1);
+                done();
+              });
+            }
+        });
       });
     });
 

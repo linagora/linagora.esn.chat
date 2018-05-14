@@ -1703,7 +1703,8 @@ describe('The chat API', function() {
       }).then(function(channel) {
         const expected = {
           [String(userId)]: {
-            numOfReadMessages: numOfMessage
+            numOfReadMessages: numOfMessage,
+            numOfUnseenMentions: 0
           }
         };
 
@@ -1733,7 +1734,8 @@ describe('The chat API', function() {
       }).then(function(channel) {
         const expected = {
           [String(userId)]: {
-            numOfReadMessages: numOfMessage
+            numOfReadMessages: numOfMessage,
+            numOfUnseenMentions: 0
           }
         };
 

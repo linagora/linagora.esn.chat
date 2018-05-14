@@ -590,7 +590,8 @@ describe('The linagora.esn.chat conversation lib', function() {
       modelsMock.ChatConversation.findByIdAndUpdate = function(conversationId, update, cb) {
         expect(conversationId).to.equal(conversation._id);
         expect(update).to.deep.equals({
-          $max: {'memberStates.userId.numOfReadMessages': 9001}
+          [`memberStates.${userId}.numOfReadMessages`]: 9001,
+          [`memberStates.${userId}.numOfUnseenMentions`]: 0
         });
 
         cb(null);
@@ -622,6 +623,27 @@ describe('The linagora.esn.chat conversation lib', function() {
         });
         done();
       });
+    });
+  });
+
+  describe('The increaseNumberOfUnseenMentionsOfMembers function', function() {
+    it('should call Conversation.findByIdAndUpdate with the correct parameter', function(done) {
+      const conversationId = '123';
+      const mentionmemberIds = ['memberId1', 'memberId2'];
+      const expectedQuery = {
+        $inc: {
+          [`memberStates.${mentionmemberIds[0]}.numOfUnseenMentions`]: 1,
+          [`memberStates.${mentionmemberIds[1]}.numOfUnseenMentions`]: 1
+        }
+      };
+
+      modelsMock.ChatConversation.findByIdAndUpdate = sinon.stub().returns(Q.when());
+
+      require('../../../backend/lib/conversation')(dependencies, lib).increaseNumberOfUnseenMentionsOfMembers(conversationId, mentionmemberIds)
+        .then(() => {
+          expect(modelsMock.ChatConversation.findByIdAndUpdate).to.have.been.calledWith(conversationId, expectedQuery);
+          done();
+        });
     });
   });
 });
