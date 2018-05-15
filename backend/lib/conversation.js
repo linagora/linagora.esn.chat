@@ -25,7 +25,7 @@ module.exports = function(dependencies) {
   const channelArchivedLocalTopic = pubsubLocal.topic(CONVERSATION_ARCHIVED);
   const channelCreationTopic = pubsubGlobal.topic(CONVERSATION_CREATED);
   const channelTopicUpdateTopic = pubsubGlobal.topic(CONVERSATION_TOPIC_UPDATED);
-  const setMemberUnreadMessagesCountTopic = pubsubGlobal.topic(MEMBER_READ_CONVERSATION);
+  const channelReadTopic = pubsubGlobal.topic(MEMBER_READ_CONVERSATION);
   const topicUpdateTopic = pubsubLocal.topic(CONVERSATION_TOPIC_UPDATED);
   const channelSavedTopic = pubsubLocal.topic(CONVERSATION_SAVED);
   const permission = require('./permission/conversation')(dependencies);
@@ -332,10 +332,9 @@ module.exports = function(dependencies) {
 
     return Conversation.findByIdAndUpdate(conversation._id, updates, err => {
       if (!err) {
-        setMemberUnreadMessagesCountTopic.publish({
+        channelReadTopic.publish({
           userId,
-          conversationId: conversation._id,
-          unreadMessageCount: 0
+          conversationId: conversation._id
         });
       }
 

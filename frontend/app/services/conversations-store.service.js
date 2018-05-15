@@ -15,7 +15,6 @@
       findConversation: findConversation,
       find: find,
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
-      setNumberOfUnreadMessages: setNumberOfUnreadMessages,
       increaseNumberOfUnreadMessages: increaseNumberOfUnreadMessages,
       increaseUserMentionsCount: increaseUserMentionsCount,
       isActiveRoom: isActiveRoom,
@@ -23,6 +22,8 @@
       leaveConversation: leaveConversation,
       markAllMessagesAsRead: markAllMessagesAsRead,
       privateConversations: [],
+      resetNumberOfUnreadMessages: resetNumberOfUnreadMessages,
+      resetNumberOfUnseenMentions: resetNumberOfUnseenMentions,
       setActive: setActive,
       setMembers: setMembers,
       unsetActive: unsetActive,
@@ -102,13 +103,23 @@
       return unreadedMessages;
     }
 
-    function setNumberOfUnreadMessages(conversationId, unreadMessageCount) {
+    function resetNumberOfUnreadMessages(conversationId) {
       var conversation = _.find(store.conversations, function(conversation) {
         return conversation._id === conversationId;
       });
 
       if (conversation) {
-        conversation.unreadMessageCount = unreadMessageCount;
+        conversation.unreadMessageCount = 0;
+      }
+    }
+
+    function resetNumberOfUnseenMentions(conversationId) {
+      var conversation = _.find(store.conversations, function(conversation) {
+        return conversation._id === conversationId;
+      });
+
+      if (conversation) {
+        conversation.mention_count = 0;
       }
     }
 

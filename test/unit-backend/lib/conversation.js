@@ -19,7 +19,7 @@ const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATIO
 
 describe('The linagora.esn.chat conversation lib', function() {
 
-  let deps, lib, logger, channelArchivedLocalTopic, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic, setMemberUnreadMessagesCount;
+  let deps, lib, logger, channelArchivedLocalTopic, channelCreationTopic, channelAddMember, membershipTopic, modelsMock, ObjectId, mq, localChannelTopicUpdateTopic, channelTopicUpdateTopic, channelUpdateTopic, channelDeletionTopic, channelSavedTopic, memberHasRead;
 
   function dependencies(name) {
     return deps[name];
@@ -70,7 +70,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       publish: sinon.spy()
     };
 
-    setMemberUnreadMessagesCount = {
+    memberHasRead = {
       publish: sinon.spy()
     };
 
@@ -179,7 +179,7 @@ describe('The linagora.esn.chat conversation lib', function() {
               return channelDeletionTopic;
             }
             if (name === MEMBER_READ_CONVERSATION) {
-              return setMemberUnreadMessagesCount;
+              return memberHasRead;
             }
           }
         }
@@ -602,8 +602,7 @@ describe('The linagora.esn.chat conversation lib', function() {
 
     it('should publish on MEMBER_READ_CONVERSATION topic', function(done) {
       const conversation = {
-        _id: 'conversationId',
-        numOfMessage: 9001
+        _id: 'conversationId'
       };
       const userId = 'userId';
 
@@ -616,10 +615,9 @@ describe('The linagora.esn.chat conversation lib', function() {
           done(err);
         }
 
-        expect(setMemberUnreadMessagesCount.publish).to.have.been.calledWith({
+        expect(memberHasRead.publish).to.have.been.calledWith({
           userId,
-          conversationId: conversation._id,
-          unreadMessageCount: 0
+          conversationId: conversation._id
         });
         done();
       });

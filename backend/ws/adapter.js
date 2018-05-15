@@ -31,7 +31,7 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(MEMBER_JOINED_CONVERSATION).subscribe(memberHasJoined);
     globalPubsub.topic(MEMBER_LEFT_CONVERSATION).subscribe(memberHasLeft);
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
-    globalPubsub.topic(MEMBER_READ_CONVERSATION).subscribe(setUserUnreadMessagesCount);
+    globalPubsub.topic(MEMBER_READ_CONVERSATION).subscribe(memberHasRead);
 
     messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({message}));
 
@@ -117,12 +117,11 @@ module.exports = (dependencies, lib) => {
     }
 
     /**
-     * Event payload is {conversationId, unreadMessageCount}
+     * Event payload is {conversationId}
      */
-    function setUserUnreadMessagesCount(event) {
+    function memberHasRead(event) {
       messenger.sendDataToUser(event.userId, MEMBER_READ_CONVERSATION, {
-        conversationId: event.conversationId,
-        unreadMessageCount: event.unreadMessageCount
+        conversationId: event.conversationId
       });
     }
   }

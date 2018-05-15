@@ -17,7 +17,7 @@ const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATIO
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic, conversationMemberAddedTopic, setUserUnreadMessagesCountTopic;
+  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic, conversationMemberAddedTopic, conversationReadTopic;
 
   beforeEach(function() {
     var self = this;
@@ -69,7 +69,7 @@ describe('The chat websocket adapter', function() {
       publish: sinon.spy()
     };
 
-    setUserUnreadMessagesCountTopic = {
+    conversationReadTopic = {
       subscribe: sinon.spy(),
       publish: sinon.spy()
     };
@@ -117,7 +117,7 @@ describe('The chat websocket adapter', function() {
               return conversationUpdatedTopic;
             }
             if (name === MEMBER_READ_CONVERSATION) {
-              return setUserUnreadMessagesCountTopic;
+              return conversationReadTopic;
             }
           }
         }
@@ -682,13 +682,12 @@ describe('The chat websocket adapter', function() {
     it('should subscribe to MEMBER_READ_CONVERSATION event', function() {
       data = {
         userId: 'user-id',
-        conversationId: conversation._id,
-        unreadMessageCount: 10
+        conversationId: conversation._id
       };
 
       adapter.bindEvents(messenger);
 
-      expect(setUserUnreadMessagesCountTopic.subscribe).to.have.been.calledWith(sinon.match(callback => {
+      expect(conversationReadTopic.subscribe).to.have.been.calledWith(sinon.match(callback => {
         subscribeCallback = callback;
 
         return _.isFunction(callback);
@@ -697,8 +696,7 @@ describe('The chat websocket adapter', function() {
       subscribeCallback(data);
 
       expect(messenger.sendDataToUser).to.have.been.calledWith(data.userId, MEMBER_READ_CONVERSATION, {
-        conversationId: data.conversationId,
-        unreadMessageCount: data.unreadMessageCount
+        conversationId: data.conversationId
       });
     });
   });
