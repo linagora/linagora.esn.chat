@@ -527,7 +527,7 @@ describe('The websocket API', function() {
           type: CONSTANTS.CONVERSATION_TYPE.OPEN,
           members: [self.helpers.asMember(userA), self.helpers.asMember(userB)]
         }).then(conversation => {
-          const message = getTextMessage(`Hello @${userB._id}`, conversation, userA);
+          const message = getTextMessage(`Hello @${String(userB._id)}`, conversation, userA);
 
           const userReceivedDeferA = Q.defer();
 
@@ -537,15 +537,16 @@ describe('The websocket API', function() {
 
           waitToBeConnected([clientA])
             .then(() => clientA.send('message', message))
-            .then(() => userReceivedDeferA.promise)
             .then(checkMessageSaved)
             .catch(done);
 
             function checkMessageSaved() {
-              return Q.denodeify(app.lib.conversation.getById)(conversation._id).then(modifiedConversation => {
-                expect(modifiedConversation.memberStates[String(userB._id)].numOfUnseenMentions).to.equal(1);
-                done();
-              });
+              setTimeout(() => {
+                Q.denodeify(app.lib.conversation.getById)(conversation._id).then(modifiedConversation => {
+                  expect(modifiedConversation.memberStates[String(userB._id)].numOfUnseenMentions).to.equal(1);
+                  done();
+                });
+              }, 3000);
             }
         });
       });
