@@ -15,7 +15,7 @@ const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const MEMBER_ADDED_IN_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_ADDED_IN_CONVERSATION;
 const MEMBERSHIP_EVENTS = CONSTANTS.NOTIFICATIONS.MEMBERSHIP_EVENTS;
-const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
+const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATION;
 
 describe('The linagora.esn.chat conversation lib', function() {
 
@@ -178,7 +178,7 @@ describe('The linagora.esn.chat conversation lib', function() {
             if (name === CONVERSATION_DELETED) {
               return channelDeletionTopic;
             }
-            if (name === MEMBER_UNREAD_MESSAGES_COUNT) {
+            if (name === MEMBER_READ_CONVERSATION) {
               return setMemberUnreadMessagesCount;
             }
           }
@@ -600,7 +600,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       require('../../../backend/lib/conversation')(dependencies, lib).markUserAsReadAllMessages(userId, conversation, done);
     });
 
-    it('should publish on MEMBER_UNREAD_MESSAGES_COUNT topic', function(done) {
+    it('should publish on MEMBER_READ_CONVERSATION topic', function(done) {
       const conversation = {
         _id: 'conversationId',
         numOfMessage: 9001

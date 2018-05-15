@@ -198,7 +198,7 @@ describe('The chatConversationListenerService service', function() {
       });
     });
 
-    describe('on CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT', function() {
+    describe('on CHAT_EVENTS.MEMBER_READ_CONVERSATION', function() {
       it('should update number of unread messages of a conversation', function() {
         var eventPayload = {
           conversationId: 'converationid',
@@ -209,7 +209,7 @@ describe('The chatConversationListenerService service', function() {
 
         chatConversationListenerService.addEventListeners();
 
-        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_READ_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
           callback(eventPayload);
 
           expect(chatConversationsStoreService.setNumberOfUnreadMessages).to.have.been.calledWith(eventPayload.conversationId, eventPayload.unreadMessageCount);

@@ -13,7 +13,7 @@ const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERS
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
-const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
+const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATION;
 
 describe('The chat websocket adapter', function() {
 
@@ -116,7 +116,7 @@ describe('The chat websocket adapter', function() {
             if (name === CONVERSATION_UPDATED) {
               return conversationUpdatedTopic;
             }
-            if (name === MEMBER_UNREAD_MESSAGES_COUNT) {
+            if (name === MEMBER_READ_CONVERSATION) {
               return setUserUnreadMessagesCountTopic;
             }
           }
@@ -679,7 +679,7 @@ describe('The chat websocket adapter', function() {
       })));
     });
 
-    it('should subscribe to MEMBER_UNREAD_MESSAGES_COUNT event', function() {
+    it('should subscribe to MEMBER_READ_CONVERSATION event', function() {
       data = {
         userId: 'user-id',
         conversationId: conversation._id,
@@ -696,7 +696,7 @@ describe('The chat websocket adapter', function() {
 
       subscribeCallback(data);
 
-      expect(messenger.sendDataToUser).to.have.been.calledWith(data.userId, MEMBER_UNREAD_MESSAGES_COUNT, {
+      expect(messenger.sendDataToUser).to.have.been.calledWith(data.userId, MEMBER_READ_CONVERSATION, {
         conversationId: data.conversationId,
         unreadMessageCount: data.unreadMessageCount
       });

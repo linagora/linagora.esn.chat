@@ -22,7 +22,7 @@
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_ADDED_TO_CONVERSATION, memberHasBeenAdded);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_JOINED_CONVERSATION, memberHasJoined);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_LEFT_CONVERSATION, memberHasLeft);
-      chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT, setMemberUnreadMessagesCount);
+      chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_READ_CONVERSATION, setMemberUnreadMessagesCount);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
     }
