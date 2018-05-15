@@ -36,6 +36,8 @@
         self.isDirectMessage = true;
       }
 
+      self.conversation.mention_count = self.conversation.memberStates && self.conversation.memberStates[session.user._id] ? self.conversation.memberStates[session.user._id].numOfUnseenMentions : 0;
+
       if (self.conversation.last_message) {
         self.conversation.last_message.text = $filter('esnEmoticonify')(self.conversation.last_message.text, {class: 'chat-emoji'});
         self.numberOfDays = getDaysSinceMessageCreated(self.conversation.last_message);

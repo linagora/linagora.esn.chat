@@ -24,6 +24,10 @@ module.exports = function(dependencies) {
             return logger.error('Can not get channel %s', channel, err);
           }
 
+          if (!conversation) {
+            return logger.error(`No such conversation ${channel}`);
+          }
+
           conversation.members && conversation.members.filter(member => (member.member.objectType === OBJECT_TYPES.USER && String(member.member.id) !== String(data.message.creator._id)))
           .forEach(member => {
             pubsub.topic(CONSTANTS.NOTIFICATIONS.CONVERSATION_INITIALIZED).publish({message: data.message, conversation: conversation.toObject(), target: member});

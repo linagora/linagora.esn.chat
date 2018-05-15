@@ -255,15 +255,15 @@ describe('The chatConversationsStoreService service', function() {
       chatConversationsStoreService.conversations = [conversation];
       chatConversationsStoreService.increaseUserMentionsCount(publicConversation._id);
 
-      expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(conversation.mention_count);
+      expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(0);
     });
 
     it('should increase when conversation is not the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
-      chatConversationsStoreService.setActive(conversation);
-      chatConversationsStoreService.increaseUserMentionsCount(publicConversation._id);
+      chatConversationsStoreService.setActive(publicConversation);
+      chatConversationsStoreService.increaseUserMentionsCount(conversation._id);
 
-      expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(1);
+      expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(1);
     });
 
     it('should not increase when conversation is the active conversation', function() {
@@ -272,34 +272,6 @@ describe('The chatConversationsStoreService service', function() {
       chatConversationsStoreService.increaseUserMentionsCount(conversation._id);
 
       expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(0);
-    });
-
-    it('should not increase number of user mentions in a confidential conversation', function() {
-      conversation.type = CHAT_CONVERSATION_TYPE.CONFIDENTIAL;
-      conversation.mention_count = 0;
-      chatConversationsStoreService.conversations = [publicConversation, conversation];
-      chatConversationsStoreService.setActive(publicConversation);
-      chatConversationsStoreService.increaseUserMentionsCount(conversation._id);
-
-      expect(chatConversationsStoreService.conversations[1].mention_count).to.equal(conversation.mention_count);
-    });
-  });
-
-  describe('The isInactiveOpenRoom', function() {
-    it('should be true with if the the open conversation is not active, otherwise return false', function() {
-      chatConversationsStoreService.conversations = [publicConversation, confidentialConversation];
-      chatConversationsStoreService.setActive(confidentialConversation);
-
-      expect(chatConversationsStoreService.isInactiveOpenRoom(publicConversation)).to.be.true;
-      expect(chatConversationsStoreService.isInactiveOpenRoom(confidentialConversation)).to.be.false;
-    });
-
-    it('should be false if the open conversation is active', function() {
-      chatConversationsStoreService.conversations = [publicConversation, confidentialConversation];
-      chatConversationsStoreService.setActive(publicConversation);
-
-      expect(chatConversationsStoreService.isInactiveOpenRoom(publicConversation)).to.be.false;
-      expect(chatConversationsStoreService.isInactiveOpenRoom(confidentialConversation)).to.be.false;
     });
   });
 
