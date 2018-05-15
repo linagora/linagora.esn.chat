@@ -157,6 +157,30 @@ describe('The first channel message handler', function() {
     expect(globalPublish).to.not.have.been.called;
   });
 
+  it('should not notify when conversation is not found', function() {
+    const countSpy = sinon.spy();
+    const getSpy = sinon.spy();
+
+    mockery.registerMock('../../../message', () => ({
+      count: (channel, callback) => {
+        countSpy(channel);
+        callback(null, 1);
+      }
+    }));
+
+    mockery.registerMock('../../../conversation', () => ({
+      getById: (channel, callback) => {
+        getSpy(channel);
+        callback(null);
+      }
+    }));
+
+    require('../../../../../../backend/lib/listener/message/handlers/first')(dependencies)(data);
+    expect(getSpy).to.have.been.calledWith(channelId);
+    expect(countSpy).to.have.been.calledWith(channelId);
+    expect(globalPublish).to.not.have.been.called;
+  });
+
   it('should not notify message creator when he is the only member', function() {
     var countSpy = sinon.spy();
     var getSpy = sinon.spy();
