@@ -198,21 +198,22 @@ describe('The chatConversationListenerService service', function() {
       });
     });
 
-    describe('on CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT', function() {
-      it('should update number of unread messages of a conversation', function() {
+    describe('on CHAT_EVENTS.MEMBER_READ_CONVERSATION', function() {
+      it('should reset number of unread messages and unseen mentions of a conversation', function() {
         var eventPayload = {
-          conversationId: 'converationid',
-          unreadMessageCount: 0
+          conversationId: 'converationid'
         };
 
-        chatConversationsStoreService.setNumberOfUnreadMessages = sinon.spy();
+        chatConversationsStoreService.resetNumberOfUnreadMessages = sinon.spy();
+        chatConversationsStoreService.resetNumberOfUnseenMentions = sinon.spy();
 
         chatConversationListenerService.addEventListeners();
 
-        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_UNREAD_MESSAGES_COUNT, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_READ_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
           callback(eventPayload);
 
-          expect(chatConversationsStoreService.setNumberOfUnreadMessages).to.have.been.calledWith(eventPayload.conversationId, eventPayload.unreadMessageCount);
+          expect(chatConversationsStoreService.resetNumberOfUnreadMessages).to.have.been.calledWith(eventPayload.conversationId);
+          expect(chatConversationsStoreService.resetNumberOfUnseenMentions).to.have.been.calledWith(eventPayload.conversationId);
 
           return true;
         })));

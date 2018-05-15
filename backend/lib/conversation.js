@@ -7,7 +7,7 @@ const CONVERSATION_ARCHIVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_ARCHIVED;
 const CONVERSATION_CREATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_CREATED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const CONVERSATION_SAVED = CONSTANTS.NOTIFICATIONS.CONVERSATION_SAVED;
-const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
+const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATION;
 const CONVERSATION_MODE = CONSTANTS.CONVERSATION_MODE;
 const CONVERSATION_TYPE = CONSTANTS.CONVERSATION_TYPE;
 const DEFAULT_CHANNEL = { name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode };
@@ -25,7 +25,7 @@ module.exports = function(dependencies) {
   const channelArchivedLocalTopic = pubsubLocal.topic(CONVERSATION_ARCHIVED);
   const channelCreationTopic = pubsubGlobal.topic(CONVERSATION_CREATED);
   const channelTopicUpdateTopic = pubsubGlobal.topic(CONVERSATION_TOPIC_UPDATED);
-  const setMemberUnreadMessagesCountTopic = pubsubGlobal.topic(MEMBER_UNREAD_MESSAGES_COUNT);
+  const channelReadTopic = pubsubGlobal.topic(MEMBER_READ_CONVERSATION);
   const topicUpdateTopic = pubsubLocal.topic(CONVERSATION_TOPIC_UPDATED);
   const channelSavedTopic = pubsubLocal.topic(CONVERSATION_SAVED);
   const permission = require('./permission/conversation')(dependencies);
@@ -332,10 +332,9 @@ module.exports = function(dependencies) {
 
     return Conversation.findByIdAndUpdate(conversation._id, updates, err => {
       if (!err) {
-        setMemberUnreadMessagesCountTopic.publish({
+        channelReadTopic.publish({
           userId,
-          conversationId: conversation._id,
-          unreadMessageCount: 0
+          conversationId: conversation._id
         });
       }
 

@@ -449,12 +449,23 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
-  describe('The setNumberOfUnreadMessages function', function() {
-    it('should set the number of unread messages of a conversation', function() {
+  describe('The resetNumberOfUnreadMessages function', function() {
+    it('should reset the number of unread messages of a conversation', function() {
+      conversation.unreadMessageCount = 10;
       chatConversationsStoreService.conversations = [conversation];
-      chatConversationsStoreService.setNumberOfUnreadMessages(conversation._id, 10);
+      chatConversationsStoreService.resetNumberOfUnreadMessages(conversation._id);
 
-      expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(10);
+      expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(0);
+    });
+  });
+
+  describe('The resetNumberOfUnseenMentions function', function() {
+    it('should reset the number of unseen mentions of a conversation', function() {
+      conversation.mention_count = 10;
+      chatConversationsStoreService.conversations = [conversation];
+      chatConversationsStoreService.resetNumberOfUnseenMentions(conversation._id);
+
+      expect(chatConversationsStoreService.conversations[0].mention_count).to.equal(0);
     });
   });
 });

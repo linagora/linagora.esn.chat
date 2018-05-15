@@ -10,7 +10,7 @@ const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERS
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
-const MEMBER_UNREAD_MESSAGES_COUNT = CONSTANTS.NOTIFICATIONS.MEMBER_UNREAD_MESSAGES_COUNT;
+const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATION;
 
 module.exports = (dependencies, lib) => {
   const logger = dependencies('logger');
@@ -31,7 +31,7 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(MEMBER_JOINED_CONVERSATION).subscribe(memberHasJoined);
     globalPubsub.topic(MEMBER_LEFT_CONVERSATION).subscribe(memberHasLeft);
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
-    globalPubsub.topic(MEMBER_UNREAD_MESSAGES_COUNT).subscribe(setUserUnreadMessagesCount);
+    globalPubsub.topic(MEMBER_READ_CONVERSATION).subscribe(memberHasRead);
 
     messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({message}));
 
@@ -117,12 +117,11 @@ module.exports = (dependencies, lib) => {
     }
 
     /**
-     * Event payload is {conversationId, unreadMessageCount}
+     * Event payload is {conversationId}
      */
-    function setUserUnreadMessagesCount(event) {
-      messenger.sendDataToUser(event.userId, MEMBER_UNREAD_MESSAGES_COUNT, {
-        conversationId: event.conversationId,
-        unreadMessageCount: event.unreadMessageCount
+    function memberHasRead(event) {
+      messenger.sendDataToUser(event.userId, MEMBER_READ_CONVERSATION, {
+        conversationId: event.conversationId
       });
     }
   }
