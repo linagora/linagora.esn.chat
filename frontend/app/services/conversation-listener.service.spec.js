@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationListenerService service', function() {
 
-  var $rootScope, $q, text, directmessage, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session;
+  var $rootScope, $q, text, directmessage, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session, esnAppStateService;
   var CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
 
   beforeEach(function() {
@@ -18,9 +18,12 @@ describe('The chatConversationListenerService service', function() {
       }),
       addConversation: sinon.spy(function() {
         return $q.when();
-      })
+      }),
+      markAllMessagesAsRead: sinon.spy()
     };
-    chatConversationsStoreService = {};
+    chatConversationsStoreService = {
+      isActiveRoom: sinon.stub().returns(true)
+    };
     chatConversationService = {};
     chatParseMention = {
       parseMentions: sinon.spy(function() {
@@ -51,12 +54,15 @@ describe('The chatConversationListenerService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationListenerService_, _CHAT_EVENTS_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationListenerService_, _esnAppStateService_, _CHAT_EVENTS_, _CHAT_CONVERSATION_TYPE_) {
     $q = _$q_;
     $rootScope = _$rootScope_;
     chatConversationListenerService = _chatConversationListenerService_;
+    esnAppStateService = _esnAppStateService_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
+
+    esnAppStateService.isForeground = sinon.stub().returns(true);
   }));
 
   describe('The addEventListeners function', function() {
@@ -327,6 +333,26 @@ describe('The chatConversationListenerService service', function() {
 
         expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
         expect(chatConversationActionsService.increaseNumberOfUnreadMessages).to.have.been.calledWith(conversation._id);
+      });
+
+      it('should mark all messages as read once every 1 second if messages arrive when user is focusing on the conversation', function(done) {
+        chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatConversationActionsService.updateUserMentionsCount = sinon.spy();
+        chatConversationsStoreService.findConversation = sinon.spy(function() {
+          return conversation;
+        });
+        chatConversationsStoreService.isActiveRoom = sinon.stub().returns(true);
+        chatConversationListenerService.start();
+
+        for (var i = 0; i < 10; i++) {
+          $rootScope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+        }
+        $rootScope.$digest();
+
+        setTimeout(function() {
+          expect(chatConversationActionsService.markAllMessagesAsRead).to.have.been.calledOnce;
+          done();
+        }, 1000);
       });
 
       it('should update conversation number of user mentions', function() {

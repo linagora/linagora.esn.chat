@@ -118,5 +118,6 @@
       icon: '/chat/images/chat-icon.svg',
       homePage: 'chat'
     })
-    .constant('STAR_LINK_TYPE', 'star');
+    .constant('STAR_LINK_TYPE', 'star')
+    .constant('CHAT_MARK_AS_READ_THROTTLE_TIMER', 1000);
 })();
