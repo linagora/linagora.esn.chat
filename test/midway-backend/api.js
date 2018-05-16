@@ -1880,6 +1880,55 @@ describe('The chat API', function() {
           });
       }).catch(done);
     });
+
+    it('should return only unread conversations if unread query param = true', function(done) {
+      const member1 = getNewMember();
+      const member2 = getNewMember();
+      const numOfMessage = 2;
+      const conversationJSON1 = {
+        type: CONVERSATION_TYPE.OPEN,
+        members: [userAsMember, member1, member2],
+        numOfMessage,
+        memberStates: {
+          [String(userId)]: {
+            numOfReadMessages: 1,
+            numOfUnseenMentions: 0
+          }
+        }
+      };
+      const conversationJSON2 = {
+        type: CONVERSATION_TYPE.OPEN,
+        members: [userAsMember, member1, member2],
+        numOfMessage,
+        memberStates: {
+          [String(userId)]: {
+            numOfReadMessages: numOfMessage,
+            numOfUnseenMentions: 0
+          }
+        }
+      };
+
+      Q.all([
+        Q.denodeify(app.lib.conversation.create)(conversationJSON1),
+        Q.denodeify(app.lib.conversation.create)(conversationJSON2)
+      ])
+      .spread(conversation1 => {
+        request(app.express)
+          .get('/api/user/conversations')
+          .query({ unread: true })
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.length).to.equal(1);
+            expect(res.body).to.shallowDeepEqual([{_id: String(conversation1._id)}]);
+            done();
+          });
+      })
+      .catch(done);
+    });
   });
 
   describe('GET /api/user/privateConversations/', function() {

@@ -311,6 +311,72 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
   });
 
+  describe('The find function', function() {
+    it('should call Conversation.find with the correct populations parameter', function(done) {
+      const options = {
+        mode: CONVERSATION_MODE.CHANNEL,
+        populations: { lastMessageCreator: true, lastMessageMentionedUsers: true }
+      };
+
+      require('../../../backend/lib/conversation')(dependencies, lib).find(options, () => {
+        expect(mq.populate).to.have.been.calledWith([
+          {
+            path: 'last_message.creator',
+            select: CONSTANTS.SKIP_FIELDS.USER
+          },
+          {
+            path: 'last_message.user_mentions',
+            select: CONSTANTS.SKIP_FIELDS.USER
+          }
+        ]);
+        done();
+      });
+    });
+
+    it('should call Conversation.find with the correct sort parameter', function(done) {
+      const sort = 'foobar';
+      const options = {
+        mode: CONVERSATION_MODE.CHANNEL,
+        sort
+      };
+
+      require('../../../backend/lib/conversation')(dependencies, lib).find(options, () => {
+        expect(mq.sort).to.have.been.calledWith(sort);
+        done();
+      });
+    });
+
+    it('should call Conversation.find with the correct "unread" parameter', function(done) {
+      const memberId1 = '589c6a2a53bf175bd6164386';
+      const memberId2 = '589c6a2a53bf175bd6164387';
+      const options = {
+        mode: CONVERSATION_MODE.CHANNEL,
+        members: [
+          { member: { id: memberId1, objectType: CONSTANTS.OBJECT_TYPES.USER } },
+          { member: { id: memberId2, objectType: CONSTANTS.OBJECT_TYPES.USER } }
+        ],
+        unread: true
+      };
+
+      require('../../../backend/lib/conversation')(dependencies, lib).find(options, () => {
+        expect(modelsMock.ChatConversation.find).to.have.been.calledWith({
+          mode: CONVERSATION_MODE.CHANNEL,
+          moderate: false,
+          members: {
+            $all: [
+              { $elemMatch: { 'member.id': new ObjectId(memberId1), 'member.objectType': CONSTANTS.OBJECT_TYPES.USER } },
+              { $elemMatch: { 'member.id': new ObjectId(memberId2), 'member.objectType': CONSTANTS.OBJECT_TYPES.USER } }
+            ]
+          },
+          [`memberStates.${memberId1}.numOfReadMessages`]: { $exists: true },
+          [`memberStates.${memberId2}.numOfReadMessages`]: { $exists: true },
+          $where: `this.memberStates["${memberId1}"].numOfReadMessages < this.numOfMessage && this.memberStates["${memberId2}"].numOfReadMessages < this.numOfMessage`
+        });
+        done();
+      });
+    });
+  });
+
   describe('The getOpenChannels function', function() {
 
     beforeEach(function() {

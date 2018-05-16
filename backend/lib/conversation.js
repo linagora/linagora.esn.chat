@@ -140,6 +140,7 @@ module.exports = function(dependencies) {
   }
 
   /**
+   * Find conversations.
    *
    * @param {string|[string]} options.type - allowed types if none provided all type are accepted
    * @param {boolean} options.ignoreMemberFilterForChannel - if true and if channel aren't excluded by the previous argument, all channel will be included even if they do not match the members filter.
@@ -147,15 +148,26 @@ module.exports = function(dependencies) {
    * @param {boolean} options.exactMembersMatch - if true only conversations that has exactly the same members will be filtered out otherwise only conversations that contains at least the provided members will be selected
    * @param {[string]} options.members of members' id
    * @param {string} options.name is undefined the conversation can have any name or no name. If null the conversation should have no name, if it's a string the conversation should have
+   * @param {Boolean} options.unread if true, search only conversations that members have unread messages
+   * @param {Object} options.populations populations now supports the values below:
+   *                                       + "lastMessageCreator": if true will populate creator of last_message
+   *                                       + "lastMessageMentionedUsers": if true will populate mentioned users in last_message
+   * @param {String|Object} options.sort sort order
    * @return {[Conversation]}
    */
   function find(options, callback) {
-    const mode = options.mode;
-    const type = options.type;
-    const ignoreMemberFilterForChannel = options.ignoreMemberFilterForChannel;
-    const exactMembersMatch = options.exactMembersMatch;
-    const members = options.members;
-    const name = options.name;
+    const {
+      mode,
+      type,
+      ignoreMemberFilterForChannel,
+      exactMembersMatch,
+      members,
+      name,
+      unread,
+      populations,
+      sort
+    } = options;
+
     const moderate = Boolean(options.moderate);
 
     if (exactMembersMatch && !members) {
@@ -172,6 +184,10 @@ module.exports = function(dependencies) {
       request.members = {
         $all: members.map(member => ({$elemMatch: {'member.objectType': member.member.objectType, 'member.id': utils.ensureObjectId(member.member.id)}}))
       };
+
+      if (unread) {
+        Object.assign(request, _buildUnreadQuery(members));
+      }
     }
 
     if (mode) {
@@ -204,7 +220,50 @@ module.exports = function(dependencies) {
       request.members.$size = members.length;
     }
 
-    Conversation.find(request).populate('last_message.creator', SKIP_FIELDS.USER).populate('last_message.user_mentions', SKIP_FIELDS.USER).sort('-last_message.date').exec(callback);
+    const query = Conversation.find(request);
+
+    if (populations) {
+      query.populate(_buildPopulations(populations));
+    }
+
+    if (sort) {
+      query.sort(sort);
+    }
+
+    query.exec(callback);
+  }
+
+  function _buildUnreadQuery(members) {
+    const query = {};
+    const unreadExpressions = members.map(member => {
+      query[`memberStates.${member.member.id}.numOfReadMessages`] = { $exists: true };
+
+      return `this.memberStates["${member.member.id}"].numOfReadMessages < this.numOfMessage`;
+    });
+
+    query.$where = unreadExpressions.join(' && ');
+
+    return query;
+  }
+
+  function _buildPopulations(populations) {
+    const mongoPopulations = [];
+
+    if (populations.lastMessageCreator) {
+      mongoPopulations.push({
+        path: 'last_message.creator',
+        select: SKIP_FIELDS.USER
+      });
+    }
+
+    if (populations.lastMessageMentionedUsers) {
+      mongoPopulations.push({
+        path: 'last_message.user_mentions',
+        select: SKIP_FIELDS.USER
+      });
+    }
+
+    return mongoPopulations;
   }
 
   function list(options, callback) {
