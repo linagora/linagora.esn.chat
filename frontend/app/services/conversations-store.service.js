@@ -4,7 +4,15 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationsStoreService', chatConversationsStoreService);
 
-  function chatConversationsStoreService($log, _, chatPrivateConversationService, CHAT_CONVERSATION_TYPE, CHAT_EVENTS, CHAT_MEMBER_STATUS) {
+  function chatConversationsStoreService(
+    $log,
+    _,
+    esnAppStateService,
+    chatPrivateConversationService,
+    CHAT_CONVERSATION_TYPE,
+    CHAT_EVENTS,
+    CHAT_MEMBER_STATUS
+  ) {
     var activeRoom = {};
     var store = {
       addConversation: addConversation,
@@ -138,7 +146,7 @@
 
       var conversation = findConversation(conversationId);
 
-      if (conversation && !isActiveRoom(conversation._id)) {
+      if (conversation && !(isActiveRoom(conversation._id) && esnAppStateService.isForeground())) {
         conversation.unreadMessageCount = (conversation.unreadMessageCount || 0) + 1;
       }
     }
