@@ -5,26 +5,20 @@
 var expect = chai.expect;
 
 describe('The ChatConversationViewController controller', function() {
+  var $rootScope, $controller, $q, $stateParams;
   var scope,
-    $q,
     sessionMock,
     chatConversationServiceMock,
     chatConversationMemberService,
     chatConversationActionsService,
-    CHAT_EVENTS,
-    CHAT,
-    CHAT_MESSAGE_GROUP,
-    CHAT_DRAG_FILE_CLASS,
     chatScrollServiceMock,
     chatConversationsStoreService,
     chatMessageServiceMock,
-    $stateParams,
     usSpinnerServiceMock,
-    $rootScope,
-    $controller,
     user,
     searchProviders,
     channelId;
+  var CHAT_EVENTS, CHAT, CHAT_MESSAGE_GROUP, CHAT_DRAG_FILE_CLASS, ESN_APP_STATE_CHANGE_EVENT;
 
   beforeEach(function() {
 
@@ -102,7 +96,7 @@ describe('The ChatConversationViewController controller', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _$stateParams_, _CHAT_MESSAGE_GROUP_, _CHAT_DRAG_FILE_CLASS_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$q_, _CHAT_EVENTS_, _$stateParams_, _CHAT_MESSAGE_GROUP_, _CHAT_DRAG_FILE_CLASS_, _ESN_APP_STATE_CHANGE_EVENT_) {
     $rootScope = _$rootScope_;
     $controller = _$controller_;
     $q = _$q_;
@@ -110,6 +104,7 @@ describe('The ChatConversationViewController controller', function() {
     CHAT_EVENTS = _CHAT_EVENTS_;
     CHAT_MESSAGE_GROUP = _CHAT_MESSAGE_GROUP_;
     CHAT_DRAG_FILE_CLASS = _CHAT_DRAG_FILE_CLASS_;
+    ESN_APP_STATE_CHANGE_EVENT = _ESN_APP_STATE_CHANGE_EVENT_;
     $stateParams = _$stateParams_;
   }));
 
@@ -302,6 +297,19 @@ describe('The ChatConversationViewController controller', function() {
       $rootScope.$digest();
 
       expect(chatConversationActionsService.markAllMessagesAsRead).to.have.been.calledWith({ _id: channelId });
+    });
+
+    it('should mark all messages in the conversation as read if the app state changed from background to foreground', function() {
+      chatConversationServiceMock.fetchMessages = sinon.stub().returns($q.when([]));
+      var ctrl = initCtrl();
+
+      ctrl.$onInit();
+      $rootScope.$digest();
+      expect(chatConversationActionsService.markAllMessagesAsRead).to.have.been.calledOnce;
+
+      $rootScope.$broadcast(ESN_APP_STATE_CHANGE_EVENT, true);
+      $rootScope.$digest();
+      expect(chatConversationActionsService.markAllMessagesAsRead).to.have.been.calledTwice;
     });
   });
 

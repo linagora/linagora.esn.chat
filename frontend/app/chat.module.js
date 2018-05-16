@@ -38,6 +38,7 @@
     'zInfiniteScroll',
     'angular-inview',
     'esn.module-registry',
-    'esn.datetime'
+    'esn.datetime',
+    'esn.app-state'
   ]);
 })();
