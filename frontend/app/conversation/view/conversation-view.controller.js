@@ -5,7 +5,26 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationViewController', ChatConversationViewController);
 
-  function ChatConversationViewController($log, $scope, $q, session, chatConversationService, chatConversationActionsService, chatConversationMemberService, CHAT_EVENTS, CHAT, $timeout, chatScrollService, chatConversationsStoreService, usSpinnerService, CHAT_MESSAGE_GROUP, chatMessageService, _, CHAT_DRAG_FILE_CLASS) {
+  function ChatConversationViewController(
+    _,
+    $log,
+    $scope,
+    $q,
+    $timeout,
+    session,
+    usSpinnerService,
+    chatConversationService,
+    chatConversationActionsService,
+    chatConversationMemberService,
+    chatScrollService,
+    chatConversationsStoreService,
+    chatMessageService,
+    CHAT_MESSAGE_GROUP,
+    CHAT_EVENTS,
+    CHAT,
+    CHAT_DRAG_FILE_CLASS,
+    ESN_APP_STATE_CHANGE_EVENT
+  ) {
     var self = this,
       messageCounterFromTheSameUser = 0;
 
@@ -152,6 +171,11 @@
         $timeout(function() {
           scrollDown(isOwnerOfmessage, messageChannel);
         }, 0);
+      });
+      $scope.$on(ESN_APP_STATE_CHANGE_EVENT, function(event, foreground) {
+        if (foreground) {
+          chatConversationActionsService.markAllMessagesAsRead(chatConversationsStoreService.activeRoom);
+        }
       });
     }
 

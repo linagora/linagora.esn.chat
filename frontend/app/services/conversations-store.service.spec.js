@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationsStoreService service', function() {
 
-  var $q, members, chatConversationsStoreService, conversation, publicConversation, confidentialConversation, user, chatPrivateConversationService;
+  var $q, members, chatConversationsStoreService, conversation, publicConversation, confidentialConversation, user, chatPrivateConversationService, esnAppStateService;
   var CHAT_CONVERSATION_TYPE, CHAT_MEMBER_STATUS;
 
   beforeEach(function() {
@@ -36,10 +36,11 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _chatConversationsStoreService_, _CHAT_CONVERSATION_TYPE_, _CHAT_MEMBER_STATUS_) {
+  beforeEach(angular.mock.inject(function(_$q_, _chatConversationsStoreService_, _esnAppStateService_, _CHAT_CONVERSATION_TYPE_, _CHAT_MEMBER_STATUS_) {
     chatConversationsStoreService = _chatConversationsStoreService_;
     $q = _$q_;
 
+    esnAppStateService = _esnAppStateService_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
     CHAT_MEMBER_STATUS = _CHAT_MEMBER_STATUS_;
 
@@ -235,17 +236,40 @@ describe('The chatConversationsStoreService service', function() {
     it('should increase when received message is not in the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
       chatConversationsStoreService.setActive(conversation);
+      esnAppStateService.isForeground = sinon.stub().returns(true);
       chatConversationsStoreService.increaseNumberOfUnreadMessages(publicConversation._id);
 
-      expect(chatConversationsStoreService.conversations[0].unreadMessageCount).to.equal(1);
+      expect(publicConversation.unreadMessageCount).to.equal(1);
     });
 
     it('should not increase when received message is in the active conversation', function() {
       chatConversationsStoreService.conversations = [publicConversation, conversation];
       chatConversationsStoreService.setActive(conversation);
+      esnAppStateService.isForeground = sinon.stub().returns(true);
       chatConversationsStoreService.increaseNumberOfUnreadMessages(conversation._id);
 
-      expect(chatConversationsStoreService.conversations[1].unreadMessageCount).to.equal(0);
+      expect(esnAppStateService.isForeground).to.have.been.called;
+      expect(conversation.unreadMessageCount).to.equal(0);
+    });
+
+    it('should increase if a message arrived in the active conversation when the app state is background (not focused)', function() {
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(conversation);
+      esnAppStateService.isForeground = sinon.stub().returns(false);
+      chatConversationsStoreService.increaseNumberOfUnreadMessages(conversation._id);
+
+      expect(esnAppStateService.isForeground).to.have.been.called;
+      expect(conversation.unreadMessageCount).to.equal(1);
+    });
+
+    it('should not increase if a message arrived in the active conversation when the app state is foreground (focused)', function() {
+      chatConversationsStoreService.conversations = [publicConversation, conversation];
+      chatConversationsStoreService.setActive(conversation);
+      esnAppStateService.isForeground = sinon.stub().returns(true);
+      chatConversationsStoreService.increaseNumberOfUnreadMessages(conversation._id);
+
+      expect(esnAppStateService.isForeground).to.have.been.called;
+      expect(conversation.unreadMessageCount).to.equal(0);
     });
   });
 

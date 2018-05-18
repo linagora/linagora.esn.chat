@@ -110,8 +110,7 @@ describe('the chatFileUploadController controller', function() {
     });
 
     it('should send a message with attachments', function() {
-      sinon.useFakeTimers(+new Date(2016, 4, 29));
-
+      var clock = sinon.useFakeTimers(+new Date(2016, 4, 29));
       var messageObj = {
         channel: conversationId,
         creator: userId,
@@ -123,6 +122,8 @@ describe('the chatFileUploadController controller', function() {
       $rootScope.$digest();
 
       expect(chatMessageService.sendMessageWithAttachments).to.have.been.calledWith(messageObj, files);
+
+      clock.restore();
     });
   });
 });

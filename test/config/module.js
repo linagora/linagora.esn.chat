@@ -48,3 +48,8 @@ angular.module('esn.module-registry', [])
     return {};
   });
 angular.module('esn.datetime', []);
+angular.module('esn.app-state', [])
+  .constant('ESN_APP_STATE_CHANGE_EVENT', 'esn:app:state:changed')
+  .factory('esnAppStateService', function() {
+    return {};
+  });

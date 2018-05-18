@@ -4,7 +4,26 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationListenerService', chatConversationListenerService);
 
-  function chatConversationListenerService($rootScope, session, chatConversationService, chatConversationActionsService, chatConversationsStoreService, chatMessengerService, chatParseMention, CHAT_NAMESPACE, CHAT_EVENTS, CHAT_CONVERSATION_TYPE) {
+  function chatConversationListenerService(
+    _,
+    $rootScope,
+    session,
+    chatConversationService,
+    chatConversationActionsService,
+    chatConversationsStoreService,
+    chatMessengerService,
+    chatParseMention,
+    esnAppStateService,
+    CHAT_NAMESPACE,
+    CHAT_EVENTS,
+    CHAT_CONVERSATION_TYPE,
+    CHAT_MARK_AS_READ_THROTTLE_TIMER
+  ) {
+    var markAllMessagesAsReadThrottled = _.throttle(chatConversationActionsService.markAllMessagesAsRead, CHAT_MARK_AS_READ_THROTTLE_TIMER, {
+      leading: false,
+      trailing: true
+    });
+
     return {
       addEventListeners: addEventListeners,
       start: start
@@ -60,6 +79,9 @@
         };
       });
       conversation.canScrollDown = true;
+      if (esnAppStateService.isForeground() && chatConversationsStoreService.isActiveRoom(conversation._id)) {
+        markAllMessagesAsReadThrottled(conversation);
+      }
     }
 
     function onMessage(message) {
