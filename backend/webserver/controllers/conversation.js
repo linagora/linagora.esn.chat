@@ -89,7 +89,8 @@ module.exports = function(dependencies, lib) {
       mode: req.body.mode,
       exactMembersMatch: true,
       name: req.body.name ? req.body.name : null,
-      members: members
+      members: members,
+      populations: { lastMessageCreator: true, lastMessageMentionedUsers: true }
     }, (err, conversations) => {
       if (err) {
         logger.error('Error while searching conversation', err);
@@ -159,11 +160,22 @@ module.exports = function(dependencies, lib) {
   }
 
   function getUserConversations(req, res) {
-    getConversations({
+    const options = {
       mode: CONSTANTS.CONVERSATION_MODE.CHANNEL,
       ignoreMemberFilterForChannel: false,
-      members: [{member: currentUserAsMember(req)}]
-    }, req, res);
+      members: [{member: currentUserAsMember(req)}],
+      populations: { lastMessageCreator: true, lastMessageMentionedUsers: true },
+      sort: { [CONSTANTS.SORT_FIELDS.CONVERSATION.lastMessageDate]: CONSTANTS.SORT_TYPE.ASC }
+    };
+
+    if (req.query.unread === 'true') {
+      options.unread = true;
+      // no need populate and sort when search unread conversations
+      delete options.populations;
+      delete options.sort;
+    }
+
+    getConversations(options, req, res);
   }
 
   function getUserPrivateConversations(req, res) {

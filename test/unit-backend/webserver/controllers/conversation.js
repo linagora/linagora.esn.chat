@@ -124,8 +124,9 @@ describe('The conversation controller', function() {
     it('should send back HTTP 500 with error when error is sent back from lib', function(done) {
       err = new Error('failed');
       const controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = { user: { _id: 'id' }, query: {} };
 
-      controller.getUserConversations({user: {_id: 'id'}}, {
+      controller.getUserConversations(req, {
         status: function(code) {
           expect(code).to.equal(500);
 
@@ -143,14 +144,46 @@ describe('The conversation controller', function() {
     it('should send back HTTP 200 with the lib.find result', function(done) {
       result = [];
       const controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = { user: { _id: 'id' }, query: {} };
 
-      controller.getUserConversations({user: {_id: 'id'}}, {
+      controller.getUserConversations(req, {
         status: function(code) {
           expect(code).to.equal(200);
 
           return {
             json: function(json) {
-              expect(lib.conversation.find).to.have.been.calledWith({ignoreMemberFilterForChannel: false, mode: CONVERSATION_MODE.CHANNEL, members: [{member: {objectType: 'user', id: 'id'}}]});
+              expect(lib.conversation.find).to.have.been.calledWith({
+                ignoreMemberFilterForChannel: false,
+                mode: CONVERSATION_MODE.CHANNEL,
+                members: [{ member: { objectType: 'user', id: 'id' } }],
+                populations: { lastMessageCreator: true, lastMessageMentionedUsers: true },
+                sort: { [CONSTANTS.SORT_FIELDS.CONVERSATION.lastMessageDate]: CONSTANTS.SORT_TYPE.ASC }
+              });
+              expect(json).to.deep.equal(result);
+              done();
+            }
+          };
+        }
+      });
+    });
+
+    it('should send back HTTP 200 with the unread conversations if unread query param is "true"', function(done) {
+      result = [];
+      const controller = getController(this.moduleHelpers.dependencies, lib);
+      const req = { user: { _id: 'id' }, query: { unread: 'true' } };
+
+      controller.getUserConversations(req, {
+        status: function(code) {
+          expect(code).to.equal(200);
+
+          return {
+            json: function(json) {
+              expect(lib.conversation.find).to.have.been.calledWith({
+                ignoreMemberFilterForChannel: false,
+                mode: CONVERSATION_MODE.CHANNEL,
+                members: [{ member: { objectType: 'user', id: 'id' } }],
+                unread: true
+              });
               expect(json).to.deep.equal(result);
               done();
             }
@@ -316,22 +349,28 @@ describe('The conversation controller', function() {
     });
 
     it('should send back previous channel if channel existed', function(done) {
-      const channel = {id: 1, members: ['user1']};
-      const query = {
-        body: {
-          members: ['user1']
-        }
+      const channel = {id: 1, members: [String(user._id), 'user1']};
+      const req = {
+        body: { members: ['user1'] },
+        user: user
       };
-      const req = {body: {}, query: query, user: user};
       const controller = getController(this.moduleHelpers.dependencies, lib);
 
-      result = [channel, {id: 2}];
+      result = [channel];
       controller.create(req, {
         status: function(code) {
           expect(code).to.equal(201);
 
           return {
             json: function(json) {
+              expect(lib.conversation.find).to.have.been.calledWith(sinon.match({
+                members: [
+                  { member: { id: 'user1', objectType: CONSTANTS.OBJECT_TYPES.USER } },
+                  { member: { id: String(user._id), objectType: CONSTANTS.OBJECT_TYPES.USER } }
+                ],
+                populations: { lastMessageCreator: true, lastMessageMentionedUsers: true }
+              }));
+              expect(lib.conversation.create).to.not.have.been.called;
               expect(json).to.deep.equal(channel);
               done();
             }

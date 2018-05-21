@@ -86,5 +86,10 @@ module.exports = {
   SORT_TYPE: {
     ASC: -1,
     DESC: 1
+  },
+  SORT_FIELDS: {
+    CONVERSATION: {
+      lastMessageDate: 'last_message.date'
+    }
   }
 };
