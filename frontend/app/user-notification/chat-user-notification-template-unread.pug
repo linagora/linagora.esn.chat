@@ -1,0 +1,15 @@
+.esn-user-notification.clickable(
+  ng-show="!$ctrl.notification.read",
+  ui-sref="chat.channels-views({ id: $ctrl.notification.lastUnreadConversationId })"
+)
+  .card
+    .card-header
+      .media
+        div
+          span.pull-left
+            img.media-object(ng-src="/chat/images/chat-icon.svg")
+          span.ellipsis
+            span.pull-right.date.hidden-xs(am-time-ago="$ctrl.notification.timestamps.creation")
+        .media-body
+          span(ng-if="$ctrl.notification.numberOfUnreadMessages === 1") #{__('You have an unread message')}
+          span(ng-if="$ctrl.notification.numberOfUnreadMessages > 1") #{__('You have %s unread messages', '{{$ctrl.notification.numberOfUnreadMessages}}')}

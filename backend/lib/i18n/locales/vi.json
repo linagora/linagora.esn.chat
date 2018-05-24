@@ -77,5 +77,7 @@
   "Shared files": "Tệp tin chia sẻ",
   "No attachments": "Không có đính kèm",
   "create a new private conversation with them?": "tạo một cuộc trò chuyện riêng tư với họ?",
-  "create a new private conversation with him/her?": "tạo một cuộc trò chuyện riêng tư với người đó?"
+  "create a new private conversation with him/her?": "tạo một cuộc trò chuyện riêng tư với người đó?",
+  "You have an unread message": "Bạn có một tin nhắn chưa đọc",
+  "You have %s unread messages": "Bạn có % tin nhắn chưa đọc"
 }

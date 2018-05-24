@@ -11,6 +11,7 @@
     chatConversationService,
     chatConversationActionsService,
     chatConversationsStoreService,
+    chatUserNotificationProvider,
     chatMessengerService,
     chatParseMention,
     esnAppStateService,

@@ -53,3 +53,4 @@ angular.module('esn.app-state', [])
   .factory('esnAppStateService', function() {
     return {};
   });
+angular.module('esn.user-notification', []);
