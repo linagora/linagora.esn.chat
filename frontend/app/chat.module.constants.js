@@ -40,7 +40,10 @@
       }
     })
     .constant('CHAT_WEBSOCKET_EVENTS', {
-      MESSAGE: 'message'
+      MESSAGE: 'message',
+      CONVERSATION: {
+        MEMBER_READ: 'chat:conversation:member:read'
+      }
     })
     .constant('CHAT_WEBSOCKET_ROOM', {
       DEFAULT: 'default'

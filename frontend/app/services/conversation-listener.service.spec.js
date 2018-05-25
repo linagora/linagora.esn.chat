@@ -7,7 +7,7 @@ var expect = chai.expect;
 describe('The chatConversationListenerService service', function() {
 
   var $rootScope, $q, text, directmessage, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session, esnAppStateService;
-  var CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
+  var CHAT_WEBSOCKET_EVENTS, CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
 
   beforeEach(function() {
     conversation = {_id: 1, name: 'My conversation'};
@@ -54,11 +54,20 @@ describe('The chatConversationListenerService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$q_, _$rootScope_, _chatConversationListenerService_, _esnAppStateService_, _CHAT_EVENTS_, _CHAT_CONVERSATION_TYPE_) {
+  beforeEach(angular.mock.inject(function(
+    _$q_,
+    _$rootScope_,
+    _chatConversationListenerService_,
+    _esnAppStateService_,
+    _CHAT_WEBSOCKET_EVENTS_,
+    _CHAT_EVENTS_,
+    _CHAT_CONVERSATION_TYPE_
+  ) {
     $q = _$q_;
     $rootScope = _$rootScope_;
     chatConversationListenerService = _chatConversationListenerService_;
     esnAppStateService = _esnAppStateService_;
+    CHAT_WEBSOCKET_EVENTS = _CHAT_WEBSOCKET_EVENTS_;
     CHAT_EVENTS = _CHAT_EVENTS_;
     CHAT_CONVERSATION_TYPE = _CHAT_CONVERSATION_TYPE_;
 
@@ -204,7 +213,7 @@ describe('The chatConversationListenerService service', function() {
       });
     });
 
-    describe('on CHAT_EVENTS.MEMBER_READ_CONVERSATION', function() {
+    describe('on CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_READ', function() {
       it('should reset number of unread messages and unseen mentions of a conversation', function() {
         var eventPayload = {
           conversationId: 'converationid'
@@ -215,7 +224,7 @@ describe('The chatConversationListenerService service', function() {
 
         chatConversationListenerService.addEventListeners();
 
-        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_EVENTS.MEMBER_READ_CONVERSATION, sinon.match.func.and(sinon.match(function(callback) {
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_READ, sinon.match.func.and(sinon.match(function(callback) {
           callback(eventPayload);
 
           expect(chatConversationsStoreService.resetNumberOfUnreadMessages).to.have.been.calledWith(eventPayload.conversationId);
@@ -223,6 +232,29 @@ describe('The chatConversationListenerService service', function() {
 
           return true;
         })));
+      });
+
+      it('should broadcast CHAT_EVENTS.MEMBER_READ_CONVERSATION with received data', function() {
+        var eventPayload = {
+          conversationId: 'converationid'
+        };
+
+        chatConversationsStoreService.resetNumberOfUnreadMessages = angular.noop;
+        chatConversationsStoreService.resetNumberOfUnseenMentions = angular.noop;
+        $rootScope.$broadcast = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(
+          CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_READ,
+          sinon.match.func.and(sinon.match(function(callback) {
+            callback(eventPayload);
+
+            expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.MEMBER_READ_CONVERSATION, eventPayload);
+
+            return true;
+          }))
+        );
       });
     });
   });

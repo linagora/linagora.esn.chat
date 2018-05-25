@@ -11,11 +11,11 @@
     chatConversationService,
     chatConversationActionsService,
     chatConversationsStoreService,
-    chatUserNotificationProvider,
     chatMessengerService,
     chatParseMention,
     esnAppStateService,
     CHAT_NAMESPACE,
+    CHAT_WEBSOCKET_EVENTS,
     CHAT_EVENTS,
     CHAT_CONVERSATION_TYPE,
     CHAT_MARK_AS_READ_THROTTLE_TIMER
@@ -42,7 +42,7 @@
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_ADDED_TO_CONVERSATION, memberHasBeenAdded);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_JOINED_CONVERSATION, memberHasJoined);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_LEFT_CONVERSATION, memberHasLeft);
-      chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_READ_CONVERSATION, memberHasRead);
+      chatMessengerService.addEventListener(CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_READ, memberHasRead);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
     }
@@ -66,6 +66,7 @@
     function memberHasRead(event) {
       chatConversationsStoreService.resetNumberOfUnreadMessages(event.conversationId);
       chatConversationsStoreService.resetNumberOfUnseenMentions(event.conversationId);
+      $rootScope.$broadcast(CHAT_EVENTS.MEMBER_READ_CONVERSATION, event);
     }
 
     function updateConversationOnMessage(message, conversation) {
@@ -91,7 +92,7 @@
       if (!conversation) {
         chatConversationActionsService.getConversation(message.channel).then(function(conversation) {
 
-        if (conversation && conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
+          if (conversation && conversation.type === CHAT_CONVERSATION_TYPE.DIRECT_MESSAGE) {
             chatConversationActionsService.addConversation(conversation).then(function(conversation) {
               updateConversationOnMessage(message, conversation);
             });
