@@ -3,6 +3,6 @@
     chat-conversation-item-icon(conversation="ctrl.conversation")
     span.item-name
       bdi(ng-bind-html="ctrl.name| esnEmoticonify:{class: 'label-emoji'}" )
-  chat-conversation-number-badge(number='ctrl.conversation.unreadMessageCount')
-  chat-conversation-number-badge(number='ctrl.conversation.mention_count')
+  chat-conversation-number-badge(ng-if='ctrl.isDirectMessage', number='ctrl.conversation.unreadMessageCount')
+  chat-conversation-number-badge(ng-if='!ctrl.isDirectMessage', number='ctrl.conversation.mention_count')
   chat-conversation-remove-cross(hover='isHover', conversation="ctrl.conversation", ng-if='ctrl.isDirectMessage')
