@@ -77,5 +77,7 @@
   "Shared files": "Shared files",
   "No attachments": "No attachments",
   "create a new private conversation with them?": "create a new private conversation with them?",
-  "create a new private conversation with him/her?": "create a new private conversation with him/her?"
+  "create a new private conversation with him/her?": "create a new private conversation with him/her?",
+  "You have an unread message": "You have an unread message",
+  "You have %s unread messages": "You have %s unread messages"
 }

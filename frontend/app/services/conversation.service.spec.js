@@ -161,6 +161,18 @@ describe('The linagora.esn.chat conversation service', function() {
       $rootScope.$digest();
       $httpBackend.flush();
     });
+
+    it('should GET to right endpoint with provided options', function() {
+      var options = {
+        unread: true
+      };
+
+      $httpBackend.expectGET('/chat/api/user/conversations?unread=true').respond([]);
+
+      chatConversationService.listForCurrentUser(options);
+
+      $httpBackend.flush();
+    });
   });
 
   describe('getStarredMessages function', function() {
