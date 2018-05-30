@@ -79,8 +79,15 @@
         return ChatRestangular.all('conversations').getList(options);
       }
 
-      function listForCurrentUser() {
-        return ChatRestangular.one('user').all('conversations').getList();
+      /**
+       * List conversations of current user.
+       *
+       * @param  {Object} options - Query option, possible attributes:
+       *                              + unread: if true, list all conversation in that user has unread messages
+       * @return {Promise}        - Resolve response with conversations list
+       */
+      function listForCurrentUser(options) {
+        return ChatRestangular.one('user').all('conversations').getList(options);
       }
 
       function markAsRead(id) {
