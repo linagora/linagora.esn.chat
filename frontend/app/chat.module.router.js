@@ -43,7 +43,8 @@
         onEnter: function(chatConversationActionsService, conversation) {
           chatConversationActionsService.setActive(conversation);
         },
-        onExit: function(chatLastConversationService, conversation) {
+        onExit: function(chatConversationActionsService, chatLastConversationService, conversation) {
+          chatConversationActionsService.unsetActive();
           chatLastConversationService.set(conversation._id);
         }
       })
