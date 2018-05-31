@@ -6,7 +6,7 @@
 var expect = chai.expect;
 
 describe('The chatUserNotificationProvider', function() {
-  var $rootScope, $q, sessionMock, esnUserNotificationCounterMock, user, today;
+  var $rootScope, $q, sessionMock, esnUserNotificationStateMock, user, today;
   var chatUserNotificationProvider, chatUserNotificationService, chatConversationService;
 
   beforeEach(function() {
@@ -18,9 +18,11 @@ describe('The chatUserNotificationProvider', function() {
       user: user
     };
 
-    esnUserNotificationCounterMock = {
-      increaseBy: sinon.spy(),
-      decreaseBy: sinon.spy(),
+    esnUserNotificationStateMock = {
+      increaseCountBy: sinon.spy(),
+      decreaseCountBy: sinon.spy(),
+      increaseNumberOfImportantNotificationsBy: sinon.spy(),
+      decreaseNumberOfImportantNotificationsBy: sinon.spy(),
       refresh: sinon.spy()
     };
 
@@ -31,7 +33,7 @@ describe('The chatUserNotificationProvider', function() {
     module('linagora.esn.chat', function($provide) {
       $provide.value('esnCollaborationClientService', {});
       $provide.value('esnUserNotificationService', { addProvider: angular.noop });
-      $provide.value('esnUserNotificationCounter', esnUserNotificationCounterMock);
+      $provide.value('esnUserNotificationState', esnUserNotificationStateMock);
       $provide.value('esnUserNotificationTemplateProviderRegistry', { add: angular.noop });
       $provide.value('ChatUserNotification', function(data) {
         return data;
@@ -80,6 +82,27 @@ describe('The chatUserNotificationProvider', function() {
 
               done();
             });
+        });
+
+      $rootScope.$digest();
+    });
+  });
+
+  describe('The getNumberOfImportantNotifications function', function() {
+    it('should return number of unseen mentions', function(done) {
+      var notification = {
+        category: 'chat:unread',
+        read: false,
+        numberOfUnseenMentions: 10
+      };
+
+      chatUserNotificationService.get = function() {
+        return $q.when(notification);
+      };
+      chatUserNotificationProvider.getNumberOfImportantNotifications()
+        .then(function(numberOfUnseenMentions) {
+          expect(numberOfUnseenMentions).to.equal(notification.numberOfUnseenMentions);
+          done();
         });
 
       $rootScope.$digest();
@@ -145,8 +168,51 @@ describe('The chatUserNotificationProvider', function() {
             },
             lastUnreadConversationId: id2
           });
-          expect(esnUserNotificationCounterMock.decreaseBy).to.have.been.calledWith(8);
-          expect(esnUserNotificationCounterMock.refresh).to.have.been.called;
+          expect(esnUserNotificationStateMock.decreaseCountBy).to.have.been.calledWith(8);
+          expect(esnUserNotificationStateMock.refresh).to.have.been.called;
+
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+
+    it('should decrease the number of unseen mentions if user is mentioned in unread messages', function(done) {
+      var id1 = 'id1';
+      var id2 = 'id2';
+      var notification = {
+        category: 'chat:unread',
+        read: false,
+        numberOfUnreadMessages: 10,
+        numberOfUnseenMentions: 6,
+        unreadConversations: [
+          { _id: id1, numberOfUnreadMessages: 8, numberOfUnseenMentions: 5, last_message: { date: today - 1 } },
+          { _id: id2, numberOfUnreadMessages: 2, numberOfUnseenMentions: 1, last_message: { date: today - 2 } }
+        ],
+        timestamps: {
+          creation: today - 1
+        },
+        lastUnreadConversationId: id1
+      };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatUserNotificationProvider.getNumberOfImportantNotifications()
+        .then(function(numberOfUnseenMentions) {
+          expect(numberOfUnseenMentions).to.equal(6);
+
+          chatUserNotificationProvider.updateOnConversationRead(id1);
+
+          expect(notification).to.shallowDeepEqual({
+            read: false,
+            numberOfUnreadMessages: 2,
+            numberOfUnseenMentions: 1,
+            timestamps: {
+              creation: today - 2
+            },
+            lastUnreadConversationId: id2
+          });
+          expect(esnUserNotificationStateMock.decreaseNumberOfImportantNotificationsBy).to.have.been.calledWith(5);
+          expect(esnUserNotificationStateMock.refresh).to.have.been.called;
 
           done();
         });
@@ -178,8 +244,8 @@ describe('The chatUserNotificationProvider', function() {
             read: true,
             numberOfUnreadMessages: 0
           });
-          expect(esnUserNotificationCounterMock.decreaseBy).to.have.been.calledWith(8);
-          expect(esnUserNotificationCounterMock.refresh).to.have.been.called;
+          expect(esnUserNotificationStateMock.decreaseCountBy).to.have.been.calledWith(8);
+          expect(esnUserNotificationStateMock.refresh).to.have.been.called;
 
           done();
         });
@@ -219,8 +285,58 @@ describe('The chatUserNotificationProvider', function() {
             },
             lastUnreadConversationId: newMessage.channel
           });
-          expect(esnUserNotificationCounterMock.increaseBy).to.have.been.calledWith(1);
-          expect(esnUserNotificationCounterMock.refresh).to.have.been.called;
+          expect(esnUserNotificationStateMock.increaseCountBy).to.have.been.calledWith(1);
+          expect(esnUserNotificationStateMock.refresh).to.have.been.called;
+
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+
+    it('should increase the number of unseen mentions if there is one new message in unread conversation', function(done) {
+      var id1 = 'id1';
+      var id2 = 'id2';
+      var notification = {
+        category: 'chat:unread',
+        read: false,
+        numberOfUnreadMessages: 10,
+        numberOfUnseenMentions: 6,
+        unreadConversations: [
+          { _id: id1, numberOfUnreadMessages: 8, numberOfUnseenMentions: 5, last_message: { date: today - 1 } },
+          { _id: id2, numberOfUnreadMessages: 2, numberOfUnseenMentions: 1, last_message: { date: today - 2 } }
+        ],
+        timestamps: {
+          creation: today - 1
+        },
+        lastUnreadConversationId: id1
+      };
+      var newMessage = {
+        channel: id1,
+        timestamps: { creation: today - 3 },
+        user_mentions: [{ _id: user._id }]
+      };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatUserNotificationProvider.getNumberOfImportantNotifications()
+        .then(function(numberOfUnseenMentions) {
+          expect(numberOfUnseenMentions).to.equal(6);
+
+          chatUserNotificationProvider.updateOnNewMessageReceived(newMessage);
+
+          expect(notification).to.shallowDeepEqual({
+            unreadConversations: [{
+              _id: id1,
+              numberOfUnseenMentions: 6
+            }],
+            numberOfUnseenMentions: 7,
+            timestamps: {
+              creation: newMessage.timestamps.creation
+            },
+            lastUnreadConversationId: newMessage.channel
+          });
+          expect(esnUserNotificationStateMock.increaseNumberOfImportantNotificationsBy).to.have.been.calledWith(1);
+          expect(esnUserNotificationStateMock.refresh).to.have.been.called;
 
           done();
         });
@@ -258,8 +374,54 @@ describe('The chatUserNotificationProvider', function() {
           { _id: conversation._id, numberOfUnreadMessages: 1, last_message: conversation.last_message}
         ]
       });
-      expect(esnUserNotificationCounterMock.increaseBy).to.have.been.calledWith(1);
-      expect(esnUserNotificationCounterMock.refresh).to.have.been.called;
+      expect(esnUserNotificationStateMock.increaseCountBy).to.have.been.calledWith(1);
+      expect(esnUserNotificationStateMock.refresh).to.have.been.called;
+      done();
+    });
+
+    it('should increase the number of unseen mentions if there is one new message in already read conversation', function(done) {
+      var id1 = 'id1';
+      var notification = {
+        category: 'chat:unread',
+        read: true,
+        numberOfUnreadMessages: 0,
+        numberOfUnseenMentions: 0,
+        unreadConversations: []
+      };
+      var newMessage = {
+        channel: id1,
+        timestamps: { creation: today - 3 },
+        user_mentions: [{ _id: user._id }]
+      };
+      var conversation = { _id: id1, last_message: { date: newMessage.timestamps.creation } };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatConversationService.get = sinon.stub().returns($q.when(conversation));
+
+      chatUserNotificationProvider.getNumberOfImportantNotifications();
+      $rootScope.$digest();
+      chatUserNotificationProvider.updateOnNewMessageReceived(newMessage);
+      $rootScope.$digest();
+
+      expect(notification).to.shallowDeepEqual({
+        read: false,
+        numberOfUnreadMessages: 1,
+        numberOfUnseenMentions: 1,
+        timestamps: {
+          creation: newMessage.timestamps.creation
+        },
+        lastUnreadConversationId: newMessage.channel,
+        unreadConversations: [
+          {
+            _id: conversation._id,
+            numberOfUnreadMessages: 1,
+            numberOfUnseenMentions: 1,
+            last_message: conversation.last_message
+          }
+        ]
+      });
+      expect(esnUserNotificationStateMock.increaseNumberOfImportantNotificationsBy).to.have.been.calledWith(1);
+      expect(esnUserNotificationStateMock.refresh).to.have.been.called;
       done();
     });
   });

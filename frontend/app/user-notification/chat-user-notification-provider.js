@@ -7,7 +7,8 @@
   function chatUserNotificationProvider(
     _,
     $q,
-    esnUserNotificationCounter,
+    session,
+    esnUserNotificationState,
     chatUserNotificationService,
     chatConversationService
   ) {
@@ -15,11 +16,19 @@
 
     return {
       name: 'chatUserNotificationProvider',
+      getNumberOfImportantNotifications: getNumberOfImportantNotifications,
       getUnreadCount: getUnreadCount,
       list: list,
       updateOnConversationRead: updateOnConversationRead,
       updateOnNewMessageReceived: updateOnNewMessageReceived
     };
+
+    function getNumberOfImportantNotifications() {
+      return _getNotification()
+        .then(function(userNotification) {
+          return userNotification.numberOfUnseenMentions;
+        });
+    }
 
     function getUnreadCount() {
       return _getNotification()
@@ -57,10 +66,12 @@
 
       var numberOfUnreadConversations = notification.unreadConversations.length;
       var numberOfReadMessages = 0;
+      var numberOfSeenMentions = 0;
 
       notification.unreadConversations = notification.unreadConversations.filter(function(conversation) {
         if (conversation._id === conversationId) {
           numberOfReadMessages = conversation.numberOfUnreadMessages;
+          numberOfSeenMentions = conversation.numberOfUnseenMentions;
 
           return false;
         }
@@ -70,8 +81,10 @@
 
       if (notification.unreadConversations.length < numberOfUnreadConversations) {
         notification.numberOfUnreadMessages -= numberOfReadMessages;
-        esnUserNotificationCounter.decreaseBy(numberOfReadMessages);
-        esnUserNotificationCounter.refresh();
+        notification.numberOfUnseenMentions -= numberOfSeenMentions;
+        esnUserNotificationState.decreaseCountBy(numberOfReadMessages);
+        esnUserNotificationState.decreaseNumberOfImportantNotificationsBy(numberOfSeenMentions);
+        esnUserNotificationState.refresh();
 
         if (notification.unreadConversations.length === 0) {
           notification.read = true;
@@ -94,27 +107,47 @@
         notification.unreadConversations[0].numberOfUnreadMessages++;
         notification.unreadConversations[0].last_message.date = message.timestamps.creation;
         notification.timestamps.creation = message.timestamps.creation;
-        esnUserNotificationCounter.increaseBy(1);
-        esnUserNotificationCounter.refresh();
+        esnUserNotificationState.increaseCountBy(1);
+
+        if (_isUserMentionedInMessage(session.user._id, message)) {
+          notification.numberOfUnseenMentions++;
+          notification.unreadConversations[0].numberOfUnseenMentions++;
+          esnUserNotificationState.increaseNumberOfImportantNotificationsBy(1);
+        }
+
+        esnUserNotificationState.refresh();
       } else {
         chatConversationService.get(message.channel).then(function(conversation) {
           if (conversation) {
-            notification.unreadConversations.unshift({
+            var newUnreadConversation = {
               _id: conversation._id,
               numberOfUnreadMessages: 1,
               last_message: conversation.last_message
-            });
+            };
+
             if (notification.read) {
               notification.read = false;
             }
             notification.timestamps = { creation: conversation.last_message.date };
             notification.lastUnreadConversationId = conversation._id;
             notification.numberOfUnreadMessages++;
-            esnUserNotificationCounter.increaseBy(1);
-            esnUserNotificationCounter.refresh();
+            esnUserNotificationState.increaseCountBy(1);
+
+            if (_isUserMentionedInMessage(session.user._id, message)) {
+              newUnreadConversation.numberOfUnseenMentions = 1;
+              notification.numberOfUnseenMentions++;
+              esnUserNotificationState.increaseNumberOfImportantNotificationsBy(1);
+            }
+
+            notification.unreadConversations.unshift(newUnreadConversation);
+            esnUserNotificationState.refresh();
           }
         });
       }
+    }
+
+    function _isUserMentionedInMessage(userId, message) {
+      return _.find(message.user_mentions, { _id: userId });
     }
   }
 })(angular);
