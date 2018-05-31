@@ -105,8 +105,10 @@
     }
 
     function start() {
-      $rootScope.$on(CHAT_EVENTS.TEXT_MESSAGE, function(event, message) {
-        onMessage(message);
+      [CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(event) {
+        $rootScope.$on(event, function(evt, message) {
+          onMessage(message);
+        });
       });
     }
 

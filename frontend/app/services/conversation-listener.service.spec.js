@@ -260,22 +260,21 @@ describe('The chatConversationListenerService service', function() {
   });
 
   describe('The $rootScope events', function() {
+    var message;
+
+    beforeEach(function() {
+      message = {
+        _id: 1,
+        channel: 2,
+        creator: 3,
+        text: 'Hello',
+        timestamps: {
+          creation: new Date()
+        }
+      };
+    });
+
     describe('on CHAT_EVENTS.TEXT_MESSAGE', function() {
-      var message;
-
-      beforeEach(function() {
-        message = {
-          _id: 1,
-          channel: 2,
-          creator: 3,
-          text: 'Hello',
-          user_mentions: ['foo', 'bar', 'baz'],
-          timestamps: {
-            creation: new Date()
-          }
-        };
-      });
-
       it('should do nothing when conversation is not in the store and it is not a direct message', function() {
         chatConversationsStoreService.findConversation = sinon.spy(function() {});
         chatConversationsStoreService.isActiveRoom = sinon.spy();
@@ -388,6 +387,7 @@ describe('The chatConversationListenerService service', function() {
       });
 
       it('should update conversation number of user mentions', function() {
+        message.user_mentions = ['foo', 'bar', 'baz'];
         chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
         chatConversationActionsService.updateUserMentionsCount = sinon.spy();
         chatConversationsStoreService.findConversation = sinon.spy(function() {
@@ -401,6 +401,24 @@ describe('The chatConversationListenerService service', function() {
 
         expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
         expect(chatConversationActionsService.updateUserMentionsCount).to.have.been.calledWith(conversation._id, message.user_mentions);
+      });
+    });
+
+    describe('on CHAT_EVENTS.FILE_MESSAGE', function() {
+      it('should update the conversation number of unread message', function() {
+        chatConversationActionsService.increaseNumberOfUnreadMessages = sinon.spy();
+        chatConversationActionsService.updateUserMentionsCount = sinon.spy();
+        chatConversationsStoreService.findConversation = sinon.spy(function() {
+          return conversation;
+        });
+
+        chatConversationListenerService.start();
+
+        $rootScope.$emit(CHAT_EVENTS.FILE_MESSAGE, message);
+        $rootScope.$digest();
+
+        expect(chatConversationsStoreService.findConversation).to.have.been.calledWith(message.channel);
+        expect(chatConversationActionsService.increaseNumberOfUnreadMessages).to.have.been.calledWith(conversation._id);
       });
     });
   });
