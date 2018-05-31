@@ -63,6 +63,7 @@ describe('The chatUserNotificationService service', function() {
             category: category,
             read: true,
             numberOfUnreadMessages: 0,
+            numberOfUnseenMentions: 0,
             unreadConversations: []
           });
           done();
@@ -104,13 +105,66 @@ describe('The chatUserNotificationService service', function() {
             category: category,
             read: false,
             numberOfUnreadMessages: 3,
+            numberOfUnseenMentions: 0,
             unreadConversations: [
-              { _id: unreadConversation2._id, numberOfUnreadMessages: 2, last_message: unreadConversation2.last_message },
-              { _id: unreadConversation1._id, numberOfUnreadMessages: 1, last_message: unreadConversation1.last_message }
+              {
+                _id: unreadConversation2._id,
+                numberOfUnreadMessages: 2,
+                last_message: unreadConversation2.last_message,
+                numberOfUnseenMentions: 0
+              },
+              {
+                _id: unreadConversation1._id,
+                numberOfUnreadMessages: 1,
+                last_message: unreadConversation1.last_message,
+                numberOfUnseenMentions: 0
+              }
             ],
             lastUnreadConversationId: unreadConversation2._id,
             timestamps: {
               creation: unreadConversation2.last_message.date
+            }
+          });
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+
+    it('should build notification object if there are unread messages with mentions', function(done) {
+      var unreadConversation = {
+        _id: 'id',
+        numOfMessage: 2,
+        memberStates: {
+          _userId: { numOfReadMessages: 1, numOfUnseenMentions: 1 }
+        },
+        last_message: {
+          date: new Date()
+        }
+      };
+
+      chatConversationService.listForCurrentUser = sinon.spy(function() {
+        return $q.when({ data: [unreadConversation] });
+      });
+      chatUserNotificationService.get()
+        .then(function(chatUserNotification) {
+          expect(chatConversationService.listForCurrentUser).to.have.been.calledWith({ unread: true });
+          expect(chatUserNotification).to.deep.equal({
+            category: category,
+            read: false,
+            numberOfUnreadMessages: 1,
+            numberOfUnseenMentions: 1,
+            unreadConversations: [
+              {
+                _id: unreadConversation._id,
+                numberOfUnreadMessages: 1,
+                last_message: unreadConversation.last_message,
+                numberOfUnseenMentions: 1
+              }
+            ],
+            lastUnreadConversationId: unreadConversation._id,
+            timestamps: {
+              creation: unreadConversation.last_message.date
             }
           });
           done();
