@@ -24,4 +24,4 @@
         span.clickable(ng-click='ctrl.toggleFile()')
           i(ng-class="ctrl.displayFile ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
         .attachment
-          file-preview(file="attachment", ng-show="ctrl.displayFile")
+          esn-attachment(attachment="attachment", gallery="ctrl.message._id", ng-show="ctrl.displayFile")
