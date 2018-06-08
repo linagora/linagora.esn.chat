@@ -60,18 +60,15 @@
     }
 
     function updateOnConversationRead(conversationId) {
-      if (!notification) {
+      if (!notification || notification.read) {
         return;
       }
 
-      var numberOfUnreadConversations = notification.unreadConversations.length;
-      var numberOfReadMessages = 0;
-      var numberOfSeenMentions = 0;
+      var readConversation;
 
       notification.unreadConversations = notification.unreadConversations.filter(function(conversation) {
         if (conversation._id === conversationId) {
-          numberOfReadMessages = conversation.numberOfUnreadMessages;
-          numberOfSeenMentions = conversation.numberOfUnseenMentions;
+          readConversation = conversation;
 
           return false;
         }
@@ -79,20 +76,29 @@
         return true;
       });
 
-      if (notification.unreadConversations.length < numberOfUnreadConversations) {
-        notification.numberOfUnreadMessages -= numberOfReadMessages;
-        notification.numberOfUnseenMentions -= numberOfSeenMentions;
-        esnUserNotificationState.decreaseCountBy(numberOfReadMessages);
-        esnUserNotificationState.decreaseNumberOfImportantNotificationsBy(numberOfSeenMentions);
-        esnUserNotificationState.refresh();
-
-        if (notification.unreadConversations.length === 0) {
-          notification.read = true;
-        } else {
-          notification.timestamps.creation = notification.unreadConversations[0].last_message.date;
-          notification.lastUnreadConversationId = notification.unreadConversations[0]._id;
-        }
+      if (!readConversation) {
+        return;
       }
+
+      var numberOfReadMessages;
+      var numberOfSeenMentions;
+
+      if (notification.unreadConversations.length === 0) {
+        numberOfReadMessages = notification.numberOfUnreadMessages;
+        numberOfSeenMentions = notification.numberOfUnseenMentions;
+        notification.read = true;
+      } else {
+        numberOfReadMessages = readConversation.numberOfUnreadMessages;
+        numberOfSeenMentions = readConversation.numberOfUnseenMentions;
+        notification.timestamps.creation = notification.unreadConversations[0].last_message.date;
+        notification.lastUnreadConversationId = notification.unreadConversations[0]._id;
+      }
+
+      notification.numberOfUnreadMessages -= numberOfReadMessages;
+      notification.numberOfUnseenMentions -= numberOfSeenMentions;
+      esnUserNotificationState.decreaseCountBy(numberOfReadMessages);
+      esnUserNotificationState.decreaseNumberOfImportantNotificationsBy(numberOfSeenMentions);
+      esnUserNotificationState.refresh();
     }
 
     function updateOnNewMessageReceived(message) {

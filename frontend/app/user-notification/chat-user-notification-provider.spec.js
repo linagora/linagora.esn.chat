@@ -138,6 +138,77 @@ describe('The chatUserNotificationProvider', function() {
   });
 
   describe('The updateOnConversationRead function', function() {
+    it('should do nothing if there is a read notification', function(done) {
+      var notification = {
+        category: 'chat:unread',
+        read: true,
+        numberOfUnreadMessages: 0,
+        numberOfUnseenMentions: 0,
+        unreadConversations: []
+      };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatUserNotificationProvider.getUnreadCount()
+        .then(function() {
+          chatUserNotificationProvider.updateOnConversationRead();
+
+          expect(notification).to.shallowDeepEqual({
+            read: true,
+            numberOfUnreadMessages: 0,
+            numberOfUnseenMentions: 0
+          });
+          expect(esnUserNotificationStateMock.decreaseCountBy).to.not.have.been.called;
+          expect(esnUserNotificationStateMock.decreaseNumberOfImportantNotificationsBy).to.not.have.been.called;
+          expect(esnUserNotificationStateMock.refresh).to.not.have.been.called;
+
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+
+    it('should do nothing if conversation has no unread message', function(done) {
+      var unreadConversationId = 'unreadConversationId';
+      var notification = {
+        category: 'chat:unread',
+        read: false,
+        numberOfUnreadMessages: 1,
+        unreadConversations: [
+          { _id: unreadConversationId, numberOfUnreadMessages: 1, last_message: { date: today - 1 } }
+        ],
+        timestamps: {
+          creation: today - 1
+        },
+        lastUnreadConversationId: unreadConversationId
+      };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatUserNotificationProvider.getUnreadCount()
+        .then(function() {
+          chatUserNotificationProvider.updateOnConversationRead('123');
+
+          expect(notification).to.deep.equal({
+            category: 'chat:unread',
+            read: false,
+            numberOfUnreadMessages: 1,
+            unreadConversations: [
+              { _id: unreadConversationId, numberOfUnreadMessages: 1, last_message: { date: today - 1 } }
+            ],
+            timestamps: {
+              creation: today - 1
+            },
+            lastUnreadConversationId: unreadConversationId
+          });
+          expect(esnUserNotificationStateMock.decreaseCountBy).to.not.have.been.called;
+          expect(esnUserNotificationStateMock.decreaseNumberOfImportantNotificationsBy).to.not.have.been.called;
+          expect(esnUserNotificationStateMock.refresh).to.not.have.been.called;
+
+          done();
+        });
+
+      $rootScope.$digest();
+    });
+
     it('should decrease the number of unread messages', function(done) {
       var id1 = 'id1';
       var id2 = 'id2';
