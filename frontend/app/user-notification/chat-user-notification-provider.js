@@ -10,6 +10,7 @@
     session,
     esnUserNotificationState,
     chatUserNotificationService,
+    chatConversationMemberService,
     chatConversationService
   ) {
     var notification;
@@ -118,30 +119,32 @@
         esnUserNotificationState.refresh();
       } else {
         chatConversationService.get(message.channel).then(function(conversation) {
-          if (conversation) {
-            var newUnreadConversation = {
-              _id: conversation._id,
-              numberOfUnreadMessages: 1,
-              last_message: conversation.last_message
-            };
-
-            if (notification.read) {
-              notification.read = false;
-            }
-            notification.timestamps = { creation: conversation.last_message.date };
-            notification.lastUnreadConversationId = conversation._id;
-            notification.numberOfUnreadMessages++;
-            esnUserNotificationState.increaseCountBy(1);
-
-            if (_isUserMentionedInMessage(session.user._id, message)) {
-              newUnreadConversation.numberOfUnseenMentions = 1;
-              notification.numberOfUnseenMentions++;
-              esnUserNotificationState.increaseNumberOfImportantNotificationsBy(1);
-            }
-
-            notification.unreadConversations.unshift(newUnreadConversation);
-            esnUserNotificationState.refresh();
+          if (!conversation || !chatConversationMemberService.currentUserIsMemberOf(conversation)) {
+            return;
           }
+
+          var newUnreadConversation = {
+            _id: conversation._id,
+            numberOfUnreadMessages: 1,
+            last_message: conversation.last_message
+          };
+
+          if (notification.read) {
+            notification.read = false;
+          }
+          notification.timestamps = { creation: conversation.last_message.date };
+          notification.lastUnreadConversationId = conversation._id;
+          notification.numberOfUnreadMessages++;
+          esnUserNotificationState.increaseCountBy(1);
+
+          if (_isUserMentionedInMessage(session.user._id, message)) {
+            newUnreadConversation.numberOfUnseenMentions = 1;
+            notification.numberOfUnseenMentions++;
+            esnUserNotificationState.increaseNumberOfImportantNotificationsBy(1);
+          }
+
+          notification.unreadConversations.unshift(newUnreadConversation);
+          esnUserNotificationState.refresh();
         });
       }
     }
