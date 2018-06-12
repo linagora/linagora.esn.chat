@@ -368,9 +368,7 @@ describe('The linagora.esn.chat conversation lib', function() {
               { $elemMatch: { 'member.id': new ObjectId(memberId2), 'member.objectType': CONSTANTS.OBJECT_TYPES.USER } }
             ]
           },
-          [`memberStates.${memberId1}.numOfReadMessages`]: { $exists: true },
-          [`memberStates.${memberId2}.numOfReadMessages`]: { $exists: true },
-          $where: `this.memberStates["${memberId1}"].numOfReadMessages < this.numOfMessage && this.memberStates["${memberId2}"].numOfReadMessages < this.numOfMessage`
+          $where: `(!this.memberStates["${memberId1}"] || this.memberStates["${memberId1}"].numOfReadMessages < this.numOfMessage) && (!this.memberStates["${memberId2}"] || this.memberStates["${memberId2}"].numOfReadMessages < this.numOfMessage)`
         });
         done();
       });
