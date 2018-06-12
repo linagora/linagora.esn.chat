@@ -424,7 +424,11 @@ describe('The chatUserNotificationProvider', function() {
         unreadConversations: []
       };
       var newMessage = { channel: id1, timestamps: { creation: today - 3 } };
-      var conversation = { _id: id1, last_message: { date: newMessage.timestamps.creation } };
+      var conversation = {
+        _id: id1,
+        member_status: 'member',
+        last_message: { date: newMessage.timestamps.creation }
+      };
 
       chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
       chatConversationService.get = sinon.stub().returns($q.when(conversation));
@@ -450,6 +454,42 @@ describe('The chatUserNotificationProvider', function() {
       done();
     });
 
+    it('should not increase the number of unread messages if there is one new message in conversation that user is not a member of', function(done) {
+      var id1 = 'id1';
+      var notification = {
+        category: 'chat:unread',
+        read: true,
+        numberOfUnreadMessages: 0,
+        unreadConversations: []
+      };
+      var newMessage = {
+        channel: id1,
+        timestamps: { creation: today - 3 }
+      };
+      var conversation = {
+        _id: id1,
+        member_status: 'none',
+        last_message: { date: newMessage.timestamps.creation }
+      };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatConversationService.get = sinon.stub().returns($q.when(conversation));
+
+      chatUserNotificationProvider.getUnreadCount();
+      $rootScope.$digest();
+      chatUserNotificationProvider.updateOnNewMessageReceived(newMessage);
+      $rootScope.$digest();
+
+      expect(notification).to.shallowDeepEqual({
+        read: true,
+        numberOfUnreadMessages: 0,
+        unreadConversations: []
+      });
+      expect(esnUserNotificationStateMock.increaseCountBy).to.not.have.been.called;
+      expect(esnUserNotificationStateMock.refresh).to.not.have.been.called;
+      done();
+    });
+
     it('should increase the number of unseen mentions if there is one new message in already read conversation', function(done) {
       var id1 = 'id1';
       var notification = {
@@ -464,7 +504,11 @@ describe('The chatUserNotificationProvider', function() {
         timestamps: { creation: today - 3 },
         user_mentions: [{ _id: user._id }]
       };
-      var conversation = { _id: id1, last_message: { date: newMessage.timestamps.creation } };
+      var conversation = {
+        _id: id1,
+        member_status: 'member',
+        last_message: { date: newMessage.timestamps.creation }
+      };
 
       chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
       chatConversationService.get = sinon.stub().returns($q.when(conversation));
@@ -493,6 +537,44 @@ describe('The chatUserNotificationProvider', function() {
       });
       expect(esnUserNotificationStateMock.increaseNumberOfImportantNotificationsBy).to.have.been.calledWith(1);
       expect(esnUserNotificationStateMock.refresh).to.have.been.called;
+      done();
+    });
+
+    it('should not increase the number of unseen mentions if there is one new message in conversation that user is not a member of', function(done) {
+      var id1 = 'id1';
+      var notification = {
+        category: 'chat:unread',
+        read: true,
+        numberOfUnreadMessages: 0,
+        numberOfUnseenMentions: 0,
+        unreadConversations: []
+      };
+      var newMessage = {
+        channel: id1,
+        timestamps: { creation: today - 3 },
+        user_mentions: [{ _id: user._id }]
+      };
+      var conversation = {
+        _id: id1,
+        member_status: 'none',
+        last_message: { date: newMessage.timestamps.creation }
+      };
+
+      chatUserNotificationService.get = sinon.stub().returns($q.when(notification));
+      chatConversationService.get = sinon.stub().returns($q.when(conversation));
+
+      chatUserNotificationProvider.getUnreadCount();
+      $rootScope.$digest();
+      chatUserNotificationProvider.updateOnNewMessageReceived(newMessage);
+      $rootScope.$digest();
+
+      expect(notification).to.shallowDeepEqual({
+        read: true,
+        numberOfUnseenMentions: 0,
+        unreadConversations: []
+      });
+      expect(esnUserNotificationStateMock.increaseNumberOfImportantNotificationsBy).to.not.have.been.called;
+      expect(esnUserNotificationStateMock.refresh).to.not.have.been.called;
       done();
     });
   });
