@@ -13,8 +13,8 @@ While waiting for a npm-based dependency injection handler, you have to install 
 Clone the `linagora.esn.chat` and `linagora.esn.emoticon` repositories.
 
 ```
-git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.emoticon.git
-git clone https://ci.open-paas.org/stash/scm/om/linagora.esn.chat.git
+git clone https://ci.linagora.com/linagora/lgs/openpaas/linagora.esn.emoticon.git
+git clone https://ci.linagora.com/linagora/lgs/openpaas/linagora.esn.chat
 ```
 
 Go inside OpenPaaS ESN repository:
@@ -40,8 +40,8 @@ npm install
 
 **2. Add the modules in the OpenPaaS ESN configuration file**
 
-You must add "linagora.esn.emoticon" and "linagora.esn.chat" in the modules section in `$ESN/config/default.NODE_ENV.json`. NODE_ENV is the environment variable used to define if the node application is running in 'production' or in 'development' (the default environment is 'development').
-Copy the 'modules' array from `$ESN/config/default.json` into `$ESN/config/default.NODE_ENV.json` (`$ESN/config/default.development.json` or `$ESN/config/default.production.json`) and add the "linagora.esn.emoticon" and "linagora.esn.chat" items:
+You must add "linagora.esn.emoticon" and "linagora.esn.chat" in the modules section in `$ESN/config/default.NODE_ENV.json`. NODE_ENV is the environment variable used to define if the node application is running in 'production' or in 'dev' (the default environment is 'dev').
+Copy the 'modules' array from `$ESN/config/default.json` into `$ESN/config/default.NODE_ENV.json` (`$ESN/config/default.dev.json` or `$ESN/config/default.production.json`) and add the "linagora.esn.emoticon" and "linagora.esn.chat" items:
 
 ```
 "modules": [
