@@ -235,7 +235,7 @@ module.exports = function(dependencies) {
 
   function _buildUnreadQuery(members) {
     const query = {};
-    const unreadExpressions = members.map(member => `(!this.memberStates["${member.member.id}"] || this.memberStates["${member.member.id}"].numOfReadMessages < this.numOfMessage)`);
+    const unreadExpressions = members.map(member => `(!this.memberStates || !this.memberStates["${member.member.id}"] || !isNumber(this.memberStates["${member.member.id}"].numOfReadMessages) || this.memberStates["${member.member.id}"].numOfReadMessages < this.numOfMessage)`);
 
     query.$where = unreadExpressions.join(' && ');
 
