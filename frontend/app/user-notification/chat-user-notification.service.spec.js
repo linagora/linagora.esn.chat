@@ -53,12 +53,10 @@ describe('The chatUserNotificationService service', function() {
 
   describe('The get function', function() {
     it('should build empty notification object if there are no unread messages', function(done) {
-      chatConversationService.listForCurrentUser = sinon.spy(function() {
-        return $q.when({ data: [] });
-      });
+      chatConversationService.fetchUnreadOpenAndSubscribedConversations = sinon.stub().returns($q.when([]));
       chatUserNotificationService.get()
         .then(function(chatUserNotification) {
-          expect(chatConversationService.listForCurrentUser).to.have.been.calledWith({ unread: true });
+          expect(chatConversationService.fetchUnreadOpenAndSubscribedConversations).to.have.been.called;
           expect(chatUserNotification).to.deep.equal({
             category: category,
             read: true,
@@ -82,7 +80,8 @@ describe('The chatUserNotificationService service', function() {
         },
         last_message: {
           date: today - 2
-        }
+        },
+        unreadMessageCount: 1
       };
       var unreadConversation2 = {
         _id: 'id2',
@@ -92,15 +91,14 @@ describe('The chatUserNotificationService service', function() {
         },
         last_message: {
           date: today - 1
-        }
+        },
+        unreadMessageCount: 2
       };
 
-      chatConversationService.listForCurrentUser = sinon.spy(function() {
-        return $q.when({ data: [unreadConversation1, unreadConversation2] });
-      });
+      chatConversationService.fetchUnreadOpenAndSubscribedConversations = sinon.stub().returns($q.when([unreadConversation1, unreadConversation2]));
       chatUserNotificationService.get()
         .then(function(chatUserNotification) {
-          expect(chatConversationService.listForCurrentUser).to.have.been.calledWith({ unread: true });
+          expect(chatConversationService.fetchUnreadOpenAndSubscribedConversations).to.have.been.called;
           expect(chatUserNotification).to.deep.equal({
             category: category,
             read: false,
@@ -140,15 +138,15 @@ describe('The chatUserNotificationService service', function() {
         },
         last_message: {
           date: new Date()
-        }
+        },
+        unreadMessageCount: 1
       };
 
-      chatConversationService.listForCurrentUser = sinon.spy(function() {
-        return $q.when({ data: [unreadConversation] });
-      });
+      chatConversationService.fetchUnreadOpenAndSubscribedConversations = sinon.stub().returns($q.when([unreadConversation]));
+
       chatUserNotificationService.get()
         .then(function(chatUserNotification) {
-          expect(chatConversationService.listForCurrentUser).to.have.been.calledWith({ unread: true });
+          expect(chatConversationService.fetchUnreadOpenAndSubscribedConversations).to.have.been.called;
           expect(chatUserNotification).to.deep.equal({
             category: category,
             read: false,
