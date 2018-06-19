@@ -143,47 +143,6 @@
       });
     }
 
-    function fetchAllConversations() {
-      return $q.all({
-        conversations: chatConversationService.listForCurrentUser(),
-        session: session.ready
-      }).then(function(resolved) {
-        return resolved.conversations.data;
-      });
-    }
-
-    function _fetchOpenConversation() {
-
-      return fetchAllConversations()
-      .then(function(conversations) {
-
-        return _.filter(conversations, function(conversation) {
-
-          return conversation.type === CHAT_CONVERSATION_TYPE.OPEN;
-        });
-      });
-    }
-
-    function fetchOpenAndSubscribedConversation() {
-
-      return $q.all([_fetchOpenConversation(), chatPrivateConversationService.get()])
-        .then(function(result) {
-          return result[0].concat(result[1]);
-        })
-        .then(_calculateUnreadMessage);
-    }
-
-    function _calculateUnreadMessage(conversations) {
-      return $q.when(conversations.map(function(conversation) {
-        var numOfMessage = conversation.numOfMessage;
-        var numOfReadMessages = conversation.memberStates && conversation.memberStates[session.user.id] && conversation.memberStates[session.user.id].numOfReadMessages || 0;
-
-        conversation.unreadMessageCount = numOfMessage - numOfReadMessages;
-
-        return conversation;
-      }));
-    }
-
     function getConversation(conversationId) {
       var conversation = chatConversationsStoreService.findConversation(conversationId);
 
@@ -267,7 +226,7 @@
     }
 
     function start() {
-      fetchOpenAndSubscribedConversation()
+      chatConversationService.fetchOpenAndSubscribedConversations()
         .then(addConversations, function(err) {
           $log.error('Can not get user conversations', err);
 
