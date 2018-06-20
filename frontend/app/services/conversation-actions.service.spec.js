@@ -42,7 +42,6 @@ describe('The chatConversationActionsService service', function() {
       })
     };
     chatMessageUtilsService = {};
-    chatConversationService = {};
     chatConversationsStoreService = {};
     chatConversationNameService = {
       getName: sinon.spy(function() {
@@ -55,12 +54,15 @@ describe('The chatConversationActionsService service', function() {
         add: angular.noop
       });
       $provide.value('chatSearchProviderService', {});
-      $provide.value('chatConversationService', chatConversationService);
       $provide.value('chatConversationsStoreService', chatConversationsStoreService);
       $provide.value('chatConversationNameService', chatConversationNameService);
       $provide.value('chatDesktopNotificationService', chatDesktopNotificationService);
       $provide.value('chatMessageUtilsService', chatMessageUtilsService);
       $provide.value('chatPrivateConversationService', chatPrivateConversationService);
+      $provide.value('esnCollaborationClientService', {
+        join: sinon.spy(),
+        leave: sinon.spy()
+      });
       $provide.factory('session', function($q) {
         sessionMock.ready = $q.when({user: user});
 
@@ -69,10 +71,11 @@ describe('The chatConversationActionsService service', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$log_, _$q_, _chatConversationActionsService_, _$rootScope_, _CHAT_CONVERSATION_TYPE_, _CHAT_CONVERSATION_MODE_, _CHAT_EVENTS_) {
+  beforeEach(angular.mock.inject(function(_$log_, _$q_, _chatConversationService_, _chatConversationActionsService_, _$rootScope_, _CHAT_CONVERSATION_TYPE_, _CHAT_CONVERSATION_MODE_, _CHAT_EVENTS_) {
     $log = _$log_;
     $q = _$q_;
     chatConversationActionsService = _chatConversationActionsService_;
+    chatConversationService = _chatConversationService_;
     $rootScope = _$rootScope_;
     sessionMock.ready = $q.when({user: user});
     sessionMock.user = user;
@@ -641,60 +644,26 @@ describe('The chatConversationActionsService service', function() {
       conversations[0].memberStates[user.id] = {
         numOfReadMessages: 8
       };
-      chatConversationService.listForCurrentUser = sinon.spy(function() {
-        return $q.when({data: conversations});
-      });
+      chatConversationService.fetchOpenAndSubscribedConversations = sinon.stub().returns($q.when(conversations));
 
       chatConversationsStoreService.addConversation = sinon.spy();
 
       chatConversationActionsService.start();
       $rootScope.$digest();
 
-      expect(chatConversationService.listForCurrentUser).to.have.been.called;
-      expect(chatConversationsStoreService.addConversation).to.have.been.calledTwice;
+      expect(chatConversationService.fetchOpenAndSubscribedConversations).to.have.been.called;
+      expect(chatConversationsStoreService.addConversation).to.have.been.calledOnce;
     });
 
-    it('should calculate unread message after fetch conversations', function() {
-      conversations = [
-        {
-          _id: 1,
-          type: CHAT_CONVERSATION_TYPE.OPEN,
-          numOfMessage: 10,
-          memberStates: {}
-        },
-        {
-          _id: 2,
-          type: CHAT_CONVERSATION_TYPE.OPEN,
-          numOfMessage: 12,
-          memberStates: {}
-        }
-      ];
-      conversations[0].memberStates[user.id] = {
-        numOfReadMessages: 8
-      };
-      chatConversationService.listForCurrentUser = sinon.stub().returns($q.when({ data: conversations }));
-      chatConversationsStoreService.addConversation = sinon.spy();
-      chatConversationActionsService.start();
-      $rootScope.$digest();
-
-      expect(chatConversationsStoreService.addConversation).to.have.been.calledThrice;
-      expect(conversations[0].unreadMessageCount).to.equal(2);
-      expect(conversations[1].unreadMessageCount).to.equal(12);
-      expect(privateConversation.unreadMessageCount).to.equal(5);
-    });
-
-    it('should reject when fetchAllConversations rejects', function() {
-      chatConversationService.listForCurrentUser = sinon.spy(function() {
-        return $q.reject(error);
-      });
-
+    it('should reject when fetchOpenAndSubscribedConversations rejects', function() {
+      chatConversationService.fetchOpenAndSubscribedConversations = sinon.stub().returns($q.reject(error));
       chatConversationsStoreService.addConversation = sinon.spy();
 
       chatConversationActionsService.start();
       $rootScope.$digest();
 
-      expect(chatConversationService.listForCurrentUser).to.have.been.called;
       expect(chatConversationsStoreService.addConversation).to.not.have.been.called;
+      expect(chatConversationService.fetchOpenAndSubscribedConversations).to.have.been.called;
     });
   });
 

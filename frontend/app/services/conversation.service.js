@@ -4,13 +4,24 @@
   angular.module('linagora.esn.chat')
     .factory('chatConversationService', chatConversationService);
 
-    function chatConversationService(ChatRestangular, esnCollaborationClientService, CHAT_OBJECT_TYPES) {
+    function chatConversationService(
+      $q,
+      _,
+      session,
+      esnCollaborationClientService,
+      ChatRestangular,
+      chatPrivateConversationService,
+      CHAT_OBJECT_TYPES,
+      CHAT_CONVERSATION_TYPE
+    ) {
       var service = {
         addMember: addMember,
         archive: archive,
         create: create,
         fetchMessages: fetchMessages,
         fetchAttachments: fetchAttachments,
+        fetchOpenAndSubscribedConversations: fetchOpenAndSubscribedConversations,
+        fetchUnreadOpenAndSubscribedConversations: fetchUnreadOpenAndSubscribedConversations,
         get: get,
         getMessage: getMessage,
         getSummary: getSummary,
@@ -113,6 +124,51 @@
         options.starred = true;
 
         return ChatRestangular.all('messages').getList(options);
+      }
+
+      function fetchOpenAndSubscribedConversations() {
+        return $q.all([_fetchOpenConversation(), chatPrivateConversationService.get()])
+          .then(function(result) {
+            return result[0].concat(result[1]);
+          })
+          .then(_calculateUnreadMessage);
+      }
+
+      function fetchUnreadOpenAndSubscribedConversations() {
+        return fetchOpenAndSubscribedConversations().then(function(conversations) {
+          return conversations.filter(function(conversation) {
+            return conversation.unreadMessageCount > 0;
+          });
+        });
+      }
+
+      function _fetchOpenConversation() {
+        return _fetchAllConversations()
+          .then(function(conversations) {
+            return _.filter(conversations, function(conversation) {
+              return conversation.type === CHAT_CONVERSATION_TYPE.OPEN;
+            });
+          });
+      }
+
+      function _fetchAllConversations() {
+        return $q.all({
+          conversations: listForCurrentUser(),
+          session: session.ready
+        }).then(function(resolved) {
+          return resolved.conversations.data;
+        });
+      }
+
+      function _calculateUnreadMessage(conversations) {
+        return conversations.map(function(conversation) {
+          var numOfMessage = conversation.numOfMessage;
+          var numOfReadMessages = conversation.memberStates && conversation.memberStates[session.user.id] && conversation.memberStates[session.user.id].numOfReadMessages || 0;
+
+          conversation.unreadMessageCount = numOfMessage - numOfReadMessages;
+
+          return conversation;
+        });
       }
     }
 })();

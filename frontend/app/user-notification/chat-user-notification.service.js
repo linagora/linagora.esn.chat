@@ -16,9 +16,9 @@
     };
 
     function get() {
-      return chatConversationService.listForCurrentUser({ unread: true })
-        .then(function(result) {
-          var unreadNotification = _buildUnreadNotification(result.data);
+      return chatConversationService.fetchUnreadOpenAndSubscribedConversations()
+        .then(function(unreadConversations) {
+          var unreadNotification = _buildUnreadNotification(unreadConversations);
 
           return new ChatUserNotification(unreadNotification);
         });
