@@ -1,4 +1,4 @@
 .chat-conversation-topic-edition
   span.editable(ng-if="!ctrl.conversation.topic.value" editable-text="ctrl.topic" onhide="ctrl.draft($data)" buttons="no" onbeforesave='ctrl.updateTopic($data)')
     | #{__('Set a topic')}
-  span.editable(ng-if="ctrl.conversation.topic.value" ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}" editable-text="ctrl.topic" onhide="ctrl.draft($data)" buttons="no" onbeforesave='ctrl.updateTopic($data)')
+  .editable(ng-if="ctrl.conversation.topic.value", ng-bind-html="ctrl.conversation.topic.value | linky:'_blank' | esnEmoticonify:{class: 'label-emoji'}", editable-text="ctrl.topic", onhide="ctrl.draft($data)", buttons="no", onbeforesave='ctrl.updateTopic($data)', title="{{ctrl.conversation.topic.value}}")
