@@ -3,10 +3,10 @@
     i.mdi.mdi-plus
   textarea(esn-textarea-autosize, textarea-max-rows="3", rows="1", ng-model='text', ng-change='onTextChanged()')
   .send-button-left
-    .dropdown.dropup
-      a(href='', data-toggle='dropdown', aria-expanded='false')
+    .dropdown.dropup(ng-init="clicked=false")
+      a(href='', data-toggle='dropdown', aria-expanded='false', ng-click="clicked=true")
         i.mdi.mdi-emoticon
-      ul.dropdown-menu.dropdown-menu-right.clickable
+      ul.dropdown-menu.dropdown-menu-right.clickable(ng-if="clicked")
         esn-emoticon-popup(on-emoji-selected='onEmojiSelected')
   button.send-button(ng-click='sendMessage()')
     i.mdi.mdi-send
