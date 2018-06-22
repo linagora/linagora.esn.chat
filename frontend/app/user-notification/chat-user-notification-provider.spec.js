@@ -485,7 +485,12 @@ describe('The chatUserNotificationProvider', function() {
           },
           lastUnreadConversationId: newMessage.channel,
           unreadConversations: [
-            { _id: conversation._id, numberOfUnreadMessages: 1, last_message: conversation.last_message}
+            {
+              _id: conversation._id,
+              numberOfUnreadMessages: 1,
+              numberOfUnseenMentions: 0,
+              last_message: conversation.last_message
+            }
           ]
         });
         expect(esnUserNotificationStateMock.increaseCountBy).to.have.been.calledWith(1);

@@ -132,6 +132,7 @@
           var newUnreadConversation = {
             _id: conversation._id,
             numberOfUnreadMessages: 1,
+            numberOfUnseenMentions: 0,
             last_message: conversation.last_message
           };
 
