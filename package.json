@@ -72,7 +72,7 @@
   "dependencies": {
     "async": "2.0.1",
     "awesome-module": "1.0.0",
-    "bower": "1.7.9",
+    "bower": "1.8.2",
     "commander": "2.9.0",
     "esn-elasticsearch-configuration": "0.4.5",
     "express": "4.14.0",
