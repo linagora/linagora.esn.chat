@@ -1,4 +1,4 @@
 .conversation-sidebar-member
   .close.hidden-xs
     i.mdi.mdi-close.clickable(ui-sref="chat.channels-views")
-  profile-overview(ng-if="ctrl.user" user="ctrl.user")
+  profile-overview(ng-if="ctrl.user", user="ctrl.user", me="ctrl.me")
