@@ -6,7 +6,8 @@ var expect = chai.expect;
 
 describe('The ChatConversationSidebarMemberController', function() {
 
-  var $controller, $q, $rootScope, stateParamsMock, stateMock, userAPIMock, notificationFactoryMock;
+  var $controller, $q, $rootScope;
+  var sessionMock, stateParamsMock, stateMock, userAPIMock, notificationFactoryMock;
 
   beforeEach(function() {
     userAPIMock = {
@@ -28,6 +29,12 @@ describe('The ChatConversationSidebarMemberController', function() {
       go: sinon.spy()
     };
 
+    sessionMock = {
+      user: {
+        _id: 'userid'
+      }
+    };
+
     module('linagora.esn.chat', function($provide) {
       $provide.value('newProvider', function(_provider) {
         return _provider;
@@ -40,6 +47,7 @@ describe('The ChatConversationSidebarMemberController', function() {
       $provide.value('$stateParams', stateParamsMock);
       $provide.value('$state', stateMock);
       $provide.value('userAPI', userAPIMock);
+      $provide.value('session', sessionMock);
       $provide.value('notificationFactory', notificationFactoryMock);
     });
   });
@@ -55,6 +63,17 @@ describe('The ChatConversationSidebarMemberController', function() {
   }
 
   describe('the $onInit', function() {
+    it('should set self.user to current session user if the member to show info is the current user', function() {
+      stateParamsMock.memberId = sessionMock.user._id;
+
+      var controller = initController();
+
+      controller.$onInit();
+
+      expect(controller.user).to.deep.equal(sessionMock.user);
+      expect(controller.me).to.be.true;
+      expect(userAPIMock.user).to.not.have.been.called;
+    });
 
     it('should call userAPI.user with $stateParams.memberId', function() {
       var controller = initController();

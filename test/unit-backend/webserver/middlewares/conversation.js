@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const Q = require('q');
+const { CONVERSATION_TYPE, CONVERSATION_MODE } = require('../../../../backend/lib/constants');
 
 describe('The conversation middleware', function() {
 
@@ -327,6 +328,39 @@ describe('The conversation middleware', function() {
         expect(user.get).to.have.been.called;
         expect(req.member).to.equal(userInfo);
         done();
+      });
+    });
+  });
+
+  describe('The canCreate function', function() {
+    it('should send back HTTP 400 if user creat a direct message conversation that only has himself as member', function(done) {
+      req.user = { _id: 'creatorid' };
+      req.body = {
+        type: CONVERSATION_TYPE.DIRECT_MESSAGE,
+        mode: CONVERSATION_MODE.CHANNEL,
+        members: ['creatorid']
+      };
+
+      res.status = function(status) {
+        expect(status).to.equals(400);
+
+        return {
+          json: function(json) {
+            expect(json).to.deep.equals({
+              error: {
+                code: 400,
+                message: 'Bad request',
+                details: 'Can not create a direct message conversation with only the creator'
+              }
+            });
+
+            done();
+          }
+        };
+      };
+
+      getMiddleware().canCreate(req, res, () => {
+        done(new Error('Test failed'));
       });
     });
   });
