@@ -112,16 +112,16 @@ module.exports = function(dependencies, lib) {
         name: req.body.name,
         type: req.body.type,
         mode: req.body.mode,
-        creator: req.user,
+        creator: req.user._id,
         topic: {
           value: req.body.topic,
-          creator: req.user
+          creator: req.user._id
         },
         avatar: req.body.avatar,
         members: members,
         purpose: {
           value: req.body.purpose,
-          creator: req.user
+          creator: req.user._id
         }
       };
 

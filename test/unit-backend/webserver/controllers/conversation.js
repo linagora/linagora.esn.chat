@@ -262,15 +262,15 @@ describe('The conversation controller', function() {
               type: 'type',
               mode: 'mode',
               domain_ids: [domain],
-              creator: user,
+              creator: user._id,
               avatar: avatar,
               topic: {
                 value: topic,
-                creator: user
+                creator: user._id
               },
               purpose: {
                 value: purpose,
-                creator: user
+                creator: user._id
               },
               members: [{member: {objectType: 'user', id: '1'}}]
             });
