@@ -16,7 +16,8 @@
       esnUserNotificationService.addProvider(chatUserNotificationProvider);
       esnUserNotificationTemplateProviderRegistry.add({
         template: 'chat-user-notification-template-unread',
-        category: CHAT_USER_NOTIFICATION_CATEGORIES.unread
+        category: CHAT_USER_NOTIFICATION_CATEGORIES.unread,
+        forceClosePopoverOnClick: true
       });
       chatUserNotificationListenerService.start();
     });
