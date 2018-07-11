@@ -68,6 +68,20 @@ describe('The ChatConversationCreatePrivateController controller', function() {
       expect(chatConversationActionsService.createDirectmessageConversation).to.not.have.been.called;
     });
 
+    it('should not create conversation if there is no member', function() {
+      chatConversationActionsService.createDirectmessageConversation = sinon.spy();
+      notificationFactory.weakError = sinon.spy();
+
+      var controller = initController();
+
+      controller.members = [];
+
+      controller.create();
+      $rootScope.$digest();
+      expect(chatConversationActionsService.createDirectmessageConversation).to.not.have.been.called;
+      expect(notificationFactory.weakError).to.have.been.calledWith('error', 'Can not create a private conversation with no member');
+    });
+
     it('should display a notification on creation failure', function() {
       chatConversationActionsService.createDirectmessageConversation = sinon.spy(function() {
         return $q.reject(new Error());
@@ -76,9 +90,11 @@ describe('The ChatConversationCreatePrivateController controller', function() {
 
       var controller = initController();
 
+      controller.members = [{_id: 1}];
+
       controller.create();
       $rootScope.$digest();
-      expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledWith({domain: session.domain._id, members: []});
+      expect(chatConversationActionsService.createDirectmessageConversation).to.have.been.calledWith({domain: session.domain._id, members: [1]});
       expect(notificationFactory.weakError).to.have.been.calledWith('error', 'Error while creating private conversation');
     });
 
