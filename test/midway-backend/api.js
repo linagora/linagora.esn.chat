@@ -1400,6 +1400,30 @@ describe('The chat API', function() {
       });
     });
 
+    it('should not create a direct message conversation if the conversation has no member', function(done) {
+      request(app.express)
+          .post('/api/conversations')
+          .type('json')
+          .send({
+            type: CONVERSATION_TYPE.DIRECT_MESSAGE,
+            mode: CONVERSATION_MODE.CHANNEL,
+            members: []
+          })
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body).to.deep.equal({
+            error: { code: 400, message: 'Bad request', details: 'Can not create a direct message conversation if there is no member' }
+          });
+
+          done();
+        });
+    });
+
     it('should not create a new conversation if the conversation has a name and an other with the same participant exist and has the same name', function(done) {
       var members = [userAsMember, getNewMember(), getNewMember()];
 

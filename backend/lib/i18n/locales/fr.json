@@ -79,5 +79,6 @@
   "create a new private conversation with them?": "créer une nouvelle conversation privée avec eux?",
   "create a new private conversation with him/her?": "créer une nouvelle conversation privée avec lui/elle?",
   "You have an unread message": "Vous avez un message non lu",
-  "You have %s unread messages": "Vous avez %s messages non lus"
+  "You have %s unread messages": "Vous avez %s messages non lus",
+  "Can not create a private conversation with no member": "Impossible de créer une conversation privée sans membre"
 }

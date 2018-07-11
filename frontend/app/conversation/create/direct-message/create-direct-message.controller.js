@@ -5,7 +5,7 @@
     .module('linagora.esn.chat')
     .controller('ChatConversationCreateDirectMessageController', ChatConversationCreateDirectMessageController);
 
-  function ChatConversationCreateDirectMessageController($log, $state, chatConversationActionsService, notificationFactory, session) {
+  function ChatConversationCreateDirectMessageController($q, $log, $state, chatConversationActionsService, notificationFactory, session) {
     var self = this;
 
     self.create = create;
@@ -14,6 +14,12 @@
     function create() {
       if (self.form && self.form.$invalid) {
         return;
+      }
+
+      if (!self.members.length) {
+        notificationFactory.weakError('error', 'Can not create a private conversation with no member');
+
+        return $q.when();
       }
 
       var conversation = {
