@@ -158,7 +158,7 @@
     }
 
     function currentUserIsCreator(conversation) {
-      return session.user._id === conversation.creator._id || session.user._id === conversation.creator;
+      return conversation.creator && session.user._id === conversation.creator._id || session.user._id === conversation.creator;
     }
 
     function joinConversation(conversation) {

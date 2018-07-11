@@ -827,4 +827,30 @@ describe('The chatConversationActionsService service', function() {
       expect(chatConversationsStoreService.updateMembersCount).to.have.been.calledWith(conversation, count);
     });
   });
+
+  describe('The currentUserIsCreator function', function() {
+    it('should return false if conversation does not have creator', function() {
+      var conversation = {
+        id: '5b2a32ee35acca5fb249d21c'
+      };
+
+      expect(chatConversationActionsService.currentUserIsCreator(conversation)).to.be.false;
+    });
+
+    it('should return false if conversation\'s creator does not have id', function() {
+      var conversation = {
+        creator: {}
+      };
+
+      expect(chatConversationActionsService.currentUserIsCreator(conversation)).to.be.false;
+    });
+
+    it('should return true if the current user is conversation\'s creator', function() {
+      var conversation = {
+        creator: user.id
+      };
+
+      expect(chatConversationActionsService.currentUserIsCreator(conversation)).to.be.true;
+    });
+  });
 });
