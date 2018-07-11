@@ -155,18 +155,28 @@ module.exports = function(dependencies, lib) {
       });
     }
 
-    if (
-      req.body.type === CONVERSATION_TYPE.DIRECT_MESSAGE &&
-      req.body.members.length === 1 &&
-      String(req.user._id) === req.body.members[0]
-    ) {
-      return res.status(400).json({
-        error: {
-          code: 400,
-          message: 'Bad request',
-          details: 'Can not create a direct message conversation with only the creator'
-        }
-      });
+    if (req.body.type === CONVERSATION_TYPE.DIRECT_MESSAGE) {
+      const numberOfMembers = req.body.members.length;
+
+      if (!numberOfMembers) {
+        return res.status(400).json({
+          error: {
+            code: 400,
+            message: 'Bad request',
+            details: 'Can not create a direct message conversation if there is no member'
+          }
+        });
+      }
+
+      if (numberOfMembers === 1 && String(req.user._id) === req.body.members[0]) {
+        return res.status(400).json({
+          error: {
+            code: 400,
+            message: 'Bad request',
+            details: 'Can not create a direct message conversation with only the creator'
+          }
+        });
+      }
     }
 
     next();
