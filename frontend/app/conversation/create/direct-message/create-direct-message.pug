@@ -7,4 +7,9 @@ sub-header
   form(name='createDirectmessageForm', esn-submit="ctrl.create()")
     .form-group.fg-line
       .row
-        users-autocomplete-input(original-users='ctrl.members', mutable-users='ctrl.members', propagate-enter-event='true')
+        users-autocomplete-input(
+          original-users='ctrl.members',
+          mutable-users='ctrl.members',
+          propagate-enter-event='true',
+          add-from-autocomplete-only='true'
+        )
