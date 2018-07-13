@@ -69,6 +69,7 @@ describe('The websocket API', function() {
         registerCollaborationModel: function(objectType, name, schema) {
           return mongoose.model(name, schema);
         },
+        registerCollaborationLib: () => {},
         getCollaborationsForUser: function(user, options, callback) {
           callback(null, collaborations);
         },
