@@ -81,70 +81,88 @@ module.exports = function(dependencies, lib) {
   }
 
   function create(req, res) {
-    const memberIds = new Set(req.body.members || []).add(String(req.user._id));
-    const members = Array.from(memberIds).map(member => ({member: {id: member, objectType: OBJECT_TYPES.USER}}));
+    const requestedUser = req.user;
 
-    lib.conversation.find({
-      type: req.body.type,
-      mode: req.body.mode,
-      exactMembersMatch: true,
-      name: req.body.name ? req.body.name : null,
-      members: members,
-      populations: { lastMessageCreator: true, lastMessageMentionedUsers: true }
-    }, (err, conversations) => {
-      if (err) {
-        logger.error('Error while searching conversation', err);
+    return _createConversation(requestedUser, req.body)
+      .then(createdConversation => {
+        if (req.body.type === CONSTANTS.CONVERSATION_TYPE.DIRECT_MESSAGE) {
+          return lib.userSubscribedPrivateConversation.get(requestedUser._id)
+            .then(subscribedPrivateConversation => {
+              const createdConversationId = String(createdConversation._id);
+              const subscribedConversationIds = subscribedPrivateConversation && subscribedPrivateConversation.conversations ? subscribedPrivateConversation.conversations : [];
+
+              if (subscribedConversationIds.indexOf(createdConversationId) !== -1) {
+                return createdConversation;
+              }
+
+              subscribedConversationIds.push(createdConversationId);
+
+              return lib.userSubscribedPrivateConversation.store(requestedUser._id, subscribedConversationIds)
+                .then(() => createdConversation);
+            });
+        }
+
+        return createdConversation;
+      })
+      .then(createdConversation => utils.sendConversationResult(createdConversation, req.user, res, 201))
+      .catch(err => {
+        const errorMessage = 'Errror while creating conversation';
+
+        logger.error(errorMessage, err);
 
         return res.status(500).json({
           error: {
             code: 500,
             message: 'Server Error',
-            details: 'Error while finding conversations with users' + members.join(', ')
+            details: errorMessage
           }
         });
-      }
-
-      if (conversations && conversations.length > 0) {
-        return utils.sendConversationResult(conversations[0], req.user, res, 201);
-      }
-
-      const conversation = {
-        name: req.body.name,
-        type: req.body.type,
-        mode: req.body.mode,
-        creator: req.user._id,
-        topic: {
-          value: req.body.topic,
-          creator: req.user._id
-        },
-        avatar: req.body.avatar,
-        members: members,
-        purpose: {
-          value: req.body.purpose,
-          creator: req.user._id
-        }
-      };
-
-      if (req.body.domain) {
-        conversation.domain_ids = [req.body.domain];
-      }
-
-      lib.conversation.create(conversation, (err, result) => {
-        if (err) {
-          logger.error('Errror while creating conversation', err);
-
-          return res.status(500).json({
-            error: {
-              code: 500,
-              message: 'Server Error',
-              details: 'Error while creating conversation'
-            }
-          });
-        }
-
-        utils.sendConversationResult(result, req.user, res, 201);
       });
-    });
+  }
+
+  function _createConversation(requestedUser, data) {
+    const memberIds = new Set(data.members || []).add(String(requestedUser._id));
+    const members = Array.from(memberIds).map(member => ({
+      member: { id: member, objectType: OBJECT_TYPES.USER }
+    }));
+    const findQuery = {
+      type: data.type,
+      mode: data.mode,
+      exactMembersMatch: true,
+      name: data.name ? data.name : null,
+      members: members,
+      populations: { lastMessageCreator: true, lastMessageMentionedUsers: true }
+    };
+
+    return Q.ninvoke(lib.conversation, 'find', findQuery)
+      .then(conversations => {
+        if (conversations && conversations.length > 0) {
+          return conversations[0];
+        }
+
+        const conversationToCreate = {
+          name: data.name,
+          type: data.type,
+          mode: data.mode,
+          creator: requestedUser._id,
+          topic: {
+            value: data.topic,
+            creator: requestedUser._id
+          },
+          avatar: data.avatar,
+          members: members,
+          purpose: {
+            value: data.purpose,
+            creator: requestedUser._id
+          }
+        };
+
+        if (data.domain) {
+          conversationToCreate.domain_ids = [data.domain];
+        }
+
+        return Q.ninvoke(lib.conversation, 'create', conversationToCreate);
+      });
   }
 
   function get(req, res) {
