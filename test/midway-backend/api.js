@@ -1527,6 +1527,34 @@ describe('The chat API', function() {
       });
     });
 
+    it('should create and subscribe to the conversation if there is a private conversation', function(done) {
+      var members = [getNewMember()];
+
+      request(app.express)
+        .post('/api/conversations')
+        .type('json')
+        .send({
+          type: CONVERSATION_TYPE.DIRECT_MESSAGE,
+          mode: CONVERSATION_MODE.CHANNEL,
+          members: members.map(member => member.member.id)
+        })
+      .expect('Content-Type', /json/)
+        .expect(201)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          const createdConversationId = String(res.body._id);
+
+          app.lib.userSubscribedPrivateConversation.get(userId)
+            .then(subscribedPrivateConversation => {
+              expect(subscribedPrivateConversation.conversations).to.includes(createdConversationId);
+              done();
+            });
+        });
+    });
+
     it('should create a new conversation if the conversation has a name and an other with the same participant exist but has no name', function(done) {
       var members = [userAsMember, getNewMember(), getNewMember()];
 
