@@ -8,6 +8,7 @@ describe('The ChatConversationViewController controller', function() {
   var $rootScope, $controller, $q, $stateParams;
   var scope,
     sessionMock,
+    uuid4,
     chatConversationServiceMock,
     chatConversationMemberService,
     chatConversationActionsService,
@@ -64,6 +65,8 @@ describe('The ChatConversationViewController controller', function() {
 
     sessionMock = {user: user};
 
+    uuid4 = {};
+
     chatConversationsStoreService = {
       activeRoom: {},
       ready: {
@@ -81,6 +84,7 @@ describe('The ChatConversationViewController controller', function() {
 
     module('linagora.esn.chat', function($provide) {
       $provide.value('session', sessionMock);
+      $provide.value('uuid4', uuid4);
       $provide.value('chatConversationService', chatConversationServiceMock);
       $provide.value('usSpinnerService', usSpinnerServiceMock);
       $provide.value('chatConversationActionsService', chatConversationActionsService);
@@ -226,6 +230,28 @@ describe('The ChatConversationViewController controller', function() {
       expect(scope.vm.messages.length).to.equal(3);
       expect(scope.vm.messages).to.contain(message);
     });
+
+    it('should generate new _id then add the message if the message have no _id', function() {
+      var channel = 1;
+
+      chatConversationsStoreService.activeRoom._id = channel;
+      message = { creator: {_id: 'userId'}, timestamps: {creation: 40}, text: 'haha' };
+      uuid4.generate = function() {
+        return 1;
+      };
+      message.channel = channel;
+      var ctrl = initCtrl(true);
+
+      ctrl.messages = [{_id: 10, creator: {_id: 'userId10'}, timestamps: {creation: 10}, text: 'haha' }, {_id: 20, creator: {_id: 'userId20'}, timestamps: {creation: 30}, text: 'haha'}];
+
+      expect(scope.vm.messages.length).to.deep.equal(2);
+      scope.$emit(CHAT_EVENTS.TEXT_MESSAGE, message);
+      $rootScope.$digest();
+
+      expect(scope.vm.messages.length).to.equal(3);
+      expect(scope.vm.messages).to.contain(message);
+      expect(scope.vm.messages[2]._id).to.equal(1);
+    });
   });
 
   describe('on $scope chat:message:file event', function() {
@@ -271,6 +297,62 @@ describe('The ChatConversationViewController controller', function() {
       $rootScope.$digest();
 
       expect(scope.vm.messages).to.be.empty;
+    });
+
+    it('should generate new _id then add the message if the message have no _id', function() {
+      var channel = 1;
+
+      chatConversationsStoreService.activeRoom._id = channel;
+      message = { creator: {_id: 'userId'}, timestamps: {creation: 40}, text: 'haha' };
+      uuid4.generate = function() {
+        return 1;
+      };
+      message.channel = channel;
+      var ctrl = initCtrl(true);
+
+      ctrl.messages = [{_id: 10, creator: {_id: 'userId10'}, timestamps: {creation: 10}, text: 'haha' }, {_id: 20, creator: {_id: 'userId20'}, timestamps: {creation: 30}, text: 'haha'}];
+
+      expect(scope.vm.messages.length).to.deep.equal(2);
+      scope.$emit(CHAT_EVENTS.FILE_MESSAGE, message);
+      $rootScope.$digest();
+
+      expect(scope.vm.messages.length).to.equal(3);
+      expect(scope.vm.messages).to.contain(message);
+      expect(scope.vm.messages[2]._id).to.equal(1);
+    });
+  });
+
+  describe('on $scope chat:message:bot event', function() {
+
+    var message;
+
+    beforeEach(function() {
+      $stateParams.id = null;
+      chatConversationServiceMock.fetchMessages = function() {
+        return $q.when([]);
+      };
+    });
+
+    it('should generate new _id then add the message if the message have no _id', function() {
+      var channel = 1;
+
+      chatConversationsStoreService.activeRoom._id = channel;
+      message = { creator: {_id: 'userId'}, timestamps: {creation: 40}, text: 'haha' };
+      uuid4.generate = function() {
+        return 1;
+      };
+      message.channel = channel;
+      var ctrl = initCtrl(true);
+
+      ctrl.messages = [{_id: 10, creator: {_id: 'userId10'}, timestamps: {creation: 10}, text: 'haha' }, {_id: 20, creator: {_id: 'userId20'}, timestamps: {creation: 30}, text: 'haha'}];
+
+      expect(scope.vm.messages.length).to.deep.equal(2);
+      scope.$emit(CHAT_EVENTS.BOT_MESSAGE, message);
+      $rootScope.$digest();
+
+      expect(scope.vm.messages.length).to.equal(3);
+      expect(scope.vm.messages).to.contain(message);
+      expect(scope.vm.messages[2]._id).to.equal(1);
     });
   });
 

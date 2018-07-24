@@ -6,7 +6,7 @@
       .lv-body(scroll-glue="glued", z-infinite-scroll="ctrl.loadPreviousMessages()", inverse="true")
         .throbber(openpaas-logo-spinner, spinner-start-active='1', spinner-size='0.3', spinner-key='{{::ctrl.spinnerKey}}')
         chat-conversation-header(ng-if="ctrl.topOfConversation" conversation="ctrl.conversation")
-        div(ng-repeat="message in ctrl.messages track by message._uniqId", in-view="$last && ctrl.setLastLineInView($inview)")
+        div(ng-repeat="message in ctrl.messages track by message._id", in-view="$last && ctrl.setLastLineInView($inview)")
           chat-message-separator(prev-message="$first ? null : ctrl.messages[$index - 1]", current-message="message")
           chat-message(message="message")
       chat-message-indicator(inview = "ctrl.inview")

@@ -6,12 +6,12 @@
     .controller('ChatConversationViewController', ChatConversationViewController);
 
   function ChatConversationViewController(
-    _,
     $log,
     $scope,
     $q,
     $timeout,
     session,
+    uuid4,
     usSpinnerService,
     chatConversationService,
     chatConversationActionsService,
@@ -42,10 +42,6 @@
     self.onDragOver = onDragOver;
     self.$onInit = $onInit;
 
-    function addUniqId(message) {
-      message._uniqId = message.creator._id + ':' + message.timestamps.creation + '' + message.text;
-    }
-
     function getConversationId() {
       return chatConversationsStoreService.activeRoom._id;
     }
@@ -60,7 +56,6 @@
     }
 
     function newMessage(message) {
-      addUniqId(message);
       // chances are, the new message is the most recent
       // So we traverse the array starting by the end
       for (var i = self.messages.length - 1; i > -1; i--) {
@@ -78,13 +73,11 @@
     function queueOlderMessages(messages, isFirstLoad) {
       if (isFirstLoad) {
         return messages.forEach(function(message) {
-          addUniqId(message);
           self.messages.push(message);
         });
       }
 
       messages.reverse().forEach(function(message) {
-        addUniqId(message);
         self.messages.unshift(message);
       });
     }
@@ -179,10 +172,6 @@
       });
     }
 
-    function isDuplicate(message) {
-      return _.find(self.messages, {_uniqId: message._uniqId});
-    }
-
     function onDragOver() {
       return chatConversationMemberService.currentUserIsMemberOf(chatConversationsStoreService.activeRoom) ? CHAT_DRAG_FILE_CLASS.IS_MEMBER : CHAT_DRAG_FILE_CLASS.IS_NOT_MEMBER;
     }
@@ -190,12 +179,9 @@
     [CHAT_EVENTS.BOT_MESSAGE, CHAT_EVENTS.TEXT_MESSAGE, CHAT_EVENTS.FILE_MESSAGE].forEach(function(eventReceived) {
       $scope.$on(eventReceived, function(event, message) {
         if (message.channel && message.channel === self.chatConversationsStoreService.activeRoom._id) {
-          addUniqId(message);
-
-          if (!isDuplicate(message)) {
-            self.newMessage(message);
-            scrollDown(message.creator._id === session.user._id, message.channel);
-          }
+          message._id = message._id || uuid4.generate();
+          self.newMessage(message);
+          scrollDown(message.creator._id === session.user._id, message.channel);
         }
       });
     });
