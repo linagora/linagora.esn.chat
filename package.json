@@ -46,7 +46,7 @@
     "karma-phantomjs-launcher": "1.0.4",
     "karma-spec-reporter": "0.0.26",
     "linagora-rse": "git+https://ci.linagora.com/linagora/lgs/openpaas/esn.git#master",
-    "mocha": "3.0.2",
+    "mocha": "5.2.0",
     "mockery": "1.7.0",
     "mongodb": "2.2.9",
     "phantomjs-prebuilt": "2.1.16",
