@@ -12,7 +12,8 @@ module.exports = function(dependencies) {
     userCanRead,
     userCanRemove,
     userCanUpdate,
-    userCanWrite
+    userCanWrite,
+    canLeave
   };
 
   function asTuple(user) {
@@ -35,4 +36,10 @@ module.exports = function(dependencies) {
     return Q.denodeify(collaborationModule.permission.canWrite)(conversation, asTuple(user));
   }
 
+  function canLeave(userId, conversation) {
+    return Promise.resolve(
+      conversation.type !== CONSTANTS.CONVERSATION_TYPE.DIRECT_MESSAGE &&
+      String(userId) !== String(conversation.creator)
+    );
+  }
 };

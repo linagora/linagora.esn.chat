@@ -4,6 +4,7 @@ const Q = require('q');
 const constants = require('./constants');
 
 module.exports = function(dependencies) {
+  const collaborationModule = dependencies('collaboration');
 
   const models = {
     ChatUserSubscribedPrivateConversation: require('./db/models/UserSubscribedPrivateConversation')(dependencies),
@@ -15,6 +16,7 @@ module.exports = function(dependencies) {
   const utils = require('./utils')(dependencies);
   const search = require('./search')(dependencies);
   const conversation = require('./conversation')(dependencies);
+  const permission = conversation.permission;
   const domain = require('./domain')(dependencies);
   const message = require('./message')(dependencies, {conversation, search});
   const members = require('./members')(dependencies);
@@ -45,6 +47,7 @@ module.exports = function(dependencies) {
     moderate.start();
     search.init();
     conversation.registerUserConversationFinder(Q.denodeify(conversation.listForUser));
+    collaborationModule.registerCollaborationLib(constants.OBJECT_TYPES.CONVERSATION, { permission });
     callback();
   }
 };
