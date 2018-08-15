@@ -1,0 +1,7 @@
+{
+  "connectionString": "mongodb://mongo/tests",
+  "connectionOptions": {
+    "auto_reconnect": false
+  }
+}
+  
