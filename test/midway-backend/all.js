@@ -1,217 +1,121 @@
 'use strict';
 
-var mockery = require('mockery');
-var chai = require('chai');
-var path = require('path');
-var fs = require('fs-extra');
-var testConfig = require('../config/servers-conf');
-var bodyParser = require('body-parser');
-var MongoClient = require('mongodb').MongoClient;
-var redis = require('redis');
-var async = require('async');
+/* eslint-disable no-console, no-process-env */
 
-before(function() {
+const Q = require('q');
+const chai = require('chai');
+const path = require('path');
+const EsConfig = require('esn-elasticsearch-configuration');
+const testConfig = require('../config/servers-conf');
+const basePath = path.resolve(__dirname + '/../../node_modules/linagora-rse');
+const backendPath = path.normalize(__dirname + '/../../backend');
+const MODULE_NAME = 'linagora.esn.chat';
+
+process.env.NODE_CONFIG = 'test/config';
+process.env.NODE_ENV = 'test';
+process.env.REDIS_HOST = 'redis';
+process.env.REDIS_PORT = 6379;
+process.env.AMQP_HOST = 'rabbitmq';
+process.env.ES_HOST = 'elasticsearch';
+
+before(function(done) {
+  let rse;
+
   chai.use(require('chai-shallow-deep-equal'));
   chai.use(require('sinon-chai'));
   chai.use(require('chai-as-promised'));
-  var basePath = path.resolve(__dirname + '/../..');
-  var tmpPath = path.resolve(basePath, testConfig.tmp);
-  var host = testConfig.host;
-  var testEnv = this.testEnv = {
+
+  this.testEnv = {
     serversConfig: testConfig,
     basePath: basePath,
-    tmp: tmpPath,
-    fixtures: path.resolve(__dirname + '/fixtures'),
-    mongoUrl: 'mongodb://' + host + ':' + testConfig.mongodb.port + '/' + testConfig.mongodb.dbname,
-    redisPort: testConfig.redis.port,
-    writeDBConfigFile: function() {
-      fs.writeFileSync(tmpPath + '/db.json', JSON.stringify({connectionString: 'mongodb://' + host + ':' + testConfig.mongodb.port + '/' + testConfig.mongodb.dbname, connectionOptions: {auto_reconnect: false}}));
-    },
-    removeDBConfigFile: function() {
-      fs.unlinkSync(tmpPath + '/db.json');
-    },
-    writeDefaultConfigFile: function() {
-      fs.writeFileSync(tmpPath + '/default.json', JSON.stringify({
-        wsserver: {enabled: true, port: testConfig.express.port},
-        webserver: {
-          port: testConfig.express.port
-        },
-        log: {
-          console: {
-            enabled: true
-          },
-          file: {
-            enabled: false
-          },
-          rotate: {
-            enabled: false
-          }
-        }
-      }));
-    },
-    removeDefaultConfigFile: function() {
-      fs.unlinkSync(tmpPath + '/default.json');
+    backendPath: backendPath,
+    fixtures: path.resolve(basePath, 'test/midway-backend/fixtures'),
+    mongoUrl: testConfig.mongodb.connectionString,
+    initCore(callback = () => {}) {
+      rse.core.init(() => process.nextTick(callback));
     }
   };
-  var self = this;
 
+  rse = require('linagora-rse');
   this.helpers = {};
+  this.testEnv.core = rse.core;
+  this.testEnv.moduleManager = rse.moduleManager;
+  rse.test.helpers(this.helpers, this.testEnv);
+  rse.test.moduleHelpers(this.helpers, this.testEnv);
+  rse.test.apiHelpers(this.helpers, this.testEnv);
 
-  this.helpers.asMember = function(user) {
-    return {member: {id: String(user._id || user), objectType: 'user'}};
-  };
+  const manager = this.testEnv.moduleManager.manager;
+  const nodeModulesPath = path.normalize(
+    path.join(__dirname, '../../node_modules/')
+  );
 
-  this.helpers.loadApplication = function(dependencies, skipModels) {
-    mockery.registerMock('./bot', function() {
-      return {
-        start: function() {}
-      };
-    });
-    const lib = require('../../backend/lib')(dependencies);
-    const mongoose = dependencies('db').mongo.mongoose;
-    const ObjectId = mongoose.Schema.ObjectId;
+  const loader = manager.loaders.code(require('../../index.js'), true);
+  const nodeModulesLoader = manager.loaders.filesystem(nodeModulesPath, true);
 
-    if (!skipModels) {
-      mongoose.model('User', new mongoose.Schema({
-        _id: {type: ObjectId, required: true},
-        username: {type: String, required: true},
-        domains: [{
-          domain_id: {type: String}
-        }]
-      }));
-    }
+  manager.appendLoader(loader);
+  manager.appendLoader(nodeModulesLoader);
 
-    const api = require('../../backend/webserver/api')(dependencies, lib);
-    const app = require('../../backend/webserver/application')(dependencies);
-    const ws = require('../../backend/ws');
+  loader.load(MODULE_NAME, done);
+});
 
-    app.use(bodyParser.json());
-    app.use('/api', api);
+before(function(done) {
+  const self = this;
 
-    return {
-      express: app,
-      lib,
-      api,
-      ws
-    };
-  };
-
-  const i18nMock = require('i18n');
-
-  i18nMock.setDefaultConfiguration = function(options) {
-    const i18nConfigTemplate = {
-      defaultLocale: 'en',
-      locales: ['en', 'fr', 'vi'],
-      updateFiles: false,
-      indent: '  ',
-      extension: '.json',
-      cookie: 'locale'
-    };
-
-    const i18nConfig = Object.assign({}, i18nConfigTemplate, options);
-
-    i18nMock.configure(i18nConfig);
-  };
-
-  this.helpers.i18n = i18nMock;
-
-  this.helpers.resetRedis = function(callback) {
-    var redisClient = redis.createClient(testEnv.redisPort);
-
-    return redisClient.flushall(callback);
-  };
-
-  this.helpers.mongo = {
-    dropDatabase: function(callback) {
-      function _dropDatabase() {
-        MongoClient.connect(self.testEnv.mongoUrl, function(err, db) {
-          if (err) {
-            return callback(err);
-          }
-          db.dropDatabase(function(err) {
-            if (err) {
-              return _dropDatabase();
-            }
-            db.close(callback);
-          });
-        });
+  self.helpers.modules.initMidway(MODULE_NAME, self.helpers.callbacks.noErrorAnd(() => {
+    self.helpers.modules.current.deps('wsserver').start(self.testEnv.serversConfig.express.port, {}, err => {
+      if (err) {
+        return done(err);
       }
-      _dropDatabase();
-    }
-  };
 
-  this.helpers.elasticsearch = {
+      const expressApp = require(self.testEnv.backendPath + '/webserver/application')(self.helpers.modules.current.deps);
+      const api = require(self.testEnv.backendPath + '/webserver/api')(self.helpers.modules.current.deps, self.helpers.modules.current.lib.lib);
 
-    checkDocumentsIndexed: function(options, callback) {
-      var request = require('superagent');
-      var elasticsearchURL = self.testEnv.serversConfig.host + ':' + self.testEnv.serversConfig.elasticsearch.port;
-      var index = options.index;
-      var type = options.type;
-      var ids = options.ids;
-      var check = options.check || function(res) {
-        return res.status === 200 && res.body.hits.total === 1;
-      };
+      expressApp.use(require('body-parser').json());
+      expressApp.use('/chat/api', api);
+      self.helpers.modules.current.app = self.helpers.modules.getWebServer(expressApp);
 
-      async.each(ids, function(id, callback) {
-        var nbExecuted = 0;
-        var finish = false;
-
-        async.doWhilst(function(callback) {
-          setTimeout(function() {
-            request
-              .get(elasticsearchURL + '/' + index + '/' + type + '/_search?q=_id:' + id)
-              .end(function(err, res) {
-                if (check(res)) {
-                  finish = true;
-
-                  return callback();
-                }
-                nbExecuted++;
-                if (nbExecuted >= self.testEnv.serversConfig.elasticsearch.tries_index) {
-                  return callback(new Error(
-                    'Number of tries of check document indexed in Elasticsearch reached the maximum allowed. Increase the number of tries!'));
-                }
-
-                return callback();
-              });
-          }, self.testEnv.serversConfig.elasticsearch.interval_index);
-
-        }, function() {
-          return (!finish) && nbExecuted < self.testEnv.serversConfig.elasticsearch.tries_index;
-        }, function(err) {
-          callback(err);
-        });
-
-      }, function(err) {
-        callback(err);
-      });
-    }
-  };
-
-  process.env.NODE_CONFIG = this.testEnv.tmp;
-  process.env.NODE_ENV = 'test';
+      self.helpers.modules.current.lib.lib.websocket = require('../../backend/ws').init(self.helpers.modules.current.deps, self.helpers.modules.current.lib.lib);
+      self.helpers.modules.current.lib.lib.start(err => done(err));
+    });
+  }));
 });
 
-after(function() {
-  delete process.env.NODE_CONFIG;
-  delete process.env.NODE_ENV;
+beforeEach(function(done) {
+  const esnConf = new EsConfig({
+    host: this.testEnv.serversConfig.elasticsearch.host,
+    port: this.testEnv.serversConfig.elasticsearch.port
+  });
+
+  Q.all([
+    esnConf.setup('users.idx', 'users'),
+    esnConf.setup('chat.messages.idx', 'chat.messages'),
+    esnConf.setup('chat.conversations.idx', 'chat.conversations')
+  ])
+  .then(() => done())
+  .catch(err => {
+    console.error('Error while setup ES indices', err);
+    done();
+  });
 });
 
-beforeEach(function() {
-  mockery.enable({warnOnReplace: false, warnOnUnregistered: false, useCleanCache: true});
-  this.testEnv.writeDBConfigFile();
-  this.testEnv.writeDefaultConfigFile();
+afterEach(function(done) {
+  const esnConf = new EsConfig({
+    host: this.testEnv.serversConfig.elasticsearch.host,
+    port: this.testEnv.serversConfig.elasticsearch.port
+  });
+
+  Q.all([
+    esnConf.deleteIndex('users.idx'),
+    esnConf.deleteIndex('chat.messages.idx'),
+    esnConf.deleteIndex('chat.conversations.idx')
+  ])
+  .then(() => done())
+  .catch(err => {
+    console.error('Error while clear ES indices', err);
+    done();
+  });
 });
 
-afterEach(function() {
-  try {
-    this.testEnv.removeDBConfigFile();
-    this.testEnv.removeDefaultConfigFile();
-  } catch (e) {
-    /*eslint no-console: ["error", { allow: ["error"] }] */
-    console.error(e);
-  }
-  mockery.resetCache();
-  mockery.deregisterAll();
-  mockery.disable();
+afterEach(function(done) {
+  this.helpers.mongo.dropDatabase(err => done(err));
 });
