@@ -183,11 +183,9 @@ describe('GET /chat/api/user/conversations', function() {
         req.expect('Content-Type', /json/);
         req.expect(200);
         req.end(helpers.callbacks.noErrorAnd(res => {
-          expect(res.body.length).to.equal(2);
+          expect(res.body.length).to.equal(1);
           expect(res.body).to.shallowDeepEqual([{
             _id: String(conversation1._id)
-          }, {
-            name: CONSTANTS.DEFAULT_CHANNEL.name
           }]);
           done();
         }));

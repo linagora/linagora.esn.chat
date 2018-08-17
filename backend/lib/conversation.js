@@ -237,6 +237,7 @@ module.exports = function(dependencies) {
     const query = {};
     const unreadExpressions = members.map(member => `(!this.memberStates || !this.memberStates["${member.member.id}"] || !isNumber(this.memberStates["${member.member.id}"].numOfReadMessages) || this.memberStates["${member.member.id}"].numOfReadMessages < this.numOfMessage)`);
 
+    unreadExpressions.unshift('this.numOfMessage > 0');
     query.$where = unreadExpressions.join(' && ');
 
     return query;
