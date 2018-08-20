@@ -103,7 +103,7 @@ describe('GET /chat/api/conversations/:id/attachments', function() {
       }).catch(done);
   });
 
-  it.skip('should give the right list of attachment based on limit and offset params', function(done) {
+  it('should give the right list of attachment based on limit and offset params', function(done) {
 
     let channelId;
     const messageSequence = [4, 2, 1, 1, 1, 3, 1, 1];
@@ -140,7 +140,8 @@ describe('GET /chat/api/conversations/:id/attachments', function() {
 
     function createMessagesWithAttachments(messageSequence, channelId) {
 
-      return Q.all(messageSequence.map((sequence, i) => { Q.denodeify(lib.message.create)(createMessage(sequence, i + 1, channelId));}));
+      return messageSequence.map((sequence, i) => () => Q.denodeify(lib.message.create)(createMessage(sequence, i + 1, channelId)))
+        .reduce(Q.when, Q());
     }
 
     function getExpectedOutput(generatedMessage) {
