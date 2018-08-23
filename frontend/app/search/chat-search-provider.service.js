@@ -15,6 +15,7 @@
     var searchServices = [chatSearchConversationsService, chatSearchMessagesService];
 
     return new esnSearchProvider({
+      uid: 'op.chat',
       name: 'Chat',
       fetch: function(query) {
 
