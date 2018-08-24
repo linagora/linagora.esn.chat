@@ -28,7 +28,7 @@
         };
       },
       buildFetchContext: function(options) {
-        return $q.when(options.query);
+        return $q.when(options.query && options.query.text);
       },
       templateUrl: '/chat/app/search/chat-search-item.html',
       activeOn: ['chat']
