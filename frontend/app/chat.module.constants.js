@@ -42,7 +42,8 @@
     .constant('CHAT_WEBSOCKET_EVENTS', {
       MESSAGE: 'message',
       CONVERSATION: {
-        MEMBER_READ: 'chat:conversation:member:read'
+        MEMBER_READ: 'chat:conversation:member:read',
+        MEMBER_UNSUBSCRIBED: 'chat:conversation:member:unsubscribed'
       }
     })
     .constant('CHAT_WEBSOCKET_ROOM', {

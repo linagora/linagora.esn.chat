@@ -185,6 +185,37 @@ describe('The chatConversationsStoreService service', function() {
     });
   });
 
+  describe('The deleteConversations function', function() {
+    it('should do nothing when input is undefined', function() {
+      chatConversationsStoreService.conversations = [conversation];
+      chatConversationsStoreService.deleteConversations();
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
+      expect(chatConversationsStoreService.channels).to.deep.equals([]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
+    });
+
+    it('should do nothing when input is empty', function() {
+      chatConversationsStoreService.conversations = [conversation];
+      chatConversationsStoreService.deleteConversations([]);
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
+      expect(chatConversationsStoreService.channels).to.deep.equals([]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
+    });
+
+    it('should remove conversations from the store', function() {
+      chatConversationsStoreService.conversations = [conversation, publicConversation];
+      chatConversationsStoreService.channels = [publicConversation];
+      chatConversationsStoreService.privateConversations = [confidentialConversation];
+      chatConversationsStoreService.deleteConversations([publicConversation, confidentialConversation]);
+
+      expect(chatConversationsStoreService.conversations).to.deep.equals([conversation]);
+      expect(chatConversationsStoreService.channels).to.deep.equals([]);
+      expect(chatConversationsStoreService.privateConversations).to.deep.equals([]);
+    });
+  });
+
   describe('The findConversation function', function() {
     it('should return nothing when conversation is not found', function() {
       chatConversationsStoreService.conversations = [conversation];

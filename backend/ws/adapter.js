@@ -11,6 +11,7 @@ const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATIO
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATION;
+const MEMBER_UNSUBSCRIBED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_UNSUBSCRIBED_CONVERSATION;
 
 module.exports = (dependencies, lib) => {
   const logger = dependencies('logger');
@@ -32,6 +33,7 @@ module.exports = (dependencies, lib) => {
     globalPubsub.topic(MEMBER_LEFT_CONVERSATION).subscribe(memberHasLeft);
     globalPubsub.topic(MESSAGE_RECEIVED).subscribe(sendMessage);
     globalPubsub.topic(MEMBER_READ_CONVERSATION).subscribe(memberHasRead);
+    globalPubsub.topic(MEMBER_UNSUBSCRIBED_CONVERSATION).subscribe(data => messenger.memberHasUnsubscribed.bind(messenger)(data.userId, data.conversationIds));
 
     messenger.on('message', message => localPubsub.topic(MESSAGE_RECEIVED).publish({message}));
 

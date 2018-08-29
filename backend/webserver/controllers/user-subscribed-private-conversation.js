@@ -48,9 +48,7 @@ module.exports = (dependencies, lib) => {
       });
     }
     for (var i = 0; i < req.body.conversationIds.length; i++) {
-      if (ObjectId.isValid(req.body.conversationIds[i])) {
-        req.body.conversationIds[i] = new ObjectId(req.body.conversationIds[i]);
-      } else {
+      if (!ObjectId.isValid(req.body.conversationIds[i])) {
         return res.status(400).json({
           error: {
             code: 400,
@@ -58,7 +56,6 @@ module.exports = (dependencies, lib) => {
             details: 'You should provide valid ids array'
           }
         });
-
       }
     }
 

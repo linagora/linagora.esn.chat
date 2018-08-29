@@ -166,6 +166,21 @@ describe('The chat websocket messenger', function() {
     });
   });
 
+  describe('The memberHasUnsubscribed function', function() {
+    it('should send unsubscribed conversation IDs to user', function() {
+      const userId = '123';
+      const conversationIds = ['456'];
+
+      messenger.memberHasUnsubscribed(userId, conversationIds);
+
+      expect(sendDataToUserSpy).to.have.been.calledWith(
+        userId,
+        CONSTANTS.NOTIFICATIONS.MEMBER_UNSUBSCRIBED_CONVERSATION,
+        { data: { conversationIds }, room: DEFAULT_ROOM }
+      );
+    });
+  });
+
   describe('The memberHasBeenAdded function', function() {
     let member, by_member;
 

@@ -10,7 +10,6 @@
     esnAppStateService,
     chatPrivateConversationService,
     CHAT_CONVERSATION_TYPE,
-    CHAT_EVENTS,
     CHAT_MEMBER_STATUS
   ) {
     var activeRoom = {};
@@ -20,6 +19,7 @@
       channels: [],
       conversations: [],
       deleteConversation: deleteConversation,
+      deleteConversations: deleteConversations,
       findConversation: findConversation,
       find: find,
       getNumberOfUnreadMessages: getNumberOfUnreadMessages,
@@ -91,6 +91,12 @@
 
       _.remove(array, {_id: conversation._id});
       _.remove(store.conversations, {_id: conversation._id});
+    }
+
+    function deleteConversations(conversations) {
+      conversations && conversations.forEach(function(conversation) {
+        deleteConversation(conversation);
+      });
     }
 
     function findConversation(conversationId) {

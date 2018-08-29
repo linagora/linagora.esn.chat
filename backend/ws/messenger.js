@@ -12,6 +12,7 @@ const MEMBER_JOINED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_JOINED_CONVERS
 const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATION;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const DEFAULT_ROOM = CONSTANTS.WEBSOCKET.DEFAULT_ROOM;
+const MEMBER_UNSUBSCRIBED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_UNSUBSCRIBED_CONVERSATION;
 
 class Messenger extends EventEmitter {
 
@@ -50,6 +51,10 @@ class Messenger extends EventEmitter {
 
   memberHasLeft(conversation, member, members_count) {
     this.sendDataToClients(conversation, MEMBER_LEFT_CONVERSATION, {conversation, member, members_count});
+  }
+
+  memberHasUnsubscribed(userId, conversationIds) {
+    this.sendDataToUser(userId, MEMBER_UNSUBSCRIBED_CONVERSATION, { conversationIds });
   }
 
   sendDataToClients(conversation, type, data) {

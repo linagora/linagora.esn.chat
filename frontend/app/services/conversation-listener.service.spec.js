@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The chatConversationListenerService service', function() {
 
-  var $rootScope, $q, text, directmessage, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session, esnAppStateService;
+  var $rootScope, $state, $q, text, directmessage, conversation, chatMessengerService, chatConversationService, chatParseMention, chatConversationActionsService, chatConversationsStoreService, chatConversationListenerService, session, esnAppStateService;
   var CHAT_WEBSOCKET_EVENTS, CHAT_EVENTS, CHAT_CONVERSATION_TYPE;
 
   beforeEach(function() {
@@ -57,6 +57,7 @@ describe('The chatConversationListenerService service', function() {
   beforeEach(angular.mock.inject(function(
     _$q_,
     _$rootScope_,
+    _$state_,
     _chatConversationListenerService_,
     _esnAppStateService_,
     _CHAT_WEBSOCKET_EVENTS_,
@@ -65,6 +66,7 @@ describe('The chatConversationListenerService service', function() {
   ) {
     $q = _$q_;
     $rootScope = _$rootScope_;
+    $state = _$state_;
     chatConversationListenerService = _chatConversationListenerService_;
     esnAppStateService = _esnAppStateService_;
     CHAT_WEBSOCKET_EVENTS = _CHAT_WEBSOCKET_EVENTS_;
@@ -251,6 +253,76 @@ describe('The chatConversationListenerService service', function() {
             callback(eventPayload);
 
             expect($rootScope.$broadcast).to.have.been.calledWith(CHAT_EVENTS.MEMBER_READ_CONVERSATION, eventPayload);
+
+            return true;
+          }))
+        );
+      });
+    });
+
+    describe('on CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_UNSUBSCRIBED event', function() {
+      var event;
+
+      beforeEach(function() {
+        event = { conversationIds: ['id1', 'id2'] };
+
+        chatConversationsStoreService.deleteConversations = angular.noop;
+      });
+
+      it('should call chatConversationsStoreService.deleteConversations to remove unsubscribed conversations', function() {
+        chatConversationsStoreService.isActiveRoom = sinon.stub().returns(false);
+        chatConversationsStoreService.deleteConversations = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(
+          CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_UNSUBSCRIBED,
+          sinon.match.func.and(sinon.match(function(callback) {
+            callback(event);
+
+            expect(chatConversationsStoreService.deleteConversations).to.have.been.calledWith(event.conversationIds);
+
+            return true;
+          }))
+        );
+      });
+
+      it('should go to default conversation (General channel) if unsubscribed active conversation', function() {
+        var generalChannelId = '123';
+
+        chatConversationsStoreService.isActiveRoom = sinon.stub().returns(true);
+        chatConversationsStoreService.channels = [{ _id: generalChannelId }];
+        $state.go = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(
+          CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_UNSUBSCRIBED,
+          sinon.match.func.and(sinon.match(function(callback) {
+            callback(event);
+
+            expect(chatConversationsStoreService.isActiveRoom).to.have.been.calledOnce;
+            expect($state.go).to.have.been.calledOnce;
+            expect($state.go).to.have.been.calledWith('chat.channels-views', { id: generalChannelId });
+
+            return true;
+          }))
+        );
+      });
+
+      it('should not switch conversation if has not unsubscribed active conversation', function() {
+        chatConversationsStoreService.isActiveRoom = sinon.stub().returns(false);
+        $state.go = sinon.spy();
+
+        chatConversationListenerService.addEventListeners();
+
+        expect(chatMessengerService.addEventListener).to.have.been.calledWith(
+          CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_UNSUBSCRIBED,
+          sinon.match.func.and(sinon.match(function(callback) {
+            callback(event);
+
+            expect(chatConversationsStoreService.isActiveRoom).to.have.been.calledTwice;
+            expect($state.go).to.not.have.been.called;
 
             return true;
           }))
