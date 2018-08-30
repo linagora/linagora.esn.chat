@@ -14,10 +14,14 @@ const MEMBER_LEFT_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_LEFT_CONVERSATIO
 const MESSAGE_RECEIVED = CONSTANTS.NOTIFICATIONS.MESSAGE_RECEIVED;
 const CONVERSATION_TOPIC_UPDATED = CONSTANTS.NOTIFICATIONS.CONVERSATION_TOPIC_UPDATED;
 const MEMBER_READ_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_READ_CONVERSATION;
+const MEMBER_UNSUBSCRIBED_CONVERSATION = CONSTANTS.NOTIFICATIONS.MEMBER_UNSUBSCRIBED_CONVERSATION;
 
 describe('The chat websocket adapter', function() {
 
-  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic, conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic, conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic, conversationMemberAddedTopic, conversationReadTopic;
+  var adapter, lib, message, localMessageReceivedTopic, globalMessageReceivedTopic,
+      conversationAddMemberTopic, conversationRemoveMemberTopic, logger, conversationCreatedTopic,
+      conversationDeletedTopic, conversationTopicUpdatedTopic, conversationUpdatedTopic,
+      conversationMemberAddedTopic, conversationReadTopic, conversationMemberUnsubscribedTopic;
 
   beforeEach(function() {
     var self = this;
@@ -74,6 +78,11 @@ describe('The chat websocket adapter', function() {
       publish: sinon.spy()
     };
 
+    conversationMemberUnsubscribedTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
     lib = {
       conversation: {},
       members: {}
@@ -119,6 +128,9 @@ describe('The chat websocket adapter', function() {
             if (name === MEMBER_READ_CONVERSATION) {
               return conversationReadTopic;
             }
+            if (name === MEMBER_UNSUBSCRIBED_CONVERSATION) {
+              return conversationMemberUnsubscribedTopic;
+            }
           }
         }
       },
@@ -147,6 +159,7 @@ describe('The chat websocket adapter', function() {
         memberHasBeenAdded: sinon.spy(),
         memberHasJoined: sinon.spy(),
         memberHasLeft: sinon.spy(),
+        memberHasUnsubscribed: sinon.spy(),
         sendMessage: sinon.spy(),
         topicUpdated: sinon.spy(),
         sendDataToUser: sinon.spy()
@@ -698,6 +711,25 @@ describe('The chat websocket adapter', function() {
       expect(messenger.sendDataToUser).to.have.been.calledWith(data.userId, MEMBER_READ_CONVERSATION, {
         conversationId: data.conversationId
       });
+    });
+
+    it('should subscribe to MEMBER_UNSUBSCRIBED_CONVERSATION event', function() {
+      data = {
+        userId: user._id,
+        conversationIds: [conversation._id]
+      };
+
+      adapter.bindEvents(messenger);
+
+      expect(conversationMemberUnsubscribedTopic.subscribe).to.have.been.calledWith(sinon.match(function(callback) {
+        subscribeCallback = callback;
+
+        return _.isFunction(callback);
+      }));
+
+      subscribeCallback(data);
+
+      expect(messenger.memberHasUnsubscribed).to.have.been.calledWith(data.userId, data.conversationIds);
     });
   });
 });

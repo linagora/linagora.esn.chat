@@ -7,14 +7,13 @@
   function chatConversationListenerService(
     _,
     $rootScope,
-    session,
+    $state,
     chatConversationService,
     chatConversationActionsService,
     chatConversationsStoreService,
     chatMessengerService,
     chatParseMention,
     esnAppStateService,
-    CHAT_NAMESPACE,
     CHAT_WEBSOCKET_EVENTS,
     CHAT_EVENTS,
     CHAT_CONVERSATION_TYPE,
@@ -43,6 +42,7 @@
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_JOINED_CONVERSATION, memberHasJoined);
       chatMessengerService.addEventListener(CHAT_EVENTS.MEMBER_LEFT_CONVERSATION, memberHasLeft);
       chatMessengerService.addEventListener(CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_READ, memberHasRead);
+      chatMessengerService.addEventListener(CHAT_WEBSOCKET_EVENTS.CONVERSATION.MEMBER_UNSUBSCRIBED, memberHasUnsubscribed);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATIONS.UPDATE, updateConversation);
       chatMessengerService.addEventListener(CHAT_EVENTS.CONVERSATION_TOPIC_UPDATED, topicUpdated);
     }
@@ -67,6 +67,18 @@
       chatConversationsStoreService.resetNumberOfUnreadMessages(event.conversationId);
       chatConversationsStoreService.resetNumberOfUnseenMentions(event.conversationId);
       $rootScope.$broadcast(CHAT_EVENTS.MEMBER_READ_CONVERSATION, event);
+    }
+
+    function memberHasUnsubscribed(event) {
+      chatConversationsStoreService.deleteConversations(event.conversationIds);
+
+      event.conversationIds.some(function(conversationId) {
+        if (chatConversationsStoreService.isActiveRoom(conversationId)) {
+          $state.go('chat.channels-views', { id: chatConversationsStoreService.channels[0]._id });
+
+          return true;
+        }
+      });
     }
 
     function updateConversationOnMessage(message, conversation) {

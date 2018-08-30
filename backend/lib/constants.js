@@ -27,6 +27,7 @@ module.exports = {
     MEMBER_LEFT_CONVERSATION: 'chat:conversation:members:left',
     MEMBER_ADDED_TO_CONVERSATION: 'chat:conversation:members:added',
     MEMBER_READ_CONVERSATION: 'chat:conversation:member:read',
+    MEMBER_UNSUBSCRIBED_CONVERSATION: 'chat:conversation:member:unsubscribed',
     MEMBERSHIP_EVENTS: 'chat:conversation:membership',
     MESSAGE_RECEIVED: 'chat:message:received',
     MESSAGE_REMOVED: 'chat:message:removed',

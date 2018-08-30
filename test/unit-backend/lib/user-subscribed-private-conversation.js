@@ -3,10 +3,11 @@
 const sinon = require('sinon');
 const expect = require('chai').expect;
 const Q = require('q');
+const { MEMBER_UNSUBSCRIBED_CONVERSATION } = require('../../../backend/lib/constants').NOTIFICATIONS;
 
 describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', function() {
 
-  let lib, deps, mq, mediaQuery, ObjectId, modelsMock, conversation;
+  let lib, deps, mq, mediaQuery, ObjectId, modelsMock, conversation, channelMemberUnsubscribedTopic;
 
   function dependencies(name) {
     return deps[name];
@@ -22,7 +23,7 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
       ChatUserSubscribedPrivateConversation: {
         findById: sinon.spy(function() {
 
-          return Q.when([]);
+          return Q.when(null);
         }),
         findOneAndUpdate: sinon.spy(function() {
 
@@ -50,6 +51,11 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
       })
     };
 
+    channelMemberUnsubscribedTopic = {
+      subscribe: sinon.spy(),
+      publish: sinon.spy()
+    };
+
     deps = {
       db: {
         mongo: {
@@ -73,11 +79,10 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
           }
         },
         global: {
-          topic: function() {
-            return {
-              subscribe: sinon.spy(),
-              publish: sinon.spy()
-            };
+          topic: function(name) {
+            if (name === MEMBER_UNSUBSCRIBED_CONVERSATION) {
+              return channelMemberUnsubscribedTopic;
+            }
           }
         }
       }
@@ -102,12 +107,34 @@ describe('The linagora.esn.chat ChatUserSubscribedPrivateConversation lib', func
 
   describe('The store function', function() {
 
-    it('should call userSubscribedPrivateConversation.store', function(done) {
+    it('should call findOneAndUpdate to create if subscribed private conversation did not exist', function(done) {
       const userId = '0xFF';
       const conversationIds = ['Id1', 'Id2', 'Id3'];
 
       require('../../../backend/lib/user-subscribed-private-conversation')(dependencies, lib).store(userId, conversationIds).then(function() {
         expect(modelsMock.ChatUserSubscribedPrivateConversation.findOneAndUpdate).to.have.been.calledWith({_id: userId}, {$set: {conversations: conversationIds}}, {upsert: true, new: true});
+        done();
+      });
+    });
+
+    it('should publish unsubscribed conversation IDs', function(done) {
+      const userId = '0xFF';
+      const newPrivateConversationIds = ['Id1', 'Id2'];
+      const saved = {
+        _id: userId,
+        conversations: newPrivateConversationIds
+      };
+      const subscribedPrivateConversation = {
+        _id: userId,
+        conversations: ['Id1', 'Id2', 'Id3'],
+        save: sinon.stub().returns(Q.when(saved))
+      };
+
+      modelsMock.ChatUserSubscribedPrivateConversation.findById = sinon.stub().returns(Q.when(subscribedPrivateConversation));
+
+      require('../../../backend/lib/user-subscribed-private-conversation')(dependencies, lib).store(userId, newPrivateConversationIds).then(function() {
+        expect(modelsMock.ChatUserSubscribedPrivateConversation.findById).to.have.been.calledWith(userId);
+        expect(channelMemberUnsubscribedTopic.publish).to.have.been.calledWith({ userId, conversationIds: ['Id3'] });
         done();
       });
     });
