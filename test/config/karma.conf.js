@@ -16,6 +16,8 @@ module.exports = function(config) {
       'frontend/components/dynamic-directive/dist/dynamic-directive.min.js',
       'frontend/components/angular-uuid4/angular-uuid4.min.js',
       'frontend/components/restangular/dist/restangular.min.js',
+      'frontend/components/angular-strap/dist/angular-strap.js',
+      'frontend/components/angular-strap/dist/angular-strap.tpl.js',
       'frontend/components/sinon-chai/lib/sinon-chai.js',
       'node_modules/sinon/pkg/sinon.js',
       'frontend/components/moment/moment.js',
