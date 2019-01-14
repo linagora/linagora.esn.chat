@@ -7,7 +7,9 @@ var expect = chai.expect;
 
 describe('the chatFileUploadController controller', function() {
 
-  var $rootScope, $scope, $controller, $q, conversation, chatMessageService, chatConversationsStoreService, searchProviders, session, conversationId, userId, chatConversationMemberService, notificationFactory;
+  var $rootScope, $scope, $controller, $q, conversation, chatMessageService, chatConversationsStoreService,
+    searchProviders, session, conversationId, userId, chatConversationMemberService, notificationFactory, esnConfig,
+    MAX_SIZE_UPLOAD_DEFAULT;
 
   beforeEach(function() {
 
@@ -48,6 +50,13 @@ describe('the chatFileUploadController controller', function() {
       }
     };
 
+    module('esn.configuration', function($provide) {
+      $provide.value('esnConfig', function() {
+        return $q.when(104857600);
+      });
+    });
+    module('esn.message');
+
     angular.mock.module('linagora.esn.chat', function($provide) {
       $provide.value('searchProviders', searchProviders);
       $provide.value('chatMessageService', chatMessageService);
@@ -58,17 +67,18 @@ describe('the chatFileUploadController controller', function() {
       $provide.value('session', session);
     });
 
-    angular.mock.inject(function(_$rootScope_, _$controller_, _$q_) {
+    angular.mock.inject(function(_$rootScope_, _$controller_, _$q_, _esnConfig_) {
       $rootScope = _$rootScope_;
       $scope = $rootScope.$new();
       $q = _$q_;
       $controller = _$controller_;
+      esnConfig = _esnConfig_;
     });
   });
 
   function initController(conversation, joinCallback) {
     var controller = $controller('chatFileUploadController',
-      {$scope: $scope},
+      {$scope: $scope, esnConfig: esnConfig, MAX_SIZE_UPLOAD_DEFAULT: MAX_SIZE_UPLOAD_DEFAULT},
       {conversation: conversation, onJoin: joinCallback}
     );
 
@@ -109,7 +119,7 @@ describe('the chatFileUploadController controller', function() {
       expect(notificationFactory.weakError).to.have.been.calledWith('error', 'You can not upload files without being a member');
     });
 
-    it('should send a message with attachments', function() {
+    it('should send a message with attachments', function(done) {
       var clock = sinon.useFakeTimers(+new Date(2016, 4, 29));
       var messageObj = {
         channel: conversationId,
@@ -118,12 +128,16 @@ describe('the chatFileUploadController controller', function() {
         text: ''
       };
 
-      initController(conversation).onFileSelect(files);
+      var promise = initController(conversation).onFileSelect(files);
+
+      promise.then(function() {
+        expect(chatMessageService.sendMessageWithAttachments).to.have.been.calledWith(messageObj, files);
+
+        clock.restore();
+        done();
+      });
+
       $rootScope.$digest();
-
-      expect(chatMessageService.sendMessageWithAttachments).to.have.been.calledWith(messageObj, files);
-
-      clock.restore();
     });
   });
 });

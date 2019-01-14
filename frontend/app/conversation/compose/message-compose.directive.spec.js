@@ -5,7 +5,8 @@
 var expect = chai.expect;
 
 describe('The message-compose directive', function() {
-  var $scope, $rootScope, $compile, $q, chatComposerState, deviceDetector, chatConversationsStoreService, chatMessageService, domainAPI, ChatTextManipulator;
+  var $scope, $rootScope, $compile, $q, chatComposerState, deviceDetector, chatConversationsStoreService,
+    chatMessageService, domainAPI, ChatTextManipulator, esnConfig, MAX_SIZE_UPLOAD_DEFAULT;
 
   beforeEach(function() {
     chatComposerState = {
@@ -38,6 +39,12 @@ describe('The message-compose directive', function() {
     };
 
     module('jadeTemplates');
+    module('esn.configuration', function($provide) {
+      $provide.value('esnConfig', esnConfig);
+    });
+    module('esn.message', function($provide) {
+      $provide.value('MAX_SIZE_UPLOAD_DEFAULT', MAX_SIZE_UPLOAD_DEFAULT);
+    });
     module('linagora.esn.chat', function($provide) {
       $provide.value('chatComposerState', chatComposerState);
       $provide.value('deviceDetector', deviceDetector);
@@ -54,12 +61,16 @@ describe('The message-compose directive', function() {
     });
   });
 
-  beforeEach(inject(function(_$rootScope_, _$compile_, _$q_, _ChatTextManipulator_) {
-    $rootScope = _$rootScope_;
-    $compile = _$compile_;
-    $q = _$q_;
-    ChatTextManipulator = _ChatTextManipulator_;
-  }));
+  beforeEach(inject(
+    function(_$rootScope_, _$compile_, _$q_, _ChatTextManipulator_, _esnConfig_, _MAX_SIZE_UPLOAD_DEFAULT_) {
+      $rootScope = _$rootScope_;
+      $compile = _$compile_;
+      $q = _$q_;
+      ChatTextManipulator = _ChatTextManipulator_;
+      esnConfig = _esnConfig_;
+      MAX_SIZE_UPLOAD_DEFAULT = _MAX_SIZE_UPLOAD_DEFAULT_;
+    }
+  ));
 
   function initDirective() {
     $scope = $rootScope.$new();

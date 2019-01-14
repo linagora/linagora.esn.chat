@@ -54,3 +54,5 @@ angular.module('esn.app-state', [])
     return {};
   });
 angular.module('esn.user-notification', []);
+angular.module('esn.configuration', []);
+angular.module('esn.message', []);
