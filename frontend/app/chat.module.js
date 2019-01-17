@@ -2,6 +2,7 @@
   'use strict';
 
   angular.module('linagora.esn.chat', [
+    'mgcrea.ngStrap.modal',
     'esn.cache',
     'esn.core',
     'esn.router',
@@ -39,6 +40,8 @@
     'angular-inview',
     'esn.module-registry',
     'esn.datetime',
-    'esn.app-state'
+    'esn.app-state',
+    'esn.configuration',
+    'esn.message'
   ]);
 })();
