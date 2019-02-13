@@ -172,9 +172,7 @@ describe('GET /chat/api/conversations/:id/messages', function() {
           const expected = JSON.parse(JSON.stringify(mongoResult));
 
           expected.creator = {
-            username: user.username,
-            _id: String(user._id),
-            __v: 0
+            _id: String(user._id)
           };
 
           expect(res.body).to.shallowDeepEqual([expected]);

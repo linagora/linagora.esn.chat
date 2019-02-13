@@ -22,10 +22,18 @@ describe('the message denormalizer', function() {
       error: sinon.spy()
     };
 
+    denormalizeUserMock = {
+      denormalize: sinon.stub().returns(Promise.resolve())
+    };
+
     this.moduleHelpers.addDep('logger', loggerMock);
+    this.moduleHelpers.addDep('denormalizeUser', denormalizeUserMock);
 
     message = {
-      _id: '123'
+      _id: '123',
+      creator: {
+        _id: 345
+      }
     };
     user = {
       _id: '222',
@@ -68,6 +76,25 @@ describe('the message denormalizer', function() {
         .catch(done);
     });
 
+    it('should call user denormalizer with the right params', function() {
+      getDenormalizer().denormalizeMessage(message, user);
+
+      expect(denormalizeUserMock.denormalize).to.have.been.calledWith(message.creator);
+    });
+
+    it('should fill response with denormalized creator', function(done) {
+      const denormalized = { _id: 333, displayName: 'Bruce Willis' };
+
+      denormalizeUserMock.denormalize.returns(Promise.resolve(denormalized));
+      getDenormalizer().denormalizeMessage(message, user)
+        .then(message => {
+          expect(message.creator).to.decrease.equals(denormalized);
+
+          done();
+        })
+        .catch(done);
+    });
+
     it('should call logger.error if isStarredBy function throw an error', function(done) {
       const error = new Error('error message');
 
@@ -98,13 +125,14 @@ describe('the message denormalizer', function() {
         }
       ];
 
-      getDenormalizer().denormalizeMessage(messages, user)
+      getDenormalizer().denormalizeMessages(messages, user)
         .then(function(denormalizedMessages) {
           expect(denormalizedMessages.length).to.equal(2);
           expect(denormalizedMessages[0].isStarred).to.be.false;
           expect(denormalizedMessages[1].isStarred).to.be.true;
           done();
-        });
+        })
+        .catch(done);
     });
   });
 

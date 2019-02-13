@@ -125,6 +125,8 @@ describe('GET /chat/api/messages/:id', function() {
         req.expect('Content-Type', /json/);
         req.expect(200);
         req.end(helpers.callbacks.noErrorAnd(res => {
+          delete mongoResult.creator;
+
           expect(res.body).to.shallowDeepEqual(JSON.parse(JSON.stringify(mongoResult)));
           done();
         }));
@@ -154,6 +156,8 @@ describe('GET /chat/api/messages/:id', function() {
         req.expect('Content-Type', /json/);
         req.expect(200);
         req.end(helpers.callbacks.noErrorAnd(res => {
+          delete mongoResult.creator;
+
           expect(res.body).to.shallowDeepEqual(JSON.parse(JSON.stringify(mongoResult)));
           done();
         }));
