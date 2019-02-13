@@ -10,7 +10,7 @@ const DEFAULT_OFFSET = CONSTANTS.DEFAULT_OFFSET;
 
 describe('The message controller', function() {
 
-  var lib, err, result;
+  var lib, err, result, denormalizeUserMock;
 
   beforeEach(function() {
     err = undefined;
@@ -29,6 +29,12 @@ describe('The message controller', function() {
         }
       }
     };
+
+    denormalizeUserMock = {
+      denormalize: sinon.stub().returns(Promise.resolve())
+    };
+
+    this.moduleHelpers.addDep('denormalizeUser', denormalizeUserMock);
   });
 
   function getController(dependencies, lib) {

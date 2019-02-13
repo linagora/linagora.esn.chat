@@ -71,7 +71,7 @@ module.exports = {
     TOPIC_UPDATE: 'topic_update'
   },
   SKIP_FIELDS: {
-    USER: '-password -accounts'
+    USER: '-password'
   },
   SEARCH: {
     MESSAGES: {
