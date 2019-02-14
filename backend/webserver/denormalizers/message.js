@@ -58,13 +58,14 @@ module.exports = function(dependencies, lib) {
   }
 
   function denormalizeMessage(message, user) {
-    return lib.message.isStarredBy(message, user)
-      .then(isStarred => {
+    return Promise.all([denormalizeUser.denormalize(message.creator), lib.message.isStarredBy(message, user)])
+      .then(results => {
         if (typeof message.toObject === 'function') {
           message = message.toObject();
         }
 
-        message.isStarred = isStarred;
+        message.creator = results[0];
+        message.isStarred = results[1];
 
         return message;
       })
