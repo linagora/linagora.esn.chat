@@ -1,7 +1,13 @@
 .chat-message(desktop-hover="isHover = hover", ng-class='{"highlight": isHover}', ng-click="ctrl.selectMessage()")
 
   .chat-message-left
-    esn-avatar(ng-if='!ctrl.message.sameUser', user-id="ctrl.message.creator._id")
+    esn-avatar(
+      ng-if='!ctrl.message.sameUser'
+      user-id="ctrl.message.creator._id"
+      profile-popover-card="{{ ctrl.message.creator }}"
+      profile-popover-card-alternative-title="{{::ctrl.displayName }}"
+      profile-popover-card-show-mobile
+    )
 
     .message-time(ng-if='ctrl.message.sameUser', ng-class='{"show": isHover && ctrl.message.sameUser}')
       small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
@@ -9,7 +15,13 @@
 
   .media-body
     .chat-message-title(ng-if='!ctrl.message.sameUser')
-      a.displayname.hidden-xs(ui-sref="chat.channels-views.member({memberId: ctrl.message.creator._id})") {{::ctrl.displayName }}
+      a.displayname.hidden-xs(
+        ui-sref="chat.channels-views.member({memberId: ctrl.message.creator._id})"
+        profile-popover-card="{{ ctrl.message.creator }}"
+        profile-popover-card-alternative-title="{{::ctrl.displayName }}"
+        profile-popover-card-show-mobile
+      )
+        | {{::ctrl.displayName }}
       user-profile-link.displayname.visible-xs(user="ctrl.message.creator")
       small.date {{::ctrl.message.timestamps.creation | esnDatetime:'time'}}
       chat-message-star(starred = 'ctrl.message.isStarred', ng-class='{"visible": ctrl.messageSelected}', ng-click="ctrl.toggleStar()")
