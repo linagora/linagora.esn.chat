@@ -31,7 +31,6 @@
     .attachment-container(ng-if="ctrl.message.attachments.length > 0")
       .chat-message-attachment-text(ng-repeat="attachment in ctrl.message.attachments track by $index")
         span.clickable(ng-click='ctrl.toggleFile()')
-          | #{__('Uploaded an Image')} :
         a(ng-href="/api/files/{{attachment._id}}", target="_blank") {{attachment.name}}
         span.clickable(ng-click='ctrl.toggleFile()')
           i(ng-class="ctrl.displayFile ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'")
