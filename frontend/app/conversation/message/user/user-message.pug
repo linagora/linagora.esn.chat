@@ -5,6 +5,7 @@
       ng-if='!ctrl.message.sameUser'
       user-id="ctrl.message.creator._id"
       profile-popover-card="{{ ctrl.message.creator }}"
+      profile-popover-card-hide-on-element-scroll='[scroll-glue="glued"]'
       profile-popover-card-alternative-title="{{::ctrl.displayName }}"
       profile-popover-card-show-mobile
     )
@@ -18,6 +19,7 @@
       a.displayname.hidden-xs(
         ui-sref="chat.channels-views.member({memberId: ctrl.message.creator._id})"
         profile-popover-card="{{ ctrl.message.creator }}"
+        profile-popover-card-hide-on-element-scroll='[scroll-glue="glued"]'
         profile-popover-card-alternative-title="{{::ctrl.displayName }}"
         profile-popover-card-show-mobile
       )
