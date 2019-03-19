@@ -1,6 +1,6 @@
 {
   "name": "linagora.esn.chat",
-  "version": "1.4.0-dev",
+  "version": "1.4.4-dev",
   "description": "OpenPaaS Chat module",
   "main": "index.js",
   "devDependencies": {
