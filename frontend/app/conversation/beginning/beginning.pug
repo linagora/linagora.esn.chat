@@ -1,5 +1,4 @@
-.chat-conversation-beginning
-.title(ng-switch="ctrl.conversation.type")
+div(ng-switch="ctrl.conversation.type")
   div(ng-switch-when="confidential")
     esn-avatar-list.visible-xs(members="ctrl.members", limit='5')
     esn-avatar-list.hidden-xs(members="ctrl.members", limit='5', profile-link="chat.channels-views.member({memberId: member.id})")
