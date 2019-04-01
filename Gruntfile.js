@@ -84,7 +84,7 @@ module.exports = function(grunt) {
           }],
           verifyOptions: {
             defaultLocale: 'en',
-            locales: ['en', 'fr', 'vi'],
+            locales: ['en', 'fr', 'vi', 'zh'],
             rules: [
               'all-keys-translated',
               'all-locales-present',
