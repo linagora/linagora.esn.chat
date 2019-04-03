@@ -120,7 +120,8 @@
       id: 'linagora.esn.chat',
       title: 'Chat',
       icon: '/chat/images/chat-icon.svg',
-      homePage: 'chat'
+      homePage: 'chat',
+      disableable: true
     })
     .constant('STAR_LINK_TYPE', 'star')
     .constant('CHAT_MARK_AS_READ_THROTTLE_TIMER', 1000);
