@@ -37,6 +37,7 @@ module.exports = function(config) {
     ],
     exclude: [
       'frontend/app/chat.module.run.js',
+      'frontend/app/chat.module-registry.run.js',
       'frontend/app/services/messaging/messaging.run.js',
       'frontend/app/services/conversation-provider/private-conversation-provider.run.js',
       'frontend/app/conversation/attachments/conversation-attachments.run.js',

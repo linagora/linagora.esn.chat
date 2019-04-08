@@ -14,6 +14,7 @@
           }
         },
         resolve: {
+          isModuleActive: isModuleActive,
           ready: function($log, chatConversationActionsService) {
             // wait for all required data to be initialized resolving other sub states
             return chatConversationActionsService.ready.then(function() {
@@ -131,5 +132,15 @@
           });
         }
       });
+
+    function isModuleActive($location, chatConfiguration) {
+      return chatConfiguration.get('enabled', true).then(function(isEnabled) {
+        if (!isEnabled) {
+          $location.path('/');
+        }
+      }).catch(function() {
+        $location.path('/');
+      });
+    }
   });
 })();
