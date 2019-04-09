@@ -44,6 +44,7 @@ module.exports = function(dependencies) {
     increaseNumberOfUnseenMentionsOfMembers,
     list,
     listForUser,
+    listByCursor,
     moderate,
     markUserAsReadAllMessages,
     permission,
@@ -317,6 +318,10 @@ module.exports = function(dependencies) {
 
   function listForUser(user, options, callback) {
     Conversation.find({'members.member.id': utils.ensureObjectId(user._id), 'members.member.objectType': OBJECT_TYPES.USER}).exec(callback);
+  }
+
+  function listByCursor() {
+    return Conversation.find().cursor();
   }
 
   function moderate(conversationId, moderate, callback) {

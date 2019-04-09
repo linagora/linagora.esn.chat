@@ -14,6 +14,6 @@ module.exports = function(dependencies) {
   function init() {
     messages.registerListener();
     conversations.registerListener();
+    conversations.registerReindexTask();
   }
-
 };
