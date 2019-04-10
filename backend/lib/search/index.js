@@ -13,7 +13,8 @@ module.exports = function(dependencies) {
 
   function init() {
     messages.registerListener();
+    messages.registerReindexTask();
     conversations.registerListener();
+    conversations.registerReindexTask();
   }
-
 };
