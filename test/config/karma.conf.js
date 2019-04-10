@@ -42,7 +42,8 @@ module.exports = function(config) {
       'frontend/app/services/conversation-provider/private-conversation-provider.run.js',
       'frontend/app/conversation/attachments/conversation-attachments.run.js',
       'frontend/app/search/search.run.js',
-      'frontend/app/user-notification/chat-user-notification.run.js'
+      'frontend/app/user-notification/chat-user-notification.run.js',
+      'frontend/app/components/launch-conversation-button/launch-conversation-button.run.js'
     ],
     frameworks: ['mocha'],
     colors: true,

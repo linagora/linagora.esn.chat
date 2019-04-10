@@ -10,16 +10,22 @@
     chatUserNotificationProvider,
     chatUserNotificationListenerService,
     esnUserNotificationTemplateProviderRegistry,
+    chatConfiguration,
     CHAT_USER_NOTIFICATION_CATEGORIES
   ) {
-    session.ready.then(function() {
-      esnUserNotificationService.addProvider(chatUserNotificationProvider);
-      esnUserNotificationTemplateProviderRegistry.add({
-        template: 'chat-user-notification-template-unread',
-        category: CHAT_USER_NOTIFICATION_CATEGORIES.unread,
-        forceClosePopoverOnClick: true
+    chatConfiguration.get('enabled', true).then(function(isEnabled) {
+      if (!isEnabled) {
+        return;
+      }
+      session.ready.then(function() {
+        esnUserNotificationService.addProvider(chatUserNotificationProvider);
+        esnUserNotificationTemplateProviderRegistry.add({
+          template: 'chat-user-notification-template-unread',
+          category: CHAT_USER_NOTIFICATION_CATEGORIES.unread,
+          forceClosePopoverOnClick: true
+        });
+        chatUserNotificationListenerService.start();
       });
-      chatUserNotificationListenerService.start();
     });
   }
 })(angular);

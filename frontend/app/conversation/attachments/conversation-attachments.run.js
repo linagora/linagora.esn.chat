@@ -4,7 +4,16 @@
   angular.module('linagora.esn.chat')
     .run(runBlock);
 
-  function runBlock(chatConversationAttachmentsProvider, esnAttachmentListProviders) {
-    esnAttachmentListProviders.add(chatConversationAttachmentsProvider);
+  function runBlock(
+    chatConversationAttachmentsProvider,
+    esnAttachmentListProviders,
+    chatConfiguration
+  ) {
+    chatConfiguration.get('enabled', true).then(function(isEnabled) {
+      if (!isEnabled) {
+        return;
+      }
+      esnAttachmentListProviders.add(chatConversationAttachmentsProvider);
+    });
   }
 })();
