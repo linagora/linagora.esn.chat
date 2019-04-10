@@ -24,6 +24,7 @@ module.exports = function(dependencies, lib) {
     getByIdAndPopulate,
     getForConversation,
     list,
+    listByCursor,
     moderate,
     parseMention,
     save,
@@ -207,6 +208,10 @@ module.exports = function(dependencies, lib) {
         });
       });
     });
+  }
+
+  function listByCursor() {
+    return ChatMessage.find().cursor();
   }
 
   function moderate(messageId, moderate, callback) {

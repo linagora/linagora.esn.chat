@@ -27,6 +27,8 @@ describe('The search messages listener', function() {
     deps = {
       logger: logger
     };
+
+    mockery.registerMock('./reindex', () => {});
   });
 
   describe('The indexMessage function', function() {

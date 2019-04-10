@@ -5,11 +5,13 @@ module.exports = function(dependencies) {
   const logger = dependencies('logger');
   const listener = require('./listener')(dependencies);
   const search = require('./search')(dependencies);
+  const reindex = require('./reindex')(dependencies);
   let searchHandler;
 
   return {
     indexMessage,
     registerListener,
+    registerReindexTask,
     removeMessageFromIndex,
     search
   };
@@ -28,6 +30,11 @@ module.exports = function(dependencies) {
   function registerListener() {
     logger.info('Subscribing to chat.messages updates for indexing');
     searchHandler = listener.register();
+  }
+
+  function registerReindexTask() {
+    logger.info('Register reindex mechanism for chat.messages');
+    reindex.register();
   }
 
   function removeMessageFromIndex(message, callback) {
