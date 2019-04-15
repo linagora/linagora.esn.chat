@@ -12,6 +12,7 @@
       link: link,
       scope: {
         userId: '@',
+        isCurrentUser: '@',
         onSuccess: '&?'
       },
       restrict: 'A'
@@ -19,7 +20,9 @@
 
     function link(scope, element, attributes, controller) {
       element.bind('click', function(evt) {
+        var isCurrentUser = scope.isCurrentUser === 'true';
         evt.stopPropagation();
+        if (isCurrentUser) return;
         controller.launch(scope.onSuccess);
       });
     }
