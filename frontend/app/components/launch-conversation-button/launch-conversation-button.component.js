@@ -10,7 +10,8 @@
       bindings: {
         userId: '@'
       },
-      controllerAs: 'ctrl'
+      controllerAs: 'ctrl',
+      controller: 'chatLaunchConversationButtonController'
     };
   }
 })();
