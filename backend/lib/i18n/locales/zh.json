@@ -78,5 +78,7 @@
   "create a new private conversation with them?": "与他们创建私人对话？",
   "create a new private conversation with him/her?": "与他/她创建私人对话？",
   "You have an unread message": "您有1条未读消息",
-  "You have %s unread messages": "您有%s条未读消息"
+  "You have %s unread messages": "您有%s条未读消息",
+  "Can not create a private conversation with no member": "无法创建没有成员的私人对话",
+  "Search in chat": "在聊天中搜索"
 }
