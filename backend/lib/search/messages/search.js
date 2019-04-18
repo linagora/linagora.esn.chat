@@ -21,7 +21,9 @@ module.exports = function(dependencies) {
       query: {
         bool: {
           filter: {
-            or: conversationIds.map(id => ({term: {channel: id}}))
+            terms: {
+              channel: conversationIds
+            }
           },
           must: {
             match: {

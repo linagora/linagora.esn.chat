@@ -19,25 +19,43 @@ module.exports = function(dependencies) {
 
     const elasticsearchQuery = {
       query: {
-        multi_match: {
-          query: query.search,
-          fields: [
-            'name',
-            'purpose.value',
-            'topic.value'
-          ]
-        }
-      },
-      filter: {
-        or: [
-          {
-            and: [
-              {term: {type: CONSTANTS.CONVERSATION_TYPE.CONFIDENTIAL}},
-              {or: conversationIds.map(id => ({term: {id: id}}))}
-            ]
+        bool: {
+          must: {
+            multi_match: {
+              query: query.search,
+              fields: [
+                'name',
+                'purpose.value',
+                'topic.value'
+              ]
+            }
           },
-          {term: {type: CONSTANTS.CONVERSATION_TYPE.OPEN}}
-        ]
+          filter: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          type: CONSTANTS.CONVERSATION_TYPE.CONFIDENTIAL
+                        }
+                      },
+                      {
+                        terms: {
+                          id: conversationIds
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  term: { type: CONSTANTS.CONVERSATION_TYPE.OPEN }
+                }
+              ]
+            }
+          }
+        }
       }
     };
 
