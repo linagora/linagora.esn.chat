@@ -3,7 +3,8 @@
 
   angular.module('linagora.esn.chat')
     .constant('CHAT', {
-      DEFAULT_FETCH_SIZE: 20
+      DEFAULT_FETCH_SIZE: 20,
+      DEFAULT_FETCH_OFFSET: 0
     })
     .constant('CHAT_ATTACHMENT_PROVIDER', {
       conversation: 'chat.conversation'
