@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 describe('The ChatMemberAddController controller', function() {
 
-  var $rootScope, scope, $controller, $stateParams;
+  var $rootScope, scope, $controller, $stateParams, CHAT;
 
   beforeEach(function() {
     $stateParams = {};
@@ -22,14 +22,16 @@ describe('The ChatMemberAddController controller', function() {
     });
   });
 
-  beforeEach(angular.mock.inject(function(_$rootScope_, _$controller_) {
+  beforeEach(inject(function(_$rootScope_, _$controller_, _CHAT_) {
     $rootScope = _$rootScope_;
     scope = $rootScope.$new();
     $controller = _$controller_;
+    CHAT = _CHAT_;
   }));
 
   function initController(options) {
-    var controller = $controller('ChatMemberAddController as ctrl', {$scope: scope}, options);
+    options = options || {};
+    var controller = $controller('ChatMemberAddController as ctrl', {$scope: scope, ELEMENTS_PER_REQUEST: options.ELEMENTS_PER_REQUEST }, options);
 
     scope.$digest();
 
@@ -59,6 +61,34 @@ describe('The ChatMemberAddController controller', function() {
       $rootScope.$digest();
 
       expect(controller.conversation).to.deep.equal('foo');
+    });
+
+    it('should set options when ELEMENTS_PER_REQUEST is not provided', function() {
+      $stateParams.conversation = true;
+
+      var controller = initController({ELEMENTS_PER_REQUEST: null});
+
+      controller.$onInit();
+      $rootScope.$digest();
+
+      expect(controller.options).to.deep.equal({
+        limit: CHAT.DEFAULT_FETCH_SIZE,
+        offset: CHAT.DEFAULT_FETCH_OFFSET
+      });
+    });
+
+    it('should set options when ELEMENTS_PER_REQUEST is provided', function() {
+      $stateParams.conversation = true;
+
+      var controller = initController({ELEMENTS_PER_REQUEST: 50});
+
+      controller.$onInit();
+      $rootScope.$digest();
+
+      expect(controller.options).to.deep.equal({
+        limit: 50,
+        offset: CHAT.DEFAULT_FETCH_OFFSET
+      });
     });
   });
 });
