@@ -1,4 +1,4 @@
-image: linagora/node-test-base:8
+image: node:10-stretch
 
 stages:
   - test
