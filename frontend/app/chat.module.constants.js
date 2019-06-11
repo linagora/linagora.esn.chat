@@ -122,7 +122,8 @@
       title: 'Chat',
       icon: '/chat/images/chat-icon.svg',
       homePage: 'chat',
-      disableable: true
+      disableable: true,
+      isDisplayedByDefault: false
     })
     .constant('STAR_LINK_TYPE', 'star')
     .constant('CHAT_MARK_AS_READ_THROTTLE_TIMER', 1000);
