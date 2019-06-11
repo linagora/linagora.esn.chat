@@ -9,7 +9,7 @@
     var directive = {
       restrict: 'E',
       replace: true,
-      template: applicationMenuTemplateBuilder('/#/chat', { url: CHAT_MODULE_METADATA.icon }, 'Chat', 'core.modules.linagora.esn.chat.enabled', false)
+      template: applicationMenuTemplateBuilder('/#/chat', { url: CHAT_MODULE_METADATA.icon }, 'Chat', 'core.modules.linagora.esn.chat.enabled', CHAT_MODULE_METADATA.isDisplayedByDefault)
     };
 
     return directive;
