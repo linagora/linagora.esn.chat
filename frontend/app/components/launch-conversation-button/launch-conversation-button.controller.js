@@ -14,7 +14,7 @@
     }
 
     function isNotUser() {
-      return !!(self.isCurrentUser || self.objectType !== 'user');
+      return (self.isCurrentUser || self.objectType !== 'user');
     }
 
   }
