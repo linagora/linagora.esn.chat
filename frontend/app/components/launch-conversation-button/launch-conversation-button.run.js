@@ -10,7 +10,7 @@
         return;
       }
       var chatLaunchConversationDynamicDirective = new DynamicDirective(true, 'chat-launch-conversation-button', {
-        attributes: [{ name: 'user-id', value: '{{$ctrl.user._id}}' }]
+        attributes: [{ name: 'user-id', value: '{{$ctrl.user._id}}' }, { name: 'is-current-user', value: '{{$ctrl.isCurrentUser}}'}, { name: 'object-type', value: '{{$ctrl.objectType}}'}]
       });
 
       dynamicDirectiveService.addInjection('profile-user-actions', chatLaunchConversationDynamicDirective);

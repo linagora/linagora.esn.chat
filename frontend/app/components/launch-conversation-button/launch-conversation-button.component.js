@@ -8,7 +8,9 @@
     return {
       templateUrl: '/chat/app/components/launch-conversation-button/launch-conversation-button.html',
       bindings: {
-        userId: '@'
+        userId: '@',
+        objectType: '@',
+        isCurrentUser: '<'
       },
       controllerAs: 'ctrl',
       controller: 'chatLaunchConversationButtonController'
