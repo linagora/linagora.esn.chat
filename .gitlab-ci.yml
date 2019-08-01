@@ -11,7 +11,7 @@ test:
     - triggers
   tags:
     - docker
-  image: docker-registry.linagora.com:5000/public-releases/openpaas-esn-test-helper:1.0.0
+  image: docker-registry.linagora.com:5000/public-releases/openpaas-esn-test-helper:1.1.0
   script:
    - npm i
    - npm update
