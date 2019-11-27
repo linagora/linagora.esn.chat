@@ -102,12 +102,12 @@ module.exports = function(dependencies) {
     Conversation.findOneAndUpdate(
       query,
       query,
-      { new: true, upsert: true, setDefaultsOnInsert: true, passRawResult: true },
-      (err, conversation, raw) => {
-        if (!err && !raw.lastErrorObject.updatedExisting) {
-          publishNewConversation(conversation);
+      { new: true, upsert: true, setDefaultsOnInsert: true, rawResult: true },
+      (err, conversation) => {
+        if (!err && !conversation.lastErrorObject.updatedExisting) {
+          publishNewConversation(conversation.value);
         }
-        callback(err, conversation);
+        callback(err, conversation.value);
       }
     );
   }
@@ -293,7 +293,7 @@ module.exports = function(dependencies) {
 
     let conversationQuery = Conversation.find(query);
 
-    Conversation.find(conversationQuery).count().exec((err, count) => {
+    Conversation.find(conversationQuery).estimatedDocumentCount().exec((err, count) => {
       if (err) {
         return callback(err);
       }
