@@ -197,7 +197,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     beforeEach(function() {
       options = {domainId: 1};
       conversation = {_id: 2};
-      mongoOptions = { new: true, upsert: true, setDefaultsOnInsert: true, passRawResult: true };
+      mongoOptions = { new: true, upsert: true, setDefaultsOnInsert: true, rawResult: true };
       query = { domain_ids: [options.domainId], name: CONSTANTS.DEFAULT_CHANNEL.name, type: CONSTANTS.DEFAULT_CHANNEL.type, mode: CONSTANTS.DEFAULT_CHANNEL.mode };
       modelsMock.ChatConversation = sinon.spy();
     });
@@ -206,7 +206,7 @@ describe('The linagora.esn.chat conversation lib', function() {
       const error = new Error('I failed to find');
 
       modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
-        cb(error);
+        cb(error, { value: { id: 'conversation' } });
       });
 
       require('../../../backend/lib/conversation')(dependencies, lib).createDefaultChannel(options, function(err) {
@@ -217,14 +217,13 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should publish conversation when it has been created', function(done) {
-      const raw = {
-        lastErrorObject: {
-          updatedExisting: false
-        }
-      };
-
       modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
-        cb(null, conversation, raw);
+        cb(null, {
+          value: conversation,
+          lastErrorObject: {
+            updatedExisting: false
+          }
+        });
       });
 
       require('../../../backend/lib/conversation')(dependencies, lib).createDefaultChannel(options, function(err, result) {
@@ -238,14 +237,13 @@ describe('The linagora.esn.chat conversation lib', function() {
     });
 
     it('should not publish conversation when it has not been created', function(done) {
-      const raw = {
-        lastErrorObject: {
-          updatedExisting: true
-        }
-      };
-
       modelsMock.ChatConversation.findOneAndUpdate = sinon.spy(function(query, update, options, cb) {
-        cb(null, conversation, raw);
+        cb(null, {
+          value: conversation,
+          lastErrorObject: {
+            updatedExisting: true
+          }
+        });
       });
 
       require('../../../backend/lib/conversation')(dependencies, lib).createDefaultChannel(options, function(err, result) {
