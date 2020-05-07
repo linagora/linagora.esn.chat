@@ -1,7 +1,10 @@
 {
   "connectionString": "mongodb://mongo/tests",
   "connectionOptions": {
+    "useNewUrlParser": true,
+    "useUnifiedTopology": true,
+    "useCreateIndex": true,
+    "useFindAndModify": false,
     "auto_reconnect": false
   }
 }
-  
