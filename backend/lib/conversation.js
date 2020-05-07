@@ -64,7 +64,7 @@ module.exports = function(dependencies) {
 
     return archivedConversation.save()
     .then(archivedConversation =>
-     Conversation.remove({_id: utils.ensureObjectId(conversation._id)}).then(() => archivedConversation)
+     Conversation.deleteOne({_id: utils.ensureObjectId(conversation._id)}).then(() => archivedConversation)
     )
     .then(archivedConversation => {
       publishArchivedConversation(archivedConversation);

@@ -270,7 +270,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         return Q.when(conversation);
       });
 
-      modelsMock.ChatConversation.remove = sinon.spy(function() {
+      modelsMock.ChatConversation.deleteOne = sinon.spy(function() {
         return Q.when();
       });
 
@@ -285,7 +285,7 @@ describe('The linagora.esn.chat conversation lib', function() {
     it('should delete conversation after storing ArchivedConversation', function(done) {
 
       require('../../../backend/lib/conversation')(dependencies, lib).archive(conversation, user).then(function() {
-        expect(modelsMock.ChatConversation.remove).to.be.called;
+        expect(modelsMock.ChatConversation.deleteOne).to.be.called;
         expect(channelArchivedLocalTopic.forward).to.be.called;
         done();
       }).catch(err => {
@@ -301,7 +301,7 @@ describe('The linagora.esn.chat conversation lib', function() {
         return Q.reject(error);
       });
       require('../../../backend/lib/conversation')(dependencies, lib).archive(conversation, user).catch(err => {
-        expect(modelsMock.ChatConversation.remove).to.not.have.been.called;
+        expect(modelsMock.ChatConversation.deleteOne).to.not.have.been.called;
         expect(channelArchivedLocalTopic.forward).to.not.have.been.called;
         expect(err.message).to.be.equal(error.message);
         done();
