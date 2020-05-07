@@ -33,7 +33,7 @@ module.exports = function(dependencies, lib) {
   };
 
   function count(conversationId, callback) {
-    ChatMessage.count({channel: conversationId}, callback);
+    ChatMessage.countDocuments({channel: conversationId}, callback);
   }
 
   function create(message, callback) {
@@ -185,7 +185,7 @@ module.exports = function(dependencies, lib) {
 
     const messageQuery = query ? ChatMessage.find(query) : ChatMessage.find();
 
-    ChatMessage.find(messageQuery).count().exec((err, count) => {
+    ChatMessage.find(messageQuery).countDocuments().exec((err, count) => {
       if (err) {
         return callback(err);
       }
