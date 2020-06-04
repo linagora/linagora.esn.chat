@@ -73,6 +73,10 @@ const chatModule = new AwesomeModule(MODULE_NAME, {
     },
 
     start: function(dependencies, callback) {
+      const logger = dependencies('logger');
+
+      logger.info('THE LINAGORA.ESN.CHAT MODULE IS DEPRECATED: It will not receive any future updates or bug fixes. It will be removed from OpenPaaS in version 1.9.0');
+
       this.lib.websocket = require('./backend/ws').init(dependencies, this.lib);
       this.lib.start(callback);
     }
