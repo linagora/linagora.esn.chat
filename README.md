@@ -2,6 +2,10 @@
 
 Chat component for OpenPaaS ESN.
 
+## WARNING: THIS FEATURE IS DEPRECATED
+
+It will not receive any future updates or bug fixes. It will be removed from OpenPaaS in version 1.9.0.
+
 ## Install
 
 *Note: The following instructions assumes that you have already installed OpenPaaS ESN in the path referenced by $ESN below.*
